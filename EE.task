@@ -44,14 +44,36 @@ union language, technology, task
 
 
 [generator]
-data
+data (numbers, strings, records)
 node
 link
 run
+stream
 
 
+[test]
 
+3
+!Hello!
+3&2&3
+a
+b
+l
+e
+h
+c
 
+a=3
+
+b=a
+l
+c=a
+1#l|
+h^e
+
+b
+c
+a
 
 
 
