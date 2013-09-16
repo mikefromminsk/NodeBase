@@ -1,35 +1,26 @@
-[name of project]
-survival
-selection
-life
-spark
-EE
-solution
-
 
 [problems]
 eternal copying
 multiple copies
 
 
-[objects]
-task
-method
-object
-unit
-sequence
+[name of project]
+final cause:
+SR(survival)
+SL(selection)
+NS(natural selection)
+LF(life) is not a game
+SK(spark)
+EV(evolution)
+SL(solution)
+GG(Good Game)
+ES(eternal support)
+ED(eternal development)
+MB(meta body)
+MP(meta program)
 
 
-[methods]
-self copying
-consalidation
-capture
 
-
-[law][selection criteria][features of object]
-size
-speed
-execution
 
 
 [System]
@@ -42,19 +33,71 @@ seed meta code
 
 union language, technology, task
 
+error correction
+hello
+hallo
+halo
+
+
+
+[lastEvolution]
+block-evolution
+
+create programs
+run programs
+set rate
+delete fails
+
+God
+stadium
+Recessing
+Olympus
+paradise
+
+
+
+
+
+[methods]
+self copying
+consalidation
+capture
+
+
+[controls]
+size
+speed
+execution
+
+control stack
+
+
 
 [generator]
+frequency analysis delphi code
+
 data (numbers, strings, records)
-node
+not create only input
+
+node to unit
+
 link
+next to sequence, method
+
 run
 stream
+
+task
 
 
 [test]
 
+!Hello,
+!%20
+!World!
+
 3
-!Hello!
+
 3&2&3
 a
 b
@@ -74,6 +117,15 @@ h^e
 b
 c
 a
+
+
+
+
+
+
+
+
+
 
 
 
