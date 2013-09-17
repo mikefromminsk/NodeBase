@@ -77,6 +77,7 @@ search similar
 frequency analysis delphi code
 
 task
+action (create, update, delete)
 data (numbers, strings, records, params) (not create only input)
 node (func)
 link (next to sequence, method)
