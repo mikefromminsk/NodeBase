@@ -57,24 +57,6 @@ consalidation
 capture
 
 
-[generator]
-/new.meta
-frequency analysis delphi code
-
-data (numbers, strings, records)
-not create only input
-
-node to unit
-
-link
-next to sequence, method
-
-run
-stream
-
-task
-
-
 [controls]
 size
 speed
@@ -91,13 +73,34 @@ error correction
 search similar
 
 
-[test]
+[generator]
+frequency analysis delphi code
 
-!Hello,
-!%20
-!World!
+task
+data (numbers, strings, records, params) (not create only input)
+node (func)
+link (next to sequence, method)
+run (stream)
 
 
+[test] .meta
+task = !HelloWorld
+
+!Hello
+
+!World
+
+2
+
+5
+
+5
+
+var0
+
+var1
+
+var2
 
 
 
