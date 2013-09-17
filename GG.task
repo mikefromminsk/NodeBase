@@ -4,20 +4,16 @@ multiple copies
 
 
 [name of project]
+GG(Good Game)
 final cause:
 SR(survival)
+DS(development and support)
 SL(selection)
 NS(natural selection)
-LF(life) is not a game
-SK(spark)
+LF(life)
 EV(evolution)
-SL(solution)
-GG(Good Game)
-ES(eternal support)
-ED(eternal development)
-MB(meta body)
 MP(meta program)
-GD(God)
+CD(coder)
 
 
 [basic task]
@@ -47,7 +43,7 @@ set rate
 delete fails
 save successfully
 
-
+plasticity code
 
 
 [methods]
@@ -65,23 +61,29 @@ execution
 control stack
 
 
-[analysis]
-sequence or parallel analysis
-
+[system analysis]
 error correction
 
-search similar
+search similarity
+
+association
+
+sequence or parallel analysis
+
 
 
 [generator]
-frequency analysis delphi code
 
-task
-action (create, update, delete)
+task idea question
 data (numbers, strings, records, params) (not create only input)
 node (func)
 link (next to sequence, method)
+action (add, move, update, create, delete)
 run (stream)
+
+frequency analysis delphi code
+
+changes when the code is blocked
 
 
 [test] .meta
