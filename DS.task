@@ -3,20 +3,8 @@ eternal copying
 multiple copies
 
 
-[name of project]
-GG(Good Game)
-final cause:
-SR(survival)
-DS(development and support)
-SL(selection)
-NS(natural selection)
-LF(life)
-EV(evolution)
-MP(meta program)
-CD(coder)
-
-
 [basic task]
+development and support
 
 
 
@@ -30,6 +18,16 @@ seed meta code
 
 union language, technology, task
 
+
+
+[system analysis]
+error correction
+
+search similarity
+
+association
+
+sequence or parallel analysis
 
 
 
@@ -57,18 +55,9 @@ capture
 size
 speed
 execution
-
+trust
 control stack
-
-
-[system analysis]
-error correction
-
-search similarity
-
-association
-
-sequence or parallel analysis
+deciding whether to answer
 
 
 
@@ -86,7 +75,11 @@ frequency analysis delphi code
 changes when the code is blocked
 
 
-[test] .meta
+
+
+
+[test] 
+
 task = !HelloWorld
 
 !Hello
