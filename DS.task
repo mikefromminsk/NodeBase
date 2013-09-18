@@ -11,13 +11,6 @@ support
 
 
 [System]
-calculation in GPU
-
-download manager
-installing like download dll. because existing different video-cards
-
-seed meta code
-
 union language, technology, task
 
 
@@ -26,7 +19,6 @@ union language, technology, task
 error
 similarity
 association
-
 
 
 [lastEvolution]
@@ -49,10 +41,10 @@ capture
 
 
 [controls]
+trust
 size
 speed
 execution
-trust
 control stack
 deciding whether to answer
 
@@ -60,7 +52,7 @@ deciding whether to answer
 
 [generator]
 
-task idea question
+task question
 data (numbers, strings, records, params) (not create only input)
 node (func)
 link (next to sequence, method)
@@ -75,31 +67,36 @@ changes when the code is blocked
 
 
 
-[test] 
-
-task = !HelloWorld
-
-!Hello
-
-!World
-
-2
-
-5
-
-5
-
-var0
-
-var1
-
-var2
 
 
 
+input 
+
+function 
+
+output
 
 
 
+task ? time price quality priority
+
+lim->0
+
+y=x+2
+
+question (text)
+
+meta grid
+
+
+
+solution
+
+idea
+
+Trial and error
+
+Абдукция 
 
 
 
