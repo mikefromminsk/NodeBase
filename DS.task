@@ -13,12 +13,11 @@ support
 [System]
 union language, technology, task
 
+law
+rule
+regularity
 
 
-[system parallel analysis]
-error
-similarity
-association
 
 
 [lastEvolution]
@@ -63,7 +62,7 @@ frequency analysis delphi code
 
 changes when the code is blocked
 
-
+sorted by number of parameters
 
 
 
@@ -72,13 +71,32 @@ changes when the code is blocked
 
 input 
 
-function 
-
-output
+generate data to test
 
 
 
-task ? time price quality priority
+
+solution
+Trial and error
+
+idea is result of analysis
+
+
+
+type search solution
+sequence
+random
+
+count result 1 n 8 null
+
+data dump of right solution
+
+
+
+
+task 
+
+time price quality priority desire
 
 lim->0
 
@@ -86,19 +104,84 @@ y=x+2
 
 question (text)
 
-meta grid
-
 control -> +
 
+type task
+precise task
+imprecise task
+
+task 1-n solution
 
 
-solution
 
-idea
+control
+analysis 
 
-Trial and error
+system parallel 
+error
+similarity
+association
 
-Абдукция 
+events
+
+
+output 
+
+result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{task}
+je?add?sqt?a;&sqr?b;;&sqr?c
+
+
+input
+func?a:int&b:int#result
+solution 
+result=a
+task
+je?result&a#output|input
+control
+
+
+
+output
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
