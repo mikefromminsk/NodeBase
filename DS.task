@@ -1,26 +1,17 @@
+
+//Development and Support
+
 [problems]
 eternal copying
 multiple copies
-
-
-[basic task]
-development
-
-support
 
 
 
 [System]
 union language, technology, task
 
-law
-rule
-regularity
 
-
-
-
-[lastEvolution]
+[type generation]
 block-evolution
 
 create programs
@@ -31,22 +22,9 @@ save successfully
 
 plasticity code
 
+sequence generatoin
 
-[methods]
-create metods of copy
-self copying
-consalidation
-capture
-
-
-[controls]
-trust
-size
-speed
-execution
-control stack
-deciding whether to answer
-
+logical analysing
 
 
 [generator]
@@ -69,19 +47,15 @@ sorted by number of parameters
 
 
 
-input 
+[input] 
 
 generate data to test
 
 
 
 
-solution
-Trial and error
-
-idea is result of analysis
-
-
+[solution]
+trial and error
 
 type search solution
 sequence
@@ -92,10 +66,8 @@ count result 1 n 8 null
 data dump of right solution
 
 
-
-
-task 
-
+[task]
+basic task
 time price quality priority desire
 
 lim->0
@@ -114,7 +86,14 @@ task 1-n solution
 
 
 
-control
+[controls]
+trust
+size
+speed
+execution
+control stack
+deciding whether to answer
+
 analysis 
 
 system parallel 
@@ -122,10 +101,10 @@ error
 similarity
 association
 
-events
+[events]
 
 
-output 
+[output] 
 
 result
 
@@ -170,7 +149,11 @@ output
 
 
 
-
+[self copy]
+create metods of copy
+self copying
+consalidation
+capture
 
 
 
