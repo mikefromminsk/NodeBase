@@ -1,29 +1,17 @@
 
-//Development and Support
+//development and support
 
 [problems]
 eternal copying
 multiple copies
 
-
-
 [System]
 union language, technology, task
 
-
 [type generation]
 block-evolution
-
-create programs
-run programs
-set rate
-delete fails
-save successfully
-
 plasticity code
-
 sequence generatoin
-
 logical analysing
 
 
@@ -55,44 +43,37 @@ generate data to test
 
 
 [solution]
-trial and error
+
 
 type search solution
+trial and error
 sequence
 random
 
-count result 1 n 8 null
+save solution data
 
-data dump of right solution
-
-
-[task]
-basic task
-time price quality priority desire
-
-lim->0
-
-y=x+2
-
-question (text)
-
-control -> +
-
-type task
-precise task
-imprecise task
+count result 0, 1, n, ∞ in 1 node
 
 task 1-n solution
 
 
+[task]
+word association
+meta formula je?y&add?x&2
+
+lim->0
+
+
+
+
 
 [controls]
-trust
-size
-speed
-execution
+time price quality priority desire
+control -> +
+trust 
+size speed execution
 control stack
-deciding whether to answer
+deciding for answer
 
 analysis 
 
