@@ -5,8 +5,11 @@
 eternal copying
 multiple copies
 
+
 [System]
 union language, technology, task
+count result 0, 1, n, ∞ in 1 node (fields)
+
 
 [type generation]
 block-evolution
@@ -14,84 +17,74 @@ plasticity code
 sequence generatoin
 logical analysing
 
-
-[generator]
-
-task question
-data (numbers, strings, records, params) (not create only input)
-node (func)
-link (next to sequence, method)
-action (add, move, update, create, delete)
-run (stream)
-
-frequency analysis delphi code
-
-changes when the code is blocked
-
-sorted by number of parameters
-
-
-
-
-
-
-[input] 
-
-generate data to test
-
-
-
-
-[solution]
-
-
 type search solution
 trial and error
 sequence
 random
 
-save solution data
 
-count result 0, 1, n, ∞ in 1 node
+[generator]
+changes when the code is blocked
 
-task 1-n solution
+sorted by number of parameters?
 
 
-[task]
+[options]
+table reps
+plasticity params
+sequentially or parallel 1-4
+
+
+[task] event
 word association
 meta formula je?y&add?x&2
-
-lim->0
-
-
+context
+find like task
 
 
+[solution] event
+params
+task 1-n solution
+save solution data?
 
-[controls]
+link (next to sequence, method)
+action (add, move, update, create, delete)
+run (stream)
+
+
+[input]
+generate data to test
+data (numbers, strings, records, params) (not create only input)
+control of user value of response
+
+[output] event
+result @node -> word
+
+
+
+
+
+[controls] -> ^+3.0
+activate after event
 time price quality priority desire
-control -> +
 trust 
 size speed execution
-control stack
-deciding for answer
+control priority stack 
 
-analysis 
-
+analysis
 system parallel 
 error
 similarity
 association
 
-[events]
+deciding for answer
+why
 
 
-[output] 
-
-result
-
-
-
-
+[question]
+How to name a cat?
+Remember the name of the Russian film
+which is better android or windows phone?
 
 
 
