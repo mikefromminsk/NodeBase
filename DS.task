@@ -9,6 +9,7 @@ multiple copies
 [System]
 union language, technology, task
 count result 0, 1, n, ∞ in 1 node (fields)
+self copy
 
 
 [type generation]
@@ -18,7 +19,7 @@ sequence generatoin
 logical analysing
 
 type search solution
-trial and error
+brute-force search
 sequence
 random
 
@@ -41,6 +42,9 @@ meta formula je?y&add?x&2
 context
 find like task
 
+text
+formula
+
 
 [solution] event
 params
@@ -56,10 +60,14 @@ run (stream)
 generate data to test
 data (numbers, strings, records, params) (not create only input)
 control of user value of response
+data is null
+human language
+
+
 
 [output] event
 result @node -> word
-
+build project from meta code
 
 
 
@@ -67,9 +75,19 @@ result @node -> word
 [controls] -> ^+3.0
 activate after event
 time price quality priority desire
-trust 
+trust joy
 size speed execution
+if control < x then activate body in x
+control size = registry size (double)
 control priority stack 
+comparate control system
+access to control data read
+error anger
+
+
+curiosity = task
+motivation = run
+points to right ansver
 
 analysis
 system parallel 
@@ -81,53 +99,49 @@ deciding for answer
 why
 
 
+
+[processing levels]
+parser
+context
+{union tool, slice tool, merge tool, error tool
+
+
+
 [question]
-How to name a cat?
-Remember the name of the Russian film
-which is better android or windows phone?
+How^cur=0,9 to name a cat ?^cur=0,9
+Remember^mot=0,7 the name of the Russian film
+(which)^cur=0,9 (is better) (android) (or) (windows phone) (?)^cur=0,9
+
+better?android&windows phone#name os
 
 
 
 
 
+[M3]
+Next: ANode
+Controls: ANode or AInt
+type Ext Int
+fastcall
 
 
 
-
-
-
-
-
-
-
-
-{task}
-je?add?sqt?a;&sqr?b;;&sqr?c
 
 
 input
 func?a:int&b:int#result
-solution 
-result=a
 task
 je?result&a#output|input
+solution 
+je?result&a
+result=a
 control
-
-
-
-output
-
+-1 %0.0
 
 
 
 
 
-
-[self copy]
-create metods of copy
-self copying
-consalidation
-capture
 
 
 
