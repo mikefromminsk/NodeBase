@@ -144,13 +144,11 @@ control
 
 
 
+class
+class.Create
+x=2
 
-
-
-
-
-
-
+class.Destroy
 
 
 
