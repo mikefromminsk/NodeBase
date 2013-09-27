@@ -7,33 +7,31 @@ multiple copies
 
 
 [System]
-union language, technology, task
+union language(c, pascal), technology, task
 count result 0, 1, n, ∞ in 1 node (fields)
 self copy
 
+generate parser c
 
-[type generation]
-block-evolution
-plasticity code
-sequence generatoin
-logical analysing
+bloc failover
 
-type search solution
-brute-force search
-sequence
-random
+from solution generate task
 
-
-[generator]
 changes when the code is blocked
 
-sorted by number of parameters?
+class
+class.Create
 
 
 [options]
 table reps
 plasticity params
+random or sequence (brute-force search)
 sequentially or parallel 1-4
+
+
+[init]
+create func node
 
 
 [task] event
@@ -90,6 +88,7 @@ motivation = run
 points to right ansver
 
 analysis
+logical
 system parallel 
 error
 similarity
@@ -107,15 +106,14 @@ context
 
 
 
-[question]
+[word task]
 How^cur=0,9 to name a cat ?^cur=0,9
 Remember^mot=0,7 the name of the Russian film
 (which)^cur=0,9 (is better) (android) (or) (windows phone) (?)^cur=0,9
 
+
+[meta task]
 better?android&windows phone#name os
-
-
-
 
 
 [M3]
@@ -128,15 +126,6 @@ fastcall
 
 
 
-input
-func?a:int&b:int#result
-task
-je?result&a#output|input
-solution 
-je?result&a
-result=a
-control
--1 %0.0
 
 
 
@@ -144,11 +133,38 @@ control
 
 
 
-class
-class.Create
-x=2
 
-class.Destroy
+
+
+
+
+
+[test] level 2
+
+
+<meta charset="utf-8">
+/module@0
+task@1
+
+/math /str /control
+
+data1=!%20
+
+sol1?a&b#res
+res=strcat?a&data1
+res=strcat?res&b
+
+task@1?in1&in2
+res=sol1?in1&in2
+je?res&!Hello%20world#good|task@1
+
+task?!Hello&!world
+
+task?!Hello&!world
+
+
+
+
 
 
 
