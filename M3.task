@@ -1,15 +1,16 @@
+[M3]
+
+Only modification
+
 [System]
 module is class
 
 count is control
 
 
-[mclient]
-font
 
 
-
-[M3]
+[System]
 Garbage collection
 
 
@@ -17,3 +18,7 @@ Garbage collection
 Нужен элементарный локализованный клиент — список проектов, по каждому — описание задач, степень их выполнения (или шансы на выполнение), описание решенных задач. Плюс кнопка «участвовать в проекте». Все.
 
 Kikstarter
+
+
+
+

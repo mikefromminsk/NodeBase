@@ -1,5 +1,10 @@
+[mgenerator]
+module to ML 
 
-//development and support
+
+[basic task]
+development and support
+
 
 [problems]
 eternal copying
@@ -8,10 +13,10 @@ multiple copies
 
 [System]
 union language(c, pascal), technology, task
-count result 0, 1, n, ∞ in 1 node (fields)
+count result 0, 1, n, ∞ in 1 node (local)
 self copy
 
-generate parser c
+task meta generate parser c
 
 bloc failover
 
