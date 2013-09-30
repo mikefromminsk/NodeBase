@@ -1,23 +1,22 @@
 [M3]
 
-Only modification
+[basic task]
+mgenerator
+
 
 [System]
 module is class
 
 count is control
 
+Next: ANode
+Controls: ANode or AInt
+type Ext Int
+fastcall
 
-
-
-[System]
 Garbage collection
 
 
-Вот зачем вообще нужна регистрация? Я хочу подарить свои вычислительные мощности, зачем вообще знать кто я, мою почту и т.п.?..
-Нужен элементарный локализованный клиент — список проектов, по каждому — описание задач, степень их выполнения (или шансы на выполнение), описание решенных задач. Плюс кнопка «участвовать в проекте». Все.
-
-Kikstarter
 
 
 
