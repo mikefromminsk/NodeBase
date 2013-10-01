@@ -115,7 +115,18 @@ why
 
 
 
-source^name@id$control:type?param=value&params#result|else
+source^name@id$info:type?param=value&params#result|else
+
+control in node
+time in unicode
+x86->x64
+int
+uint = longword
+(n,N)~(4,8)-code
+
+
+
+
 
 
 [processing]
