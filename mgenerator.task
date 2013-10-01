@@ -48,6 +48,7 @@ context
 find like task
 SQL_CALC_FOUND_ROWS
 Camel
+word task to meta task
 
 text
 formula
@@ -79,7 +80,8 @@ build project from meta code
 
 
 
-[controls] -> ^+3.0
+[controls] $3
+control is on[control]off
 activate after event
 time price quality priority desire
 trust joy
@@ -87,13 +89,18 @@ size speed execution
 if control < x then activate body in x
 control size = registry size (double)
 control priority stack 
+priority of control
 comparate control system
 access to control data read
 error anger
+intellectus control(cur)любознательность, радость открытия, сомнения в правильности решения задач и т.п.
+moralis симпатии и антипатии, любви и ненависти, долга и совести
+aisthesis 
+praxis
 
 
-curiosity = task
-motivation = run
+? curiosity = task
+! motivation = run
 points to right ansver
 
 analysis
@@ -108,39 +115,15 @@ why
 
 
 
-[processing levels]
+source^name@id$control:type?param=value&params#result|else
+
+
+[processing]
 parser
 context
 {union tool, slice tool, merge tool, error tool
 event
 calc control
-
-
-[word task]
-How^cur=0,9 to name a cat ?^cur=0,9
-Remember^mot=0,7 the name of the Russian film
-(which)^cur=0,9 (is better) (android) (or) (windows phone) (?)^cur=0,9
-
-
-[meta task]
-better?android&windows phone#name os
-
-
-
-
-
-
-when why cause reason ...
-
-
-
-
-
-
-
-
-
-
 
 
 
