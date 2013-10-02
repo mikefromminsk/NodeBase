@@ -63,6 +63,12 @@ link (next to sequence, method)
 action (add, move, update, create, delete)
 run (stream)
 
+type:
+logical
+system parallel 
+error
+similarity
+association
 
 [input]
 generate data to test
@@ -80,50 +86,39 @@ build project from meta code
 
 
 
-[controls] $3
-control is on[control]off
-activate after event
+[controls] 
+source>name@id$info:type?param=value&params#result|else
+access to control data read
+
+name$n=1&time=12312
+name$
+
+on[event]off
+
+intellectus moralis aisthesis praxis
 time price quality priority desire
 trust joy
 size speed execution
-if control < x then activate body in x
-control size = registry size (double)
+
 control priority stack 
 priority of control
-comparate control system
-access to control data read
-error anger
-intellectus control(cur)любознательность, радость открытия, сомнения в правильности решения задач и т.п.
-moralis симпатии и антипатии, любви и ненависти, долга и совести
-aisthesis 
-praxis
 
 
+
+
+funciton
 ? curiosity = task
 ! motivation = run
-points to right ansver
 
-analysis
-logical
-system parallel 
-error
-similarity
-association
+
 
 deciding for answer
+comparate control system
 why
 
 
-
-source^name@id$info:type?param=value&params#result|else
-
-control in node
-time in unicode
-x86->x64
-int
-uint = longword
-(n,N)~(4,8)-code
-
+ 
+32 n 64 N
 
 
 
@@ -132,9 +127,12 @@ uint = longword
 [processing]
 parser
 context
-{union tool, slice tool, merge tool, error tool
+union slice merge error
+
 event
 calc control
+
+
 
 
 
