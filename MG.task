@@ -1,4 +1,8 @@
-[mgenerator]
+[meta generators]
+code generator
+control generator
+struct genetator
+
 module to ML?
 system update
 
