@@ -10,30 +10,9 @@ system update
 [basic task]
 development and support
 evolution
+search in list
 
 
-[test] level 2
-
-
-<meta charset="utf-8">
-/module@0
-task@1
-
-/math /str /control
-
-data1=!%20
-
-sol1?a&b#res
-res=strcat?a&data1
-res=strcat?res&b
-
-task@1?in1&in2
-res=sol1?in1&in2
-je?res&!Hello%20world#good|task@1
-
-task?!Hello&!world
-
-task?!Hello&!world
 
 
 
@@ -71,12 +50,16 @@ sequentially or parallel 1-4
 parser
 context
 union slice merge error
-
 event
 calc control
+run
+optimization
+save
 
 
 
+
+[code generator]
 
 
 [init]
@@ -96,7 +79,7 @@ text
 formula
 
 
-[solution] event
+[solution]
 params
 task 1-n solution
 save solution data?
@@ -104,13 +87,13 @@ save solution data?
 link (next to sequence, method)
 action (add, move, update, create, delete)
 run (stream)
-
 type:
 logical
 system parallel 
 error
 similarity
 association
+
 
 [input]
 generate data to test
@@ -121,7 +104,7 @@ human language
 
 
 
-[output] event
+[output]
 result @node -> word
 build project from meta code
 
@@ -129,54 +112,63 @@ build project from meta code
 
 
 [controls] 
-source>name@id$info:type?param=value&params#result|else
-access to control data read
-32 n 64 N
+source^name@id$controls:type?param=value&params#result|else
 
-name$n=1&time=12312
-name$
+control read
 
-on[event]off
+controls code
+n=count
+t=time
+p=points
+r=runtime
+c=curiosity
 
 intellectus moralis aisthesis praxis
-time price quality priority desire
-trust joy
-size speed execution
-
-control priority stack 
-priority of control
+price want
+priority trust joy
+size
 
 
 
-
-funciton
-? curiosity = task
-! motivation = run
-
-
+control priority stack
 
 deciding for answer
 comparate control system
 
- 
-method of generate control value
 
-half control node to local node
-control node
-
-
-
-read 10 line
-after create local links
-
-
-
-search in list
+control module 
+adders
+formuls
 
 
 
 
 
+
+[event]
+AddLocal
+Run
+
+
+
+
+
+[test] level 3
+
+
+/unit@0$r00000103
+@1^main
+@2^task$c00000001#@4$p00000001|
+
+main@1
+a=b
+
+task@2?a&b#res
+res=je?a&b
+
+a
+
+b
 
 
 
