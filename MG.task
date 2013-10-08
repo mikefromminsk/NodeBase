@@ -11,7 +11,7 @@ system update
 development and support
 evolution
 search in list
-
+generate parser c
 
 
 
@@ -26,17 +26,11 @@ multiple copies
 
 count result 0, 1, n, ∞ in 1 node (local)
 
-
-task meta generate parser c
-
 bloc failover
 
 from solution generate task
 
 changes when the code is blocked
-
-class
-class.Create
 
 
 [options]
@@ -155,6 +149,9 @@ Run
 
 [test] level 3
 
+/task@2?a&b#res
+res=je?a&b
+
 
 /unit@0$r00000103
 @1^main
@@ -162,9 +159,6 @@ Run
 
 main@1
 a=b
-
-task@2?a&b#res
-res=je?a&b
 
 a
 
