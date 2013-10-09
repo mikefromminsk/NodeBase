@@ -162,7 +162,10 @@ Run
 
 a b
 
-je?a&b#res$c10
+je?a&b#@1$c10
+
+
+@1
 
 solution?a:int=3#res$c10
 res=a
@@ -173,7 +176,7 @@ res=b
 
 
 
-
+when jump to local
 
 
 
