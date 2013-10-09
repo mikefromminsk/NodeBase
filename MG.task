@@ -136,7 +136,7 @@ formuls
 
 
 
-
+curiosity when value = nil
 
 
 [event]
@@ -149,20 +149,17 @@ Run
 
 [test] level 3
 
-/task@2?a&b#res
-res=je?a&b
+
+je?a&b#$c15
+
+solution?a:int=3&x$c10:int
+x=a
+
+solution2?a:int=3&x$c10:int
+x=b
 
 
-/unit@0$r00000103
-@1^main
-@2^task$c00000001#@4$p00000001|
 
-main@1
-a=b
-
-a
-
-b
 
 
 
