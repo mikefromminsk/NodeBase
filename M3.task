@@ -15,6 +15,7 @@ type Ext Int
 fastcall
 
 Garbage collection
+ref links in all node
 
 CamelCase, mixedCase, нижние_прочерки
 
