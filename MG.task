@@ -147,16 +147,32 @@ Run
 
 
 
-[test] level 3
 
 
-je?a&b#$c15
 
-solution?a:int=3&x$c10:int
-x=a
 
-solution2?a:int=3&x$c10:int
-x=b
+
+
+
+
+
+
+
+
+
+
+
+
+[test] level 4
+
+
+je?a&b#res$c10
+
+solution?a:int=3#res$c10
+res=a
+
+solution2?a:int=3#res$c10
+res=b
 
 
 
