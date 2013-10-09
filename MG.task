@@ -54,7 +54,7 @@ save
 
 
 [code generator]
-
+search of reason L2
 
 [init]
 create func node
@@ -155,16 +155,9 @@ Run
 
 
 
-
-
-
-
-
-
-
-
 [test] level 4
 
+a b
 
 je?a&b#res$c10
 
