@@ -63,9 +63,7 @@ search of reason L2
 create func node
 
 
-[task] event
-word association
-meta formula je?y&add?x&2
+[task]
 context
 find like task
 SQL_CALC_FOUND_ROWS
@@ -77,10 +75,6 @@ formula
 
 
 [solution]
-params
-task 1-n solution
-save solution data?
-
 link (next to sequence, method)
 action (add, move, update, create, delete)
 run (stream)
@@ -119,26 +113,25 @@ t=time
 p=points
 r=runtime
 c=curiosity
+e=error
 
-intellectus moralis aisthesis praxis
-price want
-priority trust joy
+
+errors or exception
+trust
 size
+intellectus moralis aisthesis praxis
 
-
-
-control priority stack
+static and dynamic controls
 
 deciding for answer
 when jump to local
 comparate control system
 
 
-control module 
+[control generator]
 adders
 formuls
-
-
+priority
 
 curiosity when value = nil
 
@@ -147,9 +140,7 @@ curiosity when value = nil
 AddLocal
 Run
 
-
-
-
+after run if $cur > 0 then again run
 
 
 
@@ -160,12 +151,13 @@ Run
 
 
 [test] level 5
+module
 
 a
 
 b
 
-je$c1?a&x$c1#$p2|
+je$c1?a&x#$p2|$e1
 
 
 
@@ -175,16 +167,20 @@ x$c1=solution3?$1
 solution=res
 res=a
 
-solution2=res
-res=b
-
 solution3?a:int=res
 res=a
 
 
 
 
-after run if cur > 0 then again run
+[coding]
+planing in program
+
+
+
+
+
+
 
 
 
