@@ -14,7 +14,7 @@ search in list
 generate parser c
 
 
-method of generation
+[method of generation]
 random
 logical
 find
@@ -130,6 +130,7 @@ size
 control priority stack
 
 deciding for answer
+when jump to local
 comparate control system
 
 
@@ -158,28 +159,32 @@ Run
 
 
 
-[test] level 4
+[test] level 5
 
-a b
+a
 
-je?a&b#@1$c10
+b
+
+je$c1?a&x$c1#$p2|
 
 
-@1
 
-solution?a:int=3#res$c10
+
+x$c1=solution3?$1
+
+solution=res
 res=a
 
-solution2?a:int=3#res$c10
+solution2=res
 res=b
 
+solution3?a:int=res
+res=a
 
 
 
-when jump to local
 
-
-
+after run if cur > 0 then again run
 
 
 
