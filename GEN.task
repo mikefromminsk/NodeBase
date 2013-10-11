@@ -151,13 +151,16 @@ after run if $cur > 0 then again run
 
 
 [test] level 5
+method
+
+
 module
 
 a
 
 b
 
-je$c1?a&x#$p2|$e1
+je$c1?a&x$e1#$p2|$e1
 
 
 
@@ -175,6 +178,7 @@ res=a
 
 [coding]
 planing in program
+budget
 
 
 
@@ -182,11 +186,6 @@ planing in program
 
 
 
-
-
-
-method from meta
-@---@ send  copy
 
 
 
