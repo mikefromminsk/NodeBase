@@ -116,7 +116,6 @@ c=curiosity
 e=error
 
 
-errors or exception
 trust
 size
 intellectus moralis aisthesis praxis
@@ -143,9 +142,9 @@ Run
 after run if $cur > 0 then again run
 
 
-
-
-
+[coding]
+planing in program
+budget for ?
 
 
 
@@ -158,11 +157,7 @@ module
 
 a
 
-b
-
-je$c1?a&x$e1#$p2|$e1
-
-
+je$c1?a&x#$p2|$e1
 
 
 x$c1=solution3?$1
@@ -176,9 +171,16 @@ res=a
 
 
 
-[coding]
-planing in program
-budget
+
+
+
+
+
+
+
+
+
+
 
 
 
