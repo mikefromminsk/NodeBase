@@ -5,17 +5,20 @@ control
 
 
 [priority]
-fastcall
-
 Garbage collection
 ref links in all node
 
 generator
 controls
 
+client
+
+
 
 
 [optimization]
+fastcall
+
 Index is First
 
 
@@ -23,13 +26,9 @@ Index is First
 [System]
 module is class
 
-count is control
 
-Controls: ANode or AInt
+
 Next: ANode
-
-
-
 
 
 CamelCase, mixedCase, lower_case
@@ -44,10 +43,8 @@ long value array
 
 
 plasticity evolution
-$3 create task
-$3 end development
-$0 end support
-$0 end
+
+
 
 
 
@@ -67,6 +64,18 @@ identification frames of meta
 
 [] is context
 game to [game]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
