@@ -57,6 +57,9 @@ word task to meta task
 text
 formula
 
+structure context
+4byte is int and real
+
 
 [task]
 
