@@ -1,17 +1,7 @@
-[meta generators]
-code generator
-control generator
-struct genetator
-
-module to ML?
-system update
-
+[generator]
 
 [basic task]
 development and support
-evolution
-search in list
-generate parser c
 
 
 [method of generation]
@@ -26,17 +16,17 @@ multiple copies
 
 
 [System]
-
-count result 0, 1, n, ∞ in 1 node (local)
-
 bloc failover
 
+regenerate task
 from solution generate task
 
 changes when the code is blocked
 
 
 [options]
+plasticity evolution
+
 table reps
 plasticity params
 random or sequence (brute-force search)
@@ -54,17 +44,11 @@ optimization
 save
 
 
+[context]
+[] is context
+game to [game]
+node is child of context
 
-
-[code generator]
-search of reason L2
-
-[init]
-create func node
-
-
-[task]
-context
 find like task
 SQL_CALC_FOUND_ROWS
 Camel
@@ -72,6 +56,13 @@ word task to meta task
 
 text
 formula
+
+
+[task]
+
+when cur control is activator
+
+
 
 
 [solution]
@@ -88,8 +79,9 @@ association
 
 [input]
 generate data to test
-data (numbers, strings, records, params) (not create only input)
-control of user value of response
+data is numbers, strings, records, params, control
+not create only input
+ of user value of response
 data is null
 human language
 

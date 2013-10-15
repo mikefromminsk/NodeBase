@@ -1,7 +1,8 @@
 [M3]
 
+
 [basic task]
-control
+generator
 
 
 [priority]
@@ -10,6 +11,8 @@ ref links in all node
 
 generator
 controls
+
+transfer
 
 client
 
@@ -21,31 +24,21 @@ fastcall
 
 Index is First
 
+CamelCase, mixedCase, lower_case
+
 
 
 [System]
 module is class
 
-
-
 Next: ANode
 
 
-CamelCase, mixedCase, lower_case
 
+
+[localization]
 meta to down code (c++)
-
-
-long local array
-long value array
-
-
-
-
-plasticity evolution
-
-
-
+parser c
 
 
 [transfer]
@@ -61,9 +54,6 @@ identification frames of meta
 
 
 
-
-[] is context
-game to [game]
 
 
 
