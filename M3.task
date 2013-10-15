@@ -1,7 +1,23 @@
 [M3]
 
 [basic task]
-mgenerator
+control
+
+
+[priority]
+fastcall
+
+Garbage collection
+ref links in all node
+
+generator
+controls
+
+
+
+[optimization]
+Index is First
+
 
 
 [System]
@@ -9,15 +25,14 @@ module is class
 
 count is control
 
-Next: ANode
 Controls: ANode or AInt
-type Ext Int
-fastcall
+Next: ANode
 
-Garbage collection
-ref links in all node
 
-CamelCase, mixedCase, нижние_прочерки
+
+
+
+CamelCase, mixedCase, lower_case
 
 meta to down code (c++)
 
@@ -25,8 +40,6 @@ meta to down code (c++)
 long local array
 long value array
 
-Index is First
-ip:host is naUser
 
 
 
@@ -45,6 +58,10 @@ file file
 
 stack transfer methods
 
+ip:host is naUser
+
+identification frames of meta
+
 
 
 
@@ -52,10 +69,9 @@ stack transfer methods
 game to [game]
 
 
-system control version in node
 
 
-identification frames of meta
+
 
 
 
