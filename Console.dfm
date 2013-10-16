@@ -42,6 +42,7 @@ object GG: TGG
     ParentFont = False
     TabOrder = 0
     WordWrap = False
+    OnKeyDown = InputBoxKeyDown
   end
   object OutputBox: TRichEdit
     Left = 0

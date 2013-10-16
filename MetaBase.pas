@@ -28,7 +28,7 @@ type
     Prev  : PNode;
 
     Attr  : Integer;
-    Count : Integer;
+    Count : Integer;            //controls
     Handle: Integer;
   end;
 
@@ -70,7 +70,7 @@ const
   naLink = $2;
   naData = $3;
   naFile = $4;
-  naFunc = $5;
+  naFunc = $5;          //naStdFunc = $51; naFastCallFunc = $52;
   naNumber = $6;
   naPointer = $7;
 
@@ -80,9 +80,11 @@ var
 implementation
 
 constructor TMeta.Create;
+var ModuleID: String;
 begin
   Root := AllocMem(SizeOf(TNode));
-  //Module := NewNode(NextID);
+  ModuleID := NextID;
+  Module := NewNode(ModuleID);
 end;
 
 function TMeta.NextID: String;

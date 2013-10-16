@@ -1,8 +1,7 @@
 program M;
 
 uses
-  Forms,
-  Console in 'Console.pas';
+  Forms, Console, MetaBase;
 
 {$R *.res}
 
