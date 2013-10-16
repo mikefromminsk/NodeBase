@@ -10,14 +10,12 @@ type
   ANode = array of PNode;
 
   TNode = record
-    Path  : String;
-    LocalName: String;
-    ParentName: PNode;
     Name  : String;
-    ParentIndex: PNode;
+    ParentName: PNode;
     Index : ANode;
-    ParentLocal: PNode;
+    ParentIndex: PNode;
     Local : ANode;
+    ParentLocal: PNode;
     Value : PNode;
     Source: PNode;
     FType : PNode;
@@ -30,6 +28,9 @@ type
     Attr  : Integer;
     Count : Integer;            //controls
     Handle: Integer;
+
+    Path  : String;            //test variable
+    LocalName: String;
   end;
 
   TMeta = class
