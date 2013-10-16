@@ -1,26 +1,24 @@
-unit MLink;
+unit MetaLine;
 
 interface
 
 uses
-  SysUtils, MUtils;
+  SysUtils, MetaUtils;
 
 type
 
-  TMLink = class
+  TLine = class
   public
     Name: string;
     Path: array of string;
     ParentLocal: string;
     Source: string;
-    FType: TMLink;
-    Local: array of TMLink;
-    Params: array of TMLink;
-    Value: TMLink;
-    FElse: TMLink;
-  private
+    FType: TLine;
+    Local: array of TLine;
+    Params: array of TLine;
+    Value: TLine;
+    FElse: TLine;
     constructor CreateP(var LURI: String; FirstRun: Boolean = False);
-  public
     constructor Create(LURI: string);
     destructor Destroy;
     function GetLink: string;
@@ -30,7 +28,7 @@ type
 implementation
 
 
-destructor TMLink.Destroy;
+destructor TLine.Destroy;
 var i: Integer;
 begin           
   if FType <> nil then
@@ -47,12 +45,12 @@ begin
       Local[i].Destroy;
 end;
 
-constructor TMLink.Create(LURI: string);
+constructor TLine.Create(LURI: string);
 begin
   CreateP(LURI, True);
 end;
 
-constructor TMLink.CreateP(var LURI: String; FirstRun: Boolean = False);
+constructor TLine.CreateP(var LURI: String; FirstRun: Boolean = False);
 var
   s, LS: string;
   Index, i, dx: Integer;
@@ -72,7 +70,7 @@ begin
     Index := NextIndex(0, [' '], LS);
     s := Copy(LS, 1, Index-1);
     SetLength(Local, High(Local)+2);
-    Local[High(Local)] := TMLink.CreateP(s);
+    Local[High(Local)] := TLine.CreateP(s);
     Delete(LS, 1, Index);
   end;
 
@@ -140,21 +138,21 @@ begin
 
     if Index = MaxInt then
     begin
-      FType := TMLink.CreateP(LURI);
+      FType := TLine.CreateP(LURI);
       Delete(LURI, 1, Length(LURI));
     end
     else
     if LURI[Index] = '=' then
     begin
       s := Copy(LURI, 1, Index-1);
-      FType := TMLink.CreateP(s);
+      FType := TLine.CreateP(s);
       Delete(LURI, 1, Index);
-      Value := TMLink.CreateP(LURI);
+      Value := TLine.CreateP(LURI);
     end
     else
     begin
       if Length(LURI) > 0 then
-        FType := TMLink.CreateP(LURI);
+        FType := TLine.CreateP(LURI);
     end;
     Exit;
   end;
@@ -165,7 +163,7 @@ begin
     {Index := NextIndex(0, ['&', '#'], LURI);
     s := Copy(LURI, 1, Index-1);
     Delete(LURI, 1, Index-1);}
-    Value := TMLink.CreateP(LURI);
+    Value := TLine.CreateP(LURI);
     Exit;
   end;
 
@@ -189,7 +187,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TMLink.CreateP(s);
+          Params[High(Params)] := TLine.CreateP(s);
         end
         else
           Break;
@@ -199,7 +197,7 @@ begin
       if LURI[Index] in [':', '='] then
       begin
         SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TMLink.CreateP(LURI);
+        Params[High(Params)] := TLine.CreateP(LURI);
         Continue;
       end;
 
@@ -210,7 +208,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TMLink.CreateP(s);
+          Params[High(Params)] := TLine.CreateP(s);
         end;
         Continue;
       end;
@@ -222,7 +220,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TMLink.CreateP(s);
+          Params[High(Params)] := TLine.CreateP(s);
         end;
         Break;
       end;
@@ -230,7 +228,7 @@ begin
       if LURI[Index] = '?' then
       begin
         SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TMLink.CreateP(LURI);
+        Params[High(Params)] := TLine.CreateP(LURI);
       end;
 
     until False;
@@ -239,18 +237,18 @@ begin
   if (Length(LURI) > 0) and (LURI[1] = '#') and (FirstRun = True) then
   begin
     Delete(LURI, 1, 1);
-    Value := TMLink.CreateP(LURI);
+    Value := TLine.CreateP(LURI);
   end;
 
   if (Length(LURI) > 0) and (LURI[1] = '|') then
   begin
     Delete(LURI, 1, 1);
-    FElse := TMLink.CreateP(LURI);
+    FElse := TLine.CreateP(LURI);
   end;
 
 end;
 
-function TMLink.GetLink: String;
+function TLine.GetLink: String;
 var
   i: Integer;
 begin

@@ -1,4 +1,4 @@
-unit MUtils;
+unit MetaUtils;
 
 interface
 
@@ -45,7 +45,7 @@ var
 implementation
 
 uses
-  MBase;
+  MetaBase;
 
 function GetProcAddress(Handle: Integer; FuncName: String): Integer;
 begin
@@ -180,7 +180,7 @@ end;
 procedure RunThread.Execute;
 begin
   if Node <> nil then
-    MTree.Run(Node);
+    Base.Run(Node);
 end;
 
 constructor RunThread.Create;
@@ -317,8 +317,8 @@ var
   Index, FieldIndex, Level, i: Integer;
   IsPointer: Boolean;
 begin
-  IsPointer := False;
-  NodeType := MTree.GetType(Node);
+{  IsPointer := False;
+  NodeType := Base.GetType(Node);
   if NodeType = nil then Exit;
   Mask := NodeType.Name;
   FieldIndex := 0;
@@ -342,7 +342,7 @@ begin
         if Mask[i] = '(' then Inc(Level);
       end;
       DownMask := Copy(Mask, Index + 1, i - Index -1);
-      Field := MTree.AddField(Node, MTree.NewNode(IntToStr(FieldIndex)));
+      Field := Base.AddField(Node, MTree.NewNode(IntToStr(FieldIndex)));
       Field.FType := MTree.NewNode('!' + DownMask);
       Field.Attr := naPointer;
       Parse(Field, Data);
@@ -359,7 +359,7 @@ begin
     end;
     Inc(FieldIndex);
     Delete(Mask, 1, Index);
-  until Index = MaxInt;
+  until Index = MaxInt;  }
 end;
 
 
@@ -368,4 +368,5 @@ initialization
   TimerList := MTimerList.Create;
 
 end.
+
 
