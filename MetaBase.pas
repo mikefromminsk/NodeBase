@@ -254,15 +254,6 @@ begin
   end;
 end;
 
-function TMeta.GetType(Node: PNode): PNode;
-begin
-  Result := nil;
-  if Node = nil then Exit;
-  if Node.Source <> nil
-  then Result := GetType(Node.Source)
-  else Result := GetData(Node.FType);
-end;
-
 function TMeta.GetSource(Node: PNode): PNode;
 begin
   Result := Node;
@@ -276,6 +267,15 @@ begin
       Exit;
     end;
   end;
+end;
+
+function TMeta.GetType(Node: PNode): PNode;
+begin
+  Result := nil;
+  if Node = nil then Exit;
+  if Node.Source <> nil
+  then Result := GetType(Node.Source)
+  else Result := GetData(Node.FType);
 end;
 
 function TMeta.NewIndex(Name: String): PNode;
