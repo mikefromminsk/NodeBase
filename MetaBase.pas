@@ -2,9 +2,11 @@ unit MetaBase;
 
 interface
 
-uses SysUtils{AllocMem}, Classes{TStrings}, MetaLine;//, MetaUtils;
+uses
+  SysUtils{AllocMem}, Classes{TStrings}, MetaLine, MetaUtils;
 
 type
+
   PNode = ^TNode;
 
   ANode = array of PNode;
@@ -17,6 +19,8 @@ type
     Local : ANode;
     ParentLocal: PNode;
     Value : PNode;
+    ParentField: PNode;
+    Fields: ANode;
     Source: PNode;
     FType : PNode;
     FTrue : PNode;
@@ -46,6 +50,7 @@ type
     function AddLocal(Node: PNode): PNode; overload;
     function AddLocal(Node: PNode; Local: PNode): PNode; overload;
     function AddValue(Node: PNode; Value: String): PNode;
+    function AddField(Node: PNode; Field: PNode): PNode;
     function AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
     function GetIndex(Node: PNode): String;
     function SetValue(Node: PNode; Value: String): PNode;
@@ -58,8 +63,8 @@ type
     procedure NewModule(Node: PNode);
     procedure CallFunc(Node: PNode);
     function FindNode(Index: PNode): PNode;
-    function NewNode(var Line: String): PNode; overload;
-    function NewNode(Link: TLine): PNode; overload;
+    function NewNode(Line: String): PNode; overload;
+    function NewNode(Line: TLine): PNode; overload;
     procedure Run(Node: PNode);
     procedure NextNode(Node: PNode);
     function Get(Line: String): PNode;
@@ -70,8 +75,8 @@ const
   naWord = $1;
   naLink = $2;
   naData = $3;
-  naFile = $4;
-  naFunc = $5;          //naStdFunc = $51; naFastCallFunc = $52;
+  naFile = $4;          //naStdFunc = $51; naFastCallFunc = $52;
+  naFunc = $5;
   naNumber = $6;
   naPointer = $7;
 
@@ -81,11 +86,9 @@ var
 implementation
 
 constructor TMeta.Create;
-var ModuleID: String;
 begin
   Root := AllocMem(SizeOf(TNode));
-  ModuleID := NextID;
-  Module := NewNode(ModuleID);
+  Module := NewNode(NextID);
 end;
 
 function TMeta.NextID: String;
@@ -158,6 +161,28 @@ begin
   Result.Name := Value;
   Result.Attr := naData;
   Node.Value := Result;
+end;
+
+function TMeta.AddField(Node: PNode; Field: PNode): PNode;
+var i: Integer;
+begin
+  Result := nil;
+  Field.Source := nil;
+  if Node.Source <> nil then
+    Node := Node.Source;
+  if (Node.Value <> nil) and (Node.Value.Attr = naPointer) and (Node.Value.Source <> nil)then
+    Node := Node.Value.Source;
+  for i:=0 to High(Node.Fields) do
+    if Node.Fields[i].ParentName = Field.ParentName then
+    begin
+      Result := Node.Fields[i];
+      Exit;
+    end;
+  AddSubNode(Node.Fields);
+  Field.ParentField := Node;
+  Field.Value := nil;
+  Node.Fields[High(Node.Fields)] := Field;
+  Result := Field;
 end;
 
 function TMeta.AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
@@ -305,7 +330,7 @@ var
   i: Integer;
   Func, PrevModule: PNode;
   List: TStrings;
-  FileName, FileExt, FuncName: String;
+  FileName, FileExt: String;
 begin
   FileName := Copy(GetIndex(Node.ParentName), 2, MaxInt);
   if not FileExists(FileName) then Exit;
@@ -313,16 +338,16 @@ begin
   FileExt := LowerCase(ExtractFileExt(FileName));
   if FileExt = '.dll' then
   begin
-    //Node.Handle := GetImageFunctionList(FileName, List);
+    Node.Handle := GetImageFunctionList(FileName, List);
     for i:=0 to List.Count-1 do
     begin
-      FuncName := List.Strings[i];
-      Func := NewNode(FuncName);
+      Func := NewNode(List.Strings[i]);
       Func.Attr := naFunc;
       Func.Prev := Node;
-      //Func.Handle := GetProcAddress(Node.Handle, List.Strings[i]);
+      Func.Handle := GetProcAddress(Node.Handle, List.Strings[i]);
       AddLocal(Node, Func);
     end;
+    //if FileExists(FileName + '.meta') then
   end
   else
   if FileExt = '.meta' then
@@ -330,8 +355,8 @@ begin
     PrevModule := Module;
     Module := Node;
     List.LoadFromFile(FileName);
-    {for i:=0 to List.Count-1 do
-      Get(List.Strings[i]);}
+    for i:=0 to List.Count-1 do
+      Get(List.Strings[i]);
     Module := PrevModule;
   end;
   List.Free;
@@ -355,11 +380,11 @@ begin
     if Value <> nil
     then Params := Params + Value.Name
     else Exit;
-  end;                                  //fastcall
-  while Params <> '' do
+  end;
+  while Params <> '' do              //fastcall
   begin
     SetLength(Stack, High(Stack) + 2);
-    //Stack[High(Stack)] := StrToInt4(Copy(Params, 1, 4));
+    Stack[High(Stack)] := StrToInt4(Copy(Params, 1, 4));
     Delete(Params, 1, 4);
   end;
   for i:=High(Stack) downto 0 do
@@ -378,9 +403,9 @@ begin
     MOV IfFloat, 1
     @2:
   end;
-  {if IfFloat = 0
+  if IfFloat = 0
   then SetValue(Node, IntToStr4(BVal))
-  else SetValue(Node, FloatToStr8(DBVal)); }
+  else SetValue(Node, FloatToStr8(DBVal));
 end;
 
 function FindInNode(Node: PNode; Index: PNode): PNode;
@@ -406,8 +431,8 @@ begin
     for i:=0 to High(Node.Local) do
     begin
       Local := Node.Local[i];
-      {while Local.ParentField <> nil do
-        Local := Local.ParentField;}
+      while Local.ParentField <> nil do
+        Local := Local.ParentField;
       if Local.Attr = naFile then
       begin
         Result := FindInNode(Local, Index);
@@ -440,25 +465,25 @@ begin
   end;
 end;
 
-function TMeta.NewNode(var Line: String): PNode;
-begin Result := NewNode(TLine.CreateP(Line, True)); end;
+function  TMeta.NewNode(Line: String): PNode;
+begin Result := NewNode(TLine.Create(Line)); end;
 
-function TMeta.NewNode(Link: TLine): PNode;
+function TMeta.NewNode(Line: TLine): PNode;
 var
   i: Integer;
   Node: PNode;
   IsPointer: Boolean;
 begin
-  if (Length(Link.Name) <> 0) and (Link.Name[1] = '*') then
+  if (Length(Line.Name) <> 0) and (Line.Name[1] = '*') then
   begin
-    Delete(Link.Name, 1, 1);
+    Delete(Line.Name, 1, 1);
     IsPointer := True;
   end;
-  Result := NewIndex(Link.Name);
+  Result := NewIndex(Line.Name);
   if Result = nil then Exit;
-  if Link.Name[1] <> '@' then
+  if Line.Name[1] <> '@' then
     Result := AddLocal(Result);
-  case Link.Name[1] of
+  case Line.Name[1] of
     '!' : Result.Attr := naData;
     '@' : Result.Attr := naLink;
     '/' : Result.Attr := naFile;
@@ -467,58 +492,80 @@ begin
   end;
   if Result.Attr = naWord then
   begin
-    if Link.FType = nil then
+    if Line.FType = nil then
       Result.Source := FindNode(Result.ParentName);
-    {for i:=1 to High(Link.Path) do
-      Result := AddField(Result, NewNode(Link.Path[i]));}
-    if Link.Source <> '' then
+    for i:=1 to High(Line.Path) do
+      Result := AddField(Result, NewNode(Line.Path[i]));
+    if Line.Source <> '' then
     begin
-      //NextNode(NewNode(Link.Source));
+      NextNode(NewNode(Line.Source));
       Result := GetSource(Result);
       Result.Source := Prev;
     end;
-    if (Result.Source = nil) and (Link.Value <> nil) and (Prev <> nil) and (Prev <> Module) then
+    if (Result.Source = nil) and (Line.Value <> nil) and (Prev <> nil) and (Prev <> Module) then
     begin
-      NextNode(NewNode(Link.Name));
+      NextNode(NewNode(Line.Name));
       Result.Source := Prev;
     end;
   end;
-  for i:=0 to High(Link.Params) do
-    AddParam(Result, NewNode(Link.Params[i]), i);
+  for i:=0 to High(Line.Params) do
+    AddParam(Result, NewNode(Line.Params[i]), i);
   if Result.Attr = naData then
   begin
-    //AddValue(Result, DecodeName(Copy(Link.Name, 2, MaxInt)));
+    AddValue(Result, DecodeName(Copy(Line.Name, 2, MaxInt)));
     Result.Value.Attr := naData;
   end;
-  {if (Result.Attr = naNumber) and (Result.ParentField = nil) then
-    if Pos(',', Link.Name) = 0
-    then Result.Value := NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Link.Name))))
-    else Result.Value := NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Link.Name))));   }
-  if Link.FElse <> nil then
+  if (Result.Attr = naNumber) and (Result.ParentField = nil) then
+    if Pos(',', Line.Name) = 0
+    then Result.Value := NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Line.Name))))
+    else Result.Value := NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Line.Name))));
+  if Line.FElse <> nil then
   begin
-    Result.FElse := NewNode(Link.FElse);
+    Result.FElse := NewNode(Line.FElse);
     if Result.FElse = nil then
       Result.FElse := Pointer(1);
-    Result.FTrue := NewNode(Link.Value);
+    Result.FTrue := NewNode(Line.Value);
   end
   else
-  if Link.Value <> nil then
+  if Line.Value <> nil then
   begin
-    Result.Value := NewNode(Link.Value);
+    Result.Value := NewNode(Line.Value);
     Node := GetSource(Result);
     Node.Value := GetValue(Result.Value);
   end;
-  if Link.FType <> nil then
-    Result.FType := NewNode(Link.FType);
-  for i:=0 to High(Link.Local) do
-    AddLocal(Result, NewNode(Link.Local[i]));
+  if Line.FType <> nil then
+    Result.FType := NewNode(Line.FType);
+  for i:=0 to High(Line.Local) do
+    AddLocal(Result, NewNode(Line.Local[i]));
   if IsPointer = True then
   begin
     Node := GetData(Result);
-    {if Node <> nil then
-      AddValue(Result, IntToStr4(Integer(PChar(Node.Name)))); }
+    if Node <> nil then
+      AddValue(Result, IntToStr4(Integer(PChar(Node.Name))));
     Result.Attr := naPointer;
   end;
+end;
+
+procedure Build(Node: PNode; ToUp: Boolean = False);
+var
+  i: Integer;
+  Value: PNode;
+  Data: String;
+begin
+  for i:=0 to High(Node.Fields) do
+  begin
+    if ToUp = False then
+      Build(Node.Fields[i]);
+    Value := Base.GetData(Node.Fields[i]);
+    if Value <> nil then
+      if Node.Attr = naPointer
+      then Data := Data + IntToStr4(Integer(PChar(Value.Name)))
+      else Data := Data + Value.Name;
+    if i = High(Node.Fields) then
+      Base.SetValue(Node, Data);
+  end;
+  if Node.ParentField <> nil then
+    Build(Node.ParentField, True);
 end;
 
 function CompareWithZero(Node: PNode): Integer;
@@ -573,14 +620,14 @@ begin
     if (Node.Source.Value <> nil) and (Node.Source.Value.Attr = naPointer) then
     begin
       Node.Source.Value.Value := GetValue(Node.Value);
-      //SetValue(Node.Source.Value.Source.Value, PChar(Integer(StrToInt4(Node.Source.Value.Value.Name))));
+      SetValue(Node.Source.Value.Source.Value, PChar(Integer(StrToInt4(Node.Source.Value.Value.Name))));
     end
     else
     begin
       if Node.Source.Value.Attr = naWord then
       begin
         if Node.Source.Value <> GetValue(Node.Value) then
-          Node.Source.Value.Value := GetValue(Node.Value);
+          Node.Source.Value.Value := GetValue(Node.Value);         
       end
       else
         Node.Source.Value := GetValue(Node.Value);
@@ -618,11 +665,10 @@ begin
   if GetData(Result) <> nil then
   begin
     Data := GetData(Result).Name;
-    //Parse(Result, Data);
-    //Build(Result);
+    Parse(Result, Data);
+    Build(Result);
   end;
 end;
-
 
 initialization
   Base := TMeta.Create;

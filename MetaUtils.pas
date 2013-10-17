@@ -53,13 +53,13 @@ begin
 end;
 
 function StrToInt4(Str: String): Integer;
-begin
+begin//optimize to asm
   Result := Ord(Str[1]) shl 24 + Ord(Str[2]) shl 16 +
             Ord(Str[3]) shl 8  + Ord(Str[4]);
 end;
 
 function IntToStr4(Num: Integer): String;
-begin
+begin//optimize to asm
   Result := Chr((Num and $FF000000) shr 24) + Chr((Num and $00FF0000) shr 16) +
             Chr((Num and $0000FF00) shr 8)  + Chr((Num and $000000FF));
 end;
@@ -70,7 +70,7 @@ var N: record
         1: (L, R: Integer);
         2: (X: Double);
         end;
-begin
+begin//optimize to asm
   N.X := Num;
   Result := IntToStr4(N.L) + IntToStr4(N.R);
 end;
@@ -81,7 +81,7 @@ var N: record
         1: (L, R: Integer);
         2: (X: Double);
         end;
-begin
+begin//optimize to asm
   N.L := StrToInt4(Copy(Str, 1, 4));
   N.R := StrToInt4(Copy(Str, 5, 4));
   Result := N.X;
@@ -317,7 +317,7 @@ var
   Index, FieldIndex, Level, i: Integer;
   IsPointer: Boolean;
 begin
-{  IsPointer := False;
+  IsPointer := False;
   NodeType := Base.GetType(Node);
   if NodeType = nil then Exit;
   Mask := NodeType.Name;
@@ -342,8 +342,8 @@ begin
         if Mask[i] = '(' then Inc(Level);
       end;
       DownMask := Copy(Mask, Index + 1, i - Index -1);
-      Field := Base.AddField(Node, MTree.NewNode(IntToStr(FieldIndex)));
-      Field.FType := MTree.NewNode('!' + DownMask);
+      Field := Base.AddField(Node, Base.NewNode(IntToStr(FieldIndex)));
+      Field.FType := Base.NewNode('!' + DownMask);
       Field.Attr := naPointer;
       Parse(Field, Data);
       Delete(Mask, Index, i - Index + 1);
@@ -353,13 +353,13 @@ begin
     DownValue := CutString(Data, PartMask);
     if (not IsPointer) and (Mask[Index] = '.') then
     begin
-      Field := MTree.AddField(Node, MTree.NewNode(IntToStr(FieldIndex)));
-      Field.FType := MTree.NewNode('!' + PartMask + '.');
-      MTree.SetValue(Field, DownValue);
+      Field := Base.AddField(Node, Base.NewNode(IntToStr(FieldIndex)));
+      Field.FType := Base.NewNode('!' + PartMask + '.');
+      Base.SetValue(Field, DownValue);
     end;
     Inc(FieldIndex);
     Delete(Mask, 1, Index);
-  until Index = MaxInt;  }
+  until Index = MaxInt;
 end;
 
 
@@ -368,5 +368,4 @@ initialization
   TimerList := MTimerList.Create;
 
 end.
-
 
