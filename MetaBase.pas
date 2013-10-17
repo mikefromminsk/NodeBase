@@ -3,9 +3,11 @@ unit MetaBase;
 interface
 
 uses
-  SysUtils{AllocMem}, Classes{TStrings}, MetaLine, Windows, MetaUtils, Messages, Dialogs;
+  SysUtils{AllocMem}, Classes{TStrings}, MetaLine, Windows{SetTimer}, MetaUtils,
+  Dialogs;
 
 type
+  TimerProc = procedure (wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) of object; stdcall;
 
   PNode = ^TNode;
 
@@ -68,7 +70,7 @@ type
     function NewNode(Line: TLine): PNode; overload;
     procedure Run(Node: PNode);
     procedure NextNode(Node: PNode);
-    procedure DeleteNode(wnd: HWND; Msg: UINT; idEvent: UINT; Time: DWORD) stdcall; virtual; abstract;
+    procedure DeleteNode(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     function Get(Line: String): PNode;
   end;
 
@@ -88,9 +90,12 @@ var
 implementation
 
 constructor TMeta.Create;
+var Method: TMethod;
 begin
   Root := AllocMem(SizeOf(TNode));
   Module := NewNode(NextID);
+  TimerProc(Method) := Self.DeleteNode;
+  Windows.SetTimer(0, 0, 1000, Method.Code);
 end;
 
 function TMeta.NextID: String;
@@ -662,9 +667,9 @@ begin
   Prev := Node;
 end;
 
-procedure TMeta.DeleteNode(wnd: HWND; Msg: UINT; idEvent: UINT; Time: DWORD) stdcall;
+procedure TMeta.DeleteNode(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
 begin
-  ShowMessage('s');
+  ShowMessage(IntToStr(wnd));
 end;
 
 function TMeta.Get(Line: String): PNode;
@@ -681,11 +686,6 @@ begin
   end;
 end;
 
-var
-  Ptr: Pointer;
-
 initialization
   Base := TMeta.Create;
-  Ptr := Base.DeleteNode;
-  Windows.SetTimer(0, 0, 100, );
 end.
