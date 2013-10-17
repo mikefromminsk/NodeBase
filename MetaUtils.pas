@@ -3,7 +3,8 @@ unit MetaUtils;
 interface
 
 uses
-  Windows, ImageHlp, Classes, SysUtils, StrUtils, Math, Dialogs, ExtCtrls;
+  Windows, ImageHlp, Classes, SysUtils, StrUtils, Math, Dialogs, ExtCtrls,
+  Messages;
 
 type
   RunThread = class(TThread)
@@ -21,6 +22,7 @@ type
     procedure CallOnTimer(Sender : TObject);
     procedure Add(Handle: Integer; TimeOfLife: Cardinal);
   end;
+
 
 function IntToStr4(Num: Integer): String;
 function StrToInt4(Str: String): Integer;
@@ -47,8 +49,11 @@ implementation
 uses
   MetaBase;
 
+
+
 function GetProcAddress(Handle: Integer; FuncName: String): Integer;
 begin
+
   Result := Integer(Windows.GetProcAddress(Handle, PChar(FuncName)));
 end;
 
@@ -366,6 +371,5 @@ end;
 
 initialization
   TimerList := MTimerList.Create;
-
 end.
 

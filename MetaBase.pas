@@ -3,7 +3,7 @@ unit MetaBase;
 interface
 
 uses
-  SysUtils{AllocMem}, Classes{TStrings}, MetaLine, MetaUtils;
+  SysUtils{AllocMem}, Classes{TStrings}, MetaLine, Windows, MetaUtils, Messages, Dialogs;
 
 type
 
@@ -39,6 +39,7 @@ type
 
   TMeta = class
   public
+    IndexCount: Integer;
     ID: String;
     Root: PNode;
     Prev: PNode;
@@ -67,6 +68,7 @@ type
     function NewNode(Line: TLine): PNode; overload;
     procedure Run(Node: PNode);
     procedure NextNode(Node: PNode);
+    procedure DeleteNode(wnd: HWND; Msg: UINT; idEvent: UINT; Time: DWORD) stdcall; virtual; abstract;
     function Get(Line: String): PNode;
   end;
 
@@ -316,9 +318,13 @@ begin
         Index := j;
         Break;
       end;
-    if Index = -1
-    then Result := AddIndex(Result, Name[i])
-    else Result := Result.Index[Index];
+    if Index = -1 then
+    begin
+      Result := AddIndex(Result, Name[i]);
+      Inc(IndexCount);
+    end
+    else
+      Result := Result.Index[Index];
   end;
   if Result <> Root
   then Inc(Result.Count)
@@ -656,6 +662,11 @@ begin
   Prev := Node;
 end;
 
+procedure TMeta.DeleteNode(wnd: HWND; Msg: UINT; idEvent: UINT; Time: DWORD) stdcall;
+begin
+  ShowMessage('s');
+end;
+
 function TMeta.Get(Line: String): PNode;
 var Data: String;
 begin
@@ -670,6 +681,11 @@ begin
   end;
 end;
 
+var
+  Ptr: Pointer;
+
 initialization
   Base := TMeta.Create;
+  Ptr := Base.DeleteNode;
+  Windows.SetTimer(0, 0, 100, );
 end.
