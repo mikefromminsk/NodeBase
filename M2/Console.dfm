@@ -1,0 +1,91 @@
+object GG: TGG
+  Left = 297
+  Top = 113
+  Width = 397
+  Height = 472
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object WebForm: TPanel
+    Left = 0
+    Top = 0
+    Width = 389
+    Height = 438
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 0
+    object WebSplitter: TSplitter
+      Left = 0
+      Top = 281
+      Width = 389
+      Height = 3
+      Cursor = crVSplit
+      Align = alTop
+      Color = clAppWorkSpace
+      ParentColor = False
+      ResizeStyle = rsLine
+    end
+    object Console: TRichEdit
+      Left = 0
+      Top = 0
+      Width = 389
+      Height = 281
+      Align = alTop
+      BevelInner = bvNone
+      BevelOuter = bvNone
+      BorderStyle = bsNone
+      Color = clGrayText
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWhite
+      Font.Height = -16
+      Font.Name = 'Arial'
+      Font.Style = []
+      ParentFont = False
+      ScrollBars = ssVertical
+      TabOrder = 0
+      WordWrap = False
+      OnKeyUp = ConsoleKeyUp
+    end
+    object Result: TRichEdit
+      Left = 0
+      Top = 284
+      Width = 389
+      Height = 154
+      Align = alClient
+      BevelInner = bvNone
+      BevelOuter = bvNone
+      BorderStyle = bsNone
+      Color = clGrayText
+      Font.Charset = RUSSIAN_CHARSET
+      Font.Color = clWhite
+      Font.Height = -16
+      Font.Name = 'Arial'
+      Font.Style = []
+      ParentFont = False
+      ScrollBars = ssVertical
+      TabOrder = 1
+      WordWrap = False
+    end
+  end
+  object Server: TServerSocket
+    Active = True
+    Port = 80
+    ServerType = stNonBlocking
+    OnClientRead = ServerClientRead
+    OnClientError = ServerClientError
+    Left = 8
+    Top = 8
+  end
+  object ApplicationEvents1: TApplicationEvents
+    OnException = ApplicationEvents1Exception
+    Left = 40
+    Top = 8
+  end
+end
