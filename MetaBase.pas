@@ -3,8 +3,8 @@ unit MetaBase;
 interface
 
 uses
-  SysUtils{AllocMem}, Classes{TStrings}, MetaLine, Windows{SetTimer}, MetaUtils,
-  Dialogs;
+  SysUtils{AllocMem, Now}, Classes{TStrings}, MetaLine, Windows{SetTimer},
+  MetaUtils, Dialogs;
 
 type
   TimerProc = procedure (wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) of object; stdcall;
@@ -34,18 +34,30 @@ type
     Attr  : Integer;
     Count : Integer;            //controls
     Handle: Integer;
+    SaveTime  : Double;
 
-    Path  : String;            //test variable
+    Path  : String;            //test mode
     LocalName: String;
+  end;
+
+  PInterval = ^TInterval;
+
+  TInterval = record
+    FEnd : Double;
+    Nodes: ANode;
+    Next : PInterval;
+    Prev : PInterval;
   end;
 
   TMeta = class
   public
-    IndexCount: Integer;
+    NodeCount: Integer;
     ID: String;
     Root: PNode;
     Prev: PNode;
     Module: PNode;
+    TimeLine: PInterval;
+    TimerInterval: Double;
     constructor Create;
     function NextID: String;
     function AddSubNode(var Arr: ANode): PNode;
@@ -71,6 +83,7 @@ type
     procedure Run(Node: PNode);
     procedure NextNode(Node: PNode);
     procedure DeleteNode(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
+    procedure AddEvent(Node: PNode);
     function Get(Line: String): PNode;
   end;
 
@@ -94,8 +107,10 @@ var Method: TMethod;
 begin
   Root := AllocMem(SizeOf(TNode));
   Module := NewNode(NextID);
+  TimerInterval := 1000;
   TimerProc(Method) := Self.DeleteNode;
-  Windows.SetTimer(0, 0, 1000, Method.Code);
+  Windows.SetTimer(0, 0, Round(TimerInterval), Method.Code);
+  TimerInterval := TimerInterval / 86400000; //(24 * 60 * 60 * 1000);
 end;
 
 function TMeta.NextID: String;
@@ -323,13 +338,9 @@ begin
         Index := j;
         Break;
       end;
-    if Index = -1 then
-    begin
-      Result := AddIndex(Result, Name[i]);
-      Inc(IndexCount);
-    end
-    else
-      Result := Result.Index[Index];
+    if Index = -1
+    then Result := AddIndex(Result, Name[i])
+    else Result := Result.Index[Index];
   end;
   if Result <> Root
   then Inc(Result.Count)
@@ -485,6 +496,7 @@ var
   Node: PNode;
   IsPointer: Boolean;
 begin
+  IsPointer := False;
   if (Length(Line.Name) <> 0) and (Line.Name[1] = '*') then
   begin
     Delete(Line.Name, 1, 1);
@@ -555,6 +567,9 @@ begin
       AddValue(Result, IntToStr4(Integer(PChar(Node.Name))));
     Result.Attr := naPointer;
   end;
+
+
+  AddEvent(Result);
 end;
 
 procedure Build(Node: PNode; ToUp: Boolean = False);
@@ -667,9 +682,78 @@ begin
   Prev := Node;
 end;
 
-procedure TMeta.DeleteNode(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
+procedure TMeta.AddEvent(Node: PNode);
+var
+  Interval, NewInterval: PInterval;
+  SaveTime: Double;
 begin
-  ShowMessage(IntToStr(wnd));
+  SaveTime := Node.SaveTime;
+  Interval := TimeLine;
+  while Interval <> nil do
+  begin
+    if ((Interval.FEnd <= SaveTime) and (SaveTime - (Interval.FEnd - TimerInterval) >= 0))
+      or ((Interval.Next = nil) or (Interval.Next.FEnd > SaveTime)) then
+      Break;
+    Interval := Interval.Next;
+  end;
+  if Interval = nil then
+  begin
+    TimeLine := AllocMem(SizeOf(TInterval));
+    TimeLine.FEnd := Interval.FEnd + TimerInterval;
+    SetLength(TimeLine.Nodes, High(TimeLine.Nodes) + 2);
+    TimeLine.Nodes[High(TimeLine.Nodes)] := Node;
+  end
+  else
+  if (Interval.FEnd <= SaveTime) and (SaveTime - (Interval.FEnd - TimerInterval) >= 0) then
+  begin
+    SetLength(Interval.Nodes, High(Interval.Nodes) + 2);
+    Interval.Nodes[High(Interval.Nodes)] := Node;
+  end
+  else
+  if Interval.Next = nil then
+  begin
+    NewInterval := AllocMem(SizeOf(TInterval));
+    Interval.Next := NewInterval;
+    NewInterval.Prev := Interval;
+    NewInterval.FEnd := Interval.FEnd + TimerInterval;
+    SetLength(NewInterval.Nodes, High(NewInterval.Nodes) + 2);
+    NewInterval.Nodes[High(NewInterval.Nodes)] := Node;
+  end
+  else
+  begin
+    NewInterval := AllocMem(SizeOf(TInterval));
+    NewInterval.Prev := Interval;
+    NewInterval.Next := Interval.Next;
+    Interval.Next.Prev := NewInterval;
+    Interval.Next := NewInterval;
+    NewInterval.FEnd := Interval.FEnd + TimerInterval;
+    SetLength(NewInterval.Nodes, High(NewInterval.Nodes) + 2);
+    NewInterval.Nodes[High(NewInterval.Nodes)] := Node;
+  end;
+end;
+
+procedure DeleteNode(Node: PNode);
+var i: Integer;
+begin
+  for i:=0 to High(Node.Index) do
+    DeleteNode(Node.Index[i]);
+  Dispose(Node);
+end;
+
+procedure TMeta.DeleteNode(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
+var
+  i: Integer;
+  Now: Double;
+  Nodes: ANode;
+begin
+  Now := SysUtils.Now;
+  if TimeLine.FEnd < Now then
+  begin
+    Nodes := Base.TimeLine.Nodes;
+    for i:=0 to High(Nodes) do
+      if Nodes[i].SaveTime < Now then
+        DeleteNode(Nodes[i]);
+  end;
 end;
 
 function TMeta.Get(Line: String): PNode;

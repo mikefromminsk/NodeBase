@@ -37,6 +37,8 @@ x64
 
 planner
 
+option: active_kernel = 2
+
 [localization]
 meta to down code (c++)
 parser c
