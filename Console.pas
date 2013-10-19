@@ -21,6 +21,7 @@ type
     procedure InputBoxKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
+    procedure CreateParams(var Params: TCreateParams); override;
   end;
 
 var
@@ -113,6 +114,14 @@ begin
     M(InputBox.Lines[i], False);
   InputBox.SelStart := Length(InputBox.Lines.Text);
 end;
+
+procedure TGG.CreateParams(var Params: TCreateParams);
+begin
+  inherited CreateParams(Params);
+  with Params do
+    Style := (Style OR WS_POPUP) AND NOT WS_DLGFRAME;
+end;
+
 
 end.
 

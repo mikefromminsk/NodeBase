@@ -14,6 +14,9 @@ type
   ANode = array of PNode;
 
   TNode = record
+    Path  : String;            //test mode
+    LocalName: String;
+    
     Name  : String;
     ParentName: PNode;
     Index : ANode;
@@ -34,19 +37,18 @@ type
     Attr  : Integer;
     Count : Integer;            //controls
     Handle: Integer;
-    SaveTime  : Double;
+    SaveTime : Double;
+    RefCount : Integer;
 
-    Path  : String;            //test mode
-    LocalName: String;
+
   end;
 
-  PInterval = ^TInterval;
+  PBlock = ^TBlock;
 
-  TInterval = record
+  TBlock = record
     FEnd : Double;
     Nodes: ANode;
-    Next : PInterval;
-    Prev : PInterval;
+    Next : PBlock;
   end;
 
   TMeta = class
@@ -56,7 +58,7 @@ type
     Root: PNode;
     Prev: PNode;
     Module: PNode;
-    TimeLine: PInterval;
+    TimeLine: PBlock;
     TimerInterval: Double;
     constructor Create;
     function NextID: String;
@@ -82,8 +84,9 @@ type
     function NewNode(Line: TLine): PNode; overload;
     procedure Run(Node: PNode);
     procedure NextNode(Node: PNode);
-    procedure DeleteNode(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
+    procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
+    procedure SaveNode(Node: PNode);
     function Get(Line: String): PNode;
   end;
 
@@ -97,6 +100,8 @@ const
   naNumber = $6;
   naPointer = $7;
 
+  msec = 86400000;  //(24 * 60 * 60 * 1000);
+
 var
   Base: TMeta;
 
@@ -108,9 +113,9 @@ begin
   Root := AllocMem(SizeOf(TNode));
   Module := NewNode(NextID);
   TimerInterval := 1000;
-  TimerProc(Method) := Self.DeleteNode;
+  TimerProc(Method) := Self.OnTimer;
   Windows.SetTimer(0, 0, Round(TimerInterval), Method.Code);
-  TimerInterval := TimerInterval / 86400000; //(24 * 60 * 60 * 1000);
+  TimerInterval := TimerInterval / msec;
 end;
 
 function TMeta.NextID: String;
@@ -568,7 +573,8 @@ begin
     Result.Attr := naPointer;
   end;
 
-
+  if Result.Source <> nil then
+    Inc(Result.Source.RefCount);
   AddEvent(Result);
 end;
 
@@ -684,77 +690,97 @@ end;
 
 procedure TMeta.AddEvent(Node: PNode);
 var
-  Interval, NewInterval: PInterval;
-  SaveTime: Double;
+  Block, NewBlock: PBlock;
+  SaveTime, Now: Double;
 begin
+  Now := SysUtils.Now;
+  Node.SaveTime := SysUtils.Now + 30 / msec;
+
   SaveTime := Node.SaveTime;
-  Interval := TimeLine;
-  while Interval <> nil do
+
+  Block := TimeLine;
+  while Block <> nil do
   begin
-    if ((Interval.FEnd <= SaveTime) and (SaveTime - (Interval.FEnd - TimerInterval) >= 0))
-      or ((Interval.Next = nil) or (Interval.Next.FEnd > SaveTime)) then
+    if ((Block.FEnd <= SaveTime) and (SaveTime - (Block.FEnd - TimerInterval) >= 0))
+      or ((Block.Next = nil) or (Block.Next.FEnd > SaveTime)) then
       Break;
-    Interval := Interval.Next;
+    Block := Block.Next;
   end;
-  if Interval = nil then
+  if Block = nil then
   begin
-    TimeLine := AllocMem(SizeOf(TInterval));
-    TimeLine.FEnd := Interval.FEnd + TimerInterval;
+    TimeLine := AllocMem(SizeOf(TBlock));
+    TimeLine.FEnd := Now + TimerInterval;
     SetLength(TimeLine.Nodes, High(TimeLine.Nodes) + 2);
     TimeLine.Nodes[High(TimeLine.Nodes)] := Node;
   end
   else
-  if (Interval.FEnd <= SaveTime) and (SaveTime - (Interval.FEnd - TimerInterval) >= 0) then
+  if (Block.FEnd <= SaveTime) and (SaveTime - (Block.FEnd - TimerInterval) >= 0) then
   begin
-    SetLength(Interval.Nodes, High(Interval.Nodes) + 2);
-    Interval.Nodes[High(Interval.Nodes)] := Node;
+    SetLength(Block.Nodes, High(Block.Nodes) + 2);
+    Block.Nodes[High(Block.Nodes)] := Node;
   end
   else
-  if Interval.Next = nil then
+  if Block.Next = nil then
   begin
-    NewInterval := AllocMem(SizeOf(TInterval));
-    Interval.Next := NewInterval;
-    NewInterval.Prev := Interval;
-    NewInterval.FEnd := Interval.FEnd + TimerInterval;
-    SetLength(NewInterval.Nodes, High(NewInterval.Nodes) + 2);
-    NewInterval.Nodes[High(NewInterval.Nodes)] := Node;
+    NewBlock := AllocMem(SizeOf(TBlock));
+    Block.Next := NewBlock;
+    NewBlock.FEnd := Block.FEnd + TimerInterval;
+    SetLength(NewBlock.Nodes, High(NewBlock.Nodes) + 2);
+    NewBlock.Nodes[High(NewBlock.Nodes)] := Node;
   end
   else
   begin
-    NewInterval := AllocMem(SizeOf(TInterval));
-    NewInterval.Prev := Interval;
-    NewInterval.Next := Interval.Next;
-    Interval.Next.Prev := NewInterval;
-    Interval.Next := NewInterval;
-    NewInterval.FEnd := Interval.FEnd + TimerInterval;
-    SetLength(NewInterval.Nodes, High(NewInterval.Nodes) + 2);
-    NewInterval.Nodes[High(NewInterval.Nodes)] := Node;
+    NewBlock := AllocMem(SizeOf(TBlock));
+    NewBlock.Next := Block.Next;
+    Block.Next := NewBlock;
+    NewBlock.FEnd := Block.FEnd + TimerInterval;
+    SetLength(NewBlock.Nodes, High(NewBlock.Nodes) + 2);
+    NewBlock.Nodes[High(NewBlock.Nodes)] := Node;
   end;
 end;
 
-procedure DeleteNode(Node: PNode);
-var i: Integer;
+procedure TMeta.SaveNode(Node: PNode);
+var
+  Line: TLine;
+  List: TStringList;
 begin
-  for i:=0 to High(Node.Index) do
-    DeleteNode(Node.Index[i]);
+  if Node.Source <> nil then
+    Dec(Node.Source.RefCount);
+  List := TStringList.Create;
+  List.Lines.Text := 'asd';
+  List.SaveToFile('source^name@id$controls:type?param=value&params#result|else');
   Dispose(Node);
 end;
 
-procedure TMeta.DeleteNode(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
+procedure TMeta.OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
 var
   i: Integer;
   Now: Double;
-  Nodes: ANode;
+  Time: PBlock;
+  Node: PNode;
 begin
   Now := SysUtils.Now;
-  if TimeLine.FEnd < Now then
+  Time := Base.TimeLine;
+  if (Time <> nil) and
+  (Time.FEnd <= Now) and (Now - (Time.FEnd - Base.TimerInterval) >= 0) then
   begin
-    Nodes := Base.TimeLine.Nodes;
-    for i:=0 to High(Nodes) do
-      if Nodes[i].SaveTime < Now then
-        DeleteNode(Nodes[i]);
+    Time.Nodes := Base.TimeLine.Nodes;
+    for i:=0 to High(Time.Nodes) do
+      if Time.Nodes[i].SaveTime < Now then
+      begin
+        Node := Time.Nodes[i];
+        if Node <> nil then
+        begin
+         if (Node.RefCount = 0) and (Node.SaveTime < Time.FEnd) then
+          SaveNode(Node);
+        end;
+      end;
+    Time.Nodes := nil;
+    Base.TimeLine := Time.Next;
+    Dispose(Time);
   end;
 end;
+
 
 function TMeta.Get(Line: String): PNode;
 var Data: String;
