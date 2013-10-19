@@ -18,10 +18,11 @@ type
     Params: array of TLine;
     Value: TLine;
     FElse: TLine;
+    constructor CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
     constructor CreateP(var LURI: String; FirstRun: Boolean = False);
     constructor Create(LURI: string);
     destructor Destroy;
-    function GetLink: string;
+    function GetLine: string;
   end;
 
 
@@ -43,6 +44,19 @@ begin
   for i:=0 to High(Local) do
     if Local[i] <> nil then
       Local[i].Destroy;
+end;
+
+constructor TLine.CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
+begin
+  inherited Create;
+  if IdNode = '' then Exit;
+  if SourceNode <> '' then
+    Name := SourceNode + '^';
+  if NameNode <> '' then
+    Name := Name + NameNode;
+  Name := Name + '@' + IdNode;
+  if ControlsNode <> '' then
+    Name := Name + '$' + ControlsNode;
 end;
 
 constructor TLine.Create(LURI: string);
@@ -248,7 +262,7 @@ begin
 
 end;
 
-function TLine.GetLink: String;
+function TLine.GetLine: String;
 var
   i: Integer;
 begin
@@ -257,13 +271,13 @@ begin
   Result := Result + ParentLocal + Name;
   Result := Name;
   if FType <> nil then
-    Result := Result + ':' + FType.GetLink;
+    Result := Result + ':' + FType.GetLine;
   if Params <> nil then
   begin
     Result := Result + '?';
     for i:=0 to High(Params) do
     begin
-      Result := Result + StringReplace(Params[i].GetLink, '#', '=', []);
+      Result := Result + StringReplace(Params[i].GetLine, '#', '=', []);
       if i <> High(Params) then
         Result := Result + '&';
     end;
@@ -271,12 +285,12 @@ begin
   end;
   if Value <> nil then
     if (Params <> nil) or (FElse <> nil)
-    then Result := Result + '#' + Value.GetLink
-    else Result := Result + '=' + Value.GetLink;
+    then Result := Result + '#' + Value.GetLine
+    else Result := Result + '=' + Value.GetLine;
   if FElse <> nil then
-    Result := Result + '|' + FElse.GetLink;
+    Result := Result + '|' + FElse.GetLine;
   for i:=0 to High(Local) do
-    Result := Result + ' ' + Local[i].GetLink;
+    Result := Result + ' ' + Local[i].GetLine;
 end;
 
 end.

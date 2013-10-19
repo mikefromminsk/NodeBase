@@ -694,7 +694,7 @@ var
   SaveTime, Now: Double;
 begin
   Now := SysUtils.Now;
-  Node.SaveTime := SysUtils.Now + 30 / msec;
+  Node.SaveTime := SysUtils.Now + TimerInterval;
 
   SaveTime := Node.SaveTime;
 
@@ -743,12 +743,32 @@ procedure TMeta.SaveNode(Node: PNode);
 var
   Line: TLine;
   List: TStringList;
+  FilePath, NameNode: String;
+  i: Integer;
 begin
   if Node.Source <> nil then
     Dec(Node.Source.RefCount);
+  NameNode := EncodeName(GetIndex(Node.Source));
+  case Node.Attr of
+   naData : NameNode := '!' + NameNode;
+  end;
+
+  Line := TLine.CreateName(EncodeName(GetIndex(Node.Source)),
+                           NameNode,
+                           EncodeName(GetIndex(Node)),
+                           '');
   List := TStringList.Create;
-  List.Lines.Text := 'asd';
-  List.SaveToFile('source^name@id$controls:type?param=value&params#result|else');
+  List.Text := Line.GetLine;
+  if Node.Next <> nil then
+    List.Add(GetIndex(Node.Next));
+
+  for i:=0 to Length(NameNode) do
+  begin
+    FilePath := FilePath + '\' + NameNode[i];  //'%20'
+    CreateDir(FilePath);
+  end;
+  CreateDir('data');
+  List.SaveToFile('data' + FilePath);
   Dispose(Node);
 end;
 
@@ -769,11 +789,8 @@ begin
       if Time.Nodes[i].SaveTime < Now then
       begin
         Node := Time.Nodes[i];
-        if Node <> nil then
-        begin
-         if (Node.RefCount = 0) and (Node.SaveTime < Time.FEnd) then
+        if (Node <> nil) and (Node.RefCount = 0) and (Node.SaveTime <= Time.FEnd) then
           SaveNode(Node);
-        end;
       end;
     Time.Nodes := nil;
     Base.TimeLine := Time.Next;
