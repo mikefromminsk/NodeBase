@@ -249,11 +249,12 @@ end;
 
 function TMeta.GetIndex(Node: PNode): String;
 begin
-  while Node.ParentIndex <> nil do
-  begin
-    Result := Node.Name + Result;
-    Node := Node.ParentIndex;
-  end;
+  if Node <> nil then
+    while Node.ParentIndex <> nil do
+    begin
+      Result := Node.Name + Result;
+      Node := Node.ParentIndex;
+    end;
 end;
 
 function TMeta.SetValue(Node: PNode; Value: String): PNode;
@@ -739,37 +740,61 @@ begin
   end;
 end;
 
+
+
 procedure TMeta.SaveNode(Node: PNode);
 var
   Line: TLine;
   List: TStringList;
   FilePath, NameNode: String;
   i: Integer;
+
+function to_name(Node: PNode): String;
+begin
+  if Node = nil then Exit;
+  Result := EncodeName(GetIndex(Node));
+  case Node.Attr of
+    naData:
+    begin
+      Delete(Result, 1, 3);
+      Result := '!' + Result;
+    end;
+    naFile:
+    begin
+      Delete(Result, 1, 3);
+      Result := '/' + Result;
+    end;
+    naLink:
+    begin
+      Delete(Result, 1, 3);
+    end;
+  end;
+end;
+
+const RootPath = 'data';
 begin
   if Node.Source <> nil then
     Dec(Node.Source.RefCount);
-  NameNode := EncodeName(GetIndex(Node.Source));
-  case Node.Attr of
-   naData : NameNode := '!' + NameNode;
-  end;
 
-  Line := TLine.CreateName(EncodeName(GetIndex(Node.Source)),
-                           NameNode,
-                           EncodeName(GetIndex(Node)),
+  Line := TLine.CreateName(to_name(Node.Source),
+                           to_name(Node.ParentName),
+                           to_name(Node),
                            '');
   List := TStringList.Create;
   List.Text := Line.GetLine;
   if Node.Next <> nil then
-    List.Add(GetIndex(Node.Next));
-
+    List.Add('@' + to_name(Node.Next));
+  NameNode := Line.Name;
+  CreateDir(RootPath);
   for i:=0 to Length(NameNode) do
   begin
+    if NameNode[i] = '%' then
     FilePath := FilePath + '\' + NameNode[i];  //'%20'
     CreateDir(FilePath);
   end;
-  CreateDir('data');
-  List.SaveToFile('data' + FilePath);
+  List.SaveToFile(RootPath + FilePath);
   Dispose(Node);
+  Line.Destroy;
 end;
 
 procedure TMeta.OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;

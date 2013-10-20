@@ -44,6 +44,7 @@ begin
   for i:=0 to High(Local) do
     if Local[i] <> nil then
       Local[i].Destroy;
+  inherited Destroy;
 end;
 
 constructor TLine.CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
@@ -51,7 +52,7 @@ begin
   inherited Create;
   if IdNode = '' then Exit;
   if SourceNode <> '' then
-    Name := SourceNode + '^';
+    Source := SourceNode;
   if NameNode <> '' then
     Name := Name + NameNode;
   Name := Name + '@' + IdNode;
