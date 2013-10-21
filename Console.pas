@@ -12,6 +12,7 @@ type
     OutputBox: TRichEdit;
     Splitter: TSplitter;
     Server: TServerSocket;
+    Timer1: TTimer;
     procedure InputBoxKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
@@ -22,6 +23,7 @@ type
       Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure CreateParams(var Params: TCreateParams); override;
+    procedure Timer1Timer(Sender: TObject);
   end;
 
 var
@@ -122,6 +124,11 @@ begin
     Style := (Style OR WS_POPUP) AND NOT WS_DLGFRAME;
 end;
 
+
+procedure TGG.Timer1Timer(Sender: TObject);
+begin
+  GG.Caption := IntToStr(Base.NodeCount);
+end;
 
 end.
 

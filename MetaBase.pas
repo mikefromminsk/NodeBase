@@ -46,14 +46,16 @@ type
   PBlock = ^TBlock;
 
   TBlock = record
-    FEnd : Double;
-    Nodes: ANode;
-    Next : PBlock;
+    FBegin: Double;
+    FEnd  : Double;
+    Nodes : ANode;
+    Next  : PBlock;
+    Prev  : PBlock;
   end;
 
   TMeta = class
   public
-    NodeCount: Integer;
+    NodeCount: Integer; //statistic
     ID: String;
     Root: PNode;
     Prev: PNode;
@@ -113,7 +115,7 @@ var Method: TMethod;
 begin
   CreateDir(RootPath);
 
-  TimerInterval := 1000;
+  TimerInterval := 100;
   TimerProc(Method) := Self.OnTimer;
   Windows.SetTimer(0, 0, Round(TimerInterval), Method.Code);
   TimerInterval := TimerInterval / msec;
@@ -581,6 +583,7 @@ begin
   if Result.Source <> nil then
     Inc(Result.Source.RefCount);
   AddEvent(Result);
+  Inc(NodeCount);
 end;
 
 procedure Build(Node: PNode; ToUp: Boolean = False);
@@ -715,15 +718,19 @@ end;
 
 begin
   if (Node = nil) or (Node.RefCount <> 0) then Exit;
-  if Node.Source <> nil then
-    Dec(Node.Source.RefCount);
-  Line := TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '');
+
+  if Node.ParentName <> nil then
+    SaveNode(Node.ParentName);
+
   List := TStringList.Create;
+  Line := TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '');
+
   List.Text := Line.GetLine;
   if Node.Next <> nil then
     List.Add(SaveName(Node.Next));
   for i:=0 to High(Node.Local) do
     List.Add(#10 + SaveName(Node.Local[i]));
+
   IndexNode := GetIndex(Node);
   IndexWin  := RootPath;
   for i:=1 to Length(IndexNode) do
@@ -733,40 +740,63 @@ begin
     else IndexWin := IndexWin + '\' + IndexNode[i];
     CreateDir(IndexWin);
   end;
+
   List.SaveToFile(IndexWin + '\Node.meta');
-  Dispose(Node);
-  Line.Destroy;
+
+  if Node.Source <> nil then
+    Dec(Node.Source.RefCount);
+  if High(Node.Index) = -1 then
+  begin
+    for i:=0 to High(Node.ParentIndex.Index) do
+      if Node.ParentIndex.Index[i] = Node then
+      begin
+        Node.ParentIndex.Index[i] := Node.ParentIndex.Index[High(Node.ParentIndex.Index)];
+        SetLength(Node.ParentIndex.Index, High(Node.ParentIndex.Index));
+      end;
+    Dispose(Node);
+    Dec(Base.NodeCount);
+  end;
+  Line.Free;
+  List.Free;
 end;
 
 
 procedure TMeta.AddEvent(Node: PNode);
 var
   Block, NewBlock: PBlock;
-  SaveTime, Now: Double;
 begin
-  Now := SysUtils.Now;
-  SaveTime := Now + TimerInterval;
-  Node.SaveTime := SaveTime;
+  Node.SaveTime := Now + TimerInterval{formula};
 
   Block := TimeLine;
   while True do
   begin
     if Block = nil then
     begin
-      TimeLine := AllocMem(SizeOf(TBlock));
-      TimeLine.FEnd := SaveTime + TimerInterval;
-      SetLength(TimeLine.Nodes, High(TimeLine.Nodes) + 2);
-      TimeLine.Nodes[High(TimeLine.Nodes)] := Node;
+      Block := AllocMem(SizeOf(TBlock));
+      Block.FBegin:= Node.SaveTime;
+      Block.FEnd  := Node.SaveTime + TimerInterval;
+      SetLength(Block.Nodes, High(Block.Nodes) + 2);
+      Block.Nodes[High(Block.Nodes)] := Node;
+      if TimeLine = nil then
+        TimeLine := Block;
       Break;
     end
     else
-    if SaveTime <= Block.FEnd then
+    if (Node.SaveTime >= Block.FBegin) and (Node.SaveTime <= Block.FEnd) then
     begin
       SetLength(Block.Nodes, High(Block.Nodes) + 2);
       Block.Nodes[High(Block.Nodes)] := Node;
       Break;
     end;
-    //(Block.Next = nil) or (Block.Next.FEnd > SaveTime)
+    if (Block.Next = nil) or (Node.SaveTime < Block.Next.FBegin) then
+    begin
+      NewBlock := AllocMem(SizeOf(TBlock));
+      NewBlock.FBegin:= Node.SaveTime;
+      NewBlock.FEnd  := Node.SaveTime + TimerInterval;
+      SetLength(NewBlock.Nodes, High(NewBlock.Nodes) + 2);
+      NewBlock.Nodes[High(NewBlock.Nodes)] := Node;
+      Block.Next := NewBlock;
+    end;
     Block := Block.Next;
   end;
 end;
@@ -774,19 +804,19 @@ end;
 procedure TMeta.OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
 var
   i: Integer;
-  Now: Double;
-  Time: PBlock;
-  Node: PNode;
+  TimeLine: PBlock;
 begin
-  Time := Base.TimeLine;
-  Now := SysUtils.Now;
-  if (Time = nil) or (Now < Time.FEnd) then Exit;
-  for i:=0 to High(Time.Nodes) do
-    if Time.Nodes[i].SaveTime <= Time.FEnd then
-      SaveNode(Time.Nodes[i]);
-  Time.Nodes := nil;
-  Base.TimeLine := Time.Next;
-  Dispose(Time);
+  TimeLine := Base.TimeLine;
+  if (TimeLine = nil) or (TimeLine.FEnd < Now) then Exit;
+
+  for i:=0 to High(TimeLine.Nodes) do
+    if (TimeLine.Nodes[i].SaveTime >= TimeLine.FBegin) and
+       (TimeLine.Nodes[i].SaveTime <= TimeLine.FEnd) then
+      SaveNode(TimeLine.Nodes[i]);
+
+  TimeLine.Nodes := nil;
+  Base.TimeLine := TimeLine.Next;
+  Dispose(TimeLine);
 end;
 
 
