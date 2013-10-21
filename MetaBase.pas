@@ -43,14 +43,13 @@ type
 
   end;
 
-  PBlock = ^TBlock;
+  PBlock = ^TBlock;   //replace to interval
 
   TBlock = record
     FBegin: Double;
     FEnd  : Double;
     Nodes : ANode;
     Next  : PBlock;
-    Prev  : PBlock;
   end;
 
   TMeta = class
@@ -66,6 +65,7 @@ type
     function NextID: String;
     function AddSubNode(var Arr: ANode): PNode;
     function AddIndex(Node: PNode; Name: Char): PNode;
+    function NewIndex(Name: String): PNode;
     function AddLocal(Node: PNode): PNode; overload;
     function AddLocal(Node: PNode; Local: PNode): PNode; overload;
     function AddValue(Node: PNode; Value: String): PNode;
@@ -78,7 +78,6 @@ type
     function GetData(Node: PNode): PNode;
     function GetType(Node: PNode): PNode;
     function GetSource(Node: PNode): PNode;
-    function NewIndex(Name: String): PNode;
     procedure NewModule(Node: PNode);
     procedure CallFunc(Node: PNode);
     function FindNode(Index: PNode): PNode;
@@ -706,6 +705,7 @@ var
   List: TStringList;
   IndexNode, IndexWin: String;
   i: Integer;
+  Parent: PNode;
 
 function SaveName(Node: PNode): String;
 begin
@@ -747,12 +747,13 @@ begin
     Dec(Node.Source.RefCount);
   if High(Node.Index) = -1 then
   begin
-    for i:=0 to High(Node.ParentIndex.Index) do
-      if Node.ParentIndex.Index[i] = Node then
+    Parent := Node.ParentIndex;
+    for i:=0 to High(Parent.Index) do
+      if Parent.Index[i] = Node then
       begin
-        Node.ParentIndex.Index[i] := Node.ParentIndex.Index[High(Node.ParentIndex.Index)];
-        SetLength(Node.ParentIndex.Index, High(Node.ParentIndex.Index));
-      end;
+        Parent.Index[i] := Parent.Index[High(Parent.Index)];
+        SetLength(Parent.Index, High(Parent.Index));
+      end;              //up delete
     Dispose(Node);
     Dec(Base.NodeCount);
   end;

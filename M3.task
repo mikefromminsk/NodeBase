@@ -26,6 +26,7 @@ Index is First
 
 CamelCase, mixedCase, lower_case
 
+save data and count control in file attr
 
 
 [System]
@@ -72,15 +73,6 @@ time of life
 
 
 
-
-
-
-
-source^name@id$controls:type?param=value&params#result|else
-
-
-
-save data and count control in file attr
 
 
 
