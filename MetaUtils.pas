@@ -28,7 +28,7 @@ function IntToStr4(Num: Integer): String;
 function StrToInt4(Str: String): Integer;
 function FloatToStr8(Num: Double): String;
 function StrToFloat8(Str: String): Double;
-function EncodeName(Str: String): String;
+function EncodeName(Str: String; Position: Integer = 1): String;
 function DecodeName(Str: String): String;
 function PosI(Index: Integer; Substr: String; S: String): Integer;
 function NextIndex(Index: Integer; const Substr: array of string; S: String): Integer;
@@ -115,10 +115,11 @@ begin
   end;
 end;
 
-function EncodeName(Str: String): String;
+function EncodeName(Str: String; Position: Integer = 1): String;
 var i: Integer;
 begin
-  for i:=1 to Length(Str) do
+  Result := Copy(Str, 1, Position - 1);
+  for i:=Position to Length(Str) do
     if Str[i] in [#0..#32, '@', '^', '.', '?', ':', '=', '&', ';', '#', '|']
     then Result := Result + '%' + IntToHex(Ord(Str[i]), 2)
     else Result := Result + Str[i];

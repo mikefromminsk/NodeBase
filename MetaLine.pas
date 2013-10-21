@@ -7,6 +7,9 @@ uses
 
 type
 
+  //Set of illegal characters
+  //Set of filename reserved characters
+
   TLine = class
   public
     Name: string;
@@ -55,7 +58,7 @@ begin
     Source := SourceNode;
   if NameNode <> '' then
     Name := Name + NameNode;
-  Name := Name + '@' + IdNode;
+  Name := Name + IdNode;
   if ControlsNode <> '' then
     Name := Name + '$' + ControlsNode;
 end;

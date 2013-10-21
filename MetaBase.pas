@@ -16,7 +16,7 @@ type
   TNode = record
     Path  : String;            //test mode
     LocalName: String;
-    
+
     Name  : String;
     ParentName: PNode;
     Index : ANode;
@@ -100,7 +100,8 @@ const
   naNumber = $6;
   naPointer = $7;
 
-  msec = 86400000;  //(24 * 60 * 60 * 1000);
+  msec = 86400000;
+  RootPath = 'data';
 
 var
   Base: TMeta;
@@ -110,12 +111,15 @@ implementation
 constructor TMeta.Create;
 var Method: TMethod;
 begin
-  Root := AllocMem(SizeOf(TNode));
-  Module := NewNode(NextID);
+  CreateDir(RootPath);
+
   TimerInterval := 1000;
   TimerProc(Method) := Self.OnTimer;
   Windows.SetTimer(0, 0, Round(TimerInterval), Method.Code);
   TimerInterval := TimerInterval / msec;
+
+  Root := AllocMem(SizeOf(TNode));
+  Module := NewNode(NextID);
 end;
 
 function TMeta.NextID: String;
@@ -660,7 +664,7 @@ begin
       if Node.Source.Value.Attr = naWord then
       begin
         if Node.Source.Value <> GetValue(Node.Value) then
-          Node.Source.Value.Value := GetValue(Node.Value);         
+          Node.Source.Value.Value := GetValue(Node.Value);
       end
       else
         Node.Source.Value := GetValue(Node.Value);
@@ -689,56 +693,7 @@ begin
   Prev := Node;
 end;
 
-procedure TMeta.AddEvent(Node: PNode);
-var
-  Block, NewBlock: PBlock;
-  SaveTime, Now: Double;
-begin
-  Now := SysUtils.Now;
-  Node.SaveTime := SysUtils.Now + TimerInterval;
 
-  SaveTime := Node.SaveTime;
-
-  Block := TimeLine;
-  while Block <> nil do
-  begin
-    if ((Block.FEnd <= SaveTime) and (SaveTime - (Block.FEnd - TimerInterval) >= 0))
-      or ((Block.Next = nil) or (Block.Next.FEnd > SaveTime)) then
-      Break;
-    Block := Block.Next;
-  end;
-  if Block = nil then
-  begin
-    TimeLine := AllocMem(SizeOf(TBlock));
-    TimeLine.FEnd := Now + TimerInterval;
-    SetLength(TimeLine.Nodes, High(TimeLine.Nodes) + 2);
-    TimeLine.Nodes[High(TimeLine.Nodes)] := Node;
-  end
-  else
-  if (Block.FEnd <= SaveTime) and (SaveTime - (Block.FEnd - TimerInterval) >= 0) then
-  begin
-    SetLength(Block.Nodes, High(Block.Nodes) + 2);
-    Block.Nodes[High(Block.Nodes)] := Node;
-  end
-  else
-  if Block.Next = nil then
-  begin
-    NewBlock := AllocMem(SizeOf(TBlock));
-    Block.Next := NewBlock;
-    NewBlock.FEnd := Block.FEnd + TimerInterval;
-    SetLength(NewBlock.Nodes, High(NewBlock.Nodes) + 2);
-    NewBlock.Nodes[High(NewBlock.Nodes)] := Node;
-  end
-  else
-  begin
-    NewBlock := AllocMem(SizeOf(TBlock));
-    NewBlock.Next := Block.Next;
-    Block.Next := NewBlock;
-    NewBlock.FEnd := Block.FEnd + TimerInterval;
-    SetLength(NewBlock.Nodes, High(NewBlock.Nodes) + 2);
-    NewBlock.Nodes[High(NewBlock.Nodes)] := Node;
-  end;
-end;
 
 
 
@@ -746,55 +701,74 @@ procedure TMeta.SaveNode(Node: PNode);
 var
   Line: TLine;
   List: TStringList;
-  FilePath, NameNode: String;
+  IndexNode, IndexWin: String;
   i: Integer;
 
-function to_name(Node: PNode): String;
+function SaveName(Node: PNode): String;
 begin
+  Result := '';
   if Node = nil then Exit;
-  Result := EncodeName(GetIndex(Node));
-  case Node.Attr of
-    naData:
-    begin
-      Delete(Result, 1, 3);
-      Result := '!' + Result;
-    end;
-    naFile:
-    begin
-      Delete(Result, 1, 3);
-      Result := '/' + Result;
-    end;
-    naLink:
-    begin
-      Delete(Result, 1, 3);
-    end;
-  end;
+  if (Node.Attr = naData) or (Node.Attr = naFile) or (Node.Attr = naLink)
+  then Result := EncodeName(GetIndex(Node), 2)
+  else Result := EncodeName(GetIndex(Node), 1);
 end;
 
-const RootPath = 'data';
 begin
+  if (Node = nil) or (Node.RefCount <> 0) then Exit;
   if Node.Source <> nil then
     Dec(Node.Source.RefCount);
-
-  Line := TLine.CreateName(to_name(Node.Source),
-                           to_name(Node.ParentName),
-                           to_name(Node),
-                           '');
+  Line := TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '');
   List := TStringList.Create;
   List.Text := Line.GetLine;
   if Node.Next <> nil then
-    List.Add('@' + to_name(Node.Next));
-  NameNode := Line.Name;
-  CreateDir(RootPath);
-  for i:=0 to Length(NameNode) do
+    List.Add(SaveName(Node.Next));
+  for i:=0 to High(Node.Local) do
+    List.Add(#10 + SaveName(Node.Local[i]));
+  IndexNode := GetIndex(Node);
+  IndexWin  := RootPath;
+  for i:=1 to Length(IndexNode) do
   begin
-    if NameNode[i] = '%' then
-    FilePath := FilePath + '\' + NameNode[i];  //'%20'
-    CreateDir(FilePath);
+    if IndexNode[i] in [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|']
+    then IndexWin := IndexWin + '\' + IntToHex(Ord(IndexNode[i]), 2)
+    else IndexWin := IndexWin + '\' + IndexNode[i];
+    CreateDir(IndexWin);
   end;
-  List.SaveToFile(RootPath + FilePath);
+  List.SaveToFile(IndexWin + '\Node.meta');
   Dispose(Node);
   Line.Destroy;
+end;
+
+
+procedure TMeta.AddEvent(Node: PNode);
+var
+  Block, NewBlock: PBlock;
+  SaveTime, Now: Double;
+begin
+  Now := SysUtils.Now;
+  SaveTime := Now + TimerInterval;
+  Node.SaveTime := SaveTime;
+
+  Block := TimeLine;
+  while True do
+  begin
+    if Block = nil then
+    begin
+      TimeLine := AllocMem(SizeOf(TBlock));
+      TimeLine.FEnd := SaveTime + TimerInterval;
+      SetLength(TimeLine.Nodes, High(TimeLine.Nodes) + 2);
+      TimeLine.Nodes[High(TimeLine.Nodes)] := Node;
+      Break;
+    end
+    else
+    if SaveTime <= Block.FEnd then
+    begin
+      SetLength(Block.Nodes, High(Block.Nodes) + 2);
+      Block.Nodes[High(Block.Nodes)] := Node;
+      Break;
+    end;
+    //(Block.Next = nil) or (Block.Next.FEnd > SaveTime)
+    Block := Block.Next;
+  end;
 end;
 
 procedure TMeta.OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
@@ -804,23 +778,15 @@ var
   Time: PBlock;
   Node: PNode;
 begin
-  Now := SysUtils.Now;
   Time := Base.TimeLine;
-  if (Time <> nil) and
-  (Time.FEnd <= Now) and (Now - (Time.FEnd - Base.TimerInterval) >= 0) then
-  begin
-    Time.Nodes := Base.TimeLine.Nodes;
-    for i:=0 to High(Time.Nodes) do
-      if Time.Nodes[i].SaveTime < Now then
-      begin
-        Node := Time.Nodes[i];
-        if (Node <> nil) and (Node.RefCount = 0) and (Node.SaveTime <= Time.FEnd) then
-          SaveNode(Node);
-      end;
-    Time.Nodes := nil;
-    Base.TimeLine := Time.Next;
-    Dispose(Time);
-  end;
+  Now := SysUtils.Now;
+  if (Time = nil) or (Now < Time.FEnd) then Exit;
+  for i:=0 to High(Time.Nodes) do
+    if Time.Nodes[i].SaveTime <= Time.FEnd then
+      SaveNode(Time.Nodes[i]);
+  Time.Nodes := nil;
+  Base.TimeLine := Time.Next;
+  Dispose(Time);
 end;
 
 
