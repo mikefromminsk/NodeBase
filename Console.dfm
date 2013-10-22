@@ -89,6 +89,15 @@ object GG: TGG
     TabOrder = 1
     WordWrap = False
   end
+  object Button1: TButton
+    Left = 296
+    Top = 64
+    Width = 75
+    Height = 25
+    Caption = 'test'
+    TabOrder = 2
+    OnClick = Button1Click
+  end
   object Server: TServerSocket
     Active = True
     Port = 80

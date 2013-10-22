@@ -719,9 +719,6 @@ end;
 begin
   if (Node = nil) or (Node.RefCount <> 0) then Exit;
 
-  {if Node.ParentName <> nil then
-    SaveNode(Node.ParentName);}
-
   List := TStringList.Create;
   Line := TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '');
 
@@ -750,6 +747,8 @@ begin
   begin
     Parent := Node.ParentIndex;
 
+    // ParentLocal
+
     for i:=0 to High(Parent.Index) do
       if Parent.Index[i] = Node then
       begin
@@ -759,8 +758,6 @@ begin
     Dispose(Node);
     Dec(Base.NodeCount);
     Node := Parent;
-    {if Node.Attr <> naIndex then
-      Break; }
   end;   
 
   //Base.TimeLine.Next
