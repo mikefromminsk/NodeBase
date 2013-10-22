@@ -705,7 +705,7 @@ var
   List: TStringList;
   IndexNode, IndexWin: String;
   i: Integer;
-  Parent: PNode;
+  Parent, BufNode: PNode;
 
 function SaveName(Node: PNode): String;
 begin
@@ -719,8 +719,8 @@ end;
 begin
   if (Node = nil) or (Node.RefCount <> 0) then Exit;
 
-  if Node.ParentName <> nil then
-    SaveNode(Node.ParentName);
+  {if Node.ParentName <> nil then
+    SaveNode(Node.ParentName);}
 
   List := TStringList.Create;
   Line := TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '');
@@ -745,18 +745,25 @@ begin
 
   if Node.Source <> nil then
     Dec(Node.Source.RefCount);
-  if High(Node.Index) = -1 then
+
+  while (Node <> Base.Root) and (High(Node.Index) = -1) do
   begin
     Parent := Node.ParentIndex;
+
     for i:=0 to High(Parent.Index) do
       if Parent.Index[i] = Node then
       begin
         Parent.Index[i] := Parent.Index[High(Parent.Index)];
         SetLength(Parent.Index, High(Parent.Index));
-      end;              //up delete
+      end;
     Dispose(Node);
     Dec(Base.NodeCount);
-  end;
+    Node := Parent;
+    {if Node.Attr <> naIndex then
+      Break; }
+  end;   
+
+  //Base.TimeLine.Next
   Line.Free;
   List.Free;
 end;

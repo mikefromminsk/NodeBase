@@ -120,8 +120,7 @@ end;
 procedure TGG.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
-  with Params do
-    Style := (Style OR WS_POPUP) AND NOT WS_DLGFRAME;
+  //with Params do Style := (Style OR WS_POPUP) AND NOT WS_DLGFRAME;
 end;
 
 
