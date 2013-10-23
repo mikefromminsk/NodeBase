@@ -122,7 +122,7 @@ end;
 procedure TGG.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
-  //with Params do Style := (Style OR WS_POPUP) AND NOT WS_DLGFRAME;
+  with Params do Style := (Style OR WS_POPUP) AND NOT WS_DLGFRAME;
 end;
 
 
@@ -141,16 +141,15 @@ var
   NodeFunc,
   NodeNumber,
   NodePointer,
-  NodeOther
-  : Integer;
+  NodeOther : Integer;
+
+
 
 procedure RecGoTree(Node: PNode);
 var i: Integer;
 begin
   for i:=0 to High(Node.Index) do
-  begin
     RecGoTree(Node.Index[i]);
-  end;
   Inc(NodeCount);
   case Node.Attr of
     naData: Inc(NodeData);
@@ -164,7 +163,6 @@ begin
   else
     Inc(NodeOther);
   end;
-
 end;
 
 procedure TGG.Button1Click(Sender: TObject);

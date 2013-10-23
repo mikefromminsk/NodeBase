@@ -16,6 +16,7 @@ type
   TNode = record
     Path  : String;            //test mode
     LocalName: String;
+    ID    : Integer;  SaveTime : Double;
 
     Name  : String;
     ParentName: PNode;
@@ -37,7 +38,7 @@ type
     Attr  : Integer;
     Count : Integer;            //controls
     Handle: Integer;
-    SaveTime : Double;
+
     RefCount : Integer;
 
 
@@ -361,7 +362,7 @@ end;
 procedure TMeta.NewModule(Node: PNode);
 var
   i: Integer;
-  Func, PrevModule: PNode;
+  Func, PrevModule, BufPrev: PNode;
   List: TStrings;
   FileName, FileExt: String;
 begin
@@ -581,6 +582,7 @@ begin
 
   if Result.Source <> nil then
     Inc(Result.Source.RefCount);
+  Result.ID := NodeCount;
   AddEvent(Result);
   Inc(NodeCount);
 end;
@@ -690,6 +692,7 @@ begin
     begin
       AddSubNode(Module.Local);
       Module.Local[High(Module.Local)] := Node;
+      //!!!Node.ParentLocal := Module;
       Node.Prev := Module;
     end;
   Prev := Node;
@@ -719,46 +722,83 @@ end;
 begin
   if (Node = nil) or (Node.RefCount <> 0) then Exit;
 
+
   List := TStringList.Create;
   Line := TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '');
 
-  List.Text := Line.GetLine;
-  if Node.Next <> nil then
-    List.Add(SaveName(Node.Next));
-  for i:=0 to High(Node.Local) do
-    List.Add(#10 + SaveName(Node.Local[i]));
-
-  IndexNode := GetIndex(Node);
-  IndexWin  := RootPath;
-  for i:=1 to Length(IndexNode) do
+  if Node.Attr <> naIndex then
   begin
-    if IndexNode[i] in [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|']
-    then IndexWin := IndexWin + '\' + IntToHex(Ord(IndexNode[i]), 2)
-    else IndexWin := IndexWin + '\' + IndexNode[i];
-    CreateDir(IndexWin);
+    List.Text := Line.GetLine;
+    if Node.Next <> nil then
+      List.Add(SaveName(Node.Next));
+    for i:=0 to High(Node.Local) do
+      List.Add(#10 + SaveName(Node.Local[i]));
+
+    IndexNode := GetIndex(Node);
+    IndexWin  := RootPath;
+    for i:=1 to Length(IndexNode) do
+    begin
+      if IndexNode[i] in [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|']
+      then IndexWin := IndexWin + '\' + IntToHex(Ord(IndexNode[i]), 2)
+      else IndexWin := IndexWin + '\' + IndexNode[i];
+        CreateDir(IndexWin);
+    end;
+
+    List.SaveToFile(IndexWin + '\Node.meta');
+
+    if Node.Source <> nil then
+      Dec(Node.Source.RefCount);
   end;
 
-  List.SaveToFile(IndexWin + '\Node.meta');
-
-  if Node.Source <> nil then
-    Dec(Node.Source.RefCount);
-
-  while (Node <> Base.Root) and (High(Node.Index) = -1) do
+  if Node.ID = 37 then
   begin
+      Dec(Base.NodeCount);
+      Inc(Base.NodeCount);
+  end;
+
+  while (Node <> Base.Root) and (High(Node.Local) = -1) and (High(Node.Index) = -1) do
+  begin
+
+
+    if Node.ParentName <> nil then
+    begin
+      Parent := Node.ParentName;
+      for i:=0 to High(Parent.Local) do
+        if Parent.Local[i] = Node then
+        begin
+          Parent.Local[i] := Parent.Local[High(Parent.Local)];
+          SetLength(Parent.Local, High(Parent.Local));
+          Break;
+        end;
+      SaveNode(Node.ParentName);
+    end;
+
+
+    if Node.ParentLocal <> nil then
+    begin
+      Parent := Node.ParentLocal;
+      for i:=0 to High(Parent.Local) do
+        if Parent.Local[i] = Node then
+        begin
+          Parent.Local[i] := Parent.Local[High(Parent.Local)];
+          SetLength(Parent.Local, High(Parent.Local));
+          Break;
+        end;
+      SaveNode(Parent);
+    end;
+
     Parent := Node.ParentIndex;
-
-    // ParentLocal
-
     for i:=0 to High(Parent.Index) do
       if Parent.Index[i] = Node then
       begin
         Parent.Index[i] := Parent.Index[High(Parent.Index)];
         SetLength(Parent.Index, High(Parent.Index));
+        Break;
       end;
     Dispose(Node);
     Dec(Base.NodeCount);
     Node := Parent;
-  end;   
+  end;
 
   //Base.TimeLine.Next
   Line.Free;

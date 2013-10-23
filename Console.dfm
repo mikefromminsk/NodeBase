@@ -16,8 +16,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 410
-    Width = 381
+    Top = 414
+    Width = 389
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -28,8 +28,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 381
-    Height = 410
+    Width = 389
+    Height = 414
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -64,15 +64,15 @@ object GG: TGG
       'func?750,0')
     ParentFont = False
     ScrollBars = ssVertical
-    TabOrder = 0
+    TabOrder = 1
     WordWrap = False
     OnKeyDown = InputBoxKeyDown
     OnKeyUp = InputBoxKeyUp
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 414
-    Width = 381
+    Top = 418
+    Width = 389
     Height = 58
     Align = alBottom
     BevelInner = bvNone
@@ -86,7 +86,7 @@ object GG: TGG
     Font.Style = []
     ParentFont = False
     ScrollBars = ssVertical
-    TabOrder = 1
+    TabOrder = 2
     WordWrap = False
   end
   object Button1: TButton
@@ -95,7 +95,7 @@ object GG: TGG
     Width = 75
     Height = 25
     Caption = 'test'
-    TabOrder = 2
+    TabOrder = 0
     OnClick = Button1Click
   end
   object Server: TServerSocket
