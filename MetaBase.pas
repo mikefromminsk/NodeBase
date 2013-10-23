@@ -377,7 +377,6 @@ begin
     begin
       Func := NewNode(List.Strings[i]);
       Func.Attr := naFunc;
-      Func.Prev := Node;
       Func.Handle := GetProcAddress(Node.Handle, List.Strings[i]);
       AddLocal(Node, Func);
     end;
@@ -495,7 +494,9 @@ begin
       Result := Find;
       if Find.Source = nil then Exit;
     end;
-    Node := Node.Prev;
+    if (Node.Prev = nil) and (Node.ParentLocal <> nil)
+    then Node := Node.ParentLocal
+    else Node := Node.Prev;
   end;
 end;
 
@@ -631,7 +632,7 @@ begin
     NewModule(Node);
   for i:=0 to High(Node.Params) do
     Run(Node.Params[i]);
-  if (Node.Source <> nil) and ((Node.Source.Prev = Module) or (Node.Source.Attr = naFunc)) then
+  if (Node.Source <> nil) and ((Node.Source.ParentLocal = Module) or (Node.Source.Attr = naFunc)) then
   begin
     for i:=0 to High(Node.Params) do
       AddParam(GetSource(Node), GetParam(Node.Params[i]), i);
@@ -689,12 +690,7 @@ begin
   end
   else
     if Node <> nil then
-    begin
-      AddSubNode(Module.Local);
-      Module.Local[High(Module.Local)] := Node;
-      //!!!Node.ParentLocal := Module;
-      Node.Prev := Module;
-    end;
+      AddLocal(Module, Node);
   Prev := Node;
 end;
 
@@ -720,8 +716,8 @@ begin
 end;
 
 begin
-  if (Node = nil) or (Node.RefCount <> 0) then Exit;
-
+  if (Node = nil) {or (Node.RefCount <> 0)} then Exit;
+  {
 
   List := TStringList.Create;
   Line := TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '');
@@ -749,16 +745,15 @@ begin
     if Node.Source <> nil then
       Dec(Node.Source.RefCount);
   end;
-
-  if Node.ID = 37 then
+          }
+  if Node.ID = 1 then
   begin
       Dec(Base.NodeCount);
       Inc(Base.NodeCount);
   end;
 
-  while (Node <> Base.Root) and (High(Node.Local) = -1) and (High(Node.Index) = -1) do
+  while (High(Node.Local) = -1) and (High(Node.Index) = -1) do
   begin
-
 
     if Node.ParentName <> nil then
     begin
@@ -787,6 +782,7 @@ begin
       SaveNode(Parent);
     end;
 
+
     Parent := Node.ParentIndex;
     for i:=0 to High(Parent.Index) do
       if Parent.Index[i] = Node then
@@ -795,14 +791,16 @@ begin
         SetLength(Parent.Index, High(Parent.Index));
         Break;
       end;
+
     Dispose(Node);
     Dec(Base.NodeCount);
     Node := Parent;
+
   end;
 
   //Base.TimeLine.Next
-  Line.Free;
-  List.Free;
+  {Line.Free;
+  List.Free; }
 end;
 
 
