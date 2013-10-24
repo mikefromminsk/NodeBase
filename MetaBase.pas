@@ -13,10 +13,23 @@ type
 
   ANode = array of PNode;
 
+
+  PBlock = ^TBlock;   //replace to interval
+
+  TBlock = record
+    FBegin: Double;
+    FEnd  : Double;
+    Nodes : ANode;
+    Next  : PBlock;
+  end;
+
+
   TNode = record
     Path  : String;            //test mode
     LocalName: String;
-    ID    : Integer;  SaveTime : Double;
+    ID    : Integer;
+    SaveTime : Double;
+    Block : PBlock;
 
     Name  : String;
     ParentName: PNode;
@@ -40,18 +53,9 @@ type
     Handle: Integer;
 
     RefCount : Integer;
-
-
   end;
 
-  PBlock = ^TBlock;   //replace to interval
 
-  TBlock = record
-    FBegin: Double;
-    FEnd  : Double;
-    Nodes : ANode;
-    Next  : PBlock;
-  end;
 
   TMeta = class
   public
@@ -746,14 +750,15 @@ begin
       Dec(Node.Source.RefCount);
   end;
           }
-  if Node.ID = 1 then
+  if Node.ID = 184 then
   begin
       Dec(Base.NodeCount);
       Inc(Base.NodeCount);
   end;
 
-  while (High(Node.Local) = -1) and (High(Node.Index) = -1) do
+  while (High(Node.Local) = -1) and (High(Node.Index) = -1) and (Node.RefCount = 0) do //by frequency
   begin
+
 
     if Node.ParentName <> nil then
     begin
@@ -792,10 +797,18 @@ begin
         Break;
       end;
 
-    Dispose(Node);
-    Dec(Base.NodeCount);
-    Node := Parent;
+    if Node.Source <> nil then
+    begin
+      Dec(Node.Source.RefCount);
+      SaveNode(Node.Source);
+    end;
 
+    for i:=0 to High(Base.TimeLine.Nodes) do
+      if Base.TimeLine.Nodes[i] = Node then
+        Base.TimeLine.Nodes[i] := nil;
+
+    Dispose(Node);
+    Node := Parent;
   end;
 
   //Base.TimeLine.Next
@@ -822,9 +835,17 @@ begin
       Block.Nodes[High(Block.Nodes)] := Node;
       if TimeLine = nil then
         TimeLine := Block;
+      Node.Block := Block;
       Break;
     end
     else
+    begin
+      SetLength(Block.Nodes, High(Block.Nodes) + 2);
+      Block.Nodes[High(Block.Nodes)] := Node;
+      Node.Block := Block;
+      Break;
+    end;
+    {
     if (Node.SaveTime >= Block.FBegin) and (Node.SaveTime <= Block.FEnd) then
     begin
       SetLength(Block.Nodes, High(Block.Nodes) + 2);
@@ -839,7 +860,7 @@ begin
       SetLength(NewBlock.Nodes, High(NewBlock.Nodes) + 2);
       NewBlock.Nodes[High(NewBlock.Nodes)] := Node;
       Block.Next := NewBlock;
-    end;
+    end;               }
     Block := Block.Next;
   end;
 end;
@@ -852,10 +873,20 @@ begin
   TimeLine := Base.TimeLine;
   if (TimeLine = nil) or (TimeLine.FEnd < Now) then Exit;
 
+  //ShowMessage(IntToStr(High(TimeLine.Nodes)));
+
   for i:=0 to High(TimeLine.Nodes) do
-    if (TimeLine.Nodes[i].SaveTime >= TimeLine.FBegin) and
-       (TimeLine.Nodes[i].SaveTime <= TimeLine.FEnd) then
+  begin
+    {if (TimeLine.Nodes[i].SaveTime >= TimeLine.FBegin) and
+       (TimeLine.Nodes[i].SaveTime <= TimeLine.FEnd) then }
+    if i = 184 then
+    begin
+      Dec(Base.NodeCount);
+      Inc(Base.NodeCount);
+    end;
       SaveNode(TimeLine.Nodes[i]);
+  end;
+
 
   TimeLine.Nodes := nil;
   Base.TimeLine := TimeLine.Next;
