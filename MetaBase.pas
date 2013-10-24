@@ -530,6 +530,12 @@ begin
     '0'..'9', '-': Result.Attr := naNumber;
     else  Result.Attr := naWord;
   end;
+  if Result.LocalName = 'exit' then
+  begin
+    Dec(NodeCount);
+    Inc(NodeCount);
+  end;
+
   if Result.Attr = naWord then
   begin
     if Line.FType = nil then
@@ -539,6 +545,7 @@ begin
     if Line.Source <> '' then
     begin
       NextNode(NewNode(Line.Source));
+      AddEvent(Result); //!!!
       Result := GetSource(Result);
       Result.Source := Prev;
     end;
