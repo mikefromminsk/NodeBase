@@ -125,6 +125,7 @@ begin
   TimerInterval := TimerInterval / msec;
 
   Root := AllocMem(SizeOf(TNode));
+  Root.Name := 'Root';
   Module := NewNode(NextID);
 end;
 
