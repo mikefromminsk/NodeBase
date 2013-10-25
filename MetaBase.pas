@@ -764,9 +764,8 @@ begin
       Inc(Base.NodeCount);
   end;
 
-  while (High(Node.Local) = -1) and (High(Node.Index) = -1) and (Node.RefCount = 0) do //by frequency
+  while (High(Node.Local) = -1) and (High(Node.Index) = -1) and (Node.RefCount = 0) and (Node.SaveTime = 0) do //by frequency
   begin
-
 
     if Node.ParentName <> nil then
     begin
@@ -810,10 +809,6 @@ begin
       Dec(Node.Source.RefCount);
       SaveNode(Node.Source);
     end;
-
-    for i:=0 to High(Base.TimeLine.Nodes) do
-      if Base.TimeLine.Nodes[i] = Node then
-        Base.TimeLine.Nodes[i] := nil;
 
     Dispose(Node);
     Node := Parent;
@@ -887,11 +882,7 @@ begin
   begin
     {if (TimeLine.Nodes[i].SaveTime >= TimeLine.FBegin) and
        (TimeLine.Nodes[i].SaveTime <= TimeLine.FEnd) then }
-    if i = 184 then
-    begin
-      Dec(Base.NodeCount);
-      Inc(Base.NodeCount);
-    end;
+      TimeLine.Nodes[i].SaveTime := 0;
       SaveNode(TimeLine.Nodes[i]);
   end;
 
