@@ -131,7 +131,7 @@ begin
   GG.Caption := IntToStr(Base.NodeCount);
 end;
 
-var
+var     //tsst mode
   NodeCount,
   NodeData,
   NodeIndex,
@@ -142,8 +142,6 @@ var
   NodeNumber,
   NodePointer,
   NodeOther : Integer;
-
-
 
 procedure RecGoTree(Node: PNode);
 var i: Integer;

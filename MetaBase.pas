@@ -29,7 +29,6 @@ type
     LocalName: String;
     ID    : Integer;
     SaveTime : Double;
-    Block : PBlock;
 
     Name  : String;
     ParentName: PNode;
@@ -125,7 +124,6 @@ begin
   TimerInterval := TimerInterval / msec;
 
   Root := AllocMem(SizeOf(TNode));
-  Root.Name := 'Root';
   Module := NewNode(NextID);
 end;
 
@@ -367,7 +365,7 @@ end;
 procedure TMeta.NewModule(Node: PNode);
 var
   i: Integer;
-  Func, PrevModule, BufPrev: PNode;
+  Func, PrevModule: PNode;
   List: TStrings;
   FileName, FileExt: String;
 begin
@@ -546,6 +544,7 @@ begin
     if Line.Source <> '' then
     begin
       NextNode(NewNode(Line.Source));
+      Inc(Result.Source.RefCount);  //!!!
       AddEvent(Result); //!!!
       Result := GetSource(Result);
       Result.Source := Prev;
@@ -595,9 +594,11 @@ begin
 
   if Result.Source <> nil then
     Inc(Result.Source.RefCount);
-  Result.ID := NodeCount;
   AddEvent(Result);
+
+
   Inc(NodeCount);
+  Result.ID := NodeCount;
 end;
 
 procedure Build(Node: PNode; ToUp: Boolean = False);
@@ -706,67 +707,14 @@ begin
   Prev := Node;
 end;
 
-
-
-
-
 procedure TMeta.SaveNode(Node: PNode);
 var
-  Line: TLine;
-  List: TStringList;
-  IndexNode, IndexWin: String;
   i: Integer;
-  Parent, BufNode: PNode;
-
-function SaveName(Node: PNode): String;
+  Parent: PNode;
 begin
-  Result := '';
   if Node = nil then Exit;
-  if (Node.Attr = naData) or (Node.Attr = naFile) or (Node.Attr = naLink)
-  then Result := EncodeName(GetIndex(Node), 2)
-  else Result := EncodeName(GetIndex(Node), 1);
-end;
-
-begin
-  if (Node = nil) {or (Node.RefCount <> 0)} then Exit;
-  {
-
-  List := TStringList.Create;
-  Line := TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '');
-
-  if Node.Attr <> naIndex then
+  while (High(Node.Local) = -1) and (Node.RefCount = 0) and (High(Node.Index) = -1) and (Node.SaveTime = 0) do
   begin
-    List.Text := Line.GetLine;
-    if Node.Next <> nil then
-      List.Add(SaveName(Node.Next));
-    for i:=0 to High(Node.Local) do
-      List.Add(#10 + SaveName(Node.Local[i]));
-
-    IndexNode := GetIndex(Node);
-    IndexWin  := RootPath;
-    for i:=1 to Length(IndexNode) do
-    begin
-      if IndexNode[i] in [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|']
-      then IndexWin := IndexWin + '\' + IntToHex(Ord(IndexNode[i]), 2)
-      else IndexWin := IndexWin + '\' + IndexNode[i];
-        CreateDir(IndexWin);
-    end;
-
-    List.SaveToFile(IndexWin + '\Node.meta');
-
-    if Node.Source <> nil then
-      Dec(Node.Source.RefCount);
-  end;
-          }
-  if Node.ID = 184 then
-  begin
-      Dec(Base.NodeCount);
-      Inc(Base.NodeCount);
-  end;
-
-  while (High(Node.Local) = -1) and (High(Node.Index) = -1) and (Node.RefCount = 0) and (Node.SaveTime = 0) do //by frequency
-  begin
-
     if Node.ParentName <> nil then
     begin
       Parent := Node.ParentName;
@@ -779,8 +727,6 @@ begin
         end;
       SaveNode(Node.ParentName);
     end;
-
-
     if Node.ParentLocal <> nil then
     begin
       Parent := Node.ParentLocal;
@@ -793,8 +739,6 @@ begin
         end;
       SaveNode(Parent);
     end;
-
-
     Parent := Node.ParentIndex;
     for i:=0 to High(Parent.Index) do
       if Parent.Index[i] = Node then
@@ -803,28 +747,20 @@ begin
         SetLength(Parent.Index, High(Parent.Index));
         Break;
       end;
-
     if Node.Source <> nil then
     begin
       Dec(Node.Source.RefCount);
       SaveNode(Node.Source);
     end;
-
     Dispose(Node);
     Node := Parent;
   end;
-
-  //Base.TimeLine.Next
-  {Line.Free;
-  List.Free; }
 end;
 
-
 procedure TMeta.AddEvent(Node: PNode);
-var
-  Block, NewBlock: PBlock;
+var Block, NewBlock: PBlock;
 begin
-  Node.SaveTime := Now + TimerInterval{formula};
+  Node.SaveTime := Now + TimerInterval;     //formula
 
   Block := TimeLine;
   while True do
@@ -838,23 +774,16 @@ begin
       Block.Nodes[High(Block.Nodes)] := Node;
       if TimeLine = nil then
         TimeLine := Block;
-      Node.Block := Block;
       Break;
     end
     else
-    begin
-      SetLength(Block.Nodes, High(Block.Nodes) + 2);
-      Block.Nodes[High(Block.Nodes)] := Node;
-      Node.Block := Block;
-      Break;
-    end;
-    {
     if (Node.SaveTime >= Block.FBegin) and (Node.SaveTime <= Block.FEnd) then
     begin
       SetLength(Block.Nodes, High(Block.Nodes) + 2);
       Block.Nodes[High(Block.Nodes)] := Node;
       Break;
-    end;
+    end
+    else
     if (Block.Next = nil) or (Node.SaveTime < Block.Next.FBegin) then
     begin
       NewBlock := AllocMem(SizeOf(TBlock));
@@ -863,7 +792,8 @@ begin
       SetLength(NewBlock.Nodes, High(NewBlock.Nodes) + 2);
       NewBlock.Nodes[High(NewBlock.Nodes)] := Node;
       Block.Next := NewBlock;
-    end;               }
+      Break;
+    end;
     Block := Block.Next;
   end;
 end;
@@ -873,25 +803,19 @@ var
   i: Integer;
   TimeLine: PBlock;
 begin
-  TimeLine := Base.TimeLine;
-  if (TimeLine = nil) or (TimeLine.FEnd < Now) then Exit;
-
-  //ShowMessage(IntToStr(High(TimeLine.Nodes)));
-
+  TimeLine := Base.TimeLine;      
+  if (TimeLine = nil) or (Now < TimeLine.FEnd) then Exit;   //while
   for i:=0 to High(TimeLine.Nodes) do
-  begin
-    {if (TimeLine.Nodes[i].SaveTime >= TimeLine.FBegin) and
-       (TimeLine.Nodes[i].SaveTime <= TimeLine.FEnd) then }
+    if (TimeLine.Nodes[i].SaveTime >= TimeLine.FBegin) and
+       (TimeLine.Nodes[i].SaveTime <= TimeLine.FEnd) then
+    begin
       TimeLine.Nodes[i].SaveTime := 0;
       SaveNode(TimeLine.Nodes[i]);
-  end;
-
-
+    end;
   TimeLine.Nodes := nil;
   Base.TimeLine := TimeLine.Next;
   Dispose(TimeLine);
 end;
-
 
 function TMeta.Get(Line: String): PNode;
 var Data: String;

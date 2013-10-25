@@ -64,7 +64,7 @@ object GG: TGG
       'func?750,0')
     ParentFont = False
     ScrollBars = ssVertical
-    TabOrder = 1
+    TabOrder = 0
     WordWrap = False
     OnKeyDown = InputBoxKeyDown
     OnKeyUp = InputBoxKeyUp
@@ -86,16 +86,16 @@ object GG: TGG
     Font.Style = []
     ParentFont = False
     ScrollBars = ssVertical
-    TabOrder = 2
+    TabOrder = 1
     WordWrap = False
   end
   object Button1: TButton
-    Left = 296
-    Top = 64
+    Left = 304
+    Top = 384
     Width = 75
     Height = 25
     Caption = 'test'
-    TabOrder = 0
+    TabOrder = 2
     OnClick = Button1Click
   end
   object Server: TServerSocket
