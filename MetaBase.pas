@@ -60,8 +60,7 @@ type
 
   TMeta = class
   public
-    NodeCount: Integer; //statistic
-    ID: String;
+    ID: Integer;
     Root: PNode;
     Prev: PNode;
     Module: PNode;
@@ -132,23 +131,9 @@ begin
 end;
 
 function TMeta.NextID: String;
-var i: Integer;
 begin
-  i := 1;
-  while True do
-    if i > Length(ID) then
-    begin
-      ID := ID + #1;
-      Break;
-    end
-    else
-    begin
-      ID[i] := Chr(Ord(ID[i]) + 1);
-      if ID[i] <> #0 then
-        Break;
-      Inc(I);
-    end;
-  Result := '@' + ID;
+  Inc(ID);
+  Result := '@' + IntToStr(ID);
 end;
 
 function TMeta.AddSubNode(var Arr: ANode): PNode;
@@ -533,11 +518,6 @@ begin
     '0'..'9', '-': Result.Attr := naNumber;
     else  Result.Attr := naWord;
   end;
-  if Result.LocalName = 'exit' then
-  begin
-    Dec(NodeCount);
-    Inc(NodeCount);
-  end;
 
   if Result.Attr = naWord then
   begin
@@ -600,9 +580,6 @@ begin
     Inc(Result.Source.RefCount);
   AddEvent(Result);
 
-
-  Inc(NodeCount);
-  Result.ID := NodeCount;
 end;
 
 procedure Build(Node: PNode; ToUp: Boolean = False);

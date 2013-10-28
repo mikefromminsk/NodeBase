@@ -1,7 +1,11 @@
 program M;
 
+{%ToDo 'M.todo'}
+
 uses
-  Forms, Console, MetaBase;
+  Forms,
+  Console,
+  MetaBase;
 
 {$R *.res}
 

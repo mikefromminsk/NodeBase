@@ -16,8 +16,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 414
-    Width = 389
+    Top = 410
+    Width = 381
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -28,8 +28,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 389
-    Height = 414
+    Width = 381
+    Height = 410
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -71,8 +71,8 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 418
-    Width = 389
+    Top = 414
+    Width = 381
     Height = 58
     Align = alBottom
     BevelInner = bvNone
@@ -89,16 +89,6 @@ object GG: TGG
     TabOrder = 1
     WordWrap = False
   end
-  object Button1: TButton
-    Left = 304
-    Top = 384
-    Width = 75
-    Height = 25
-    Caption = 'test'
-    TabOrder = 2
-    Visible = False
-    OnClick = Button1Click
-  end
   object Server: TServerSocket
     Active = True
     Port = 80
@@ -109,7 +99,6 @@ object GG: TGG
     Top = 8
   end
   object Timer1: TTimer
-    OnTimer = Timer1Timer
     Left = 288
     Top = 8
   end

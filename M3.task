@@ -39,6 +39,8 @@ planner
 
 option: active_kernel = 2
 
+data to number
+
 [localization]
 meta to down code (c++)
 parser c
@@ -64,13 +66,51 @@ identification console(frame) of meta
 
 [controls]
 
+
 [basic task]
 development and support
 
-
-
-
+source in sys params
 
 source^name@id$controls:type?param=value&params#result|else
+
+
+
+
+$c=12&cur=31
+
+
+
+Node.ParentParam
+
+
+
+
+
+[test] level 5
+
+je$i1?5&x#$p2|$e1
+
+
+x$c1=solution3?$1
+
+@1=res
+res=a
+
+@2?a:int=res
+res=a
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

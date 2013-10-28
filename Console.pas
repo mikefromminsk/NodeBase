@@ -13,7 +13,6 @@ type
     Splitter: TSplitter;
     Server: TServerSocket;
     Timer1: TTimer;
-    Button1: TButton;
     procedure InputBoxKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
@@ -24,8 +23,7 @@ type
       Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure CreateParams(var Params: TCreateParams); override;
-    procedure Timer1Timer(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure Test;
   end;
 
 var
@@ -34,7 +32,7 @@ var
 implementation
 
 uses
-  MetaBase, MetaUtils;
+  MetaBase, MetaUtils, MetaLine;
 
 {$R *.dfm}
 
@@ -111,82 +109,39 @@ begin
     M(InputBox.Lines[InputBox.Lines.Count-1], False);
 end;
 
-procedure TGG.FormCreate(Sender: TObject);
-var i: Integer;
-begin
-  for i:=0 to InputBox.Lines.Count - 1 do
-    M(InputBox.Lines[i], False);
-  InputBox.SelStart := Length(InputBox.Lines.Text);
-end;
-
 procedure TGG.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
   with Params do Style := (Style OR WS_POPUP) AND NOT WS_DLGFRAME;
 end;
 
-
-procedure TGG.Timer1Timer(Sender: TObject);
-begin
-  GG.Caption := IntToStr(Base.NodeCount);
-end;
-
-var     //tsst mode
-  NodeCount,
-  NodeData,
-  NodeIndex,
-  NodeWord,
-  NodeLink,
-  NodeFile,
-  NodeFunc,
-  NodeNumber,
-  NodePointer,
-  NodeOther : Integer;
-
-procedure RecGoTree(Node: PNode);
+procedure TGG.FormCreate(Sender: TObject);
 var i: Integer;
 begin
-  for i:=0 to High(Node.Index) do
-    RecGoTree(Node.Index[i]);
-  Inc(NodeCount);
-  case Node.Attr of
-    naData: Inc(NodeData);
-    naIndex: Inc(NodeIndex);
-    naWord: Inc(NodeWord);
-    naLink: Inc(NodeLink);
-    naFile: Inc(NodeFile);
-    naFunc: Inc(NodeFunc);
-    naNumber: Inc(NodeNumber);
-    naPointer: Inc(NodePointer);
-  else
-    Inc(NodeOther);
-  end;
+  Test;
+  for i:=0 to InputBox.Lines.Count - 1 do
+    M(InputBox.Lines[i], False);
+  InputBox.SelStart := Length(InputBox.Lines.Text);
 end;
 
-procedure TGG.Button1Click(Sender: TObject);
+
+
+
+
+
+procedure TGG.Test;
+var Line: TLine;
 begin
-  NodeCount := 0;
-  NodeData := 0;
-  NodeIndex := 0;
-  NodeWord := 0;
-  NodeLink := 0;
-  NodeFile := 0;
-  NodeFunc := 0;
-  NodeNumber := 0;
-  NodePointer := 0;
-  NodeOther := 0;
-  RecGoTree(Base.Root);
-  ShowMessage(#10'NodeCount = ' + IntToStr(NodeCount) +
-              #10'NodeData = ' + IntToStr(NodeData) +
-              #10'NodeIndex = ' + IntToStr(NodeIndex) +
-              #10'NodeWord = ' + IntToStr(NodeWord) +
-              #10'NodeLink = ' + IntToStr(NodeLink) +
-              #10'NodeFile = ' + IntToStr(NodeFile) +
-              #10'NodeFunc = ' + IntToStr(NodeFunc) +
-              #10'NodeNumber = ' + IntToStr(NodeNumber) +
-              #10'NodePointer = ' + IntToStr(NodePointer) +
-              #10'NodeOther = ' + IntToStr(NodeOther)  );
+
+
+  Line := TLine.Create('$c=2');
+
+
 end;
+
+
+
+
 
 end.
 
