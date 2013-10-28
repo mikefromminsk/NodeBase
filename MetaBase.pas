@@ -14,44 +14,46 @@ type
   ANode = array of PNode;
 
 
-  PBlock = ^TBlock;   //replace to interval
+  PEvent = ^TEvent;   //replace to interval
 
-  TBlock = record
+  TEvent = record
     FBegin: Double;
     FEnd  : Double;
     Nodes : ANode;
-    Next  : PBlock;
+    Next  : PEvent;
   end;
 
 
   TNode = record
-    Path  : String;            //test mode
+    Path  : String;          //test variable
     LocalName: String;
     ID    : Integer;
-    SaveTime : Double;
 
-    Name  : String;
-    ParentName: PNode;
-    Index : ANode;
+
+    Name       : String;     //pointers
+    ParentName : PNode;
+    Index      : ANode;
     ParentIndex: PNode;
-    Local : ANode;
+    Local      : ANode;
     ParentLocal: PNode;
-    Value : PNode;
+    Value      : PNode;
     ParentField: PNode;
-    Fields: ANode;
-    Source: PNode;
-    FType : PNode;
-    FTrue : PNode;
-    FElse : PNode;
-    Params: ANode;
-    Next  : PNode;
-    Prev  : PNode;
+    Fields     : ANode;
+    Source     : PNode;
+    FType      : PNode;
+    FTrue      : PNode;
+    FElse      : PNode;
+    Params     : ANode;
+    Next       : PNode;
+    Prev       : PNode;
 
-    Attr  : Integer;
-    Count : Integer;            //controls
-    Handle: Integer;
+    Attr       : Integer;    //system
+    Count      : Integer;
+    Handle     : Integer;
+    SaveTime   : Double;
+    RefCount   : Integer;
 
-    RefCount : Integer;
+    Interest   : Double;     //controls
   end;
 
 
@@ -63,7 +65,7 @@ type
     Root: PNode;
     Prev: PNode;
     Module: PNode;
-    TimeLine: PBlock;
+    TimeLine: PEvent;
     TimerInterval: Double;
     constructor Create;
     function NextID: String;
@@ -100,8 +102,8 @@ const
   naWord = $1;
   naLink = $2;
   naData = $3;
-  naFile = $4;          //naStdFunc = $51; naFastCallFunc = $52;
-  naFunc = $5;
+  naFile = $4;          
+  naFunc = $5;          //naStdFunc = $51; naFastCallFunc = $52;
   naNumber = $6;
   naPointer = $7;
 
@@ -112,6 +114,8 @@ var
   Base: TMeta;
 
 implementation
+
+uses MetaControls;
 
 constructor TMeta.Create;
 var Method: TMethod;
@@ -707,101 +711,91 @@ begin
   Prev := Node;
 end;
 
+
 procedure TMeta.SaveNode(Node: PNode);
-var
-  i: Integer;
-  Parent: PNode;
+var ParentIndex: PNode;
+procedure DeleteArrayValue(var Arr: ANode; Value: Pointer);
+var i: Integer;
+begin
+  for i:=0 to High(Arr) do
+    if Arr[i] = Value then
+    begin
+      Arr[i] := Arr[High(Arr)];
+      SetLength(Arr, High(Arr));
+      Exit;
+    end;
+end;
 begin
   if Node = nil then Exit;
   while (High(Node.Local) = -1) and (Node.RefCount = 0) and (High(Node.Index) = -1) and (Node.SaveTime = 0) do
   begin
     if Node.ParentName <> nil then
     begin
-      Parent := Node.ParentName;
-      for i:=0 to High(Parent.Local) do
-        if Parent.Local[i] = Node then
-        begin
-          Parent.Local[i] := Parent.Local[High(Parent.Local)];
-          SetLength(Parent.Local, High(Parent.Local));
-          Break;
-        end;
+      DeleteArrayValue(Node.ParentName.Local, Node);
       SaveNode(Node.ParentName);
     end;
     if Node.ParentLocal <> nil then
     begin
-      Parent := Node.ParentLocal;
-      for i:=0 to High(Parent.Local) do
-        if Parent.Local[i] = Node then
-        begin
-          Parent.Local[i] := Parent.Local[High(Parent.Local)];
-          SetLength(Parent.Local, High(Parent.Local));
-          Break;
-        end;
-      SaveNode(Parent);
+      DeleteArrayValue(Node.ParentLocal.Local, Node);
+      SaveNode(Node.ParentLocal);
     end;
-    Parent := Node.ParentIndex;
-    for i:=0 to High(Parent.Index) do
-      if Parent.Index[i] = Node then
-      begin
-        Parent.Index[i] := Parent.Index[High(Parent.Index)];
-        SetLength(Parent.Index, High(Parent.Index));
-        Break;
-      end;
+    ParentIndex := Node.ParentIndex;
+    DeleteArrayValue(ParentIndex.Index, Node);
     if Node.Source <> nil then
     begin
       Dec(Node.Source.RefCount);
       SaveNode(Node.Source);
     end;
     Dispose(Node);
-    Node := Parent;
+    Node := ParentIndex;
   end;
 end;
 
 procedure TMeta.AddEvent(Node: PNode);
-var Block, NewBlock: PBlock;
+var Event, NewEvent: PEvent;
 begin
   Node.SaveTime := Now + TimerInterval;     //formula
 
-  Block := TimeLine;
+  Event := TimeLine;
   while True do
   begin
-    if Block = nil then
+    if Event = nil then
     begin
-      Block := AllocMem(SizeOf(TBlock));
-      Block.FBegin:= Node.SaveTime;
-      Block.FEnd  := Node.SaveTime + TimerInterval;
-      SetLength(Block.Nodes, High(Block.Nodes) + 2);
-      Block.Nodes[High(Block.Nodes)] := Node;
+      Event := AllocMem(SizeOf(TEvent));
+      Event.FBegin:= Node.SaveTime;
+      Event.FEnd  := Node.SaveTime + TimerInterval;
+      SetLength(Event.Nodes, High(Event.Nodes) + 2);
+      Event.Nodes[High(Event.Nodes)] := Node;
       if TimeLine = nil then
-        TimeLine := Block;
+        TimeLine := Event;
       Break;
     end
     else
-    if (Node.SaveTime >= Block.FBegin) and (Node.SaveTime <= Block.FEnd) then
+    if (Node.SaveTime >= Event.FBegin) and (Node.SaveTime <= Event.FEnd) then
     begin
-      SetLength(Block.Nodes, High(Block.Nodes) + 2);
-      Block.Nodes[High(Block.Nodes)] := Node;
+      SetLength(Event.Nodes, High(Event.Nodes) + 2);
+      Event.Nodes[High(Event.Nodes)] := Node;
       Break;
     end
     else
-    if (Block.Next = nil) or (Node.SaveTime < Block.Next.FBegin) then
+    if (Event.Next = nil) or (Node.SaveTime < Event.Next.FBegin) then
     begin
-      NewBlock := AllocMem(SizeOf(TBlock));
-      NewBlock.FBegin:= Node.SaveTime;
-      NewBlock.FEnd  := Node.SaveTime + TimerInterval;
-      SetLength(NewBlock.Nodes, High(NewBlock.Nodes) + 2);
-      NewBlock.Nodes[High(NewBlock.Nodes)] := Node;
-      Block.Next := NewBlock;
+      NewEvent := AllocMem(SizeOf(TEvent));
+      NewEvent.FBegin:= Node.SaveTime;
+      NewEvent.FEnd  := Node.SaveTime + TimerInterval;
+      SetLength(NewEvent.Nodes, High(NewEvent.Nodes) + 2);
+      NewEvent.Nodes[High(NewEvent.Nodes)] := Node;
+      Event.Next := NewEvent;
       Break;
     end;
-    Block := Block.Next;
+    Event := Event.Next;
   end;
 end;
 
 procedure TMeta.OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
 var
   i: Integer;
-  TimeLine: PBlock;
+  TimeLine: PEvent;
 begin
   TimeLine := Base.TimeLine;      
   if (TimeLine = nil) or (Now < TimeLine.FEnd) then Exit;   //while
@@ -822,6 +816,7 @@ var Data: String;
 begin
   Result := NewNode(Line);
   NextNode(Result);
+  SetControls(Result);
   Run(Result);
   if GetData(Result) <> nil then
   begin

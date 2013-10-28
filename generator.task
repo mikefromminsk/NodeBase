@@ -1,7 +1,6 @@
 [generator]
 
-[basic task]
-development and support
+
 
 
 [method of generation]
@@ -106,11 +105,12 @@ source^name@id$controls:type?param=value&params#result|else
 control read
 
 controls code
-n=count
+c=count
 t=time
+i=interest
+
 p=points
 r=runtime
-c=curiosity
 e=error
 
 
@@ -148,14 +148,8 @@ budget for ?
 
 
 [test] level 5
-method
 
-
-module
-
-a
-
-je$c1?a&x#$p2|$e1
+je$i1?5&x#$p2|$e1
 
 
 x$c1=solution3?$1

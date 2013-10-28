@@ -96,6 +96,7 @@ object GG: TGG
     Height = 25
     Caption = 'test'
     TabOrder = 2
+    Visible = False
     OnClick = Button1Click
   end
   object Server: TServerSocket

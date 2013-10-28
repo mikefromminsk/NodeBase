@@ -8,8 +8,8 @@ generator
 [priority]
 Garbage collection
 
-generator
 controls
+generator
 
 transfer
 
@@ -61,5 +61,16 @@ identification console(frame) of meta
 
 
 
+
+[controls]
+
+[basic task]
+development and support
+
+
+
+
+
+source^name@id$controls:type?param=value&params#result|else
 
 
