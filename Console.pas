@@ -23,7 +23,6 @@ type
       Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure CreateParams(var Params: TCreateParams); override;
-    procedure Test;
   end;
 
 var
@@ -118,26 +117,11 @@ end;
 procedure TGG.FormCreate(Sender: TObject);
 var i: Integer;
 begin
-  Test;
   for i:=0 to InputBox.Lines.Count - 1 do
     M(InputBox.Lines[i], False);
   InputBox.SelStart := Length(InputBox.Lines.Text);
 end;
 
-
-
-
-
-
-procedure TGG.Test;
-var Line: TLine;
-begin
-
-
-  Line := TLine.Create('$c=2');
-
-
-end;
 
 
 

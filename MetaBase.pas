@@ -519,6 +519,14 @@ begin
     else  Result.Attr := naWord;
   end;
 
+  for i:=0 to High(Line.ControlsNames) do
+  begin
+    case Line.ControlsNames[i][1] of
+      'C' : Result.Count := StrToInt(Line.ControlsValues[i]);
+      'I' : Result.Interest := StrToFloat(Line.ControlsValues[i]);
+    end;
+  end;
+
   if Result.Attr = naWord then
   begin
     if Line.FType = nil then

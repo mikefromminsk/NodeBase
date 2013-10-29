@@ -7,15 +7,18 @@ uses
 
 type
 
-  //Set of illegal characters
-  //Set of filename reserved characters
-
   TLine = class
   public
-    Name: string;
-    Path: array of string;
-    ParentLocal: string;
-    Source: string;
+    Source  : String;
+    Name    : String;
+    ID      : String;
+    Path    : array of String;
+    ControlsNames: array of String;
+    ControlsValues: array of String;       //property Controls[Index: Integer]: string read Get write Put;
+
+    ParentLocal: String;
+
+
     FType: TLine;
     Local: array of TLine;
     Params: array of TLine;
@@ -28,6 +31,9 @@ type
     function GetLine: string;
   end;
 
+{var
+  IllegalChars  : Set of '$', '?', ':', '=', '&', ';', '#', '|';
+  FileIlegalChars: Set of sdfafsdfasdf}
 
 implementation
 
@@ -50,15 +56,15 @@ begin
   inherited Destroy;
 end;
 
-constructor TLine.CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
+constructor TLine.CreateName(SourceNode, NameNode, IDNode, ControlsNode: String);
 begin
   inherited Create;
   if IdNode = '' then Exit;
   if SourceNode <> '' then
     Source := SourceNode;
   if NameNode <> '' then
-    Name := Name + NameNode;
-  Name := Name + IdNode;
+    Name := NameNode;
+  ID := IDNode;
   if ControlsNode <> '' then
     Name := Name + '$' + ControlsNode;
 end;
@@ -70,7 +76,7 @@ end;
 
 constructor TLine.CreateP(var LURI: String; FirstRun: Boolean = False);
 var
-  s, LS: string;
+  S, LS: string;
   Index, i, dx: Integer;
 begin
   if length(LURI) = 0 then Exit;
@@ -97,48 +103,65 @@ begin
 
   if Index > 1 then
   begin
-    Name := Copy(LURI, 1, Index - 1);    //Name
-    Source := Copy(Name, 1, Pos('^', Name) - 1);
-    Delete(Name, 1, Pos('^', Name));
-    if Length(Name) > 0 then
+    ID := Copy(LURI, 1, Index - 1);    //ID
+    Source := Copy(ID, 1, Pos('^', ID) - 1);
+    Delete(ID, 1, Pos('^', ID));
+    if Length(ID) > 0 then
     begin
-      ParentLocal := Copy(Name, 1, Pos('@', Name) - 1);
-      Delete(Name, 1, Pos('@', Name)-1);
+      ParentLocal := Copy(ID, 1, Pos('@', ID) - 1);
+      Delete(ID, 1, Pos('@', ID)-1);
     end;
     Delete(LURI, 1, Index-1);
-    
-    if NextIndex(0, ['\', '/'], Name) <> MaxInt then
+
+    if NextIndex(0, ['\', '/'], ID) <> MaxInt then
     begin
-      for i:=0 to Length(Name) do
-        if Name[i] = '\' then
-          Name[i] := '/';
-      if not (Name[1] in ['\', '/']) then
-        Name := '/' + Name;
+      for i:=0 to Length(ID) do
+        if ID[i] = '\' then
+          ID[i] := '/';
+      if not (ID[1] in ['\', '/']) then
+        ID := '/' + ID;
       SetLength(Path, 1);
-      Path[0] := Name;
+      Path[0] := ID;
     end
     else
-    if Name[1] <> '!' then
+    if ID[1] <> '!' then
     begin
-      while Pos('..', Name) <> 0 do
-        Insert('0', Name, Pos('..', Name) + 1);
+      if Pos('$', ID) <> 0 then
+      begin
+        S := UpperCase(Copy(ID, Pos('$', ID) + 1, MaxInt));
+        Delete(ID, Pos('$', ID), MaxInt);
+        while S <> '' do
+        begin
+          SetLength(ControlsNames, High(ControlsNames) + 2);
+          SetLength(ControlsValues, High(ControlsValues) + 2);
+          ControlsNames[High(ControlsNames)] := S[1];
+          Delete(S, 1, 1);
+          for i:=1 to Length(S) do
+            if not (S[i] in ['0'..'9', ',', '.']) then
+              Break;
+          ControlsValues[High(ControlsValues)] := Copy(S, 1, i-1);
+          Delete(S, 1, i-1);
+        end;
+      end;
+      while Pos('..', ID) <> 0 do
+        Insert('0', ID, Pos('..', ID) + 1);
       i := 1;
       dx := 0;
       while dx <> MaxInt do
       begin
-        dx := PosI(i, '.', Name);
+        dx := PosI(i, '.', ID);
         SetLength(Path, High(Path)+2);
-        Path[High(Path)] := Copy(Name, i, dx - i);
+        Path[High(Path)] := Copy(ID, i, dx - i);
         i := dx + 1;
       end;
       if Path[High(Path)] = '' then
         Path[High(Path)] := '0';
-      Name := Path[0];
+      ID := Path[0];
     end
     else
     begin
       SetLength(Path, 1);
-      Path[0] := Name;
+      Path[0] := ID;
     end;
     
     if Length(LURI) = 0 then Exit;
@@ -267,13 +290,13 @@ begin
 end;
 
 function TLine.GetLine: String;
-var
-  i: Integer;
+var i: Integer;
 begin
   if Source <> '' then
     Result := Source + '^';
-  Result := Result + ParentLocal + Name;
-  Result := Name;
+  Result := Result + Name + ID;
+  for i:=0 to High(ControlsNames) do
+    Result := Result + ControlsNames[i] + ControlsValues[i];
   if FType <> nil then
     Result := Result + ':' + FType.GetLine;
   if Params <> nil then

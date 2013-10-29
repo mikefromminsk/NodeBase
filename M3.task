@@ -11,6 +11,8 @@ Garbage collection
 controls
 generator
 
+save load cycle
+
 transfer
 
 client
@@ -75,9 +77,7 @@ source in sys params
 source^name@id$controls:type?param=value&params#result|else
 
 
-
-
-$c=12&cur=31
+name$C12R2147483648
 
 
 
