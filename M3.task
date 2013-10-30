@@ -20,6 +20,19 @@ client
 file system of base storage
 
 
+[genetate module] level 5
+
+je$i1?5&x#$p2|$e1
+
+
+x$c1=solution3?$1
+
+@1=res
+res=a
+
+@2?a:int=res
+res=a
+
 
 
 [optimization]
@@ -74,12 +87,26 @@ identification console(frame) of meta
 [basic task]
 development and support
 
+
+
+[desk]
 source in sys params
 
 source^name@id$controls:type?param=value&params#result|else
 
 
 Node.ParentParam
+
+
+number branch 
+
+
+find space = context
+
+
+kernel module
+run stack
+run all proc through
 
 
 
@@ -94,6 +121,43 @@ $I5
 
 
 
+[find space]
+auto create find space 
+
+search in branch cash
+
+branch cash
+moduls
+
+
+
+[development]
+{
+begin:
+if prev = nil
+  [value](90)
+    new(30) find(70)
+  [next](10)
+    new(90) find(10)
+  [if](0)
+    new(0) find(0)
+if prev <> nil
+  [value](90)
+    new(10) find(90)
+  [next](70)
+    new(10) find(90)
+  [if](10)
+    new(90) find(10)
+
+if find 
+  [params](100)
+    new(1) find(99)
+
+if new 
+  [type]
+    new(3) find(97)
+  goto begin
+}
 
 
 
@@ -110,18 +174,25 @@ $I5
 
 
 
-[genetate module] level 5
-
-je$i1?5&x#$p2|$e1
 
 
-x$c1=solution3?$1
 
-@1=res
-res=a
 
-@2?a:int=res
-res=a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
