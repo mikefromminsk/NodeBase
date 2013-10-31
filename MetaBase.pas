@@ -537,7 +537,7 @@ begin
     begin
       NextNode(NewNode(Line.Source));
       Inc(Result.Source.RefCount);  //!!!
-      AddEvent(Result); //!!!
+      AddEvent(Result);             //!!!
       Result := GetSource(Result);
       Result.Source := Prev;
     end;

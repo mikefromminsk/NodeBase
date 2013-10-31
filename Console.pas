@@ -120,6 +120,7 @@ begin
   for i:=0 to InputBox.Lines.Count - 1 do
     M(InputBox.Lines[i], False);
   InputBox.SelStart := Length(InputBox.Lines.Text);
+
 end;
 
 
