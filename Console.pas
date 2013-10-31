@@ -23,6 +23,8 @@ type
       Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure CreateParams(var Params: TCreateParams); override;
+    procedure FormShow(Sender: TObject);
+    function M(Line: String; WriteToConsole: Boolean = True): String;
   end;
 
 var
@@ -35,7 +37,7 @@ uses
 
 {$R *.dfm}
 
-function M(Line: String; WriteToConsole: Boolean = True): String;
+function TGG.M(Line: String; WriteToConsole: Boolean = True): String;
 var
   Node, Data: PNode;
 begin
@@ -61,7 +63,7 @@ end;
 function HttpResponse(Line: String): String;
 begin
   Result := 'HTTP/1.1 200 OK'#13#10#13#10 +
-  '<html><head></head><body>' + M(Line) + '</body></html>';
+  '<html><head></head><body>' + GG.M(Line) + '</body></html>';
 end;
 
 procedure TGG.ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
@@ -117,16 +119,14 @@ end;
 procedure TGG.FormCreate(Sender: TObject);
 var i: Integer;
 begin
-  for i:=0 to InputBox.Lines.Count - 1 do
-    M(InputBox.Lines[i], False);
-  InputBox.SelStart := Length(InputBox.Lines.Text);
-
+  {for i:=0 to InputBox.Lines.Count - 1 do
+    M(InputBox.Lines[i], False);      }
 end;
 
-
-
-
-
+procedure TGG.FormShow(Sender: TObject);
+begin
+  InputBox.SelStart := Length(InputBox.Lines.Text);
+end;
 
 end.
 

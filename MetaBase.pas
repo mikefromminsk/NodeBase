@@ -151,7 +151,7 @@ begin
   Result.ParentIndex := Node;
   Result := Node.Index[High(Node.Index)];
 
-  Node := Result;
+  Node := Result;         //test
   while Node <> nil do
   begin
     Result.Path := Node.Name + Result.Path;
@@ -168,7 +168,7 @@ begin
   Node.Local[High(Node.Local)] := Local;
   Result := Local;
 
-  while Node <> nil do
+  while Node <> nil do    //test
   begin
     Result.LocalName := Node.Name + Result.LocalName;
     Node := Node.ParentIndex;
@@ -812,5 +812,5 @@ begin
 end;
 
 initialization
-  Base := TMeta.Create;
+  //Base := TMeta.Create;
 end.

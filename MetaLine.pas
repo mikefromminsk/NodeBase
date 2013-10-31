@@ -7,17 +7,17 @@ uses
 
 type
 
+  //Set of illegal characters
+  //Set of filename reserved characters
+
   TLine = class
   public
-    Source  : String;
-    Name    : String;
-    ID      : String;
-    Path    : array of String;
+    Name: string;
+    Path: array of string;
+    ParentLocal: string;
+    Source: string;
     ControlsNames: array of String;
     ControlsValues: array of String;       //property Controls[Index: Integer]: string read Get write Put;
-
-    ParentLocal: String;
-
 
     FType: TLine;
     Local: array of TLine;
@@ -31,9 +31,6 @@ type
     function GetLine: string;
   end;
 
-{var
-  IllegalChars  : Set of '$', '?', ':', '=', '&', ';', '#', '|';
-  FileIlegalChars: Set of sdfafsdfasdf}
 
 implementation
 
@@ -56,15 +53,15 @@ begin
   inherited Destroy;
 end;
 
-constructor TLine.CreateName(SourceNode, NameNode, IDNode, ControlsNode: String);
+constructor TLine.CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
 begin
   inherited Create;
   if IdNode = '' then Exit;
   if SourceNode <> '' then
     Source := SourceNode;
   if NameNode <> '' then
-    Name := NameNode;
-  ID := IDNode;
+    Name := Name + NameNode;
+  Name := Name + IdNode;
   if ControlsNode <> '' then
     Name := Name + '$' + ControlsNode;
 end;
@@ -76,7 +73,7 @@ end;
 
 constructor TLine.CreateP(var LURI: String; FirstRun: Boolean = False);
 var
-  S, LS: string;
+  s, LS: string;
   Index, i, dx: Integer;
 begin
   if length(LURI) = 0 then Exit;
@@ -103,33 +100,32 @@ begin
 
   if Index > 1 then
   begin
-    ID := Copy(LURI, 1, Index - 1);    //ID
-    Source := Copy(ID, 1, Pos('^', ID) - 1);
-    Delete(ID, 1, Pos('^', ID));
-    if Length(ID) > 0 then
+    Name := Copy(LURI, 1, Index - 1);    //Name
+    Source := Copy(Name, 1, Pos('^', Name) - 1);
+    Delete(Name, 1, Pos('^', Name));
+    if Length(Name) > 0 then
     begin
-      ParentLocal := Copy(ID, 1, Pos('@', ID) - 1);
-      Delete(ID, 1, Pos('@', ID)-1);
+      ParentLocal := Copy(Name, 1, Pos('@', Name) - 1);
+      Delete(Name, 1, Pos('@', Name)-1);
     end;
     Delete(LURI, 1, Index-1);
-
-    if NextIndex(0, ['\', '/'], ID) <> MaxInt then
+    if NextIndex(0, ['\', '/'], Name) <> MaxInt then
     begin
-      for i:=0 to Length(ID) do
-        if ID[i] = '\' then
-          ID[i] := '/';
-      if not (ID[1] in ['\', '/']) then
-        ID := '/' + ID;
+      for i:=0 to Length(Name) do
+        if Name[i] = '\' then
+          Name[i] := '/';
+      if not (Name[1] in ['\', '/']) then
+        Name := '/' + Name;
       SetLength(Path, 1);
-      Path[0] := ID;
+      Path[0] := Name;
     end
     else
-    if ID[1] <> '!' then
+    if Name[1] <> '!' then
     begin
-      if Pos('$', ID) <> 0 then
+      if Pos('$', Name) <> 0 then
       begin
-        S := UpperCase(Copy(ID, Pos('$', ID) + 1, MaxInt));
-        Delete(ID, Pos('$', ID), MaxInt);
+        S := UpperCase(Copy(Name, Pos('$', Name) + 1, MaxInt));
+        Delete(Name, Pos('$', Name), MaxInt);
         while S <> '' do
         begin
           SetLength(ControlsNames, High(ControlsNames) + 2);
@@ -143,25 +139,25 @@ begin
           Delete(S, 1, i-1);
         end;
       end;
-      while Pos('..', ID) <> 0 do
-        Insert('0', ID, Pos('..', ID) + 1);
+      while Pos('..', Name) <> 0 do
+        Insert('0', Name, Pos('..', Name) + 1);
       i := 1;
       dx := 0;
       while dx <> MaxInt do
       begin
-        dx := PosI(i, '.', ID);
+        dx := PosI(i, '.', Name);
         SetLength(Path, High(Path)+2);
-        Path[High(Path)] := Copy(ID, i, dx - i);
+        Path[High(Path)] := Copy(Name, i, dx - i);
         i := dx + 1;
       end;
       if Path[High(Path)] = '' then
         Path[High(Path)] := '0';
-      ID := Path[0];
+      Name := Path[0];
     end
     else
     begin
       SetLength(Path, 1);
-      Path[0] := ID;
+      Path[0] := Name;
     end;
     
     if Length(LURI) = 0 then Exit;
@@ -290,11 +286,12 @@ begin
 end;
 
 function TLine.GetLine: String;
-var i: Integer;
+var
+  i: Integer;
 begin
   if Source <> '' then
     Result := Source + '^';
-  Result := Result + Name + ID;
+  Result := Result + ParentLocal + Name;
   for i:=0 to High(ControlsNames) do
     Result := Result + ControlsNames[i] + ControlsValues[i];
   if FType <> nil then
