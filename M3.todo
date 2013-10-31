@@ -153,11 +153,18 @@ if prev <> nil
     new(10) find(90)
   [if](10)
     new(90) find(10)
-
+if next <> nil
+  [value]
+    new(30) find(70) delete(10)
+  [next]
+    new(30) find(30) delete(30)
+  
 if find 
   [params](100)
     new(1) find(99)
 
+if delete
+	
 if new 
   [type]
     new(3) find(97)
