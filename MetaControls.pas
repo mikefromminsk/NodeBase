@@ -2,20 +2,20 @@ unit MetaControls;
 
 interface
 
-uses MetaBase;
+uses
+  MetaBase;
 
 
-procedure SetControls(Node: PNode);
 
-
+procedure Analysis(Node: PNode);
 
 implementation
 
 
-procedure SetControls(Node: PNode);
+
+procedure Analysis(Node: PNode);
 begin
-  if Node = nil then Exit;
-  Node.Interest := 2;
+  
 end;
 
 

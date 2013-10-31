@@ -1,7 +1,7 @@
 program M;
 
 uses
-  Forms, Console, MetaBase, MetaLine, Dialogs;
+  Forms, Console, MetaBase {, MetaLine, Dialogs};
 
 {$R *.res}
 
@@ -16,7 +16,10 @@ begin
   Application.Initialize;
   Application.CreateForm(TGG, GG);
   Base := TMeta.Create;
-  for i:=0 to GG.InputBox.Lines.Count - 1 do
-    GG.M(GG.InputBox.Lines[i], False);
+
+  GG.M('$I5');
+
+  {for i:=0 to GG.InputBox.Lines.Count - 1 do
+    GG.M(GG.InputBox.Lines[i], False);  }
   Application.Run;
 end.

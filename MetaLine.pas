@@ -18,7 +18,6 @@ type
     Source: string;
     ControlsNames: array of String;
     ControlsValues: array of String;       //property Controls[Index: Integer]: string read Get write Put;
-
     FType: TLine;
     Local: array of TLine;
     Params: array of TLine;

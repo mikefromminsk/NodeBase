@@ -45,18 +45,6 @@ CamelCase, mixedCase, lower_case
 save data and count control in file attr
 
 
-[System]
-module is class
-
-Next: ANode
-
-x64
-
-planner
-
-option: active_kernel = 2
-
-data to number
 
 [localization]
 meta to down code (c++)
@@ -76,68 +64,67 @@ identification console(frame) of meta
 
 
 
+[System]
+module is class
+
+Next: ANode
+
+x64
+
+planner
+
+option: active_kernel = 2
+
+data to number
 
 
 
 
 
-[controls]
 
 
-[basic task]
+
+[controls][basic task]
 development and support
 
 
 
 [desk]
+Node.ParentParam
+
 source in sys params
 
 source^name@id$controls:type?param=value&params#result|else
 
 
-Node.ParentParam
+
 
 
 number branch 
 
-
-find space = context
-
-
-kernel module
-run stack
-run all proc through
+branch cash
 
 
 
 
 
 
-
-
-$I5
 
 
 
 
 
 [find space]
-auto create find space 
+auto set 
 
 search in branch cash
 
-branch cash
-moduls
-
-1 word
-pointer = ParentLocal
-
-FindRoot = module?
+FindRoot: PNode
 
 
 
 [development]
-{
+
 begin:
 if prev = nil
   [value](90)
@@ -169,14 +156,24 @@ if new
   [type]
     new(3) find(97)
   goto begin
-}
 
 
 
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-
-
+$I5
 
 
 

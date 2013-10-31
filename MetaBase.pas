@@ -27,8 +27,8 @@ type
   TNode = record
     Path  : String;          //test variable
     LocalName: String;
-    ID    : Integer;
 
+    Interest   : Double;     //controls
 
     Name       : String;     //pointers
     ParentName : PNode;
@@ -53,7 +53,7 @@ type
     SaveTime   : Double;
     RefCount   : Integer;
 
-    Interest   : Double;     //controls
+
   end;
 
 
@@ -696,7 +696,6 @@ begin
   Prev := Node;
 end;
 
-
 procedure TMeta.SaveNode(Node: PNode);
 var ParentIndex: PNode;
 procedure DeleteArrayValue(var Arr: ANode; Value: Pointer);
@@ -801,7 +800,8 @@ var Data: String;
 begin
   Result := NewNode(Line);
   NextNode(Result);
-  SetControls(Result);
+
+  Analysis(Result);
   Run(Result);
   if GetData(Result) <> nil then
   begin
@@ -811,6 +811,6 @@ begin
   end;
 end;
 
-initialization
+//initialization
   //Base := TMeta.Create;
 end.
