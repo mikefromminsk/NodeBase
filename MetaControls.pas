@@ -19,7 +19,7 @@ begin
 end;
 
 
-procedure NFD(Node: PNode; New, Find, Delete: Integer);
+procedure TypeAction(Node: PNode; New, Find, Delete: Integer);
 var
   Method: Integer;
 begin
@@ -46,7 +46,7 @@ begin
 
 end;
 
-procedure VNI(Node: PNode; Value, Next, Fif: Integer);
+procedure TypeLink(Node: PNode; Value, Next, Fif: Integer);
 var TypeLink:Integer;
 begin
   TypeLink := Random(Value + Next + Fif);
@@ -66,7 +66,7 @@ begin
 
 end;
 
-procedure Analysis(Node: PNode; Value, Next, Fif: Integer);
+procedure TypeNode(Node: PNode; Value, Next, Fif: Integer);
 var i:Integer;
 begin
 

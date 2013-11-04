@@ -113,11 +113,6 @@ branch cash
 
 
 
-
-
-
-
-
 [find space]
 auto set 
 
@@ -127,12 +122,15 @@ FindRoot: PNode
 
 
 
-[development]
+development
 
   
   
   
-  
+trracert graph
+world graph
+
+plastic attr
   
   
   
@@ -140,10 +138,9 @@ FindRoot: PNode
 $I5
 
 
-
-
-
-
+TypeAction
+TypeLink
+TypeNode
 
 
 
