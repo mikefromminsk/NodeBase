@@ -3,86 +3,79 @@ unit MetaControls;
 interface
 
 uses
-  MetaBase;
-
-
+  Types, Math, MetaBase, Dialogs, SysUtils;
 
 procedure Analysis(Node: PNode);
 
+var
+  ValueActionFrequency: TIntegerDynArray;
 
+const
+  actNew = 0;
+  actFind = 1;
+  actDelete = 2;
 
 implementation
 
-function Find(): PNode;
+
+
+function RandomArr(A: TIntegerDynArray): Integer;
+var i: Integer;
 begin
-
-end;
-
-
-procedure TypeAction(Node: PNode; New, Find, Delete: Integer);
-var
-  Method: Integer;
-begin
-
-  Method := Random(New + Find + Delete);
-
-  if Method <= New then
+  Result := Random(MaxInt);
+  Result := Result mod SumInt(A);
+  for i:=0 to High(A) do
   begin
-    AddLocal(Module, NewNode(NextNode));
-  end
-  else
-  if Method <= New + Find then
-  begin
-    Node
-    for i:=0 to High(Node.Param) do
+    Result := Result - A[i];
+    if Result <= 0 then
     begin
-
+      Result := i;
+      Exit;
     end;
-  end
-  else
-  begin
-
   end;
-
 end;
+
+
+function RandomNode(Node: PNode): PNode;
+begin
+  Node := Node.ParentLocal;
+  Result := Node.Local[Random(High(Node.Local) + 1)];
+end;
+
 
 procedure TypeLink(Node: PNode; Value, Next, Fif: Integer);
-var TypeLink:Integer;
+var
+  TypeLink, Action: Integer;
 begin
-  TypeLink := Random(Value + Next + Fif);
+  TypeLink := Value;
+
   if TypeLink <= Value then
   begin
-    NFD(Node: PNode; New, Find, Delete: Integer);
-  end
-  else
-  if TypeLink <= Value + Next then
-  begin
-    NFD(Node: PNode; New, Find, Delete: Integer);
-  end
-  else
-  begin
-    NFD(Node: PNode; New, Find, Delete: Integer);
+    case RandomArr(ValueActionFrequency) of
+      actNew : Node.Value := Base.NewNode(Base.NextID);   //Analusis
+      actFind: Node.Value := Base.NewNode(Base.GetIndex(RandomNode(Node)));  //Recursion  Param
+      actDelete: Base.SaveNode(Base.AddLocal(Node, Node.Value)); //ParentValue
+    end;
   end;
 
 end;
 
-procedure TypeNode(Node: PNode; Value, Next, Fif: Integer);
-var i:Integer;
+
+procedure Analysis(Node: PNode);
 begin
-
-  if Node.Prev = nil then
+  if Node = nil then Exit;
+  if Node.Interest > 0 then
   begin
-
-  end;
-  if Node.Prev <> nil then
-  begin
-
-  end;
-  if Node.Next <> nil then
-  begin
-
+    if Node.Prev = nil then
+      TypeLink(Node, 10, 10, 10);
   end;
 end;
 
 
+initialization
+  Randomize;
+  SetLength(ValueActionFrequency, 3);
+  ValueActionFrequency[actNew] := 0;
+  ValueActionFrequency[actFind] := 90;
+  ValueActionFrequency[actDelete] := 0;
 end.
