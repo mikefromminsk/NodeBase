@@ -17,13 +17,13 @@ begin
   Application.CreateForm(TGG, GG);
   Base := TMeta.Create;
 
-  GG.InputBox.Clear;
+  //GG.InputBox.Clear;
   for i:=0 to GG.InputBox.Lines.Count - 1 do
     GG.M(GG.InputBox.Lines[i], False);
 
-  GG.M('!123');
+  {GG.M('!123');
   GG.M('');
-  GG.M('$I5');
+  GG.M('$I5');}
 
   Application.Run;
 end.

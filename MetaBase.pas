@@ -406,16 +406,41 @@ begin
     then Params := Params + Value.Name
     else Exit;
   end;
-  while Params <> '' do              //fastcall
+  while Params <> '' do
   begin
     SetLength(Stack, High(Stack) + 2);
     Stack[High(Stack)] := StrToInt4(Copy(Params, 1, 4));
     Delete(Params, 1, 4);
   end;
-  for i:=High(Stack) downto 0 do
+  asm
+    push ecx
+    push edx
+    push eax
+  end;
+  for i:=High(Stack) downto 3 do
   begin
     FourByte := Stack[i];
     asm push FourByte end;
+  end;
+  if High(Stack) >= 2 then
+  begin
+    FourByte := Stack[2];
+    asm mov ecx, FourByte end;
+    FourByte := Stack[1];
+    asm mov edx, FourByte end;
+    FourByte := Stack[0];
+    asm mov eax, FourByte end;
+  end
+  else
+  if High(Stack) = 1 then
+  asm
+    mov edx, Stack[1]
+    mov eax, Stack[0]
+  end
+  else
+  if High(Stack) = 0 then
+  asm
+    mov eax, Stack[0]
   end;
   asm
     CALL Func
@@ -431,6 +456,11 @@ begin
   if IfFloat = 0
   then SetValue(Node, IntToStr4(BVal))
   else SetValue(Node, FloatToStr8(DBVal));
+  asm
+    pop ecx
+    pop edx
+    pop eax
+  end;
 end;
 
 function FindInNode(Node: PNode; Index: PNode): PNode;
