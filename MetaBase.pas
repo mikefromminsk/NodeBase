@@ -123,7 +123,7 @@ begin
 
   TimerInterval := 100;
   TimerProc(Method) := Self.OnTimer;
-  Windows.SetTimer(0, 0, Round(TimerInterval), Method.Code);
+  //Windows.SetTimer(0, 0, Round(TimerInterval), Method.Code);
   TimerInterval := TimerInterval / msec;
 
   Root := AllocMem(SizeOf(TNode));
@@ -397,7 +397,7 @@ var
   DBVal: Double;
   IfFloat: Integer;
 begin
-
+  BVal := BVal + 1;
   Func := Node.Handle;
   if (Func = 0) then Exit;
   EAXParam := 0; EDXParam := 0; ECXParam := 0; RegParamCount := 0;
@@ -411,8 +411,11 @@ begin
     begin
       Param := Value.Name;
 
-      if Length(Param) <> 4 then
-        Params := Params + StringOfChar(#0, 4 - (Length(Param) mod 4)) + Param;
+      if Length(Param) > 4 then
+        Params := Params + StringOfChar(#0, Length(Param) mod 4) + Param;
+
+      if Length(Param) < 4 then
+        Params := Params + StringOfChar(#0, 4 - Length(Param)) + Param;
 
       if Length(Param) = 4 then
       begin
@@ -451,6 +454,7 @@ begin
     asm mov eax, EAXParam end;
 
   asm
+    CLC
     CALL Func
     JC @1
     MOV BVal, EAX                //get int value
