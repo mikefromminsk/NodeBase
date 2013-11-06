@@ -390,54 +390,65 @@ end;
 procedure TMeta.CallFunc(Node: PNode);
 var
   Value: PNode;
-  Params: String;
+  Params, Param: String;
   Stack: array of Integer;
-  Func, FourByte, i, BVal, ParamCount: Integer;
+  Func, FourByte, i, BVal, ParamCount,
+  EAXParam, EDXParam, ECXParam, RegParamCount: Integer;
   DBVal: Double;
   IfFloat: Integer;
 begin
-  DBVal := DBVal + 1;
+
   Func := Node.Handle;
   if (Func = 0) then Exit;
+  EAXParam := 0; EDXParam := 0; ECXParam := 0; RegParamCount := 0;
+  
+
   for i:=0 to High(Node.Params) do
   begin
     Value := GetData(Node.Params[i]);
-    if Value <> nil
-    then Params := Params + Value.Name
-    else Exit;
+    if Value = nil then Exit
+    else
+    begin
+      Param := Value.Name;
+
+      if Length(Param) <> 4 then
+        Params := Params + StringOfChar(#0, 4 - (Length(Param) mod 4)) + Param;
+
+      if Length(Param) = 4 then
+      begin
+        case RegParamCount of
+          0: EAXParam := StrToInt4(Value.Name);
+          1: EDXParam := StrToInt4(Value.Name);
+          2: ECXParam := StrToInt4(Value.Name);
+        else
+          Params := Params + Value.Name;
+        end;
+        Inc(RegParamCount);
+      end;
+    end;
   end;
+
   while Params <> '' do
   begin
     SetLength(Stack, High(Stack) + 2);
     Stack[High(Stack)] := StrToInt4(Copy(Params, 1, 4));
     Delete(Params, 1, 4);
   end;
-  {asm
-    push ecx
-    push edx
-    push eax
-  end;}
-  for i:=High(Stack) downto 3 do
+
+  for i:=High(Stack) downto 0 do
   begin
     FourByte := Stack[i];
     asm push FourByte end;
   end;
 
-  if i >= 2 then
-  begin
-    FourByte := Stack[2];
-    asm mov ecx, FourByte end;
-  end;
-  if i >= 1 then
-  begin
-    FourByte := Stack[1];
-    asm mov edx, FourByte end;
-  end;
-  if i >= 0 then
-  begin
-    FourByte := Stack[0];
-    asm mov eax, FourByte end;
-  end;
+  if RegParamCount >= 3 then
+    asm mov ecx, ECXParam end;
+
+  if RegParamCount >= 2 then
+    asm mov edx, EDXParam end;
+
+  if RegParamCount >= 1 then
+    asm mov eax, EAXParam end;
 
   asm
     CALL Func
@@ -450,14 +461,11 @@ begin
     MOV IfFloat, 1
     @2:
   end;
+
   if IfFloat = 0
   then SetValue(Node, IntToStr4(BVal))
   else SetValue(Node, FloatToStr8(DBVal));
-  {asm
-    pop ecx
-    pop edx
-    pop eax
-  end;}
+
 end;
 
 function FindInNode(Node: PNode; Index: PNode): PNode;

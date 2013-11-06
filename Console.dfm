@@ -48,7 +48,7 @@ object GG: TGG
       ''
       '/sys/math.dll.meta'
       ''
-      'add?1&2')
+      'fadd?1,0&2,0')
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 0
