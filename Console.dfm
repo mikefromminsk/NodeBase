@@ -62,7 +62,7 @@ object GG: TGG
       'here^exit'
       'res=fsqrt?fmul?res&6,0'
       ''
-      'func?3,0')
+      'func?750,0')
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 0

@@ -412,19 +412,19 @@ begin
       Param := Value.Name;
 
       if Length(Param) > 4 then
-        Params := Params + StringOfChar(#0, Length(Param) mod 4) + Param;
+        Params := StringOfChar(#0, Length(Param) mod 4) + Param + Params;
 
       if Length(Param) < 4 then
-        Params := Params + StringOfChar(#0, 4 - Length(Param)) + Param;
+        Params := StringOfChar(#0, 4 - Length(Param)) + Param + Params;
 
       if Length(Param) = 4 then
       begin
         case RegParamCount of
-          0: EAXParam := StrToInt4(Value.Name);
-          1: EDXParam := StrToInt4(Value.Name);
-          2: ECXParam := StrToInt4(Value.Name);
+          0: EAXParam := StrToInt4(Param);
+          1: EDXParam := StrToInt4(Param);
+          2: ECXParam := StrToInt4(Param);
         else
-          Params := Params + Value.Name;
+          Params := Param + Params;
         end;
         Inc(RegParamCount);
       end;
