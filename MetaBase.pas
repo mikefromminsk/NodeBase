@@ -392,7 +392,7 @@ var
   Value: PNode;
   Params: String;
   Stack: array of Integer;
-  Func, FourByte, i, BVal: Integer;
+  Func, FourByte, i, BVal, ParamCount: Integer;
   DBVal: Double;
   IfFloat: Integer;
 begin
@@ -412,36 +412,33 @@ begin
     Stack[High(Stack)] := StrToInt4(Copy(Params, 1, 4));
     Delete(Params, 1, 4);
   end;
-  asm
+  {asm
     push ecx
     push edx
     push eax
-  end;
+  end;}
   for i:=High(Stack) downto 3 do
   begin
     FourByte := Stack[i];
     asm push FourByte end;
   end;
-  if High(Stack) >= 2 then
+
+  if i >= 2 then
   begin
     FourByte := Stack[2];
     asm mov ecx, FourByte end;
+  end;
+  if i >= 1 then
+  begin
     FourByte := Stack[1];
     asm mov edx, FourByte end;
+  end;
+  if i >= 0 then
+  begin
     FourByte := Stack[0];
     asm mov eax, FourByte end;
-  end
-  else
-  if High(Stack) = 1 then
-  asm
-    mov edx, Stack[1]
-    mov eax, Stack[0]
-  end
-  else
-  if High(Stack) = 0 then
-  asm
-    mov eax, Stack[0]
   end;
+
   asm
     CALL Func
     JC @1
@@ -456,11 +453,11 @@ begin
   if IfFloat = 0
   then SetValue(Node, IntToStr4(BVal))
   else SetValue(Node, FloatToStr8(DBVal));
-  asm
+  {asm
     pop ecx
     pop edx
     pop eax
-  end;
+  end;}
 end;
 
 function FindInNode(Node: PNode; Index: PNode): PNode;

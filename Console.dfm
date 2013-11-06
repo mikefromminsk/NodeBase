@@ -48,21 +48,7 @@ object GG: TGG
       ''
       '/sys/math.dll.meta'
       ''
-      'func?a:float#res'
-      'res=0,0'
-      'i=1,0'
-      'dx=1,0'
-      'while'
-      'fje?i&a#exit|'
-      'i=finc?i'
-      'res=fadd?res&dx'
-      'dx=fdiv?1,0&fsqr?i'
-      'jmp#lab|'
-      'while^lab'
-      'here^exit'
-      'res=fsqrt?fmul?res&6,0'
-      ''
-      'func?750,0')
+      'add?1&2')
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 0
