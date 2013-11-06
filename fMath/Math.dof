@@ -90,7 +90,7 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=
+OutputDir=..\exe\sys\
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
@@ -149,5 +149,6 @@ Item2=..\..\common;..\..\common\forms;..\..\common\components
 Count=1
 Item0=..\..\..\lib
 [HistoryLists\hlOutputDirectorry]
-Count=1
-Item0=..\..\..\bin
+Count=2
+Item0=..\exe\sys\
+Item1=..\..\..\bin

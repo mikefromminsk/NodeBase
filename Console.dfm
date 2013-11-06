@@ -17,8 +17,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 414
-    Width = 389
+    Top = 410
+    Width = 381
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -29,8 +29,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 389
-    Height = 414
+    Width = 381
+    Height = 410
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -48,7 +48,21 @@ object GG: TGG
       ''
       '/sys/math.dll.meta'
       ''
-      'fadd?1,0&2,0')
+      'func?a:float#res'
+      'res=0,0'
+      'i=1,0'
+      'dx=1,0'
+      'while'
+      'fje?i&a#exit|'
+      'i=finc?i'
+      'res=fadd?res&dx'
+      'dx=fdiv?1,0&fsqr?i'
+      'jmp#lab|'
+      'while^lab'
+      'here^exit'
+      'res=fsqrt?fmul?res&6,0'
+      ''
+      'func?3,0')
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 0
@@ -58,8 +72,8 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 418
-    Width = 389
+    Top = 414
+    Width = 381
     Height = 58
     Align = alBottom
     BevelInner = bvNone

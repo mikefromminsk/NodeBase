@@ -17,20 +17,9 @@ begin
   Application.CreateForm(TGG, GG);
   Base := TMeta.Create;
 
-  GG.InputBox.Clear;
+  //GG.InputBox.Clear;
   for i:=0 to GG.InputBox.Lines.Count - 1 do
     GG.M(GG.InputBox.Lines[i], False);
-
-
-
-
-
-
-GG.M('/sys/math.dll');
-GG.M('');
-GG.M('/sys/math.dll.meta');
-GG.M('');
-GG.M('fadd?1,0&2,0');
 
 
   Application.Run;
