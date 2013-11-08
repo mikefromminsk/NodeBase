@@ -97,14 +97,15 @@ type
   end;
 
 const
-  naIndex = $0;
-  naWord = $1;
-  naLink = $2;
-  naData = $3;
-  naFile = $4;          
-  naFunc = $5;          //naStdFunc = $51; naFastCallFunc = $52;
-  naNumber = $6;
-  naPointer = $7;
+  naIndex = 0;
+  naWord = 1;
+  naLink = 2;
+  naData = 3;
+  naFile = 4;
+  naFunc = 5;          //naStdFunc = $51; naFastCallFunc = $52;
+  naNumber = 6;
+  naPointer = 7;
+  naRoot = 8;
 
   msec = 86400000;
   RootPath = 'data';
@@ -127,6 +128,7 @@ begin
   TimerInterval := TimerInterval / msec;
 
   Root := AllocMem(SizeOf(TNode));
+  Root.Attr := naRoot;
   Module := NewNode(NextID);
 end;
 
