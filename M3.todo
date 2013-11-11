@@ -31,6 +31,8 @@ CamelCase, mixedCase, lower_case
 
 save data and count control in file attr
 
+saveNode to segment code with addlocal(to up)
+
 
 
 [localization]
@@ -75,12 +77,9 @@ data to number
 
 
 
-[controls][basic task]
-development and support
+[controls]
 
 
-
-[desk]
 Node.ParentParam
 
 source in sys params
@@ -97,6 +96,9 @@ branch cash
 
 
 
+
+[task of interest control]
+development and support
 
 
 
@@ -170,7 +172,6 @@ func?750,0
 750,0
 
 3,14031830638005
-
 
 
 
