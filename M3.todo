@@ -2,29 +2,11 @@
 
 
 [basic task]
-generator
-
-
-[priority]
-Garbage collection
-
 controls
-generator
-
-save load cycle
-
-transfer
-
-client
-
-file system of base storage
-
 
 
 
 [optimization]
-fastcall
-
 Index is First
 
 CamelCase, mixedCase, lower_case
@@ -33,7 +15,9 @@ save data and count control in file attr
 
 saveNode to segment code with addlocal(to up)
 
+record packed
 
+union all module to one file
 
 [localization]
 meta to down code (c++)
