@@ -21,6 +21,5 @@ begin
   for i:=0 to GG.InputBox.Lines.Count - 1 do
     GG.M(GG.InputBox.Lines[i], False);
 
-
   Application.Run;
 end.

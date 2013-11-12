@@ -53,7 +53,7 @@ type
     SaveTime   : Double;
     RefCount   : Integer;
 
-
+    Data       : Pointer;
   end;
 
 
@@ -114,8 +114,6 @@ var
   Base: TMeta;
 
 implementation
-
-uses MetaControls;
 
 constructor TMeta.Create;
 var Method: TMethod;
