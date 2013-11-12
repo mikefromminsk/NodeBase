@@ -1,0 +1,190 @@
+[generator]
+
+
+
+
+[method of generation]
+random
+logical
+find
+
+
+[problems]
+eternal copying
+multiple copies
+
+
+[System]
+bloc failover
+
+regenerate task
+from solution generate task
+
+changes when the code is blocked
+
+
+[options]
+plasticity evolution
+
+table reps
+plasticity params
+random or sequence (brute-force search)
+sequentially or parallel 1-4
+
+
+[processing]
+parser
+context
+union slice merge error
+event
+calc control
+run
+optimization
+save
+
+
+[context]
+[] is context
+game to [game]
+node is child of context
+
+find like task
+SQL_CALC_FOUND_ROWS
+Camel
+word task to meta task
+
+text
+formula
+
+structure context
+4byte is int and real
+
+context is module
+in context = in module
+
+
+[task]
+
+when cur control is activator
+
+
+
+
+[solution]
+link (next to sequence, method)
+action (add, move, update, create, delete)
+run (stream)
+type:
+logical
+system parallel 
+error
+similarity
+association
+
+
+[input]
+generate data to test
+data is numbers, strings, records, params, control
+not create only input
+ of user value of response
+data is null
+human language
+
+
+
+[output]
+result @node -> word
+build project from meta code
+
+
+
+
+[controls] 
+source^name@id$controls:type?param=value&params#result|else
+
+control read
+
+controls code
+c=count
+t=time
+i=interest
+
+p=points
+r=runtime
+e=error
+
+
+trust
+size
+intellectus moralis aisthesis praxis
+
+static and dynamic controls
+
+deciding for answer
+when jump to local
+comparate control system
+
+
+[control generator]
+adders
+formuls
+priority
+
+curiosity when value = nil
+
+
+[event]
+AddLocal
+Run
+
+after run if $cur > 0 then again run
+
+
+[coding]
+planing in program
+budget for ?
+
+
+
+
+[test] level 5
+
+je$i1?5&x#$p2|$e1
+
+
+x$c1=solution3?$1
+
+solution=res
+res=a
+
+solution3?a:int=res
+res=a
+
+
+
+
+
+
+
+
+
+
+solution is task
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
