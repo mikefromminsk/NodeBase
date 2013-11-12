@@ -1,13 +1,33 @@
 [MetaGenerator]
-based to metabase
+
+
+[basic task]
+development
+
+support
+
+
+
+
+
+[simple task]
+connected to metabase
+
+
+
+
+
+
+
 
 Added var to TNode(virtualStringTree)
 Data: record end;        // this is a placeholder, each node gets extra data determined by NodeDataSize
         NodeData := Pointer(PByte(@Result.Data) + FTotalInternalDataSize);
         NodeData^ := UserData;
-Data: Pointer;
 
-in TNode Pointer
+
+TNode 
+	Data: Pointer
 
 rewrite the function (abstract)
 
