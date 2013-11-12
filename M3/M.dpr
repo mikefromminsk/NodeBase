@@ -1,18 +1,12 @@
 program M;
 
 uses
-  Forms, Console, MetaBase {, MetaLine, Dialogs};
+  Forms, Console, MetaBase;
 
 {$R *.res}
 
-var
-  i: Integer;
-  //Line: TLine;
+var i: Integer;
 begin
-  {Line := TLine.Create('name$I5');
-  ShowMessage(Line.ControlsValues[0]);
-  Exit;}
-
   Application.Initialize;
   Application.CreateForm(TGG, GG);
   Base := TMeta.Create;

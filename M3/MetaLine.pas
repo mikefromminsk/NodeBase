@@ -1,5 +1,12 @@
 unit MetaLine;
 
+{var
+  Line: TLine;
+begin
+  Line := TLine.Create('name$I5');
+  ShowMessage(Line.ControlsValues[0]);
+  Exit;}
+
 interface
 
 uses

@@ -28,7 +28,7 @@ type
     Path  : String;          //test variable
     LocalName: String;
 
-    Interest   : Double;     //controls
+
 
     Name       : String;     //pointers
     ParentName : PNode;
@@ -53,10 +53,20 @@ type
     SaveTime   : Double;
     RefCount   : Integer;
 
+    Interest   : Double;     //controls
+
     Data       : Pointer;
   end;
 
-
+  TInterest = record
+    step : Double;
+    max  : Double;
+    min  : Double;
+    count: Double;
+    now  : Double;
+    into : Double;
+    from : Double;
+  end;
 
   TMeta = class
   public
@@ -66,7 +76,10 @@ type
     Module: PNode;
     TimeLine: PEvent;
     TimerInterval: Double;
+    Interest: TInterest;
+
     constructor Create;
+    procedure Load;
     function NextID: String;
     function AddSubNode(var Arr: ANode): PNode;
     function AddIndex(Node: PNode; Name: Char): PNode;
@@ -93,6 +106,7 @@ type
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
+    procedure SetControls(Node: PNode);
     function Get(Line: String): PNode;
   end;
 
@@ -111,23 +125,51 @@ const
   RootPath = 'data';
 
 var
-  Base: TMeta;
+  Base: TMeta; //Meta: TRoot;
 
 implementation
 
 constructor TMeta.Create;
 var Method: TMethod;
 begin
-  CreateDir(RootPath);
+  Load;
 
+  with Interest do
+  begin
+    step := 10;
+    max  := 20;
+    min  := -10;
+    count:= 0;
+    now  := 10;
+    into := 0;
+    from := 50000;
+  end;
+
+  CreateDir(RootPath);
   TimerInterval := 100;
   TimerProc(Method) := Self.OnTimer;
   //Windows.SetTimer(0, 0, Round(TimerInterval), Method.Code);
   TimerInterval := TimerInterval / msec;
 
+
   Root := AllocMem(SizeOf(TNode));
   Root.Attr := naRoot;
   Module := NewNode(NextID);
+end;
+
+procedure TMeta.Load;
+var MetaOptions: TStringList;
+begin
+  if FileExists('metaoptions.ini') then
+  begin
+    MetaOptions := TStringList.Create;
+    with MetaOptions do
+    begin
+      LoadFromFile('metaoptions.ini');  //StRootValue
+      ID := StrToInt(Values['ID']);
+      TimerInterval := StrToInt(Values['TimerInterval']);
+    end;
+  end;
 end;
 
 function TMeta.NextID: String;
@@ -898,8 +940,27 @@ begin
     if Node.Prev = nil then
       TypeLink(Node, 10, 10, 10);
   end;
+
 end;
 
+
+procedure TMeta.SetControls(Node: PNode);
+begin
+  if Node = nil then Exit;
+
+  with Interest do
+  begin
+    count := Random(2) + 1;//count + 1;
+    into := Random(Round(from-1)) + 1;
+    if Random(3)= 0 then
+      into := 0;
+
+    Node.Interest := (step/count) * (0 + (max-now)/(max-min) );
+
+    now := now + Node.Interest;
+  end;
+  
+end;
 
 
 
@@ -910,6 +971,8 @@ begin
   NextNode(Result);
 
   Analysis(Result);
+  SetControls(Result);
+  
   Run(Result);
   if GetData(Result) <> nil then
   begin
