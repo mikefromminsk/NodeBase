@@ -899,7 +899,6 @@ begin
   Result := NewNode(Line);
   NextNode(Result);
 
-  Analysis(Result);
   SetControls(Result);
   
   Run(Result);

@@ -4,7 +4,7 @@ object GG: TGG
   Width = 397
   Height = 510
   BorderIcons = [biSystemMenu]
-  Color = clBtnFace
+  Color = clGrayText
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -17,25 +17,25 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 410
-    Width = 381
+    Top = 414
+    Width = 389
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
     Color = cl3DDkShadow
+    MinSize = 1
     ParentColor = False
     ResizeStyle = rsLine
   end
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 381
-    Height = 410
+    Width = 389
+    Height = 414
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
     BorderStyle = bsNone
-    Color = clGrayText
     Font.Charset = RUSSIAN_CHARSET
     Font.Color = clWhite
     Font.Height = -16
@@ -63,6 +63,7 @@ object GG: TGG
       'res=fsqrt?fmul?res&6,0'
       ''
       'func?750,0')
+    ParentColor = True
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 0
@@ -72,19 +73,19 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 414
-    Width = 381
+    Top = 418
+    Width = 389
     Height = 58
     Align = alBottom
     BevelInner = bvNone
     BevelOuter = bvNone
     BorderStyle = bsNone
-    Color = clGrayText
     Font.Charset = RUSSIAN_CHARSET
     Font.Color = clWhite
     Font.Height = -16
     Font.Name = 'Arial'
     Font.Style = []
+    ParentColor = True
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 1
@@ -100,7 +101,7 @@ object GG: TGG
     Top = 8
   end
   object Timer1: TTimer
-    Left = 288
+    Left = 312
     Top = 8
   end
 end

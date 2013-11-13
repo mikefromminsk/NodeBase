@@ -1,13 +1,13 @@
-program Project1;
+program MG;
 
 uses
   Forms,
-  Unit1 in 'Unit1.pas' {Form1};
+  ConsoleMG in 'ConsoleMG.pas' {GC};
 
 {$R *.res}
 
 begin
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TGC, GC);
   Application.Run;
 end.
