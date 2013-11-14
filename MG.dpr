@@ -1,13 +1,13 @@
 program MG;
 
 uses
-  Forms,
-  ConsoleMG in 'ConsoleMG.pas' {GC};
+  Forms, ConsoleMG, MetaBase;
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.CreateForm(TGC, GC);
+
   Application.Run;
 end.
