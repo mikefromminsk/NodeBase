@@ -25,6 +25,10 @@ type
     procedure CreateParams(var Params: TCreateParams); override;
     procedure FormShow(Sender: TObject);
     function M(Line: String; WriteToConsole: Boolean = True): String;
+    procedure FormDestroy(Sender: TObject);
+    procedure OutputBoxKeyPress(Sender: TObject; var Key: Char);
+  private
+    procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
   end;
 
 var
@@ -113,12 +117,13 @@ end;
 procedure TGG.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
-  with Params do Style := (Style OR WS_POPUP) AND NOT WS_DLGFRAME;
+  with Params do Style := (Style or WS_POPUP) and not WS_DLGFRAME;
 end;
 
 procedure TGG.FormCreate(Sender: TObject);
 var i: Integer;
 begin
+  //RegisterHotKey(GG.Handle, VK_F9, 0, VK_F9);
   {for i:=0 to InputBox.Lines.Count - 1 do
     M(InputBox.Lines[i], False);      }
 end;
@@ -126,6 +131,21 @@ end;
 procedure TGG.FormShow(Sender: TObject);
 begin
   InputBox.SelStart := Length(InputBox.Lines.Text);
+end;
+
+procedure TGG.WMHotKey(var Msg: TWMHotKey);
+begin
+  ShowMessage('1');
+end;
+
+procedure TGG.FormDestroy(Sender: TObject);
+begin
+  //UnRegisterHotKey(GG.Handle, VK_F9);
+end;
+
+procedure TGG.OutputBoxKeyPress(Sender: TObject; var Key: Char);
+begin
+  ShowMessage(IntToStr(Ord(Key)));
 end;
 
 end.
