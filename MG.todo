@@ -30,8 +30,9 @@ save in Root Node generator variable
 
 
 
-link
+
 action
+link
 type
 logical
 similarity
@@ -57,7 +58,8 @@ $I1
 
 
 [simple]
-connected to metabase
+link
+action
 
 
 
