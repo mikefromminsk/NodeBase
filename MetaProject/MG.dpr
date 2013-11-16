@@ -1,7 +1,7 @@
 program MG;
 
 uses
-  Forms, ConsoleMG, MetaGenerator;
+  Forms, ConsoleMG{, MetaGenerator};
 
 {$R *.res}
 

@@ -134,9 +134,6 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
-[HistoryLists\hlDebugSourcePath]
-Count=1
-Item0=dcu\
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
@@ -144,12 +141,5 @@ Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 Count=1
 Item0=dcu\
 [HistoryLists\hlOutputDirectorry]
-Count=2
+Count=1
 Item0=exe\
-Item1=dcu\
-[HistoryLists\hlBPLOutput]
-Count=1
-Item0=dcu\
-[HistoryLists\hlDCPOutput]
-Count=1
-Item0=dcu\
