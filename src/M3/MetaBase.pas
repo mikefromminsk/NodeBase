@@ -107,7 +107,7 @@ type
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
     procedure SetControls(Node: PNode);
-    function Get(Line: String): PNode;
+    function Get(Line: String): PNode; virtual;
   end;
 
 const

@@ -4,12 +4,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, Console, StdCtrls, ComCtrls, ExtCtrls;
+  Dialogs, StdCtrls, ComCtrls, ExtCtrls;
 
 type
-  TMGen = class(TGG)
-    RichEdit1: TRichEdit;
-    Splitter1: TSplitter;
+  TMGen = class(TForm)
   end;
 
 var
