@@ -1,4 +1,10 @@
 
+int=!4
+
+float=!8
+
+string=!*
+
 add?a:int&b:int
 
 fadd?a:float&b:float

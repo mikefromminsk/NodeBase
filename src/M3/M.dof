@@ -90,12 +90,12 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=..\exe\sys\
-UnitOutputDir=
+OutputDir=..\..\exe\M3
+UnitOutputDir=..\..\lib
 PackageDLLOutputDir=
 PackageDCPOutputDir=
 SearchPath=
-Packages=vcl;rtl;vclx;indy;inet;xmlrtl;vclie;inetdbbde;inetdbxpress;dbrtl;dsnap;dsnapcon;vcldb;soaprtl;VclSmp;dbexpress;dbxcds;inetdb;bdertl;vcldbx;webdsnap;websnap;adortl;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;vclshlctrls;IntrawebDB_50_70;Intraweb_50_70;Rave50CLX;Rave50VCL;dclOfficeXP
+Packages=vcl;rtl
 Conditionals=
 DebugSourceDirs=
 UsePackages=1
@@ -110,9 +110,9 @@ ActiveLang=
 ProjectLang=
 RootDir=
 [Version Info]
-IncludeVerInfo=0
+IncludeVerInfo=1
 AutoIncBuild=0
-MajorVer=1
+MajorVer=3
 MinorVer=0
 Release=0
 Build=0
@@ -126,7 +126,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=
 FileDescription=
-FileVersion=1.0.0.0
+FileVersion=3.0.0.0
 InternalName=
 LegalCopyright=
 LegalTrademarks=
@@ -134,21 +134,3 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
-[HistoryLists\hlConditionals]
-Count=1
-Item0=_STORAGER_LIB_;_CRYPTO_;USE_PROGRESSBAR
-[HistoryLists\hlUnitAliases]
-Count=1
-Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
-[HistoryLists\hlSearchPath]
-Count=3
-Item0=..\;..\..\;..\forms
-Item1=..\;..\..\
-Item2=..\..\common;..\..\common\forms;..\..\common\components
-[HistoryLists\hlUnitOutputDirectory]
-Count=1
-Item0=..\..\..\lib
-[HistoryLists\hlOutputDirectorry]
-Count=2
-Item0=..\exe\sys\
-Item1=..\..\..\bin
