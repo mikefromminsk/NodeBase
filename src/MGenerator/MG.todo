@@ -19,26 +19,9 @@ dynamic plasticity
 
 
 
-Inheritance
 
 
-TNode 
-	Data: Pointer
-
-
-save in Root Node generator variable
-
-
-
-
-action
-link
-type
-logical
-similarity
-association
-run 
-error
+[test]
 
 
 
@@ -46,20 +29,20 @@ error
 
 
 
-test data
-meta data
-
-
-
-$I1
 
 
 
 
 
-[simple]
-link
-action
+
+
+
+
+
+
+
+
+
 
 
 

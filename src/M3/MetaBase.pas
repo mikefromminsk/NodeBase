@@ -913,5 +913,4 @@ end;
 
 initialization
   //Base := TMeta.Create;
-  Randomize;
 end.
