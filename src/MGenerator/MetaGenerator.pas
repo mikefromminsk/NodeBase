@@ -2,12 +2,13 @@ unit MetaGenerator;
 
 interface
 
-uses MetaBase, Dialogs, SysUtils;
+uses MetaBase, MetaUtils, Dialogs, SysUtils;
 
 type
   TGenerator = class(TMeta)
     procedure GenerationLocal(Node: PNode);
     procedure GenerationScript(Node: PNode);
+    function RandomNode(Node: PNode): PNode;
 
     function Get(Line: String): PNode; //override;
   end;
@@ -26,30 +27,51 @@ begin
   for i:=0 to Random(10) do
   begin
     NewLine := NextId;
-    CountParam := Random(3);
+    {CountParam := Random(3);
     if CountParam > 0 then
     begin
       NewLine := NewLine + '?';
       for j:=0 to CountParam do
         NewLine := NewLine + NextId + '&';
       Delete(NewLine, Length(NewLine), 1);
-    end;
+    end;}
     AddLocal(Node, NewNode(NewLine));
   end;
+end;
+
+function TGenerator.RandomNode(Node: PNode): PNode;
+var i, Index: Integer;
+begin
+  Index := Random(High(Node.Local) +  High(Node.Params) + 1);
+  if Index > High(Node.Local)
+  then Result := Node.Params[Index - High(Node.Local)]
+  else Result := Node.Local[Index];
 end;
 
 procedure TGenerator.GenerationScript(Node: PNode);
 var
   i, j: Integer;
-  Next: PNode;
   NewLine: String;
 begin
+
   for i:=0 to Random(10) do
   begin
-    Next := Node.Local[Random(High(Node.Local))];
-    NewLine := '@' + GetIndex(Next) + '^' + NextId;
-    if High(Next.Params) <> -1 then
+    NewLine := GetIndex(RandomNode(Node)) + '^' + NextId;
+    
+    if Random(2) = 0 then
+      NewLine := NewLine + '=' + GetIndex(RandomNode(Node));
+
+    {if High(Next.Params) <> -1 then
+    begin
+      NewLine := NewLine + '?';
       for j:=0 to High(Next.Params) do
+        NewLine := NewLine + GetIndex(RandomNode(Node)) + '&';
+      Delete(NewLine, Length(NewLine), 1);
+    end;
+
+    if Random(30) = 0 then
+      NewLine := NewLine + '|' + GetIndex(RandomNode(Node));}    
+
     NextNode(NewNode(NewLine));
   end;
 end;
@@ -68,6 +90,13 @@ begin
   begin
     GenerationLocal(Result);
     GenerationScript(Result);
+    Node := Result;
+    while Node.Next <> nil do
+    begin
+      if (Node.Value <> nil) and (GetData(Node) <> nil) then
+        ShowMessage(EncodeName(GetData(Node).Name));
+      Node := Node.Next;
+    end;
   end;
 end;
 
@@ -75,5 +104,5 @@ end;
 initialization
   Randomize;
   Gen := TGenerator.Create;
-  Gen.Get('$I1');
+  Gen.Get('$I1?2&2');
 end.

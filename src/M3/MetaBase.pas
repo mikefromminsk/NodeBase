@@ -289,6 +289,7 @@ end;
 
 function TMeta.GetIndex(Node: PNode): String;
 begin
+  Result := '';
   if Node <> nil then
     while Node.ParentIndex <> nil do
     begin
