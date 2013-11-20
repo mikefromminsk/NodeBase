@@ -7,11 +7,11 @@ uses
   Dialogs, StdCtrls, ComCtrls, ExtCtrls;
 
 type
-  TMGen = class(TForm)
+  TMGConcole = class(TForm)
   end;
 
 var
-  MGen: TMGen;
+  MGConcole: TMGConcole;
 
 implementation
 

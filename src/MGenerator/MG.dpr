@@ -7,6 +7,6 @@ uses
 
 begin
   Application.Initialize;
-  Application.CreateForm(TMGen, MGen);
+  Application.CreateForm(TMGConcole, MGConcole);
   Application.Run;
 end.
