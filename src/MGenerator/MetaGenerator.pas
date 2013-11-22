@@ -7,9 +7,12 @@ uses MetaBase, MetaUtils, Dialogs, SysUtils;
 type
   TMGen = class(TMeta)
     function AddNode(var Arr: ANode; Node: PNode): PNode;
-    procedure GenLocal(Node: PNode);
+    procedure GenNode(Node: PNode);
+    procedure GenParams(Node: PNode);
     procedure GenScript(Node: PNode);
     function RandomNode(Node: PNode): PNode;
+    function RandomParams(Func: PNode; Node: PNode): String;
+
 
     function Get(Line: String): PNode; 
   end;
@@ -27,27 +30,49 @@ begin
   Arr[High(Arr)] := Node;
 end;
 
-procedure TMGen.GenLocal(Node: PNode);
+procedure TMGen.GenNode(Node: PNode);
 var
   i: Integer;
   LocalNode: PNode;
 begin
-  for i:=0 to Random(10) do
+  for i:=0 to Random(10) do     //CreateNode
   begin
     LocalNode := NewNode(NextId);
     AddLocal(Node, LocalNode);
+    if Random(30) = 0 then    //CreateParams
+      GenParams(LocalNode);
   end;
+end;
+
+procedure TMGen.GenParams(Node: PNode);
+var i, CountParams: Integer;
+begin
+  CountParams := Random(3);   //CountParams
+  for i:=0 to CountParams do
+    AddParam(Node, NewNode(NextId + ':int'), i);
 end;
 
 function TMGen.RandomNode(Node: PNode): PNode;
 var i, Index: Integer;
 begin
-  Index := Random(High(Node.Local) +  High(Node.Params) + 1);
+  Index := Random(High(Node.Local) +  High(Node.Params) + 1); //RandomLocalOrParam
   if Index > High(Node.Local)
   then Result := Node.Params[Index - High(Node.Local)]
   else Result := Node.Local[Index];
 end;
 
+function TMGen.RandomParams(Func: PNode; Node: PNode): String;
+var i, Index: Integer;
+begin
+  Result := '';
+  if High(Func.Params) <> -1 then
+  begin
+    Result := '?';
+    for i:=0 to High(Func.Params) do
+      Result := Result + GetIndex(RandomNode(Root)) + '^' + NextId + '&';
+    Delete(Result, Length(Result), 1);
+  end;
+end;
 
 procedure TMGen.GenScript(Node: PNode);
 var
@@ -60,29 +85,15 @@ begin
   begin
     LeftNode := RandomNode(Node);
     NewLine := GetIndex(LeftNode) + '^' + NextId;
-    
-    if (High(LeftNode.Params) = -1) and (Random(2) = 0) then
+
+    if (High(LeftNode.Params) = -1) and (Random(2) = 0) then   //SetValue
     begin
       RightNode := RandomNode(Node);
-
-      if High(RightNode.Params) <> -1 then                                              //если попали на функцию то установить параметры
-      begin
-        NewLine := NewLine + '?';
-        for j:=0 to High(RightNode.Params) do
-          NewLine := NewLine + GetIndex(RandomNode(Node)) + '^' + NextId + '&';
-        Delete(NewLine, Length(NewLine), 1);
-      end;
-
-      NewLine := NewLine + '=' + GetIndex(RandomNode(RightNode)) + '^' + NextId;
+      NewLine := NewLine + '=' + GetIndex(RightNode) + '^' + NextId + RandomParams(RightNode, Node);
     end;
 
-    if High(LeftNode.Params) <> -1 then                                              //если попали на функцию то установить параметры
-    begin
-      NewLine := NewLine + '?';
-      for j:=0 to High(LeftNode.Params) do
-        NewLine := NewLine + GetIndex(RandomNode(Node)) + '^' + NextId + '&';
-      Delete(NewLine, Length(NewLine), 1);
-    end;
+    if (High(LeftNode.Params) <> -1) and (Random(2) = 0) then  //SetParams
+      NewLine := NewLine + '=' + GetIndex(LeftNode) + '^' + NextId + RandomParams(LeftNode, Node);
 
     NextNode(NewNode(NewLine));
   end;
@@ -104,7 +115,7 @@ begin
     SetLength(Nodes, 0);
     for i:=0 to High(Result.Params) do
       AddNode(Nodes, Result.Params[i]);
-    GenLocal(Result);
+    GenNode(Result);
     GenScript(Result);
 
     Node := Result;
