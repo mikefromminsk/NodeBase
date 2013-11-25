@@ -24,9 +24,11 @@ dynamic plasticity
 [test]
 
 
+/../sys/math.dll
 
+/../sys/math.dll.meta
 
-I5=value
+I1?2&2
 
 
 

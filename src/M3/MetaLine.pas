@@ -156,8 +156,6 @@ begin
         Path[High(Path)] := Copy(Name, i, dx - i);
         i := dx + 1;
       end;
-      if Path[High(Path)] = '' then
-        Path[High(Path)] := '0';
       Name := Path[0];
     end
     else

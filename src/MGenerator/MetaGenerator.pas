@@ -2,7 +2,7 @@ unit MetaGenerator;
 
 interface
 
-uses MetaBase, MetaUtils, Dialogs, SysUtils;
+uses MetaBase, MetaUtils, Dialogs, SysUtils, Math{IfThen}, Types;
 
 type
   TMGen = class(TMeta)
@@ -17,7 +17,6 @@ type
 
 var
   Gen: TMGen;
-  Nodes: ANode;
 
 implementation
 
@@ -42,6 +41,7 @@ begin
   end;
 end;
 
+
 procedure TMGen.GenParams(Node: PNode);
 var i, CountParams: Integer;
 begin
@@ -52,13 +52,43 @@ begin
     Node.Value := NewNode(NextId);
 end;
 
-function TMGen.RandomNode(Node: PNode): PNode;
-var i, Index: Integer;
+function RandomArr(var Index: Integer; Arr: TIntegerDynArray): Integer;
+var i, SumArr: Integer;
 begin
-  Index := Random(High(Node.Local) +  High(Node.Params) + 1); //RandomLocalOrParam
-  if Index > High(Node.Local)
-  then Result := Node.Params[Index - High(Node.Local)]
-  else Result := Node.Local[Index];
+  SumArr := SumInt(Arr);
+  if SumArr = 0 then
+  begin
+    Result := -1;
+    Exit;
+  end;
+  Index := Random(MaxInt) mod SumArr;
+  for i:=0 to High(Arr) do
+  begin
+    if Index - Arr[i] < 0 then
+    begin
+      Result := i;
+      Exit;
+    end;
+    Index := Index - Arr[i];
+  end;
+end;
+
+function TMGen.RandomNode(Node: PNode): PNode;
+var
+  Index, ValueExist: Integer;
+  Arr: TIntegerDynArray;
+begin
+  SetLength(Arr, 3);
+  Arr[0] := 0;//High(Node.Local) + 1;
+  Arr[1] := High(Node.Params) + 1;
+  Arr[2] := IfThen(Node.Value = nil, 0, 1);
+  case RandomArr(Index, Arr) of
+    0: Result := Node.Local[Index];
+    1: Result := Node.Params[Index];
+    2: Result := Node.Value;
+  else Result := nil;
+  end;
+  SetLength(Arr, 0);
 end;
 
 function TMGen.RandomParams(Func: PNode; Node: PNode): String;
@@ -69,7 +99,7 @@ begin
   begin
     Result := '?';
     for i:=0 to High(Func.Params) do
-      Result := Result + GetIndex(RandomNode(Root)) + '^' + NextId + '&';
+      Result := Result + GetIndex(RandomNode(Node)) + '^' + NextId + '&';
     Delete(Result, Length(Result), 1);
   end;
 end;
@@ -78,24 +108,30 @@ procedure TMGen.GenScript(Node: PNode);
 var
   i, j: Integer;
   NewLine: String;
-  LeftNode, RightNode: PNode;
+  LeftNode, RightNode, Buf: PNode;
 begin
 
-  for i:=0 to Random(10) do
+  for i:=0 to Random(5) do
   begin
     LeftNode := RandomNode(Node);
+    NewLine := '';
     NewLine := GetIndex(LeftNode) + '^' + NextId;
 
-    if (High(LeftNode.Params) = -1) and (Random(2) = 0) then   //SetValue
+    {if (High(LeftNode.Params) <> -1) and (Random(2) = 0) then  //SetParams
+      NewLine := NewLine + RandomParams(LeftNode, Node);}
+
+    if (High(LeftNode.Params) = -1) {and (Random(2) = 0)} then   //SetValue with Params
     begin
       RightNode := RandomNode(Node);
-      NewLine := NewLine + '=' + GetIndex(RightNode) + '^' + NextId + RandomParams(RightNode, Node);
+      NewLine := NewLine + '=' + GetIndex(RightNode) + '^' + NextId{ + RandomParams(RightNode, Node)};
     end;
 
-    if (High(LeftNode.Params) <> -1) and (Random(2) = 0) then  //SetParams
-      NewLine := NewLine + '=' + GetIndex(LeftNode) + '^' + NextId + RandomParams(LeftNode, Node);
 
-    NextNode(NewNode(NewLine));
+    Buf := NewNode(NewLine);
+    NextNode(Buf);
+    Buf := Prev;
+    if Buf = nil then
+      Buf := Prev;
   end;
 end;
 
@@ -108,13 +144,9 @@ begin
   Result := inherited Get(Line);
   if Result = nil then Exit;
 
-
   if Result.Interest <> 0 then
   begin
 
-    SetLength(Nodes, 0);
-    for i:=0 to High(Result.Params) do
-      AddNode(Nodes, Result.Params[i]);
     GenNode(Result);
     GenScript(Result);
 
@@ -125,7 +157,7 @@ begin
         ShowMessage(EncodeName(GetData(Node).Name));
       Node := Node.Next;
     end;
-    
+
   end;
 end;
 
@@ -133,5 +165,5 @@ end;
 initialization
   Randomize;
   Gen := TMGen.Create;
-  Gen.Get('$I1?2&2');
+  Gen.Get('$I1?2&2#$I1');
 end.

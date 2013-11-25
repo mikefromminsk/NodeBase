@@ -589,6 +589,8 @@ begin
     Delete(Line.Name, 1, 1);
     IsPointer := True;
   end;
+  if (Line.Name = '') and (High(Line.ControlsNames) <> -1) then
+    Line.Name := NextID;
   Result := NewIndex(Line.Name);
   if Result = nil then Exit;
   if Line.Name[1] <> '@' then
@@ -629,6 +631,9 @@ begin
       Result.Source := Prev;
     end;
   end;
+  if Line.Source <> '' then
+    Result.Source := NewNode(Line.Source);
+
   for i:=0 to High(Line.Params) do
     AddParam(Result, NewNode(Line.Params[i]), i);
   if Result.Attr = naData then
