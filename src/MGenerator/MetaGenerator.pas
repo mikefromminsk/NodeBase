@@ -12,8 +12,6 @@ type
     procedure GenScript(Node: PNode);
     function RandomNode(Node: PNode): PNode;
     function RandomParams(Func: PNode; Node: PNode): String;
-
-
     function Get(Line: String): PNode; 
   end;
 
@@ -39,7 +37,7 @@ begin
   begin
     LocalNode := NewNode(NextId);
     AddLocal(Node, LocalNode);
-    if Random(30) = 0 then    //CreateParams
+    if Random(30) = 0 then      //CreateParams
       GenParams(LocalNode);
   end;
 end;
@@ -49,7 +47,9 @@ var i, CountParams: Integer;
 begin
   CountParams := Random(3);   //CountParams
   for i:=0 to CountParams do
-    AddParam(Node, NewNode(NextId + ':int'), i);
+    AddParam(Node, NewNode(NextId + ':'), i);
+  if Random(2) = 0 then       //CreateResult
+    Node.Value := NewNode(NextId);
 end;
 
 function TMGen.RandomNode(Node: PNode): PNode;
