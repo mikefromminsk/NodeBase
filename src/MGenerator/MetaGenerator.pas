@@ -75,20 +75,23 @@ end;
 
 function TMGen.RandomNode(Node: PNode): PNode;
 var
-  Index, ValueExist: Integer;
-  Arr: TIntegerDynArray;
+  Index: Integer; Arr: TIntegerDynArray;
 begin
-  SetLength(Arr, 3);
+  SetLength(Arr, 4);
   Arr[0] := 0;//High(Node.Local) + 1;
   Arr[1] := High(Node.Params) + 1;
   Arr[2] := IfThen(Node.Value = nil, 0, 1);
+  Arr[3] := High(Node.ParentLocal.Local);
   case RandomArr(Index, Arr) of
     0: Result := Node.Local[Index];
     1: Result := Node.Params[Index];
     2: Result := Node.Value;
+    3: Result := Node.ParentLocal.Local[Index];
   else Result := nil;
   end;
   SetLength(Arr, 0);
+  if (Result <> nil) and (((Result.Attr = naFile) and (High(Result.Local) <> -1)) or (Result = Node)) then
+    Result := RandomNode(Result);
 end;
 
 function TMGen.RandomParams(Func: PNode; Node: PNode): String;
@@ -126,12 +129,7 @@ begin
       NewLine := NewLine + '=' + GetIndex(RightNode) + '^' + NextId{ + RandomParams(RightNode, Node)};
     end;
 
-
-    Buf := NewNode(NewLine);
-    NextNode(Buf);
-    Buf := Prev;
-    if Buf = nil then
-      Buf := Prev;
+    NextNode(NewNode(NewLine));
   end;
 end;
 
@@ -165,5 +163,9 @@ end;
 initialization
   Randomize;
   Gen := TMGen.Create;
+  Gen.Get('5');
+  Gen.Get('');
+  Gen.Get('10');
+  Gen.Get('');
   Gen.Get('$I1?2&2#$I1');
 end.
