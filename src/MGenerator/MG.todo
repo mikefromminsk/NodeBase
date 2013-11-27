@@ -24,11 +24,17 @@ dynamic plasticity
 [test]
 
 
-/../sys/math.dll
+/../dll/math.dll
 
-/../sys/math.dll.meta
+/../dll/math.dll.meta
 
-I1?2&2
+func?a:int&b:int#res:int
+
+func$I5?2&2#4
+
+je?func?2&2;;#I5|
+
+
 
 
 
