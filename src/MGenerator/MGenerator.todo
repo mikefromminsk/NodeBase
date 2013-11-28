@@ -29,23 +29,23 @@ func?a:int&b:int
 
 
 
-je?func?2&2;&4;#$P5|$P-1 "$R4 = $P5 + $P-1"
+je?func?2&2;&4;#$P5| 
 
 SetControls
 
-je$R4?func?2&2;&4;#$P5|$P-1
+je$R5?func?2&2;&4;#$P5|
 
-je$R4?func$R4?2&2;&4;#$P5|$P-1
+je$R5?func$R5?2&2;&4;#$P5|
 
 Run
 
-je$R4?func$R4E2?2&2;&4;#$P5|$P-1
+je$R5?func$R4E2?2&2;&4;#$P5|
 
 Error
 
 SetControls
 
-je$R4?func$R4E2N5?2&2;&4;#$P5|$P-1
+je$R5?func$R5E2N5?2&2;&4;#$P5|
 
 Gen
 
