@@ -163,8 +163,6 @@ end;
 initialization
   Randomize;
   Gen := TMGen.Create;
-  Gen.Get('/../dll/math.dll');
-  Gen.Get('');
   Gen.Get('/../dll/math.dll.meta');
   Gen.Get('');
   Gen.Get('$I1?2&2#$I1');
