@@ -12,7 +12,7 @@ type
     procedure GenScript(Node: PNode);
     function RandomNode(Node: PNode): PNode;
     function RandomParams(Func: PNode; Node: PNode): String;
-    function Get(Line: String): PNode; 
+    procedure Analysing(Node: PNode); override;
   end;
 
 var
@@ -134,28 +134,21 @@ begin
 end;
 
 
-function TMGen.Get(Line: String): PNode;
-var
-  Node: PNode;
-  i: Integer;
+procedure TMGen.Analysing(Node: PNode);
 begin
-  Result := inherited Get(Line);
-  if Result = nil then Exit;
+  inherited Analysing(Node);
 
-  if Result.Interest <> 0 then
+  if (Node.Generate <> 0) then
   begin
+    GenNode(Node);
+    //GenScript(Node);
 
-    GenNode(Result);
-    GenScript(Result);
-
-    Node := Result;
     while Node.Next <> nil do
     begin
       if (Node.Value <> nil) and (GetData(Node) <> nil) then
         ShowMessage(EncodeName(GetData(Node).Name));
       Node := Node.Next;
     end;
-
   end;
 end;
 
@@ -165,5 +158,5 @@ initialization
   Gen := TMGen.Create;
   Gen.Get('/../dll/math.dll.meta');
   Gen.Get('');
-  Gen.Get('$I1?2&2#$I1');
+  Gen.Get('je?func$G1?2&2;&4;');
 end.

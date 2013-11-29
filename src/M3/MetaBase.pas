@@ -30,32 +30,33 @@ type
 
 
 
-    Name       : String;     //pointers
-    ParentName : PNode;
-    Index      : ANode;
-    ParentIndex: PNode;
-    Local      : ANode;
-    ParentLocal: PNode;
-    Value      : PNode;
-    ParentField: PNode;
-    Fields     : ANode;
-    Source     : PNode;
-    FType      : PNode;
-    FTrue      : PNode;
-    FElse      : PNode;
-    Params     : ANode;
-    Next       : PNode;
-    Prev       : PNode;
+    Name        : String;     //pointers
+    ParentName  : PNode;
+    Index       : ANode;
+    ParentIndex : PNode;
+    Local       : ANode;
+    ParentLocal : PNode;
+    Value       : PNode;
+    ParentField : PNode;
+    Fields      : ANode;
+    Source      : PNode;
+    FType       : PNode;
+    FTrue       : PNode;
+    FElse       : PNode;
+    ParentParams: PNode;
+    Params      : ANode;
+    Next        : PNode;
+    Prev        : PNode;
 
-    Attr       : Integer;    //system
-    Count      : Integer;
-    Handle     : Integer;
-    SaveTime   : Double;
-    RefCount   : Integer;
+    Attr        : Integer;    //system
+    Count       : Integer;
+    Handle      : Integer;
+    SaveTime    : Double;
+    RefCount    : Integer;
 
-    Interest   : Double;     //controls
+    Generate    : Double;     //controls
 
-    Data       : Pointer;
+    Data        : Pointer;
   end;
 
   TInterest = record
@@ -106,8 +107,8 @@ type
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
-    procedure SetControls(Node: PNode);
-    function Get(Line: String): PNode; virtual;
+    procedure Analysing(Node: PNode); virtual;
+    function Get(Line: String): PNode;// virtual;
   end;
 
 const
@@ -267,6 +268,7 @@ begin
       end;
     AddSubNode(Node.Params);
     Node.Params[High(Node.Params)] := Param;
+    Param.ParentParams := Node;
     Result := Param;
   end
   else
@@ -275,6 +277,7 @@ begin
     begin
       AddSubNode(Node.Params);
       Node.Params[Index] := Param;
+      Param.ParentParams := Node;
       Result := Node.Params[Index];
     end
     else
@@ -607,7 +610,7 @@ begin
   begin
     case Line.ControlsNames[i][1] of
       'C' : Result.Count := StrToInt(Line.ControlsValues[i]);
-      'I' : Result.Interest := StrToFloat(Line.ControlsValues[i]);
+      'G' : Result.Generate := StrToFloat(Line.ControlsValues[i]);
     end;
   end;
 
@@ -717,6 +720,7 @@ var FuncResult, i: Integer;
 begin
   NextNode:
   if Node = nil then Exit;
+  Analysing(Node);
   if Node.Attr = naFile then
     NewModule(Node);
   for i:=0 to High(Node.Params) do
@@ -882,21 +886,9 @@ begin
   Dispose(TimeLine);
 end;
 
-procedure TMeta.SetControls(Node: PNode);
+procedure TMeta.Analysing(Node: PNode);
 begin
-  if Node = nil then Exit;
 
-  with Interest do
-  begin
-    count := Random(2) + 1;//count + 1;
-    into := Random(Round(from-1)) + 1;
-    if Random(3)= 0 then
-      into := 0;
-
-    Node.Interest := (step/count) * (0 + (max-now)/(max-min) );
-
-    now := now + Node.Interest;
-  end;
 end;
 
 function TMeta.Get(Line: String): PNode;
@@ -904,9 +896,6 @@ var Data: String;
 begin
   Result := NewNode(Line);
   NextNode(Result);
-
-  SetControls(Result);
-  
   Run(Result);
   if GetData(Result) <> nil then
   begin
