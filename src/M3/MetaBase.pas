@@ -54,7 +54,7 @@ type
     SaveTime    : Double;
     RefCount    : Integer;
 
-    Generate    : Double;     //controls
+    Generate    : Integer;     //controls
 
     Data        : Pointer;
   end;
@@ -610,7 +610,8 @@ begin
   begin
     case Line.ControlsNames[i][1] of
       'C' : Result.Count := StrToInt(Line.ControlsValues[i]);
-      'G' : Result.Generate := StrToFloat(Line.ControlsValues[i]);
+      'T' : Result.SaveTime := StrToFloat(Line.ControlsValues[i]);
+      'G' : Result.Generate := StrToInt(Line.ControlsValues[i]);
     end;
   end;
 

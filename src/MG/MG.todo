@@ -11,7 +11,7 @@ support
 
 dynamic plasticity
 
-
+подчеркивание при наведении
 
 
 
@@ -61,6 +61,12 @@ G = Gen
 
 when SetControls then
 rec going to up
+
+
+
+
+
+GetNodeBody
 
 
 

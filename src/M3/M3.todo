@@ -19,6 +19,9 @@ record packed
 
 union all module to one file
 
+storage time in numbers or in codes
+41608,6161969676 or %01%02%03%04%05%06%07%08
+
 [localization]
 meta to down code (c++)
 parser c
