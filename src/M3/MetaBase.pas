@@ -106,7 +106,6 @@ type
     procedure NextNode(Node: PNode);
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
-    function GetNodeText(Node: PNode): String;
     procedure SaveNode(Node: PNode);
     procedure Analysing(Node: PNode); virtual;
     function Get(Line: String): PNode;// virtual;
@@ -787,53 +786,6 @@ begin
     if Node <> nil then
       AddLocal(Module, Node);
   Prev := Node;
-end;
-
-function TMeta.GetNodeText(Node: PNode): String;
-var
-  Str: String;
-  i: Integer;
-begin
-  Result := '';
-  if Node = nil then Exit;
-  if Node.Source <> nil then
-    Result := Result + GetIndex(Node.Source) + '^';
-  if Node.ParentName <> nil then
-    Result := Result + GetIndex(Node.ParentName);
-  Result := Result + GetIndex(Node);
-  if Node.FType <> nil then
-    Result := Result + ':' + GetIndex(Node.FType);
-  Str := '';
-  {if Node.Count <> 0 then
-    Str := Str + 'C' + IntToStr(Node.Count);
-  if Node.SaveTime <> 0 then
-    Str := Str + 'T' + FloatToStr(Node.SaveTime); }
-  if Node.Generate <> 0 then
-    Str := Str + 'G' + IntToStr(Node.Generate);
-  if Str <> '' then
-    Result := Result + '$' + Str;
-  Str := '';
-  for i:=0 to High(Node.Params) do
-    Str := Str + GetIndex(Node.Params[i]) + '&';
-  if Str <> '' then
-  begin
-    Delete(Str, Length(Str), 1);
-    Result := Result + '?' + Str + ';';
-  end;
-  if (Node.FTrue <> nil) or (Node.FElse <> nil) then
-  begin
-    if Node.FTrue <> nil then
-      Result := Result + '#' + GetIndex(Node.FTrue);
-    if Node.FElse <> nil then
-      Result := Result + '|' + GetIndex(Node.FElse);
-  end
-  else
-  if Node.Value <> nil then
-    Result := Result + '#' + GetIndex(Node.Value);
-  while Node.Next <> nil do
-    Result := Result + #10 + GetIndex(Node.Next);
-  for i:=0 to High(Node.Local) do
-    Result := Result + #10#10 + GetIndex(Node.Local[i]);
 end;
 
 procedure TMeta.SaveNode(Node: PNode);
