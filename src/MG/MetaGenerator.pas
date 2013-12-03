@@ -95,10 +95,10 @@ var Index: Integer; Arr: TIntegerDynArray;
 begin
   Result := nil;
   SetLength(Arr, 4);
-  Arr[0] := 1;//High(Node.Local) + 1;
-  Arr[1] := 0;//High(Node.Params) + 1;
+  Arr[0] := {1;//}High(Node.Local) + 1;
+  Arr[1] := {0;//}High(Node.Params) + 1;
   Arr[2] := IfThen(Node.Value = nil, 0, 1);
-  Arr[3] := 0;//High(Node.ParentLocal.Local);
+  Arr[3] := {0;//}High(Node.ParentLocal.Local);
   case RandomArr(Index, Arr) of
     0: Result := Node.Local[Index];
     1: Result := Node.Params[Index];
@@ -130,7 +130,7 @@ begin
       RNode := RandomNode(Node);
     end;
 
-    Line := GetIndex(LNode) + '^' + NextId + RandomParams(LNode, Node);;
+    Line := GetIndex(LNode) + '^' + NextId + RandomParams(LNode, Node);
 
     if (High(LNode.Params) = -1) then
       Line := Line + '=' + GetIndex(RNode) + '^' + NextId + RandomParams(RNode, Node);
@@ -210,5 +210,7 @@ end;
 
 initialization
   Randomize;
+  //for RandSeed := 0 to 1 do
+  //RandSeed := 4;
   Gen := TMGen.Create;
 end.

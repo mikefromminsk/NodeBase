@@ -13,7 +13,7 @@ dynamic plasticity
 
 подчеркивание при наведении
 
-
+RandSeed := 1
 
 
 
@@ -71,7 +71,7 @@ GetNodeBody
 
 
 
-
+GetData RecDefens
 
 
 

@@ -32,7 +32,7 @@ begin
   Node := Gen.Get(Line);
   if WriteToConsole = True then
     InputBox.Lines.Add(Line);
-  //ModuleBox.Lines.Text := Gen.GetNodeText(Node);
+  ModuleBox.Lines.Text := Gen.GetNodeText(Node);
 end;
 
 procedure TMGConcole.FormShow(Sender: TObject);

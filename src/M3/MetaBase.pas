@@ -92,9 +92,9 @@ type
     function AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
     function GetIndex(Node: PNode): String;
     function SetValue(Node: PNode; Value: String): PNode;
-    function GetValue(Node: PNode): PNode;
+    function GetValue(Node: PNode; Source: PNode = nil): PNode;
     function GetParam(Node: PNode): PNode;
-    function GetData(Node: PNode): PNode;
+    function GetData(Node: PNode; Source: PNode = nil): PNode;
     function GetType(Node: PNode): PNode;
     function GetSource(Node: PNode): PNode;
     procedure NewModule(Node: PNode);
@@ -308,18 +308,19 @@ begin
     Node.Source.Value := Result;
 end;
 
-function TMeta.GetValue(Node: PNode): PNode;
+function TMeta.GetValue(Node: PNode; Source: PNode = nil): PNode;
 begin
-  Result := nil;
-  while Node <> nil do
+  Result := Node;
+  while Result <> nil do
   begin
-    if (Node.Attr <> naPointer) and (Node.Source <> nil) then
-      Node := Node.Source
+    if (Result.Attr <> naPointer) and (Result.Source <> nil) then
+      Result := Result.Source
     else
     begin
-      Result := Node;
       if Result.Attr = naPointer then Exit;
-      Node := Node.Value;
+      if Result.Value = nil then Exit;
+      if Result.Value = Source then Exit;
+      Result := Result.Value;
     end;
   end;
 end;
@@ -335,7 +336,7 @@ begin
   end;
 end;
 
-function TMeta.GetData(Node: PNode): PNode;
+function TMeta.GetData(Node: PNode; Source: PNode = nil): PNode;
 begin
   Result := nil;
   while Node <> nil do
@@ -346,6 +347,7 @@ begin
     begin
       if Node.Attr = naData then
         Result := Node;
+      if Node.Value = Source then Exit;
       Node := Node.Value;
     end;
   end;
@@ -661,7 +663,7 @@ begin
   begin
     Result.Value := NewNode(Line.Value);
     Node := GetSource(Result);
-    Node.Value := GetValue(Result.Value);
+    Node.Value := GetValue(Result.Value, Node);
   end;
   if Line.FType <> nil then
     Result.FType := NewNode(Line.FType);
@@ -731,7 +733,7 @@ begin
     for i:=0 to High(Node.Params) do
       AddParam(GetSource(Node), GetParam(Node.Params[i]), i);
     Run(Node.Source);
-    Node.Value := GetData(Node.Source);
+    Node.Value := GetData(Node.Source, Node.Source);
   end;
   if Node.Attr = naFunc then
     CallFunc(Node);
@@ -766,7 +768,7 @@ begin
           Node.Source.Value.Value := GetValue(Node.Value);
       end
       else
-        Node.Source.Value := GetValue(Node.Value);
+        Node.Source.Value := GetValue(Node.Value, Node.Source);
     end;
   end;
 
@@ -898,7 +900,7 @@ begin
   Result := NewNode(Line);
   NextNode(Result);
   Run(Result);
-  if GetData(Result) <> nil then
+  if (Result <> nil) and (GetData(Result, Result.Value) <> nil) then
   begin
     Data := GetData(Result).Name;
     Parse(Result, Data);
