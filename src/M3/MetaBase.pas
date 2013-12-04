@@ -92,9 +92,9 @@ type
     function AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
     function GetIndex(Node: PNode): String;
     function SetValue(Node: PNode; Value: String): PNode;
-    function GetValue(Node: PNode; Source: PNode = nil): PNode;
+    function GetValue(Node: PNode): PNode;
     function GetParam(Node: PNode): PNode;
-    function GetData(Node: PNode; Source: PNode = nil): PNode;
+    function GetData(Node: PNode): PNode;
     function GetType(Node: PNode): PNode;
     function GetSource(Node: PNode): PNode;
     procedure NewModule(Node: PNode);
@@ -308,21 +308,38 @@ begin
     Node.Source.Value := Result;
 end;
 
-function TMeta.GetValue(Node: PNode; Source: PNode = nil): PNode;
+function FindValue(var ValueStack: ANode; Value: PNode): Boolean;
+var i: Integer;
 begin
-  Result := Node;
-  while Result <> nil do
+  Result := False;
+  for i:=0 to High(ValueStack) do
+  if ValueStack[i] = Value then
   begin
-    if (Result.Attr <> naPointer) and (Result.Source <> nil) then
-      Result := Result.Source
+    Result := True;
+    Exit;
+  end;
+end;
+
+function TMeta.GetValue(Node: PNode): PNode;
+var ValueStack: ANode;
+begin
+  Result := nil;
+  while Node <> nil do
+  begin
+    SetLength(ValueStack, High(ValueStack) + 2);
+    ValueStack[High(ValueStack)] := Node;
+    if (Node.Attr <> naPointer) and (Node.Source <> nil) then
+      Node := Node.Source
     else
     begin
-      if Result.Attr = naPointer then Exit;
-      if Result.Value = nil then Exit;
-      if Result.Value = Source then Exit;
-      Result := Result.Value;
+      Result := Node;
+      if Node.Attr = naPointer then Break;
+      if Node.Value = nil then Break;
+      if FindValue(ValueStack, Node.Value) then Break;
+      Node := Node.Value;
     end;
   end;
+  SetLength(ValueStack, 0);
 end;
 
 function TMeta.GetParam(Node: PNode): PNode;
@@ -336,21 +353,25 @@ begin
   end;
 end;
 
-function TMeta.GetData(Node: PNode; Source: PNode = nil): PNode;
+function TMeta.GetData(Node: PNode): PNode;
+var ValueStack: ANode;
 begin
   Result := nil;
   while Node <> nil do
   begin
+    SetLength(ValueStack, High(ValueStack) + 2);
+    ValueStack[High(ValueStack)] := Node;
     if (Node.Attr <> naPointer) and (Node.Source <> nil) then
       Node := Node.Source
     else
     begin
       if Node.Attr = naData then
         Result := Node;
-      if Node.Value = Source then Exit;
+      if FindValue(ValueStack, Node.Value) then Break;
       Node := Node.Value;
     end;
   end;
+  SetLength(ValueStack, 0);
 end;
 
 function TMeta.GetSource(Node: PNode): PNode;
@@ -663,7 +684,7 @@ begin
   begin
     Result.Value := NewNode(Line.Value);
     Node := GetSource(Result);
-    Node.Value := GetValue(Result.Value, Node);
+    Node.Value := GetValue(Result.Value);
   end;
   if Line.FType <> nil then
     Result.FType := NewNode(Line.FType);
@@ -733,7 +754,7 @@ begin
     for i:=0 to High(Node.Params) do
       AddParam(GetSource(Node), GetParam(Node.Params[i]), i);
     Run(Node.Source);
-    Node.Value := GetData(Node.Source, Node.Source);
+    Node.Value := GetData(Node.Source);
   end;
   if Node.Attr = naFunc then
     CallFunc(Node);
@@ -768,7 +789,7 @@ begin
           Node.Source.Value.Value := GetValue(Node.Value);
       end
       else
-        Node.Source.Value := GetValue(Node.Value, Node.Source);
+        Node.Source.Value := GetValue(Node.Value);
     end;
   end;
 
@@ -900,7 +921,7 @@ begin
   Result := NewNode(Line);
   NextNode(Result);
   Run(Result);
-  if (Result <> nil) and (GetData(Result, Result.Value) <> nil) then
+  if (Result <> nil) and (GetData(Result) <> nil) then
   begin
     Data := GetData(Result).Name;
     Parse(Result, Data);

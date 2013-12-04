@@ -2,76 +2,58 @@
 
 
 [basic task]
-development
+generation
 
-support
+modufication
 
 
-[System]
+[optimization]
+
+GetData RecDefens
+
+
+
+[system]
 
 dynamic plasticity
 
 подчеркивание при наведении
 
-RandSeed := 1
+for RandSeed
 
-
-
+TextNode
 
 
 
 
 [test]
-
 /../dll/math.dll.meta
 
-func?a:int&b:int
-
-
-
-je?func?2&2;&4;#$P5| 
-
-SetControls
-
-je$R5?func?2&2;&4;#$P5|
-
-je$R5?func$R5?2&2;&4;#$P5|
-
-Run
-
-je$R5?func$R4E2?2&2;&4;#$P5|
-
-Error
-
-SetControls
-
-je$R5?func$R5E2N5?2&2;&4;#$P5|
-
-Gen
-
-Run
-
-$P5
-je$I5
-func$I5G5
-$P-1
-
-R = Run
-G = Gen
-
-when SetControls then
-rec going to up
+$G1?2&2#$I1
 
 
 
 
 
-GetNodeBody
+
+
+
+G1
+add?@55&@56
 
 
 
 
-GetData RecDefens
+
+
+
+
+
+
+
+
+
+
 
 
 

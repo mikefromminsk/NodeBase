@@ -211,6 +211,6 @@ end;
 initialization
   Randomize;
   //for RandSeed := 0 to 1 do
-  //RandSeed := 4;
+  //RandSeed := 0;
   Gen := TMGen.Create;
 end.
