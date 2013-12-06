@@ -14,7 +14,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure InputBoxKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    procedure Send(Line: String; WriteToConsole: Boolean = True);
+    procedure Send(Line: String; WriteToConsole: Boolean = False);
   end;
 
 var
@@ -26,7 +26,7 @@ implementation
 
 uses MetaBase;
 
-procedure TMGConcole.Send(Line: String; WriteToConsole: Boolean = True);
+procedure TMGConcole.Send(Line: String; WriteToConsole: Boolean = False);
 var Node: PNode;
 begin
   Node := Gen.Get(Line);
@@ -40,7 +40,7 @@ var i: Integer;
 begin
   InputBox.SelStart := Length(InputBox.Lines.Text);
   for i:=0 to InputBox.Lines.Count - 1 do
-    Send(InputBox.Lines[i], False);
+    Send(InputBox.Lines[i]);
 end;
 
 procedure TMGConcole.InputBoxKeyUp(Sender: TObject; var Key: Word;

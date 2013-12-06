@@ -55,7 +55,8 @@ type
     RefCount    : Integer;
 
     Generate    : Integer;     //controls
-
+    RunCount    : Integer;
+    
     Data        : Pointer;
   end;
 
@@ -635,6 +636,7 @@ begin
       'C' : Result.Count := StrToInt(Line.ControlsValues[i]);
       'T' : Result.SaveTime := StrToFloat(Line.ControlsValues[i]);
       'G' : Result.Generate := StrToInt(Line.ControlsValues[i]);
+      'R' : Result.RunCount := StrToInt(Line.ControlsValues[i]);
     end;
   end;
 
