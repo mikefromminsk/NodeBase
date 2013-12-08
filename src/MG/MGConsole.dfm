@@ -29,16 +29,9 @@ object MGConcole: TMGConcole
     Font.Name = 'MS Sans Serif'
     Font.Style = []
     Lines.Strings = (
-      '/../dll/math.dll.meta$R1'
+      '/../dll/math.meta$R1'
       ''
-      'a:=0'
-      ''
-      'func'
-      'a=add?a&1'
-      ''
-      'func$R10'
-      ''
-      'a')
+      'func$R1000G1?2&2')
     ParentFont = False
     TabOrder = 0
     WordWrap = False

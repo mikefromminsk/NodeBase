@@ -150,10 +150,6 @@ begin
   if Node.FType <> nil then
     Result := Result + ':' + GetIndex(Node.FType);
   Str := '';
-  {if Node.Count <> 0 then
-    Str := Str + 'C' + IntToStr(Node.Count);
-  if Node.SaveTime <> 0 then
-    Str := Str + 'T' + FloatToStr(Node.SaveTime); }
   if Node.Generate <> 0 then
     Str := Str + 'G' + IntToStr(Node.Generate);
   if Str <> '' then

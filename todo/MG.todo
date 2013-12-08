@@ -26,22 +26,13 @@ TextNode
 
 call set error
 
-$G1R100
+
 
 
 [desktop]
 
 
-$G1R100?2&2
-
-
-
-
-
-add?@55&@56
-
-
-
+delete old
 
 
 
