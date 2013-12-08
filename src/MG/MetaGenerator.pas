@@ -13,6 +13,7 @@ type
     function RandomNode(Node: PNode): PNode;
     function RandomParams(Func: PNode; Node: PNode): String;
     procedure GenScript(Node: PNode);
+    function GetNodeText(Node: PNode): String;
     procedure Analysing(Node: PNode); override;
   end;
 
@@ -26,6 +27,27 @@ function TMGen.AddNode(var Arr: ANode; Node: PNode): PNode;
 begin
   Result := AddSubNode(Arr);
   Arr[High(Arr)] := Node;
+end;
+
+function RandomArr(var Index: Integer; Arr: TIntegerDynArray): Integer;
+var i, SumArr: Integer;
+begin
+  SumArr := SumInt(Arr);
+  if SumArr = 0 then
+  begin
+    Result := -1;
+    Exit;
+  end;
+  Index := Random(MaxInt) mod SumArr;
+  for i:=0 to High(Arr) do
+  begin
+    if Index - Arr[i] < 0 then
+    begin
+      Result := i;
+      Exit;
+    end;
+    Index := Index - Arr[i];
+  end;
 end;
 
 procedure TMGen.GenNode(Node: PNode);
@@ -52,40 +74,6 @@ begin
     Node.Value := NewNode(NextId);
 end;
 
-function RandomArr(var Index: Integer; Arr: TIntegerDynArray): Integer;
-var i, SumArr: Integer;
-begin
-  SumArr := SumInt(Arr);
-  if SumArr = 0 then
-  begin
-    Result := -1;
-    Exit;
-  end;
-  Index := Random(MaxInt) mod SumArr;
-  for i:=0 to High(Arr) do
-  begin
-    if Index - Arr[i] < 0 then
-    begin
-      Result := i;
-      Exit;
-    end;
-    Index := Index - Arr[i];
-  end;
-end;
-
-function TMGen.RandomParams(Func: PNode; Node: PNode): String;
-var i, Index: Integer;
-begin
-  Result := '';
-  if High(Func.Params) <> -1 then
-  begin
-    Result := '?';
-    for i:=0 to High(Func.Params) do
-      Result := Result + GetIndex(RandomNode(Node)) + '^' + NextId + '&';
-    Delete(Result, Length(Result), 1);
-  end;
-end;
-
 function TMGen.RandomNode(Node: PNode): PNode;
 var Index: Integer; Arr: TIntegerDynArray;
 begin
@@ -102,6 +90,19 @@ begin
     3: Result := Node.ParentLocal.Local[Index];
   end;
   SetLength(Arr, 0);
+end;
+
+function TMGen.RandomParams(Func: PNode; Node: PNode): String;
+var i, Index: Integer;
+begin
+  Result := '';
+  if High(Func.Params) <> -1 then
+  begin
+    Result := '?';
+    for i:=0 to High(Func.Params) do
+      Result := Result + GetIndex(RandomNode(Node)) + '^' + NextId + '&';
+    Delete(Result, Length(Result), 1);
+  end;
 end;
 
 procedure TMGen.GenScript(Node: PNode);
@@ -133,7 +134,59 @@ begin
   end;
 end;
 
-
+function TMGen.GetNodeText(Node: PNode): String;
+var
+  Str: String;
+  i: Integer;
+  Next: PNode;
+begin
+  Result := '';
+  if Node = nil then Exit;
+  if Node.Source <> nil then
+    Result := Result + GetIndex(Node.Source) + '^';
+  if Node.ParentName <> nil then
+    Result := Result + GetIndex(Node.ParentName);
+  Result := Result + GetIndex(Node);
+  if Node.FType <> nil then
+    Result := Result + ':' + GetIndex(Node.FType);
+  Str := '';
+  {if Node.Count <> 0 then
+    Str := Str + 'C' + IntToStr(Node.Count);
+  if Node.SaveTime <> 0 then
+    Str := Str + 'T' + FloatToStr(Node.SaveTime); }
+  if Node.Generate <> 0 then
+    Str := Str + 'G' + IntToStr(Node.Generate);
+  if Str <> '' then
+    Result := Result + '$' + Str;
+  Str := '';
+  for i:=0 to High(Node.Params) do
+    Str := Str + GetIndex(Node.Params[i]) + '&';
+  if Str <> '' then
+  begin
+    Delete(Str, Length(Str), 1);
+    Result := Result + '?' + Str + ';';
+  end;
+  if (Node.FTrue <> nil) or (Node.FElse <> nil) then
+  begin
+    if Node.FTrue <> nil then
+      Result := Result + '#' + GetIndex(Node.FTrue);
+    if Node.FElse <> nil then
+      Result := Result + '|' + GetIndex(Node.FElse);
+  end
+  else
+  if Node.Value <> nil then
+    Result := Result + '#' + GetIndex(Node.Value);
+  if GetData(Node) <> nil then
+    Result := Result + '=' + EncodeName(GetData(Node).Name);
+  Next := Node.Next;
+  while Next <> nil do
+  begin
+    Result := Result + #10 + GetIndex(Next) + '=' + GetIndex(Next.Value);
+    Next := Next.Next;
+  end;
+  for i:=0 to High(Node.Local) do
+    Result := Result + #10#10 + GetNodeText(Node.Local[i]);
+end;
 
 
 procedure TMGen.Analysing(Node: PNode);

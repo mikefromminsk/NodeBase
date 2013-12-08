@@ -48,59 +48,7 @@ implementation
 uses
   MetaBase;
 
-(*function TMeta.GetNodeText(Node: PNode): String;
-var
-  Str: String;
-  i: Integer;
-  Next: PNode;
-begin
-  Result := '';
-  if Node = nil then Exit;
-  if Node.Source <> nil then
-    Result := Result + GetIndex(Node.Source) + '^';
-  if Node.ParentName <> nil then
-    Result := Result + GetIndex(Node.ParentName);
-  Result := Result + GetIndex(Node);
-  if Node.FType <> nil then
-    Result := Result + ':' + GetIndex(Node.FType);
-  Str := '';
-  {if Node.Count <> 0 then
-    Str := Str + 'C' + IntToStr(Node.Count);
-  if Node.SaveTime <> 0 then
-    Str := Str + 'T' + FloatToStr(Node.SaveTime); }
-  if Node.Generate <> 0 then
-    Str := Str + 'G' + IntToStr(Node.Generate);
-  if Str <> '' then
-    Result := Result + '$' + Str;
-  Str := '';
-  for i:=0 to High(Node.Params) do
-    Str := Str + GetIndex(Node.Params[i]) + '&';
-  if Str <> '' then
-  begin
-    Delete(Str, Length(Str), 1);
-    Result := Result + '?' + Str + ';';
-  end;
-  if (Node.FTrue <> nil) or (Node.FElse <> nil) then
-  begin
-    if Node.FTrue <> nil then
-      Result := Result + '#' + GetIndex(Node.FTrue);
-    if Node.FElse <> nil then
-      Result := Result + '|' + GetIndex(Node.FElse);
-  end
-  else
-  if Node.Value <> nil then
-    Result := Result + '#' + GetIndex(Node.Value);
-  if GetData(Node) <> nil then
-    Result := Result + '=' + EncodeName(GetData(Node).Name);
-  Next := Node.Next;
-  while Next <> nil do
-  begin
-    Result := Result + #10 + GetIndex(Next) + '=' + GetIndex(Next.Value);
-    Next := Next.Next;
-  end;
-  for i:=0 to High(Node.Local) do
-    Result := Result + #10#10 + GetNodeText(Node.Local[i]);
-end;*)
+
 
 
 

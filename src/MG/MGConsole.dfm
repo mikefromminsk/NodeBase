@@ -36,7 +36,7 @@ object MGConcole: TMGConcole
       'func'
       'a=add?a&1'
       ''
-      'func$R10G1'
+      'func$R10'
       ''
       'a')
     ParentFont = False
