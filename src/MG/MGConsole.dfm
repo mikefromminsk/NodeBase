@@ -11,7 +11,7 @@ object MGConcole: TMGConcole
   PixelsPerInch = 96
   TextHeight = 13
   object Splitter: TSplitter
-    Left = 205
+    Left = 245
     Top = 0
     Height = 486
     Align = alRight
@@ -19,7 +19,7 @@ object MGConcole: TMGConcole
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 205
+    Width = 245
     Height = 486
     Align = alClient
     BorderStyle = bsNone
@@ -29,23 +29,25 @@ object MGConcole: TMGConcole
     Font.Name = 'MS Sans Serif'
     Font.Style = []
     Lines.Strings = (
-      '/../dll/math.dll.meta'
+      '/../dll/math.dll.meta$R1'
       ''
-      'a=0'
+      'a:=0'
       ''
       'func'
       'a=add?a&1'
       ''
-      'func')
+      'func$R10G1'
+      ''
+      'a')
     ParentFont = False
     TabOrder = 0
     WordWrap = False
     OnKeyUp = InputBoxKeyUp
   end
   object ModuleBox: TRichEdit
-    Left = 208
+    Left = 248
     Top = 0
-    Width = 224
+    Width = 184
     Height = 486
     Align = alRight
     BorderStyle = bsNone

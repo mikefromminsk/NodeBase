@@ -18,8 +18,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 414
-    Width = 389
+    Top = 410
+    Width = 381
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -31,8 +31,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 389
-    Height = 414
+    Width = 381
+    Height = 410
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -43,7 +43,7 @@ object GG: TGG
     Font.Name = 'Arial'
     Font.Style = []
     Lines.Strings = (
-      '/../dll/math.dll.meta'
+      '/../dll/math.dll.meta$R1'
       ''
       'func?a:float#res'
       'res=0,0'
@@ -58,8 +58,7 @@ object GG: TGG
       'while^lab'
       'here^exit'
       'res=fsqrt?fmul?res&6,0'
-      ''
-      'func?750,0')
+      '')
     ParentColor = True
     ParentFont = False
     ScrollBars = ssVertical
@@ -70,8 +69,8 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 418
-    Width = 389
+    Top = 414
+    Width = 381
     Height = 58
     Align = alBottom
     BevelInner = bvNone

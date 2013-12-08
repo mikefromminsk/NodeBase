@@ -1,11 +1,12 @@
 unit MetaLine;
 
-{var
+{
   Line: TLine;
 begin
   Line := TLine.Create('name$I5');
   ShowMessage(Line.ControlsValues[0]);
-  Exit;}
+  Exit;
+  }
 
 interface
 
@@ -124,8 +125,7 @@ begin
         Name := '/' + Name;
       SetLength(Path, 1);
       Path[0] := Name;
-    end
-    else
+    end;
     if Name[1] <> '!' then
     begin
       if Pos('$', Name) <> 0 then
@@ -145,7 +145,7 @@ begin
           Delete(S, 1, i-1);
         end;
       end;
-      while Pos('..', Name) <> 0 do
+      {while Pos('..', Name) <> 0 do
         Insert('0', Name, Pos('..', Name) + 1);
       i := 1;
       dx := 0;
@@ -156,7 +156,7 @@ begin
         Path[High(Path)] := Copy(Name, i, dx - i);
         i := dx + 1;
       end;
-      Name := Path[0];
+      Name := Path[0];}
     end
     else
     begin

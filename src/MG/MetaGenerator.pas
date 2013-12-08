@@ -201,12 +201,6 @@ var
 begin
   inherited Analysing(Node);
 
-  if Node.RunCount > 0 then
-  begin
-    for i:=0 to Node.RefCount do
-      Run(Node);
-  end;
-
   if Node.Generate > 0 then
   begin
     GenNode(Node);

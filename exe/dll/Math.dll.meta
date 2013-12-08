@@ -1,5 +1,5 @@
 
-/../dll/math.dll
+/../dll/math.dll$R1
 
 int=!4
 
@@ -7,7 +7,60 @@ float=!8
 
 string=!*
 
+
 add?a:int&b:int
 
+fadd?a:float&b:float
+
+inc?a:int
+
+finc?a:float
+
 sub?a:int&b:int
+
+fsub?a:float&b:float
+
+mul?a:int&b:int
+
+fmul?a:float&b:float
+
+_div?a:int&b:int
+
+fdiv?a:float&b:float
+
+sqr?a:int
+
+fsqr?a:float
+
+sqrt?a:int
+
+fsqrt?a:float
+
+jmp
+
+jg?a:int&a:int
+
+fjg?a:float&b:float
+
+jl?a:int&b:int
+
+fjl?a:float&b:float
+
+je?a:int&b:int
+
+fje?a:float&b:float
+
+stoi?a:int
+
+stof?a:int
+
+itos?a:int
+
+ftos?a:float
+
+round?a:float
+
+abs?a:int
+
+fabs?a:float
 

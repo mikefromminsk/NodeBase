@@ -685,8 +685,8 @@ begin
   if Line.Value <> nil then
   begin
     Result.Value := NewNode(Line.Value);
-    Node := GetSource(Result);
-    Node.Value := GetValue(Result.Value);
+    {Node := GetSource(Result);
+    Node.Value := GetValue(Result.Value); }
   end;
   if Line.FType <> nil then
     Result.FType := NewNode(Line.FType);
@@ -751,7 +751,8 @@ begin
     NewModule(Node);
   for i:=0 to High(Node.Params) do
     Run(Node.Params[i]);
-  if (Node.Source <> nil) and ((Node.Source.ParentLocal = Module) or (Node.Source.Attr = naFunc)) then
+  if (Node.Source <> nil) and (((Node.Source.ParentLocal = Module) and (Node.Source.Next <> nil))
+    or (Node.Source.Attr = naFunc)) then
   begin
     for i:=0 to High(Node.Params) do
       AddParam(GetSource(Node), GetParam(Node.Params[i]), i);
@@ -918,11 +919,15 @@ begin
 end;
 
 function TMeta.Get(Line: String): PNode;
-var Data: String;
+var
+  Data: String;
+  i: Integer;
 begin
   Result := NewNode(Line);
   NextNode(Result);
-  Run(Result);
+  if Result <> nil then
+    for i:=1 to Result.RunCount do
+      Run(Result);
   if (Result <> nil) and (GetData(Result) <> nil) then
   begin
     Data := GetData(Result).Name;

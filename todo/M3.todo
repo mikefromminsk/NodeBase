@@ -176,7 +176,18 @@ $I1?2&2
 
 
 
+/../dll/math.dll.meta$R1
 
+add$R1?1&2
+
+a:=0
+
+func
+a=add?a&1
+
+func$R1
+
+a
 
 
 
