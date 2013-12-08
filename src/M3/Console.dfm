@@ -58,7 +58,8 @@ object GG: TGG
       'while^lab'
       'here^exit'
       'res=fsqrt?fmul?res&6,0'
-      '')
+      ''
+      'func$R1?750,0')
     ParentColor = True
     ParentFont = False
     ScrollBars = ssVertical

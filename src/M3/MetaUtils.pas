@@ -37,7 +37,6 @@ function GetProcAddress(Handle: Integer; FuncName: String): Integer;
 function CopyMem(S: String; Index, Count: Integer): String;
 function PosMem(Index: Integer; SubStr, S: String): Integer;
 function CutString(var Str: String; Mask: String): String;
-procedure Parse(Node: Pointer; var Data: String);
 procedure WaitThread(Handle: Integer; Time: Cardinal);
 procedure RunInThread(Node: Pointer);
 
@@ -48,6 +47,60 @@ implementation
 
 uses
   MetaBase;
+
+(*function TMeta.GetNodeText(Node: PNode): String;
+var
+  Str: String;
+  i: Integer;
+  Next: PNode;
+begin
+  Result := '';
+  if Node = nil then Exit;
+  if Node.Source <> nil then
+    Result := Result + GetIndex(Node.Source) + '^';
+  if Node.ParentName <> nil then
+    Result := Result + GetIndex(Node.ParentName);
+  Result := Result + GetIndex(Node);
+  if Node.FType <> nil then
+    Result := Result + ':' + GetIndex(Node.FType);
+  Str := '';
+  {if Node.Count <> 0 then
+    Str := Str + 'C' + IntToStr(Node.Count);
+  if Node.SaveTime <> 0 then
+    Str := Str + 'T' + FloatToStr(Node.SaveTime); }
+  if Node.Generate <> 0 then
+    Str := Str + 'G' + IntToStr(Node.Generate);
+  if Str <> '' then
+    Result := Result + '$' + Str;
+  Str := '';
+  for i:=0 to High(Node.Params) do
+    Str := Str + GetIndex(Node.Params[i]) + '&';
+  if Str <> '' then
+  begin
+    Delete(Str, Length(Str), 1);
+    Result := Result + '?' + Str + ';';
+  end;
+  if (Node.FTrue <> nil) or (Node.FElse <> nil) then
+  begin
+    if Node.FTrue <> nil then
+      Result := Result + '#' + GetIndex(Node.FTrue);
+    if Node.FElse <> nil then
+      Result := Result + '|' + GetIndex(Node.FElse);
+  end
+  else
+  if Node.Value <> nil then
+    Result := Result + '#' + GetIndex(Node.Value);
+  if GetData(Node) <> nil then
+    Result := Result + '=' + EncodeName(GetData(Node).Name);
+  Next := Node.Next;
+  while Next <> nil do
+  begin
+    Result := Result + #10 + GetIndex(Next) + '=' + GetIndex(Next.Value);
+    Next := Next.Next;
+  end;
+  for i:=0 to High(Node.Local) do
+    Result := Result + #10#10 + GetNodeText(Node.Local[i]);
+end;*)
 
 
 
@@ -315,60 +368,6 @@ begin
     Dec(PosRTag, Length(RTag));
   Result := CopyMem(Result, Max(Index, PosLTag), Min(Count, PosRTag));
 end;
-
-procedure Parse(Node: Pointer; var Data: String);
-var
-  NodeType, Field: PNode;
-  Mask, PartMask, DownMask, DownValue: String;
-  Index, FieldIndex, Level, i: Integer;
-  IsPointer: Boolean;
-begin
-  IsPointer := False;
-  NodeType := Base.GetType(Node);
-  if NodeType = nil then Exit;
-  Mask := NodeType.Name;
-  FieldIndex := 0;
-  repeat
-    Index := NextIndex(0, ['.', '('], Mask);
-    if (Mask <> '') and (Index = MaxInt) then
-    begin
-      Mask := Mask + '.';
-      Index := Length(Mask);
-    end;
-    if Index = MaxInt then Break;
-    if Mask[Index] = '(' then
-    begin
-      IsPointer := True;
-      Level := 1;
-      i := Index;
-      while (Level <> 0) and (i < Length(Mask)) do
-      begin
-        i := NextIndex(i, [')', '('], Mask);
-        if Mask[i] = ')' then Dec(Level);
-        if Mask[i] = '(' then Inc(Level);
-      end;
-      DownMask := Copy(Mask, Index + 1, i - Index -1);
-      Field := Base.AddField(Node, Base.NewNode(IntToStr(FieldIndex)));
-      Field.FType := Base.NewNode('!' + DownMask);
-      Field.Attr := naPointer;
-      Parse(Field, Data);
-      Delete(Mask, Index, i - Index + 1);
-      Index := NextIndex(0, ['.', '('], Mask);
-    end;
-    PartMask := Copy(Mask, 1, Index - 1);
-    DownValue := CutString(Data, PartMask);
-    if (not IsPointer) and (Mask[Index] = '.') then
-    begin
-      Field := Base.AddField(Node, Base.NewNode(IntToStr(FieldIndex)));
-      Field.FType := Base.NewNode('!' + PartMask + '.');
-      Base.SetValue(Field, DownValue);
-    end;
-    Inc(FieldIndex);
-    Delete(Mask, 1, Index);
-  until Index = MaxInt;
-end;
-
-
 
 initialization
   TimerList := MTimerList.Create;

@@ -109,7 +109,7 @@ type
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
     procedure Analysing(Node: PNode); virtual;
-    function Get(Line: String): PNode;// virtual;
+    function Get(Line: String): PNode;
   end;
 
 const
@@ -120,8 +120,7 @@ const
   naFile = 4;
   naFunc = 5;          //naStdFunc = $51; naFastCallFunc = $52;
   naNumber = 6;
-  naPointer = 7;
-  naRoot = 8;
+  naRoot = 7;
 
   msec = 86400000;
   RootPath = 'data';
@@ -239,8 +238,6 @@ begin
   Field.Source := nil;
   if Node.Source <> nil then
     Node := Node.Source;
-  if (Node.Value <> nil) and (Node.Value.Attr = naPointer) and (Node.Value.Source <> nil)then
-    Node := Node.Value.Source;
   for i:=0 to High(Node.Fields) do
     if Node.Fields[i].ParentName = Field.ParentName then
     begin
@@ -329,12 +326,11 @@ begin
   begin
     SetLength(ValueStack, High(ValueStack) + 2);
     ValueStack[High(ValueStack)] := Node;
-    if (Node.Attr <> naPointer) and (Node.Source <> nil) then
+    if Node.Source <> nil then
       Node := Node.Source
     else
     begin
       Result := Node;
-      if Node.Attr = naPointer then Break;
       if Node.Value = nil then Break;
       if FindValue(ValueStack, Node.Value) then Break;
       Node := Node.Value;
@@ -349,7 +345,6 @@ begin
   while Node <> nil do
   begin
     Result := Node;
-    if Result.Attr = naPointer then Exit;
     Node := Node.Value;
   end;
 end;
@@ -362,7 +357,7 @@ begin
   begin
     SetLength(ValueStack, High(ValueStack) + 2);
     ValueStack[High(ValueStack)] := Node;
-    if (Node.Attr <> naPointer) and (Node.Source <> nil) then
+    if Node.Source <> nil then
       Node := Node.Source
     else
     begin
@@ -382,11 +377,7 @@ begin
   while Result.Source <> nil do
   begin
     Result := Result.Source;
-    if (Result.Value <> nil) and (Result.Value.Attr = naPointer) then
-    begin
-      Result := Result.Value;
-      Exit;
-    end;
+    if Result.Value <> nil then  Exit;
   end;
 end;
 
@@ -683,49 +674,14 @@ begin
   end
   else
   if Line.Value <> nil then
-  begin
     Result.Value := NewNode(Line.Value);
-    {Node := GetSource(Result);
-    Node.Value := GetValue(Result.Value); }
-  end;
   if Line.FType <> nil then
     Result.FType := NewNode(Line.FType);
   for i:=0 to High(Line.Local) do
     AddLocal(Result, NewNode(Line.Local[i]));
-  if IsPointer = True then
-  begin
-    Node := GetData(Result);
-    if Node <> nil then
-      AddValue(Result, IntToStr4(Integer(PChar(Node.Name))));
-    Result.Attr := naPointer;
-  end;
-
   if Result.Source <> nil then
     Inc(Result.Source.RefCount);
   AddEvent(Result);
-
-end;
-
-procedure Build(Node: PNode; ToUp: Boolean = False);
-var
-  i: Integer;
-  Value: PNode;
-  Data: String;
-begin
-  for i:=0 to High(Node.Fields) do
-  begin
-    if ToUp = False then
-      Build(Node.Fields[i]);
-    Value := Base.GetData(Node.Fields[i]);
-    if Value <> nil then
-      if Node.Attr = naPointer
-      then Data := Data + IntToStr4(Integer(PChar(Value.Name)))
-      else Data := Data + Value.Name;
-    if i = High(Node.Fields) then
-      Base.SetValue(Node, Data);
-  end;
-  if Node.ParentField <> nil then
-    Build(Node.ParentField, True);
 end;
 
 function CompareWithZero(Node: PNode): Integer;
@@ -747,6 +703,7 @@ begin
   NextNode:
   if Node = nil then Exit;
   Analysing(Node);
+
   if Node.Attr = naFile then
     NewModule(Node);
   for i:=0 to High(Node.Params) do
@@ -755,7 +712,7 @@ begin
     or (Node.Source.Attr = naFunc)) then
   begin
     for i:=0 to High(Node.Params) do
-      AddParam(GetSource(Node), GetParam(Node.Params[i]), i);
+      AddParam(GetSource(Node), GetValue(Node.Params[i]), i);
     Run(Node.Source);
     Node.Value := GetData(Node.Source);
   end;
@@ -779,21 +736,7 @@ begin
   if (Node.Value <> nil) and (Node.Source <> nil) then
   begin
     Run(Node.Value);
-    if (Node.Source.Value <> nil) and (Node.Source.Value.Attr = naPointer) then
-    begin
-      Node.Source.Value.Value := GetValue(Node.Value);
-      SetValue(Node.Source.Value.Source.Value, PChar(Integer(StrToInt4(Node.Source.Value.Value.Name))));
-    end
-    else
-    begin
-      if Node.Source.Value.Attr = naWord then
-      begin
-        if Node.Source.Value <> GetValue(Node.Value) then
-          Node.Source.Value.Value := GetValue(Node.Value);
-      end
-      else
-        Node.Source.Value := GetValue(Node.Value);
-    end;
+    Node.Source.Value := GetValue(Node.Value);
   end;
 
   Node := Node.Next;
@@ -813,6 +756,8 @@ begin
       AddLocal(Module, Node);
   Prev := Node;
 end;
+
+
 
 procedure TMeta.SaveNode(Node: PNode);
 var ParentIndex: PNode;
@@ -928,12 +873,6 @@ begin
   if Result <> nil then
     for i:=1 to Result.RunCount do
       Run(Result);
-  if (Result <> nil) and (GetData(Result) <> nil) then
-  begin
-    Data := GetData(Result).Name;
-    Parse(Result, Data);
-    Build(Result);
-  end;
 end;
 
 

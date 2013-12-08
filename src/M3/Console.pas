@@ -24,7 +24,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure CreateParams(var Params: TCreateParams); override;
     procedure FormShow(Sender: TObject);
-    function M(Line: String; WriteToConsole: Boolean = True): String;
+    function Send(Line: String; WriteToConsole: Boolean = False): String;
     procedure FormDestroy(Sender: TObject);
     procedure OutputBoxKeyPress(Sender: TObject; var Key: Char);
   private
@@ -41,7 +41,7 @@ uses
 
 {$R *.dfm}
 
-function TGG.M(Line: String; WriteToConsole: Boolean = True): String;
+function TGG.Send(Line: String; WriteToConsole: Boolean = False): String;
 var
   Node, Data: PNode;
 begin
@@ -67,7 +67,7 @@ end;
 function HttpResponse(Line: String): String;
 begin
   Result := 'HTTP/1.1 200 OK'#13#10#13#10 +
-  '<html><head></head><body>' + GG.M(Line) + '</body></html>';
+  '<html><head></head><body>' + GG.Send(Line) + '</body></html>';
 end;
 
 procedure TGG.ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
@@ -111,7 +111,7 @@ procedure TGG.InputBoxKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if Key = 13 then
-    M(InputBox.Lines[InputBox.Lines.Count-1], False);
+    Send(InputBox.Lines[InputBox.Lines.Count-1]);
 end;
 
 procedure TGG.CreateParams(var Params: TCreateParams);
@@ -124,8 +124,8 @@ procedure TGG.FormCreate(Sender: TObject);
 var i: Integer;
 begin
   //RegisterHotKey(GG.Handle, VK_F9, 0, VK_F9);
-  {for i:=0 to InputBox.Lines.Count - 1 do
-    M(InputBox.Lines[i], False);      }
+  for i:=0 to InputBox.Lines.Count - 1 do
+    Send(InputBox.Lines[i]);
 end;
 
 procedure TGG.FormShow(Sender: TObject);
