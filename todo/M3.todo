@@ -27,22 +27,6 @@ meta to down code (c++)
 parser c
 
 
-[transfer]
-node node
-node user user node
-file file
-
-stack transfer methods
-
-ip:host is naUser
-
-identification console(frame) of meta
-
-user root
-user data collision 
-node like link where collision
-
-
 
 [System]
 module is class
@@ -149,58 +133,6 @@ here^exit
 res=fsqrt?fmul?res&6,0
 
 func?750,0
-
-
-[]
-
-/sys/types.meta
-
-/sys/math.dll
-
-/sys/math.dll.meta
-
-
-0,0
-
-1,0
-
-6,0
-
-750,0
-
-3,14031830638005
-
-
-
-
-
-
-$I1?2&2
-
-
-
-
-
-
-/../dll/math.dll.meta$R1
-
-add$R1?1&2
-
-a:=0
-
-func
-a=add?a&1
-
-func$R1
-
-a
-
-
-
-
-
-
-
 
 
 
