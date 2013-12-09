@@ -31,8 +31,11 @@ call set error
 
 [desktop]
 
-
 delete old
+
+ExitCode
+
+je$R100E1?$G1?2&2;&4;#$E1|
 
 
 

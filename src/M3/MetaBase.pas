@@ -56,6 +56,7 @@ type
 
     Generate    : Integer;     //controls
     RunCount    : Integer;
+    ExitCode    : Integer;
     
     Data        : Pointer;
   end;
