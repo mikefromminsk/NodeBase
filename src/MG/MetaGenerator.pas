@@ -166,7 +166,7 @@ begin
   begin
     if Node.FTrue <> nil then
       Result := Result + '#' + GetIndex(Node.FTrue);
-    if Node.FElse <> nil then
+    if Integer(Node.FElse) > 1 then
       Result := Result + '|' + GetIndex(Node.FElse);
   end
   else

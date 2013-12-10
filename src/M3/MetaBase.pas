@@ -57,8 +57,7 @@ type
     Generate    : Integer;     //controls
     RunCount    : Integer;
     Exception   : Integer;
-    
-    Data        : Pointer;
+
   end;
 
   TInterest = record
@@ -610,7 +609,7 @@ begin
     Delete(Line.Name, 1, 1);
     IsPointer := True;
   end;
-  if (Line.Name = '') and (High(Line.ControlsNames) <> -1) then
+  if (Line.Name = '') and (High(Line.Names) <> -1) then
     Line.Name := NextID;
   Result := NewIndex(Line.Name);
   if Result = nil then Exit;
@@ -624,14 +623,14 @@ begin
     else  Result.Attr := naWord;
   end;
 
-  for i:=0 to High(Line.ControlsNames) do
+  for i:=0 to High(Line.Names) do
   begin
-    case Line.ControlsNames[i][1] of
-      'C' : Result.Count := StrToInt(Line.ControlsValues[i]);
-      'T' : Result.SaveTime := StrToFloat(Line.ControlsValues[i]);
-      'G' : Result.Generate := StrToInt(Line.ControlsValues[i]);
-      'R' : Result.RunCount := StrToInt(Line.ControlsValues[i]);
-      'E' : Result.Exception := StrToInt(Line.ControlsValues[i]);
+    case Line.Names[i][1] of
+      'C' : Result.Count := StrToInt(Line.Values[i]);
+      'T' : Result.SaveTime := StrToFloat(Line.Values[i]);
+      'G' : Result.Generate := StrToInt(Line.Values[i]);
+      'R' : Result.RunCount := StrToInt(Line.Values[i]);
+      'E' : Result.Exception := StrToInt(Line.Values[i]);
     end;
   end;
 
@@ -711,7 +710,7 @@ begin
     ExceptionFlag1 := True;
 
   if ExceptionFlag1 = True then
-    Exit;
+    Exit;         
 
   if Node.Attr = naFile then
     NewModule(Node);
@@ -883,6 +882,7 @@ begin
     for i:=1 to Result.RunCount do
     begin
       Run(Result);
+      if ExceptionFlag1 = True then
       if ExceptionFlag1 = True then
         Break;
     end;

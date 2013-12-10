@@ -1,3 +1,17 @@
 je(func(2&2)) ? $I5 : $I2 ;
 -> to ->
 je?func?2&2;;#$I5|$I2
+
+
+all code to functioin 
+ replace
+ search
+ ...
+
+
+
+
+Value to Value and FTruex
+
+
+

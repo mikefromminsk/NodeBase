@@ -31,7 +31,7 @@ object MGConcole: TMGConcole
     Lines.Strings = (
       '/../dll/math.meta$R1'
       ''
-      'func$R1000G1?2&2')
+      'je$R2?1&1#$E1|')
     ParentFont = False
     TabOrder = 0
     WordWrap = False

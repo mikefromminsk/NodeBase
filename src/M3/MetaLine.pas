@@ -24,8 +24,8 @@ type
     Path: array of string;
     ParentLocal: string;
     Source: string;
-    ControlsNames: array of String;
-    ControlsValues: array of String;       //property Controls[Index: Integer]: string read Get write Put;
+    Names: array of String;       //to ControlNames
+    Values: array of String;       //property Controls[Index: Integer]: string read Get write Put;
     FType: TLine;
     Local: array of TLine;
     Params: array of TLine;
@@ -134,14 +134,14 @@ begin
         Delete(Name, Pos('$', Name), MaxInt);
         while S <> '' do
         begin
-          SetLength(ControlsNames, High(ControlsNames) + 2);
-          SetLength(ControlsValues, High(ControlsValues) + 2);
-          ControlsNames[High(ControlsNames)] := S[1];
+          SetLength(Names, High(Names) + 2);
+          SetLength(Values, High(Values) + 2);
+          Names[High(Names)] := S[1];
           Delete(S, 1, 1);
           for i:=1 to Length(S) do
             if not (S[i] in ['0'..'9', ',', '.']) then
               Break;
-          ControlsValues[High(ControlsValues)] := Copy(S, 1, i-1);
+          Values[High(Values)] := Copy(S, 1, i-1);
           Delete(S, 1, i-1);
         end;
       end;
@@ -296,8 +296,8 @@ begin
   if Source <> '' then
     Result := Source + '^';
   Result := Result + ParentLocal + Name;
-  for i:=0 to High(ControlsNames) do
-    Result := Result + ControlsNames[i] + ControlsValues[i];
+  for i:=0 to High(Names) do
+    Result := Result + Names[i] + Values[i];
   if FType <> nil then
     Result := Result + ':' + FType.GetLine;
   if Params <> nil then
