@@ -58,7 +58,7 @@ Exception or Exit code
 2 break for
 1 exit run
 
-je$R100?$G1?2&2;&4;#$E1|
+je$R2?1&1#$E1|
 
 
 

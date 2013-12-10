@@ -13,7 +13,7 @@ type
     function RandomNode(Node: PNode): PNode;
     function RandomParams(Func: PNode; Node: PNode): String;
     procedure GenScript(Node: PNode);
-    function GetNodeText(Node: PNode): String;
+    function GetNodeBody(Node: PNode): String;
     procedure Analysing(Node: PNode); override;
   end;
 
@@ -134,7 +134,7 @@ begin
   end;
 end;
 
-function TMGen.GetNodeText(Node: PNode): String;
+function TMGen.GetNodeBody(Node: PNode): String;
 var
   Str: String;
   i: Integer;
@@ -181,7 +181,7 @@ begin
     Next := Next.Next;
   end;
   for i:=0 to High(Node.Local) do
-    Result := Result + #10#10 + GetNodeText(Node.Local[i]);
+    Result := Result + #10#10 + GetNodeBody(Node.Local[i]);
 end;
 
 
