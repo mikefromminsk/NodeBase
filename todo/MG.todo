@@ -33,7 +33,25 @@ call set error
 
 delete old
 
-ExitCode
+ExceptionBlock
+  PNode;
+  ECode;
+end;
+
+exit
+func Run
+if ExceptionFlag1 then 
+  Exit;
+func Get
+for 
+run
+if ExceptionFlag1 then 
+begin
+  ExceptionFlag1 := False;
+  Break;
+end;
+
+Exception or Exit code
 5 close conn
 4 not run
 3 continue for
