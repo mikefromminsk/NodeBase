@@ -34,8 +34,13 @@ call set error
 delete old
 
 ExitCode
+5 close conn
+4 not run
+3 continue for
+2 break for
+1 exit run
 
-je$R100E1?$G1?2&2;&4;#$E1|
+je$R100?$G1?2&2;&4;#$E1|
 
 
 
