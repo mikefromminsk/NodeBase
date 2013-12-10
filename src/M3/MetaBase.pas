@@ -56,7 +56,7 @@ type
 
     Generate    : Integer;     //controls
     RunCount    : Integer;
-    ExitCode    : Integer;
+    Exception   : Integer;
     
     Data        : Pointer;
   end;
@@ -80,6 +80,8 @@ type
     TimeLine: PEvent;
     TimerInterval: Double;
     Interest: TInterest;
+
+    ExceptionFlag1: Boolean;
 
     constructor Create;
     procedure Load;
@@ -629,6 +631,7 @@ begin
       'T' : Result.SaveTime := StrToFloat(Line.ControlsValues[i]);
       'G' : Result.Generate := StrToInt(Line.ControlsValues[i]);
       'R' : Result.RunCount := StrToInt(Line.ControlsValues[i]);
+      'E' : Result.Exception := StrToInt(Line.ControlsValues[i]);
     end;
   end;
 
@@ -704,6 +707,11 @@ begin
   NextNode:
   if Node = nil then Exit;
   Analysing(Node);
+  if Node.Exception = 1 then
+    ExceptionFlag1 := True;
+
+  if ExceptionFlag1 = True then
+    Exit;
 
   if Node.Attr = naFile then
     NewModule(Node);
@@ -873,7 +881,11 @@ begin
   NextNode(Result);
   if Result <> nil then
     for i:=1 to Result.RunCount do
+    begin
       Run(Result);
+      if ExceptionFlag1 = True then
+        Break;
+    end;
 end;
 
 
