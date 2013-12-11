@@ -3,9 +3,9 @@ MetaCoder
 
 
 [basic task]
-generation
+generation metacode
 
-modufication
+modufication metacode
 
 
 [optimization]
@@ -63,6 +63,8 @@ Exception or Exit code
 
 je$R2?1&1#$E1|
 
+
+je$R100?$G1?2&2;&4;#$E1|
 
 
 

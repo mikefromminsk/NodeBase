@@ -2,7 +2,7 @@
 
 
 [basic task]
-controls
+support MG
 
 
 
@@ -63,6 +63,8 @@ naPointer
 Parse and Build
 
 rec code access trues
+
+filestruct in file like word
 
 
 [controls]
