@@ -26,6 +26,9 @@ TextNode
 
 call set error
 
+last value be equal value
+3.14 3.14 3.14
+
 
 
 
