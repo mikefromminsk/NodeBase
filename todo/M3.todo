@@ -25,6 +25,8 @@ storage time in numbers or in codes
 FElse
 (FElse <> nil) and (FElse <> Pointer(1)) -> (Integer(FElse) > 1)
 
+ideal math model
+
 
 
 [localization]
