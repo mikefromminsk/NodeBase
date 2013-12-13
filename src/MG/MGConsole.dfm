@@ -3,7 +3,7 @@ object MGConcole: TMGConcole
   Top = 124
   BorderStyle = bsSingle
   ClientHeight = 486
-  ClientWidth = 432
+  ClientWidth = 634
   Color = clBtnFace
   ParentFont = True
   OldCreateOrder = False
@@ -11,7 +11,7 @@ object MGConcole: TMGConcole
   PixelsPerInch = 96
   TextHeight = 13
   object Splitter: TSplitter
-    Left = 245
+    Left = 301
     Top = 0
     Height = 486
     Align = alRight
@@ -19,7 +19,7 @@ object MGConcole: TMGConcole
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 245
+    Width = 301
     Height = 486
     Align = alClient
     BorderStyle = bsNone
@@ -31,16 +31,18 @@ object MGConcole: TMGConcole
     Lines.Strings = (
       '/../dll/math.meta$R1'
       ''
-      'je$R2?1&1#$E1|')
+      'je$R100000?$G1?2&2;&4;#$E1|'
+      ''
+      '@149')
     ParentFont = False
     TabOrder = 0
     WordWrap = False
     OnKeyUp = InputBoxKeyUp
   end
   object ModuleBox: TRichEdit
-    Left = 248
+    Left = 304
     Top = 0
-    Width = 184
+    Width = 330
     Height = 486
     Align = alRight
     BorderStyle = bsNone

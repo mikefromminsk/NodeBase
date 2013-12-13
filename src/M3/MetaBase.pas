@@ -106,7 +106,7 @@ type
     function NewNode(Line: String): PNode; overload;
     function NewNode(Line: TLine): PNode; overload;
     procedure Run(Node: PNode);
-    procedure NextNode(Node: PNode);
+    procedure NextNode(var PrevNode: PNode; Node: PNode);
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
@@ -642,7 +642,7 @@ begin
       Result := AddField(Result, NewNode(Line.Path[i]));
     if Line.Source <> '' then
     begin
-      NextNode(NewNode(Line.Source));
+      NextNode(Prev, NewNode(Line.Source));
       Inc(Result.Source.RefCount);  //!!!
       AddEvent(Result);             //!!!
       Result := GetSource(Result);
@@ -650,7 +650,7 @@ begin
     end;
     if (Result.Source = nil) and (Line.Value <> nil) and (Prev <> nil) and (Prev <> Module) then
     begin
-      NextNode(NewNode(Line.Name));
+      NextNode(Prev, NewNode(Line.Name));
       Result.Source := Prev;
     end;
   end;
@@ -700,7 +700,7 @@ begin
 end;
 
 procedure TMeta.Run(Node: PNode);
-label NextNode;
+label NextNode; //Change name
 var FuncResult, i: Integer;
 begin
   NextNode:
@@ -751,18 +751,18 @@ begin
   Goto NextNode;
 end;
 
-procedure TMeta.NextNode(Node: PNode);
+procedure TMeta.NextNode(var PrevNode: PNode; Node: PNode);
 begin
-  if Prev <> nil then
+  if PrevNode <> nil then
   begin
     if Node <> nil then
-      Node.Prev := Prev;
-    Prev.Next := Node;
+      Node.Prev := PrevNode;
+    PrevNode.Next := Node;
   end
   else
     if Node <> nil then
       AddLocal(Module, Node);
-  Prev := Node;
+  PrevNode := Node;
 end;
 
 
@@ -877,7 +877,7 @@ var
   i: Integer;
 begin
   Result := NewNode(Line);
-  NextNode(Result);
+  NextNode(Prev, Result);
   if Result <> nil then
     for i:=1 to Result.RunCount do
     begin
