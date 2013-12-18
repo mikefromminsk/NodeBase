@@ -121,7 +121,8 @@ for testing
 
 
 
-
+save when SafeTime is not nil
+else not save
 
 
 
