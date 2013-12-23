@@ -1,0 +1,101 @@
+<filename data="Unit1">
+<interface/>
+<comment data=" ќпредел€ет внешнее представление этого модул€"/>
+<Uses>
+<usesmodule data="Forms">
+<Uses/>
+<type>
+<class>
+<classname data="TForm1"/>
+<classparent data="TForm">
+<classbody>
+<procedure>
+<procedurename data="FormCreate"/>
+<procedureparams>
+<procedureparam>
+<procedureparamname data="Sender"/>
+<procedureparamtype data="TObject"/>
+<procedureparam/>
+<procedureparams/>
+<procedure/>
+<classbody/>
+<class/>
+<type/>
+<vars>
+<var>
+<varname data="Form1"/>
+<vartype data="TForm1"/>
+<var/>
+<vars/>
+<Implementation/>
+<dirrective data="{$R *.dfm}" updatefunction="changeDirrective"/>
+<Uses>
+<usesmodule data="Dialogs">
+<usesmodule data="SysUtils">
+<Uses/>
+
+<procedure>
+<procedurename data="SayNumber"/>
+<procedureparams>
+<procedureparam>
+<procedureparamname data="number"/>
+<procedureparamtype data="Integer"/>
+<procedureparam/>
+<procedureparams/>
+<procedurebody>
+<procedurename data="ShowMessage"/>
+<procedureparams>
+<procedureparam>
+<procedureparamdata>
+
+
+<function>
+<functionname data="ShowMessage"/>
+<functionparams>
+<functionparam>
+<functionparamvalue>
+
+<function>
+<functionname data="Add"/>
+<functionparams>
+
+<functionparam>
+<functionparamvalue>
+<stringdata data="Number = "/>
+<functionparamvalue/>
+<functionparam/>
+
+
+<functionparam>
+<functionparamvalue>
+
+<function>
+<functionname data="IntToStr"/>
+<functionparams>
+<functionparam>
+<functionparamvalue>
+
+<var data="number"/>
+
+<functionparamvalue/>
+<functionparam/>
+<functionparams/>
+<function/>
+
+<functionparamvalue/>
+<functionparam/>
+<functionparams/>
+<function/>
+
+<functionparamvalue/>
+<functionparam/>
+<functionparams/>
+<function/>
+
+<procedureparamdata/>
+<procedureparam/>
+<procedureparams/>
+<procedurebody/>
+<procedure/>
+
+<filename/>
