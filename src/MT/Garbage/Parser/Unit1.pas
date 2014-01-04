@@ -13,6 +13,8 @@ type
     Label1: TLabel;
     Label2: TLabel;
     Memo2: TMemo;
+    Memo3: TMemo;
+    Label3: TLabel;
     procedure Button1Click(Sender: TObject);
     procedure Edit1KeyPress(Sender: TObject; var Key: Char);
   private
@@ -29,8 +31,13 @@ implementation
 {$R *.dfm}
 
 procedure TForm1.Button1Click(Sender: TObject);
+var S: String;
 begin
-  ShowMessage(RunParser(Memo2.Text, Memo1.Text));
+  S := Memo1.Text;
+  S := StringReplace(S, #10, ' ', [rfReplaceAll, rfIgnoreCase]);
+  S := StringReplace(S, '  ', ' ', [rfReplaceAll, rfIgnoreCase]);
+  Memo1.Text := S;
+  Memo3.Text := RunParser(Memo2.Text, Memo1.Text);
 end;
 
 procedure TForm1.Edit1KeyPress(Sender: TObject; var Key: Char);

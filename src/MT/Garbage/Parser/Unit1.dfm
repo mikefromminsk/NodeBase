@@ -1,8 +1,8 @@
 object Form1: TForm1
   Left = 192
   Top = 124
-  Width = 499
-  Height = 298
+  Width = 733
+  Height = 428
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -26,19 +26,29 @@ object Form1: TForm1
     Height = 13
     Caption = #1057#1090#1088#1091#1082#1090#1091#1088#1072
   end
+  object Label3: TLabel
+    Left = 475
+    Top = 4
+    Width = 52
+    Height = 13
+    Caption = #1056#1077#1079#1091#1083#1100#1090#1072#1090
+  end
   object Memo1: TMemo
     Left = 8
     Top = 24
     Width = 233
     Height = 201
     Lines.Strings = (
-      'http://www.google.by/search?client=opera&q=waegwg')
+      'function Name(a: Integer): Integer;'
+      'begin'
+      '  Result := a + 1;'
+      'end;')
     TabOrder = 0
     WordWrap = False
   end
   object Button1: TButton
-    Left = 400
-    Top = 232
+    Left = 488
+    Top = 240
     Width = 75
     Height = 25
     Caption = 'Parse'
@@ -60,5 +70,12 @@ object Form1: TForm1
       '   </Param>'
       '  </URL>')
     TabOrder = 2
+  end
+  object Memo3: TMemo
+    Left = 480
+    Top = 24
+    Width = 225
+    Height = 201
+    TabOrder = 3
   end
 end
