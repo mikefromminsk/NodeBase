@@ -72,7 +72,9 @@ sentence
 Hello@1 world@3 all@2 
 @1 @3 @2
 @1 @2 @3
-Hello+all+world
+Hello+all+world@123
+world+all+Hello@123
+all+Hello+world@123
 
 
 
