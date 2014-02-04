@@ -18,8 +18,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 410
-    Width = 381
+    Top = 414
+    Width = 389
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -31,8 +31,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 381
-    Height = 410
+    Width = 389
+    Height = 414
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -70,8 +70,8 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 414
-    Width = 381
+    Top = 418
+    Width = 389
     Height = 58
     Align = alBottom
     BevelInner = bvNone
@@ -90,7 +90,7 @@ object GG: TGG
     OnKeyPress = OutputBoxKeyPress
   end
   object Server: TServerSocket
-    Active = False
+    Active = True
     Port = 80
     ServerType = stNonBlocking
     OnClientRead = ServerClientRead

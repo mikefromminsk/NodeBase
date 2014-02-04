@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, ExtCtrls, ScktComp;
+  Dialogs, StdCtrls, ComCtrls, ExtCtrls, ScktComp, AppEvnts, ShellApi;
 
 type
   TGG = class(TForm)
@@ -29,6 +29,9 @@ type
     procedure OutputBoxKeyPress(Sender: TObject; var Key: Char);
   private
     procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
+    procedure ControlWindow(var Msg: TMessage); message WM_SYSCOMMAND;
+    procedure IconMouse(var Msg: TMessage); message WM_USER + 1;
+    procedure Ic(n: Integer; Icon: TIcon);
   end;
 
 var
@@ -66,8 +69,7 @@ end;
 
 function HttpResponse(Line: String): String;
 begin
-  Result := 'HTTP/1.1 200 OK'#13#10#13#10 +
-  '<html><head></head><body>' + GG.Send(Line) + '</body></html>';
+  Result := 'HTTP/1.1 200 OK'#13#10#13#10 + Base.GetNodeBody(Base.Get(Line));
 end;
 
 procedure TGG.ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
@@ -104,7 +106,8 @@ end;
 procedure TGG.InputBoxKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if (Key = VK_ESCAPE) or (Key = VK_F9) then Close;
+  if Key = VK_F9 then Close;
+  if Key = VK_ESCAPE then PostMessage(Handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
 end;
 
 procedure TGG.InputBoxKeyUp(Sender: TObject; var Key: Word;
@@ -147,6 +150,59 @@ procedure TGG.OutputBoxKeyPress(Sender: TObject; var Key: Char);
 begin
   ShowMessage(IntToStr(Ord(Key)));
 end;
+
+// TRAY
+procedure TGG.Ic(n: Integer; Icon: TIcon);
+var Nim: TNotifyIconData;
+begin
+  with Nim do
+  begin
+    cbSize := SizeOf(Nim);
+    Wnd := Self.Handle;
+    uID := 1;
+    uFlags := NIF_ICON or NIF_MESSAGE or NIF_TIP;
+    hicon := Icon.Handle;
+    uCallbackMessage := WM_USER + 1;
+  end;
+  case n of
+    1: Shell_NotifyIcon(Nim_Add, @Nim);
+    2: Shell_NotifyIcon(Nim_Delete, @Nim);
+    3: Shell_NotifyIcon(Nim_Modify, @Nim);
+  end;
+end;
+
+procedure TGG.ControlWindow(var Msg: TMessage);
+begin
+  if Msg.WParam = SC_MINIMIZE then
+  begin
+    Ic(1, Application.Icon);  // Добавляем значок в трей
+    ShowWindow(Handle, SW_HIDE);  // Скрываем программу
+    ShowWindow(Application.Handle, SW_HIDE);  // Скрываем кнопку с TaskBar'а
+  end
+  else
+    inherited;
+end;
+
+procedure TGG.IconMouse(var Msg: TMessage);
+var p: TPoint;
+begin
+  GetCursorPos(p);
+  case Msg.LParam of
+    WM_LBUTTONUP, WM_LBUTTONDBLCLK:
+      begin
+        Ic(2, Application.Icon);
+        ShowWindow(Application.Handle, SW_SHOW); // Восстанавливаем кнопку программы
+        ShowWindow(Handle, SW_SHOW); // Восстанавливаем окно программы
+      end;
+    WM_RBUTTONUP:
+      begin
+        SetForegroundWindow(Handle);  // Восстанавливаем программу в качестве переднего окна
+        //PopupMenu1.Popup(p.X,p.Y);  // Заставляем всплыть тот самый TPopUp о котором я говорил чуть раньше
+        PostMessage(Handle, WM_NULL, 0, 0);
+      end;
+  end;
+end;
+
 
 end.
 

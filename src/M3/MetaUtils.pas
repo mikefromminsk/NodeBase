@@ -49,9 +49,6 @@ uses
   MetaBase;
 
 
-
-
-
 function GetProcAddress(Handle: Integer; FuncName: String): Integer;
 begin
 
