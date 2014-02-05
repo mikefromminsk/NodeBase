@@ -137,6 +137,8 @@ save when SafeTime is not nil
 else not save
 
 
+console.pas change to interface.pas
+
 
 
 
