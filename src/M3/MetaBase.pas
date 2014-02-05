@@ -940,19 +940,21 @@ begin
   end
   else
   if Node.Value <> nil then
-    Result := Result + '#' + GetIndex(Node.Value);
-  if GetData(Node) <> nil then
-    Result := Result + '=' + EncodeName(GetData(Node).Name);
+  begin
+    if Node.Value.Attr = naData then
+      Result := Result + '#!' + EncodeName(Node.Value.Name)
+    else
+      Result := Result + '#' + GetIndex(Node.Value);
+  end;
   Next := Node.Next;
   while Next <> nil do
   begin
-    Result := Result + #10 + GetIndex(Next) + '=' + GetIndex(Next.Value);
+    Result := Result + #10 + GetIndex(Next);
     Next := Next.Next;
   end;
   for i:=0 to High(Node.Local) do
-    Result := Result + #10#10 + GetNodeBody(Node.Local[i]);
+    Result := Result + ' ' + GetIndex(Node.Local[i]);
 end;
-
 
 initialization
   //Base := TMeta.Create;

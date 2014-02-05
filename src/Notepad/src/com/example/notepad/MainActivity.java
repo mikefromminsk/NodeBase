@@ -13,10 +13,14 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		//Connect
+		//Load Options
+		//Reg Notepad
+		
 		
 		ListView List = (ListView)findViewById(R.id.listView1);
 		String[] arr = {"1", "2", "3", "1", "2", "3", "1", "2", "3", "1", "2", "3", "1", "2", "3", "1", "2", "3", "1", "2", "3", "1", "2", "3", "1", "2", "3", "1", "2", "3", "1", "2", "3", "1", "2", "3"};
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item, arr);
+		MetaAdapter adapter = new MetaAdapter(this, R.layout.list_item);
 		List.setAdapter(adapter);
 	}
 
