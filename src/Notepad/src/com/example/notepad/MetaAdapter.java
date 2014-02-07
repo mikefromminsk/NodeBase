@@ -45,7 +45,7 @@ public class MetaAdapter extends ArrayAdapter {
 		View row = inflater.inflate(R.layout.list_item, parent, false);
 		
 		TextView textView = (TextView)row.findViewById(R.id.textView1);
-		textView.setTag("http://178.124.178.151/1/test.txt");
+		textView.setTag("http://178.124.178.151/!hello");
 		new DownloadNode().execute(textView);
 		return row;
 	}

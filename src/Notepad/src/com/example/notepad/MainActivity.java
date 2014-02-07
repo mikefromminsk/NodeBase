@@ -1,6 +1,8 @@
 package com.example.notepad;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,15 +45,13 @@ public class MainActivity extends Activity {
 			public void onClick(View arg0){
 				try
 				{
-				    HttpClient client = new DefaultHttpClient();  
-				    HttpGet get = new HttpGet("http://178.124.178.151/1/test.txt");
-				    HttpResponse responseGet = client.execute(get);  
-				    HttpEntity resEntityGet = responseGet.getEntity();  
-				    if (resEntityGet != null) 
-				    {  
-				        String response = EntityUtils.toString(resEntityGet);
-				        Toast.makeText(getApplication(), "Запрос выполнен", Toast.LENGTH_SHORT).show(); 
-				    }
+					 Pattern p = Pattern.compile("(...)");
+					 Matcher m = p.matcher("Hello,123");
+					 while (m.find()) {
+					     String name = m.group(1);
+					     Toast.makeText(getApplication(), name, Toast.LENGTH_SHORT).show(); 
+					 }
+					     	    
 				}catch (Exception e)
 				{Log.i("GET RESPONSE", "Error " + e.getMessage());}
 			}
