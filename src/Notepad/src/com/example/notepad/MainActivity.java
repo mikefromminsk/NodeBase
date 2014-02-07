@@ -45,8 +45,8 @@ public class MainActivity extends Activity {
 			public void onClick(View arg0){
 				try
 				{
-					 Pattern p = Pattern.compile("(...)");
-					 Matcher m = p.matcher("Hello,123");
+					 Pattern p = Pattern.compile("^(.*?)?@(.+?)(\\?(.*?):(.*?)?=(.*?))?(#(.*?))?(\\|(.*?))?$");
+					 Matcher m = p.matcher("!hello@3431#!hello");
 					 while (m.find()) {
 					     String name = m.group(1);
 					     Toast.makeText(getApplication(), name, Toast.LENGTH_SHORT).show(); 
