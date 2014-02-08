@@ -954,6 +954,7 @@ begin
   end;
   for i:=0 to High(Node.Local) do
     Result := Result + ' ' + GetIndex(Node.Local[i]);
+  //Result := '!hello@393#!hello'#10#10'@555'
 end;
 
 initialization
