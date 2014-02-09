@@ -77,6 +77,7 @@ var List: TStrings;
 begin                      
   List := TStringList.Create;
   List.Text := Socket.ReceiveText;
+  InputBox.Text := List.Text;
   List.Delimiter := ' ';
   List.DelimitedText := List.Strings[0];
   Socket.SendText(HttpResponse(Copy(List.Strings[1], 2, MaxInt)));
