@@ -24,16 +24,22 @@ import org.apache.http.util.EntityUtils;
 import android.os.Bundle;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-	
+
 	MetaNode root;
 
 	@Override
@@ -59,20 +65,50 @@ public class MainActivity extends Activity {
 			public void onClick(View arg0){
 				try
 				{
+					setContentView(R.layout.text_change);
+					EditText text = (EditText)findViewById(R.id.editText1);
+			        InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			        imm.showSoftInput(text, InputMethodManager.SHOW_IMPLICIT);
+			        
+				}catch (Exception e)
+				{Log.i("test", "Error " + e.getMessage());}
+			}
+		});
+		try
+		{
+		Button save = (Button)findViewById(R.id.button);
+		save.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		}catch (Exception e)
+		{Log.i("test", "Error " + e.getMessage());}
+
+		/*Button button2 = (Button)findViewById(R.id.button2);
+		button2.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0){
+				try
+				{
 					URL url = new URL("http://178.124.178.151");
 					HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 					conn.setRequestMethod("POST");
 					conn.setRequestProperty("Content-Language", "en-US");  
-							
+						
 					conn.setDoInput(true);
 					conn.setDoOutput(true);
-
+	
 				      //Send request
 				      DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
 				      wr.writeBytes("1234");
 				      wr.flush();
 				      wr.close();
-
+	
 				      //Get Response	
 				      InputStream is = conn.getInputStream();
 				      BufferedReader rd = new BufferedReader(new InputStreamReader(is));
@@ -83,13 +119,11 @@ public class MainActivity extends Activity {
 				        response.append('\r');
 				      }
 				      rd.close();
-
-					Toast.makeText(getApplication(), "GUT", Toast.LENGTH_SHORT).show();
-					     	    
 				}catch (Exception e)
-				{Log.i("GET RESPONSE", "Error " + e.getMessage());}
+				{Log.i("test", "Error " + e.getMessage());}
 			}
-		});
+		});*/
+		
 	}
 
 	@Override
