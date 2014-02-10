@@ -49,13 +49,13 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		
-		/*root = new MetaNode("http://178.124.178.151/!hello");
+		root = new MetaNode("http://178.124.178.151/!hello");
 		
-		//setTitle(root.id);
+		setTitle(root.id);
 		
 		ListView List = (ListView)findViewById(R.id.listView1);
 		MetaAdapter adapter = new MetaAdapter(this, R.layout.list_item, root.local);
-		List.setAdapter(adapter);*/
+		List.setAdapter(adapter);
 		
 		
 		
@@ -65,55 +65,21 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View arg0){
 				    Intent intent = new Intent(MainActivity.this, NodeEdit.class);
-				    startActivity(intent);
+				    intent.putExtra("data", "");
+				    startActivityForResult(intent, 0);
 			}
-		});
-
-
-
-		/*Button button2 = (Button)findViewById(R.id.button2);
-		button2.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0){
-				try
-				{
-					URL url = new URL("http://178.124.178.151");
-					HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-					conn.setRequestMethod("POST");
-					conn.setRequestProperty("Content-Language", "en-US");  
-						
-					conn.setDoInput(true);
-					conn.setDoOutput(true);
-	
-				      //Send request
-				      DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-				      wr.writeBytes("1234");
-				      wr.flush();
-				      wr.close();
-	
-				      //Get Response	
-				      InputStream is = conn.getInputStream();
-				      BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-				      String line;
-				      StringBuffer response = new StringBuffer(); 
-				      while((line = rd.readLine()) != null) {
-				        response.append(line);
-				        response.append('\r');
-				      }
-				      rd.close();
-				}catch (Exception e)
-				{Log.i("test", "Error " + e.getMessage());}
-			}
-		});*/
+		});	
 		
 	}
-
+	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == RESULT_OK)
+		{
+			root.local.add(data.getStringExtra("result"));
+			root.setNode();
+		}
 	}
 
 }

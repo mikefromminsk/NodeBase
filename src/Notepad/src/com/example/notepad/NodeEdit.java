@@ -1,8 +1,17 @@
 package com.example.notepad;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
@@ -22,31 +31,23 @@ public class NodeEdit extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.node_edit);
-		
-		
-		/*EditText text = (EditText)findViewById(R.id.editText1);
-		InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(text, InputMethodManager.SHOW_IMPLICIT);*/
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+		
+		final EditText edittext = (EditText)findViewById(R.id.editText1);
+		edittext.setText(getIntent().getExtras().getString("data"));
         
         Button button = (Button)findViewById(R.id.button1);
         button.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
-			public void onClick(View arg0) {
-				
-		        
-
-				
+			public void onClick(View arg0) 
+			{
+				Intent intent = new Intent();
+				intent.putExtra("result", edittext.getText().toString());
+				setResult(RESULT_OK, intent);
+				finish();
 			}
+				
 		});
 	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.node_edit, menu);
-		return true;
-	}
-
 }

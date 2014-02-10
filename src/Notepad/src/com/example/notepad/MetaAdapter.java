@@ -63,8 +63,6 @@ public class MetaAdapter extends ArrayAdapter {
 	class DownloadNode extends AsyncTask<Object, Void, String>{
 
 		TextView textView;
-		
-		
 
         @Override
         protected String doInBackground(Object... params) {   	
