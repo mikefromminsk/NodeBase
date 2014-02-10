@@ -762,7 +762,12 @@ begin
   end
   else
     if Node <> nil then
-      AddLocal(Module, Node);
+    begin
+      if Module = nil then
+        Module := Node
+      else
+        AddLocal(Module, Node);
+    end;
   PrevNode := Node;
 end;
 
@@ -953,8 +958,7 @@ begin
     Next := Next.Next;
   end;
   for i:=0 to High(Node.Local) do
-    Result := Result + ' ' + GetIndex(Node.Local[i]);
-  //Result := '!hello@393#!hello'#10#10'@555'
+    Result := Result + #10#10 + GetIndex(Node.Local[i]);
 end;
 
 initialization

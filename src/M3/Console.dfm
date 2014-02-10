@@ -1,7 +1,7 @@
 object GG: TGG
-  Left = 219
+  Left = 204
   Top = 115
-  Width = 397
+  Width = 557
   Height = 510
   BorderIcons = [biSystemMenu]
   Color = clGrayText
@@ -19,7 +19,7 @@ object GG: TGG
   object Splitter: TSplitter
     Left = 0
     Top = 410
-    Width = 381
+    Width = 541
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -28,10 +28,63 @@ object GG: TGG
     ParentColor = False
     ResizeStyle = rsLine
   end
+  object Splitter1: TSplitter
+    Left = 212
+    Top = 0
+    Width = 4
+    Height = 410
+    Align = alRight
+    Color = cl3DDkShadow
+    MinSize = 1
+    ParentColor = False
+  end
+  object OutputBox: TRichEdit
+    Left = 0
+    Top = 414
+    Width = 541
+    Height = 58
+    Align = alBottom
+    BevelInner = bvNone
+    BevelOuter = bvNone
+    BorderStyle = bsNone
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWhite
+    Font.Height = -16
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentColor = True
+    ParentFont = False
+    ScrollBars = ssVertical
+    TabOrder = 0
+    WordWrap = False
+    OnKeyPress = OutputBoxKeyPress
+  end
+  object QueryBox: TRichEdit
+    Left = 216
+    Top = 0
+    Width = 325
+    Height = 410
+    Align = alRight
+    BevelInner = bvNone
+    BevelOuter = bvNone
+    BorderStyle = bsNone
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWhite
+    Font.Height = -16
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentColor = True
+    ParentFont = False
+    ScrollBars = ssVertical
+    TabOrder = 1
+    WordWrap = False
+    OnKeyDown = InputBoxKeyDown
+    OnKeyUp = InputBoxKeyUp
+  end
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 381
+    Width = 212
     Height = 410
     Align = alClient
     BevelInner = bvNone
@@ -63,31 +116,10 @@ object GG: TGG
     ParentColor = True
     ParentFont = False
     ScrollBars = ssVertical
-    TabOrder = 0
+    TabOrder = 2
     WordWrap = False
     OnKeyDown = InputBoxKeyDown
     OnKeyUp = InputBoxKeyUp
-  end
-  object OutputBox: TRichEdit
-    Left = 0
-    Top = 414
-    Width = 381
-    Height = 58
-    Align = alBottom
-    BevelInner = bvNone
-    BevelOuter = bvNone
-    BorderStyle = bsNone
-    Font.Charset = RUSSIAN_CHARSET
-    Font.Color = clWhite
-    Font.Height = -16
-    Font.Name = 'Arial'
-    Font.Style = []
-    ParentColor = True
-    ParentFont = False
-    ScrollBars = ssVertical
-    TabOrder = 1
-    WordWrap = False
-    OnKeyPress = OutputBoxKeyPress
   end
   object Server: TServerSocket
     Active = True

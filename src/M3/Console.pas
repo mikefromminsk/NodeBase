@@ -8,11 +8,13 @@ uses
 
 type
   TGG = class(TForm)
-    InputBox: TRichEdit;
     OutputBox: TRichEdit;
     Splitter: TSplitter;
     Server: TServerSocket;
     Timer1: TTimer;
+    QueryBox: TRichEdit;
+    Splitter1: TSplitter;
+    InputBox: TRichEdit;
     procedure InputBoxKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
@@ -69,20 +71,59 @@ end;
 
 function HttpResponse(Line: String): String;
 begin
-  Result := 'HTTP/1.1 200 OK'#13#10#13#10 + Base.GetNodeBody(Base.Get(Line));
+  Result := 'HTTP/1.1 200 OK'#10#10 + Line;
+  GG.QueryBox.Text := GG.QueryBox.Text + Result;
+  GG.QueryBox.Lines.Add('************************'#10);
 end;
 
 procedure TGG.ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
-var List: TStrings;
-begin                      
-  List := TStringList.Create;
-  List.Text := Socket.ReceiveText;
-  InputBox.Text := List.Text;
-  List.Delimiter := ' ';
-  List.DelimitedText := List.Strings[0];
-  Socket.SendText(HttpResponse(Copy(List.Strings[1], 2, MaxInt)));
+var
+  Query, Head: TStrings;
+  Body, Ansver: String;
+  i: Integer;
+  PrevModule: PNode;
+begin
+  Query := TStringList.Create;
+  Head := TStringList.Create;
+  Body := '';
+
+  Query.Text := Socket.ReceiveText;
+
+  Head.Delimiter := ' ';
+  Head.DelimitedText := Query.Strings[0];
+
+  QueryBox.Text := QueryBox.Text + Query.Text;
+  QueryBox.Lines.Add('************************'#10);
+
+  if Head.Strings[0] = 'POST' then
+  begin
+    with Base do
+    begin
+      PrevModule := Base.Module;
+      Base.Prev := nil;
+      Base.Module := nil;
+      for i:=Query.IndexOf('') + 1 to Query.Count - 1 do
+      begin
+        body := Query.Strings[i];
+        Get(Query.Strings[i]);
+      end;
+
+      Socket.SendText(HttpResponse(GetNodeBody(Base.Module)));       //GetNodeBody(Module)
+      Base.Module := PrevModule;
+      Base.Prev := nil;
+    end;
+
+
+  end;
+  if Head.Strings[0] = 'GET' then
+  begin
+    Body := Copy(Head.Strings[1], 2, MaxInt);
+    Socket.SendText(HttpResponse(Base.GetNodeBody(Base.Get(Body))));
+  end;
+
   Socket.Close;
-  List.Free;
+  Query.Free;
+  Head.Free;
 end;
 
 procedure MessageLog(Message: String);

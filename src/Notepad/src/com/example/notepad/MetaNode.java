@@ -33,6 +33,7 @@ public class MetaNode {
 	public MetaNode(String url)
 	{
 		this.url = url;
+		local = new ArrayList<String>();
 		getNode();
 	}
 	
@@ -54,18 +55,17 @@ public class MetaNode {
 				 felse = m.group(11);
 			}
 			next = buf.readLine();
-			if (local == null)
-				local = new ArrayList<String>();
-			else
-				local.clear();
 			
+			local.clear();
+
 			if ((next != null) & (next.isEmpty()))
 			{
 				String str = "";
 				while ((str = buf.readLine()) != null)
 			    	 if (!str.isEmpty())
-				        local.add(str);
+			    		 local.add(str);
 			}
+			buf.close();
 			
 		}catch (Exception e){
 			Log.i("GET RESPONSE", "Error " + e.getMessage());
@@ -97,8 +97,8 @@ public class MetaNode {
 			if (name != null) 		body += name;
 			if (id != null) 		body += id;
 			if (parameters != null) body += "?" + parameters;
-			if (id != null) 		body += "#" + value;
-			if (id != null) 		body += "|" + felse;
+			if (value != null) 		body += "#" + value;
+			if (felse != null) 		body += "|" + felse;
 			
 			if (next != null) 		body += "\n" + next;
 			
@@ -109,8 +109,9 @@ public class MetaNode {
 			output.writeBytes(body);
 			output.flush();
 			output.close();
-			
+
 			setNodeStream(conn.getInputStream());
+			conn.disconnect();
 		}
 		catch (Exception e)
 			{Log.i("test", "Error " + e.getMessage());}		

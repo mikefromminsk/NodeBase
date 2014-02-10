@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK)
 		{
-			root.local.add(data.getStringExtra("result"));
+			root.local.add("!" + data.getStringExtra("result"));
 			root.setNode();
 		}
 	}
