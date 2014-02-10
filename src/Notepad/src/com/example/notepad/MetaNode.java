@@ -54,7 +54,10 @@ public class MetaNode {
 				 felse = m.group(11);
 			}
 			next = buf.readLine();
-			local = new ArrayList<String>();
+			if (local == null)
+				local = new ArrayList<String>();
+			else
+				local.clear();
 			
 			if ((next != null) & (next.isEmpty()))
 			{
@@ -92,7 +95,7 @@ public class MetaNode {
 			String body = "";
 			if (parent != null) 	body = parent + "^";
 			if (name != null) 		body += name;
-			if (id != null) 		body += "@" + id;
+			if (id != null) 		body += id;
 			if (parameters != null) body += "?" + parameters;
 			if (id != null) 		body += "#" + value;
 			if (id != null) 		body += "|" + felse;
