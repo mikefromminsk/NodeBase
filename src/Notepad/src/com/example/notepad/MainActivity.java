@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.text.InputType;
 import android.util.Log;
@@ -63,30 +64,12 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View arg0){
-				try
-				{
-					setContentView(R.layout.text_change);
-					EditText text = (EditText)findViewById(R.id.editText1);
-			        InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			        imm.showSoftInput(text, InputMethodManager.SHOW_IMPLICIT);
-			        
-				}catch (Exception e)
-				{Log.i("test", "Error " + e.getMessage());}
+				    Intent intent = new Intent(MainActivity.this, NodeEdit.class);
+				    startActivity(intent);
 			}
 		});
-		try
-		{
-		Button save = (Button)findViewById(R.id.button);
-		save.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-		}catch (Exception e)
-		{Log.i("test", "Error " + e.getMessage());}
+
+
 
 		/*Button button2 = (Button)findViewById(R.id.button2);
 		button2.setOnClickListener(new View.OnClickListener() {
