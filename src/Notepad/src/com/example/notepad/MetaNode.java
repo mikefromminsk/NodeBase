@@ -22,19 +22,43 @@ import android.widget.Toast;
 
 public class MetaNode {
 	
-	String url;
-	
+	String host;
+	String query;
 	
 	public String parent, name, id, parameters, value, felse;
 	String next;
 	
-	List<String> local;
+	List<MetaNode> local;
 		
-	public MetaNode(String url)
+	public MetaNode(String host, String query)
 	{
-		this.url = url;
-		local = new ArrayList<String>();
-		getNode();
+		this.host = host;
+		this.query = query;
+		
+		local = new ArrayList<MetaNode>();
+	}
+	
+	String getURL()
+	{
+		String url = host;
+		if (query == "")
+			url	+= id;
+		else
+			url	+= query;
+		return url;
+	}
+	
+	public void loadNode() 
+	{
+		try 
+		{
+			URLConnection conn = new URL(getURL()).openConnection();
+			setNodeStream(conn.getInputStream());
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+			
 	}
 	
 	@SuppressLint("NewApi")
@@ -63,7 +87,7 @@ public class MetaNode {
 				String str = "";
 				while ((str = buf.readLine()) != null)
 			    	 if (!str.isEmpty())
-			    		 local.add(str);
+			    		 local.add(new MetaNode(host, str));
 			}
 			buf.close();
 			
@@ -72,22 +96,12 @@ public class MetaNode {
 		}	
 	}
 	
-	public void getNode() 
-	{
-		try {
-			URLConnection conn = new URL(url).openConnection();
-			setNodeStream(conn.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-			
-	}
-	
+
 	public void setNode()
 	{
 		try
 		{
-			HttpURLConnection conn = (HttpURLConnection)new URL(url).openConnection();
+			HttpURLConnection conn = (HttpURLConnection)new URL(getURL()).openConnection();
 			conn.setRequestMethod("POST");						
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
@@ -109,13 +123,14 @@ public class MetaNode {
 			output.writeBytes(body);
 			output.flush();
 			output.close();
-			InputStream input = conn.getInputStream();
-			setNodeStream(input);
-			input.close();
+
+			setNodeStream(conn.getInputStream());
+
 		}
 		catch (Exception e)
 			{Log.i("test", "Error " + e.getMessage());}		
 		
 	}
+
 
 }

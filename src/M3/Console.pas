@@ -240,6 +240,7 @@ begin
 
   if ARequestInfo.Command = 'GET' then
   begin
+    Base.Get('');
     AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Copy(ARequestInfo.Document, 2, MaxInt)));
   end;
   if ARequestInfo.Command = 'POST' then

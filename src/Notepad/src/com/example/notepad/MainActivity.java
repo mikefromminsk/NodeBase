@@ -3,6 +3,8 @@ package com.example.notepad;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,15 +51,12 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		
-		root = new MetaNode("http://178.124.178.151/!hello");
-		
-		setTitle(root.id);
+		root = new MetaNode("http://178.124.178.151/", "!hello");
+		root.loadNode();
 		
 		ListView List = (ListView)findViewById(R.id.listView1);
-		MetaAdapter adapter = new MetaAdapter(this, R.layout.list_item, root.local);
+		MetaAdapter adapter = new MetaAdapter(this, R.layout.list_item, root);
 		List.setAdapter(adapter);
-		
-		
 		
 		Button button = (Button)findViewById(R.id.button1);
 		button.setOnClickListener(new View.OnClickListener() {
@@ -77,9 +76,26 @@ public class MainActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK)
 		{
-			root.local.add("!" + data.getStringExtra("result"));
-			root.setNode();
+			root.local.add(new MetaNode(root.host, "!" + data.getStringExtra("result")));
 		}
 	}
+	
+
+	final String FileName = "file";
+	  
+	  void writeFile() throws IOException {
+				FileWriter file = new FileWriter(FileName);
+				file.write("123"); 
+				file.close();
+		  }
+
+		  void readFile() throws IOException {
+		    	String str = "";
+		    	BufferedReader buf = new BufferedReader(new FileReader(FileName));
+		    	while ((str = buf.readLine()) != null) 
+			        Log.d("Adapter", str); 
+		    	buf.close();
+		  }
+
 
 }

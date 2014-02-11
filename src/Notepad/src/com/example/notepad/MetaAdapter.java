@@ -35,63 +35,57 @@ import android.widget.Toast;
 
 
 public class MetaAdapter extends ArrayAdapter {
-	Context context;
-	List<String> local;
 	
-	public MetaAdapter(Context context, int resource, List<String> local) {
+	Context context;
+	MetaNode root;
+
+	public MetaAdapter(Context context, int resource, MetaNode root) {
 		super(context, resource);
 		this.context = context;
-		this.local = local;
+		this.root = root;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View row = inflater.inflate(R.layout.list_item, parent, false);
+		
 		TextView textView = (TextView)row.findViewById(R.id.textView1);
-		textView.setTag("http://178.124.178.151/" + local.get(position));
-		new DownloadNode().execute(textView);
+		new DownloadNode().execute(textView, root.local.get(position));
 		return row;
 	}
 
 	@Override
 	public int getCount() {
-		return local.size();
+		return root.local.size();
 	}
 	
 	
-	class DownloadNode extends AsyncTask<Object, Void, String>{
+	class DownloadNode extends AsyncTask<Object, Void, Void>{
+
+
 
 		TextView textView;
+		MetaNode node;
 
         @Override
-        protected String doInBackground(Object... params) {   	
+        protected Void doInBackground(Object... params) {   
+
         	textView = (TextView)params[0];
-			return new MetaNode(textView.getTag().toString()).id;
+        	node = (MetaNode)params[1];
+        	node.loadNode();
+			return null;
         }
         
 		@Override
-		protected void onPostExecute(String result) {
+		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			textView.setText(result);
+			textView.setText(node.id);
+			if (node.id != "")
+				node.query = "";
 		}
+
     }
 
-
-	final String FileName = "file";
-	  
-	  void writeFile() throws IOException {
-				FileWriter file = new FileWriter(FileName);
-				file.write("123"); 
-				file.close();
-		  }
-
-		  void readFile() throws IOException {
-		    	String str = "";
-		    	BufferedReader buf = new BufferedReader(new FileReader(FileName));
-		    	while ((str = buf.readLine()) != null) 
-			        Log.d("Adapter", str); 
-		    	buf.close();
-		  }
 
 }
