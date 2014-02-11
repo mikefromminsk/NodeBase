@@ -263,6 +263,8 @@ var
   List: TStringList;
   Stream: TMemoryStream;
 begin
+  QueryBox.Lines.Add('->>>' + ARequestInfo.Command + ' ' + ARequestInfo.Document);
+
   if ARequestInfo.Command = 'GET' then
   begin
     List := TStringList.Create;
@@ -284,6 +286,8 @@ begin
       Stream.Free;
     end;
   end;
+  QueryBox.Lines.Add(AResponseInfo.ContentText);
+  QueryBox.Lines.Add('<<<-' + ARequestInfo.Command + ' ' + ARequestInfo.Document);
 end;
 
 procedure TGG.IdHTTPServer1CreatePostStream(ASender: TIdPeerThread;
