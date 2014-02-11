@@ -250,24 +250,42 @@ begin
   end;
 end;
 
+function MemoryStreamToString(M: TMemoryStream): AnsiString;
+begin
+  SetString(Result, PAnsiChar(M.Memory), M.Size);
+end;
 
 procedure TGG.IdHTTPServer1CommandGet(AThread: TIdPeerThread;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
-var List: TStringList;
+var
+  List: TStringList;
+  Stream: TMemoryStream;
 begin
+
+
   with ARequestInfo do
   begin
-    QueryBox.Text := QueryBox.Text + Command + ' ' + Document;
-    QueryBox.Lines.Add('************************'#10);
+    if Command = 'POST' then
+    begin
+      Stream := TMemoryStream.Create;
+      Stream.LoadFromStream(PostStream);
+      QueryBox.Text := QueryBox.Text + Command + ' ' + MemoryStreamToString(Stream);
+      AResponseInfo.ContentText := MemoryStreamToString(Stream);
+      QueryBox.Lines.Add('************************'#10);
+      Stream.Free;
+    end
+    else
+    begin
+      List := TStringList.Create;
+      List.Add('!hello@123#!hello');
+      List.Add('');
+      List.Add('@1');
+      List.Add('');
+      List.Add('@2');
+      AResponseInfo.ContentText := List.Text;
+      List.Free;
+    end;
   end;
-  List := TStringList.Create;
-  List.Add('!hello@123#!hello');
-  List.Add('');
-  List.Add('@1');
-  List.Add('');
-  List.Add('@2');
-  AResponseInfo.ContentText := List.Text;
-  List.Free;
 end;
 
 end.

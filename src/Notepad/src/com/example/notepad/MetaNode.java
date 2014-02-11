@@ -109,8 +109,9 @@ public class MetaNode {
 			output.writeBytes(body);
 			output.flush();
 			output.close();
-
-			setNodeStream(conn.getInputStream());
+			InputStream input = conn.getInputStream();
+			setNodeStream(input);
+			input.close();
 			conn.disconnect();
 		}
 		catch (Exception e)
