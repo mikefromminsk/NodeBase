@@ -4,17 +4,19 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, ExtCtrls, ScktComp, AppEvnts, ShellApi;
+  Dialogs, StdCtrls, ComCtrls, ExtCtrls, ScktComp, AppEvnts, ShellApi,
+  IdBaseComponent, IdComponent, IdTCPServer, IdCustomHTTPServer,
+  IdHTTPServer;
 
 type
   TGG = class(TForm)
     OutputBox: TRichEdit;
     Splitter: TSplitter;
-    Server: TServerSocket;
     Timer1: TTimer;
     QueryBox: TRichEdit;
     Splitter1: TSplitter;
     InputBox: TRichEdit;
+    IdHTTPServer1: TIdHTTPServer;
     procedure InputBoxKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
@@ -29,6 +31,9 @@ type
     function Send(Line: String; WriteToConsole: Boolean = False): String;
     procedure FormDestroy(Sender: TObject);
     procedure OutputBoxKeyPress(Sender: TObject; var Key: Char);
+    procedure IdHTTPServer1CommandGet(AThread: TIdPeerThread;
+      ARequestInfo: TIdHTTPRequestInfo;
+      AResponseInfo: TIdHTTPResponseInfo);
   private
     procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
     procedure ControlWindow(var Msg: TMessage); message WM_SYSCOMMAND;
@@ -245,6 +250,25 @@ begin
   end;
 end;
 
+
+procedure TGG.IdHTTPServer1CommandGet(AThread: TIdPeerThread;
+  ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
+var List: TStringList;
+begin
+  with ARequestInfo do
+  begin
+    QueryBox.Text := QueryBox.Text + Command + ' ' + Document;
+    QueryBox.Lines.Add('************************'#10);
+  end;
+  List := TStringList.Create;
+  List.Add('!hello@123#!hello');
+  List.Add('');
+  List.Add('@1');
+  List.Add('');
+  List.Add('@2');
+  AResponseInfo.ContentText := List.Text;
+  List.Free;
+end;
 
 end.
 

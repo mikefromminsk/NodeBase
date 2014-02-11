@@ -18,8 +18,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 410
-    Width = 541
+    Top = 414
+    Width = 549
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -29,10 +29,10 @@ object GG: TGG
     ResizeStyle = rsLine
   end
   object Splitter1: TSplitter
-    Left = 212
+    Left = 220
     Top = 0
     Width = 4
-    Height = 410
+    Height = 414
     Align = alRight
     Color = cl3DDkShadow
     MinSize = 1
@@ -40,8 +40,8 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 414
-    Width = 541
+    Top = 418
+    Width = 549
     Height = 58
     Align = alBottom
     BevelInner = bvNone
@@ -60,10 +60,10 @@ object GG: TGG
     OnKeyPress = OutputBoxKeyPress
   end
   object QueryBox: TRichEdit
-    Left = 216
+    Left = 224
     Top = 0
     Width = 325
-    Height = 410
+    Height = 414
     Align = alRight
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -84,8 +84,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 212
-    Height = 410
+    Width = 220
+    Height = 414
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -121,17 +121,21 @@ object GG: TGG
     OnKeyDown = InputBoxKeyDown
     OnKeyUp = InputBoxKeyUp
   end
-  object Server: TServerSocket
-    Active = True
-    Port = 80
-    ServerType = stNonBlocking
-    OnClientRead = ServerClientRead
-    OnClientError = ServerClientError
-    Left = 352
-    Top = 8
-  end
   object Timer1: TTimer
     Left = 312
+    Top = 8
+  end
+  object IdHTTPServer1: TIdHTTPServer
+    Active = True
+    Bindings = <>
+    CommandHandlers = <>
+    Greeting.NumericCode = 0
+    MaxConnectionReply.NumericCode = 0
+    ReplyExceptionCode = 0
+    ReplyTexts = <>
+    ReplyUnknownCommand.NumericCode = 0
+    OnCommandGet = IdHTTPServer1CommandGet
+    Left = 392
     Top = 8
   end
 end
