@@ -80,9 +80,7 @@ public class MetaAdapter extends ArrayAdapter {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			textView.setText(node.id);
-			if (node.id != "")
-				node.query = "";
+			textView.setText(node.getURL());
 		}
 
     }

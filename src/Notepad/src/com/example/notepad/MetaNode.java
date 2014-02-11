@@ -54,6 +54,8 @@ public class MetaNode {
 		{
 			URLConnection conn = new URL(getURL()).openConnection();
 			setNodeStream(conn.getInputStream());
+			if (id != "")
+				query = "";
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
