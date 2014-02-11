@@ -134,8 +134,9 @@ object GG: TGG
     ReplyExceptionCode = 0
     ReplyTexts = <>
     ReplyUnknownCommand.NumericCode = 0
+    OnCreatePostStream = IdHTTPServer1CreatePostStream
     OnCommandGet = IdHTTPServer1CommandGet
-    Left = 392
+    Left = 344
     Top = 8
   end
 end

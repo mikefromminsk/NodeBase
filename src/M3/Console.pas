@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, ScktComp, AppEvnts, ShellApi,
   IdBaseComponent, IdComponent, IdTCPServer, IdCustomHTTPServer,
-  IdHTTPServer;
+  IdHTTPServer, IdTCPConnection, IdTCPClient, IdHTTP;
 
 type
   TGG = class(TForm)
@@ -34,6 +34,8 @@ type
     procedure IdHTTPServer1CommandGet(AThread: TIdPeerThread;
       ARequestInfo: TIdHTTPRequestInfo;
       AResponseInfo: TIdHTTPResponseInfo);
+    procedure IdHTTPServer1CreatePostStream(ASender: TIdPeerThread;
+      var VPostStream: TStream);
   private
     procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
     procedure ControlWindow(var Msg: TMessage); message WM_SYSCOMMAND;
@@ -47,7 +49,7 @@ var
 implementation
 
 uses
-  MetaBase, MetaUtils, MetaLine;
+  MetaBase, MetaUtils, MetaLine, IdHTTPHeaderInfo;
 
 {$R *.dfm}
 
@@ -261,31 +263,33 @@ var
   List: TStringList;
   Stream: TMemoryStream;
 begin
-
-
-  with ARequestInfo do
+  if ARequestInfo.Command = 'GET' then
   begin
-    if Command = 'POST' then
-    begin
-      Stream := TMemoryStream.Create;
-      Stream.LoadFromStream(PostStream);
-      QueryBox.Text := QueryBox.Text + Command + ' ' + MemoryStreamToString(Stream);
+    List := TStringList.Create;
+    List.Add('!hello@123#!hello');
+    List.Add('');
+    List.Add('@1');
+    List.Add('');
+    List.Add('@2');
+    AResponseInfo.ContentText := List.Text;
+    List.Free;
+  end;
+  if ARequestInfo.Command = 'POST' then
+  begin
+    Stream := TMemoryStream.Create;
+    try
+      Stream.LoadFromStream(ARequestInfo.PostStream);
       AResponseInfo.ContentText := MemoryStreamToString(Stream);
-      QueryBox.Lines.Add('************************'#10);
+    finally
       Stream.Free;
-    end
-    else
-    begin
-      List := TStringList.Create;
-      List.Add('!hello@123#!hello');
-      List.Add('');
-      List.Add('@1');
-      List.Add('');
-      List.Add('@2');
-      AResponseInfo.ContentText := List.Text;
-      List.Free;
     end;
   end;
+end;
+
+procedure TGG.IdHTTPServer1CreatePostStream(ASender: TIdPeerThread;
+  var VPostStream: TStream);
+begin
+  VPostStream := TMemoryStream.Create;
 end;
 
 end.
