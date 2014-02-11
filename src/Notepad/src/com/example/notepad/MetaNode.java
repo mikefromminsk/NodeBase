@@ -112,7 +112,6 @@ public class MetaNode {
 			InputStream input = conn.getInputStream();
 			setNodeStream(input);
 			input.close();
-			conn.disconnect();
 		}
 		catch (Exception e)
 			{Log.i("test", "Error " + e.getMessage());}		

@@ -20,7 +20,6 @@ type
     procedure InputBoxKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
-    procedure ApplicationEvents1Exception(Sender: TObject; E: Exception);
     procedure ServerClientError(Sender: TObject; Socket: TCustomWinSocket;
       ErrorEvent: TErrorEvent; var ErrorCode: Integer);
     procedure InputBoxKeyDown(Sender: TObject; var Key: Word;
@@ -29,7 +28,6 @@ type
     procedure CreateParams(var Params: TCreateParams); override;
     procedure FormShow(Sender: TObject);
     function Send(Line: String; WriteToConsole: Boolean = False): String;
-    procedure FormDestroy(Sender: TObject);
     procedure OutputBoxKeyPress(Sender: TObject; var Key: Char);
     procedure IdHTTPServer1CommandGet(AThread: TIdPeerThread;
       ARequestInfo: TIdHTTPRequestInfo;
@@ -37,7 +35,6 @@ type
     procedure IdHTTPServer1CreatePostStream(ASender: TIdPeerThread;
       var VPostStream: TStream);
   private
-    procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
     procedure ControlWindow(var Msg: TMessage); message WM_SYSCOMMAND;
     procedure IconMouse(var Msg: TMessage); message WM_USER + 1;
     procedure Ic(n: Integer; Icon: TIcon);
@@ -133,23 +130,10 @@ begin
   Head.Free;
 end;
 
-procedure MessageLog(Message: String);
-var Log: TextFile;
-begin
-  AssignFile(Log, 'M.log');
-  WriteLn(Log, '[' + DateToStr(Now) + ']: ' +  Message);
-  CloseFile(Log);
-end;
-
-procedure TGG.ApplicationEvents1Exception(Sender: TObject; E: Exception);
-begin
-  MessageLog(E.ClassName + ' : ' + E.Message);
-end;
-
 procedure TGG.ServerClientError(Sender: TObject; Socket: TCustomWinSocket;
   ErrorEvent: TErrorEvent; var ErrorCode: Integer);
 begin
-  MessageLog('SocketError ' + IntToStr(ErrorCode));
+  QueryBox.Lines.Add(TimeToStr(Now) + 'SocketError ' + IntToStr(ErrorCode));
 end;
 
 procedure TGG.InputBoxKeyDown(Sender: TObject; var Key: Word;
@@ -185,19 +169,9 @@ begin
   InputBox.SelStart := Length(InputBox.Lines.Text);
 end;
 
-procedure TGG.WMHotKey(var Msg: TWMHotKey);
-begin
-  ShowMessage('1');
-end;
-
-procedure TGG.FormDestroy(Sender: TObject);
-begin
-  //UnRegisterHotKey(GG.Handle, VK_F9);
-end;
-
 procedure TGG.OutputBoxKeyPress(Sender: TObject; var Key: Char);
 begin
-  ShowMessage(IntToStr(Ord(Key)));
+
 end;
 
 // TRAY
@@ -224,9 +198,9 @@ procedure TGG.ControlWindow(var Msg: TMessage);
 begin
   if Msg.WParam = SC_MINIMIZE then
   begin
-    Ic(1, Application.Icon);  // Добавляем значок в трей
-    ShowWindow(Handle, SW_HIDE);  // Скрываем программу
-    ShowWindow(Application.Handle, SW_HIDE);  // Скрываем кнопку с TaskBar'а
+    Ic(1, Application.Icon);
+    ShowWindow(Handle, SW_HIDE);
+    ShowWindow(Application.Handle, SW_HIDE);   
   end
   else
     inherited;
@@ -240,13 +214,12 @@ begin
     WM_LBUTTONUP, WM_LBUTTONDBLCLK:
       begin
         Ic(2, Application.Icon);
-        ShowWindow(Application.Handle, SW_SHOW); // Восстанавливаем кнопку программы
-        ShowWindow(Handle, SW_SHOW); // Восстанавливаем окно программы
+        ShowWindow(Application.Handle, SW_SHOW);
+        ShowWindow(Handle, SW_SHOW);
       end;
     WM_RBUTTONUP:
       begin
-        SetForegroundWindow(Handle);  // Восстанавливаем программу в качестве переднего окна
-        //PopupMenu1.Popup(p.X,p.Y);  // Заставляем всплыть тот самый TPopUp о котором я говорил чуть раньше
+        SetForegroundWindow(Handle);
         PostMessage(Handle, WM_NULL, 0, 0);
       end;
   end;
@@ -267,14 +240,7 @@ begin
 
   if ARequestInfo.Command = 'GET' then
   begin
-    List := TStringList.Create;
-    List.Add('!hello@123#!hello');
-    List.Add('');
-    List.Add('@1');
-    List.Add('');
-    List.Add('@2');
-    AResponseInfo.ContentText := List.Text;
-    List.Free;
+    AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Copy(ARequestInfo.Document, 2, MaxInt)));
   end;
   if ARequestInfo.Command = 'POST' then
   begin
