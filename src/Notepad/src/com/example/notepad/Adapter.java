@@ -34,12 +34,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class MetaAdapter extends ArrayAdapter {
+public class Adapter extends ArrayAdapter {
 	
 	Context context;
-	MetaNode root;
+	Node root;
 
-	public MetaAdapter(Context context, int resource, MetaNode root) {
+	public Adapter(Context context, int resource, Node root) {
 		super(context, resource);
 		this.context = context;
 		this.root = root;
@@ -51,7 +51,7 @@ public class MetaAdapter extends ArrayAdapter {
 		View row = inflater.inflate(R.layout.list_item, parent, false);
 		
 		TextView textView = (TextView)row.findViewById(R.id.textView1);
-		new DownloadNode().execute(textView, root.local.get(position));
+		new DownloadLocalNode().execute(textView, root.local.get(position));
 		return row;
 	}
 
@@ -61,18 +61,16 @@ public class MetaAdapter extends ArrayAdapter {
 	}
 	
 	
-	class DownloadNode extends AsyncTask<Object, Void, Void>{
-
-
+	class DownloadLocalNode extends AsyncTask<Object, Void, Void>{
 
 		TextView textView;
-		MetaNode node;
+		Node node;
 
         @Override
         protected Void doInBackground(Object... params) {   
 
         	textView = (TextView)params[0];
-        	node = (MetaNode)params[1];
+        	node = (Node)params[1];
         	node.loadNode();
 			return null;
         }
@@ -81,6 +79,33 @@ public class MetaAdapter extends ArrayAdapter {
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
 			textView.setText(node.getURL());
+			new DownloadValueNode().execute(textView, node.value);
+			
+		}
+
+    }
+	
+	class DownloadValueNode extends AsyncTask<Object, Void, Void>{
+
+		TextView textView;
+		Node node;
+
+        @Override
+        protected Void doInBackground(Object... params) {   
+
+        	textView = (TextView)params[0];
+        	node = (Node)params[1];
+        	String value = node.query;
+        	if (value.charAt(0) != '!')
+        		node.loadNode();
+			return null;
+        }
+        
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			Log.i("123", "Error value xx" + node.query + "xx");
+			textView.setText(node.query);
 		}
 
     }

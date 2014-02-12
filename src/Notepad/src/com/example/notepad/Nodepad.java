@@ -41,21 +41,21 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class Nodepad extends Activity {
 
-	MetaNode root;
+	Node root;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.notepad);
 		
 		
-		root = new MetaNode("http://178.124.178.151/", "!hello");
+		root = new Node("http://178.124.178.151/", "!hello");
 		root.loadNode();
 		
 		ListView List = (ListView)findViewById(R.id.listView1);
-		MetaAdapter adapter = new MetaAdapter(this, R.layout.list_item, root);
+		Adapter adapter = new Adapter(this, R.layout.list_item, root);
 		List.setAdapter(adapter);
 		
 		Button button = (Button)findViewById(R.id.button1);
@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View arg0){
-				    Intent intent = new Intent(MainActivity.this, NodeEdit.class);
+				    Intent intent = new Intent(Nodepad.this, NodeEdit.class);
 				    intent.putExtra("data", "");
 				    startActivityForResult(intent, 0);
 			}
@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK)
 		{
-			root.local.add(new MetaNode(root.host, "!" + data.getStringExtra("result")));
+			root.local.add(new Node(root.host, "!" + data.getStringExtra("result")));
 		}
 	}
 	

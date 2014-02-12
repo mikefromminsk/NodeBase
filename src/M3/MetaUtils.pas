@@ -118,9 +118,9 @@ var i: Integer;
 begin
   Result := Copy(Str, 1, Position - 1);
   for i:=Position to Length(Str) do
-    if Str[i] in [#0..#32, '@', '^', '.', '?', ':', '=', '&', ';', '#', '|']
-    then Result := Result + '%' + IntToHex(Ord(Str[i]), 2)
-    else Result := Result + Str[i];
+    if Str[i] in [#48..#57, #65..#90, #97..#122]  //'@', '^', '.', '?', ':', '=', '&', ';', '#', '|'
+    then Result := Result + Str[i]
+    else Result := Result + '%' + IntToHex(Ord(Str[i]), 2);
 end;
 
 function DecodeName(Str: String): String;

@@ -20,25 +20,28 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
-public class MetaNode {
+public class Node {
 	
 	String host;
 	String query;
 	
-	public String parent, name, id, parameters, value, felse;
+	public String parent, name, id, parameters, felse;
+	
 	String next;
 	
-	List<MetaNode> local;
+	Node value;
+	
+	List<Node> local;
 		
-	public MetaNode(String host, String query)
+	public Node(String host, String query)
 	{
 		this.host = host;
 		this.query = query;
 		
-		local = new ArrayList<MetaNode>();
+		local = new ArrayList<Node>();
 	}
 	
-	String getURL()
+	public String getURL()
 	{
 		String url = host;
 		if (query == "")
@@ -70,14 +73,16 @@ public class MetaNode {
     	{
 			BufferedReader buf = new BufferedReader(new InputStreamReader(body));
 			Pattern p = Pattern.compile("^((.*?)\\^)?(.*?)?(@(.*?))(\\?(.*?))?(#(.*?))?(\\|(.*?))?$");
-			Matcher m = p.matcher(buf.readLine());
+			String head = buf.readLine();
+			Matcher m = p.matcher(head);
 			if (m.find()) 
 			{	 
 				 parent = m.group(2);
 				 name = m.group(3);
 				 id = m.group(4);
 				 parameters = m.group(7);
-				 value = m.group(9);
+				 Log.i("123", "Error value yy" +  head+ "yy");
+				 value = new Node(host, m.group(9));
 				 felse = m.group(11);
 			}
 			next = buf.readLine();
@@ -89,7 +94,7 @@ public class MetaNode {
 				String str = "";
 				while ((str = buf.readLine()) != null)
 			    	 if (!str.isEmpty())
-			    		 local.add(new MetaNode(host, str));
+			    		 local.add(new Node(host, str));
 			}
 			buf.close();
 			
