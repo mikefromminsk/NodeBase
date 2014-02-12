@@ -9,8 +9,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,7 +81,7 @@ public class Adapter extends ArrayAdapter {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			textView.setText(node.getURL());
+			textView.setText(node.id);
 			new DownloadValueNode().execute(textView, node.value);
 			
 		}
@@ -95,17 +98,21 @@ public class Adapter extends ArrayAdapter {
 
         	textView = (TextView)params[0];
         	node = (Node)params[1];
-        	String value = node.query;
-        	if (value.charAt(0) != '!')
-        		node.loadNode();
+        	if (node.name != null)
+        		if (node.name.charAt(0) != '!')
+        			node.loadNode();
 			return null;
         }
         
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			Log.i("123", "Error value xx" + node.query + "xx");
-			textView.setText(node.query);
+			
+			try {
+				textView.setText(URLDecoder.decode(node.query, "Windows-1251"));
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
 		}
 
     }

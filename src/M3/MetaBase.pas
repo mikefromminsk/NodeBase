@@ -947,7 +947,7 @@ begin
   if Node.Value <> nil then
   begin
     if Node.Value.Attr = naData then
-      Result := Result + '#!' + EncodeName(Node.Value.Name)
+      Result := Result + '#' + EncodeName(Node.Value.Name)
     else
       Result := Result + '#' + GetIndex(Node.Value);
   end;

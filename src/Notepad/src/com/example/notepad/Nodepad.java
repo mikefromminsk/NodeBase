@@ -10,9 +10,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,7 +52,6 @@ public class Nodepad extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.notepad);
 		
-		
 		root = new Node("http://178.124.178.151/", "!hello");
 		root.loadNode();
 		
@@ -76,7 +77,12 @@ public class Nodepad extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK)
 		{
-			root.local.add(new Node(root.host, "!" + data.getStringExtra("result")));
+			try {
+				root.local.add(new Node(root.host, "!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251")));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
