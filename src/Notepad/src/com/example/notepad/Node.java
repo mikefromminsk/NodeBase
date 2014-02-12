@@ -41,21 +41,24 @@ public class Node {
 		local = new ArrayList<Node>();
 	}
 	
-	public String getURL()
+	public String getUrl()
 	{
-		String url = host;
+		return host + getName();
+	}
+	
+	public String getName()
+	{
 		if (query == "")
-			url	+= id;
+			return id;
 		else
-			url	+= query;
-		return url;
+			return query;
 	}
 	
 	public void loadNode() 
 	{
 		try 
 		{
-			URLConnection conn = new URL(getURL()).openConnection();
+			URLConnection conn = new URL(getUrl()).openConnection();
 			setNodeStream(conn.getInputStream());
 			if (id != "")
 				query = "";
@@ -107,7 +110,7 @@ public class Node {
 	{
 		try
 		{
-			HttpURLConnection conn = (HttpURLConnection)new URL(getURL()).openConnection();
+			HttpURLConnection conn = (HttpURLConnection)new URL(getUrl()).openConnection();
 			conn.setRequestMethod("POST");						
 			conn.setDoInput(true);
 			conn.setDoOutput(true);

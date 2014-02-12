@@ -919,7 +919,7 @@ begin
   if Node.Source <> nil then
     Result := Result + GetIndex(Node.Source) + '^';
   if Node.ParentName <> nil then
-    Result := Result + GetIndex(Node.ParentName);
+    Result := Result + EncodeName(GetIndex(Node.ParentName), 2);
   Result := Result + GetIndex(Node);
   if Node.FType <> nil then
     Result := Result + ':' + GetIndex(Node.FType);

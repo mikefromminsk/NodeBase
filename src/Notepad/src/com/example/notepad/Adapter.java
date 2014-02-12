@@ -107,10 +107,12 @@ public class Adapter extends ArrayAdapter {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			
-			try {
-				textView.setText(URLDecoder.decode(node.query, "Windows-1251"));
-			} catch (UnsupportedEncodingException e) {
+			try 
+			{
+				textView.setText(URLDecoder.decode(node.query, "Windows-1251").replace('\n', ' '));
+			} 
+			catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
