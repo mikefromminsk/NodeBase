@@ -54,6 +54,8 @@ public class Adapter extends ArrayAdapter {
 		View row = inflater.inflate(R.layout.list_item, parent, false);
 		
 		TextView textView = (TextView)row.findViewById(R.id.textView1);
+		textView.setTag(position);
+		
 		new DownloadLocalNode().execute(textView, root.local.get(position));
 		return row;
 	}
@@ -81,9 +83,7 @@ public class Adapter extends ArrayAdapter {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			textView.setText(node.id);
 			new DownloadValueNode().execute(textView, node.value);
-			
 		}
 
     }
@@ -109,7 +109,9 @@ public class Adapter extends ArrayAdapter {
 			super.onPostExecute(result);
 			try 
 			{
+				
 				textView.setText(URLDecoder.decode(node.query, "Windows-1251").replace('\n', ' '));
+				textView.setTag(textView.getText().toString());
 			} 
 			catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block

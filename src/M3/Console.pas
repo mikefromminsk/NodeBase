@@ -236,25 +236,24 @@ var
   List: TStringList;
   Stream: TMemoryStream;
 begin
-  QueryBox.Lines.Add('->>>' + ARequestInfo.Command + ' ' + ARequestInfo.Document);
 
+  QueryBox.Lines.Add(ARequestInfo.Command + ' ' + ARequestInfo.Document);
+  Base.Get('');
+  
   if ARequestInfo.Command = 'GET' then
   begin
-    Base.Get('');
     AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Copy(ARequestInfo.Document, 2, MaxInt)));
   end;
   if ARequestInfo.Command = 'POST' then
   begin
-    Stream := TMemoryStream.Create;
     try
+      Stream := TMemoryStream.Create;
       Stream.LoadFromStream(ARequestInfo.PostStream);
       AResponseInfo.ContentText := MemoryStreamToString(Stream);
     finally
       Stream.Free;
     end;
   end;
-  QueryBox.Lines.Add(AResponseInfo.ContentText);
-  QueryBox.Lines.Add('<<<-' + ARequestInfo.Command + ' ' + ARequestInfo.Document);
 end;
 
 procedure TGG.IdHTTPServer1CreatePostStream(ASender: TIdPeerThread;

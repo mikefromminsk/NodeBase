@@ -3,6 +3,7 @@ package com.example.notepad;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,6 +27,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import android.os.Bundle;
+import android.os.Environment;
+import android.annotation.SuppressLint;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.content.Context;
@@ -53,7 +56,7 @@ public class Nodepad extends Activity {
 		setContentView(R.layout.notepad);
 		
 		root = new Node("http://178.124.178.151/", "!hello");
-		root.loadNode();
+		//root.loadNode();
 		
 		ListView List = (ListView)findViewById(R.id.listView1);
 		Adapter adapter = new Adapter(this, R.layout.list_item, root);
@@ -64,6 +67,7 @@ public class Nodepad extends Activity {
 			
 			@Override
 			public void onClick(View arg0){
+					writeFile();
 				    Intent intent = new Intent(Nodepad.this, NodeEdit.class);
 				    intent.putExtra("data", "");
 				    startActivityForResult(intent, 0);
@@ -72,9 +76,12 @@ public class Nodepad extends Activity {
 		
 	}
 	
+	@SuppressLint("ShowToast")
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		
+		
 		if (resultCode == RESULT_OK)
 		{
 			try {
@@ -86,18 +93,30 @@ public class Nodepad extends Activity {
 		}
 	}
 	
-
-	final String FileName = "file";
 	  
-	  void writeFile() throws IOException {
-				FileWriter file = new FileWriter(FileName);
-				file.write("123"); 
-				file.close();
+	  void writeFile(){
+		  
+				
+				try 
+				{	
+
+					File dir = new File(Environment.getExternalStorageDirectory(), "meta");
+					dir.mkdirs();
+					FileWriter filewrite = new FileWriter(dir.getAbsolutePath() + "/test.txt", true);
+					//filewrite.write("1211");
+					filewrite.append("12345");
+					filewrite.flush();
+					filewrite.close();
+				} 
+				catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		  }
 
 		  void readFile() throws IOException {
 		    	String str = "";
-		    	BufferedReader buf = new BufferedReader(new FileReader(FileName));
+		    	BufferedReader buf = new BufferedReader(new FileReader(""));
 		    	while ((str = buf.readLine()) != null) 
 			        Log.d("Adapter", str); 
 		    	buf.close();
