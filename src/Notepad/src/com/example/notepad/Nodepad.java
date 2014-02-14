@@ -69,7 +69,6 @@ public class Nodepad extends Activity {
 			rootNode = buf.readLine();
 			root = new Node(host, rootNode);
 			root.loadNode();
-			Toast.makeText(getApplication(), host + rootNode, Toast.LENGTH_LONG).show();
 			buf.close();
 			
 		}
@@ -92,9 +91,6 @@ public class Nodepad extends Activity {
 			}
 		}
 
-	
-		
-		
 		ListView List = (ListView)findViewById(R.id.listView1);
 		Adapter adapter = new Adapter(this, R.layout.list_item, root);
 		List.setAdapter(adapter);

@@ -49,13 +49,13 @@ public class Node {
 		
 		local = new ArrayList<Node>();
 		
-		
-		if (this.query.charAt(0) == '@')
-		{
-			id = this.query;
-			this.query = "";
-			getNode();
-		}
+		if (query != null)
+			if (this.query.charAt(0) == '@')
+			{
+				id = this.query;
+				this.query = "";
+				getNode();
+			}
 	}
 	
 	public String getUrl()
@@ -117,6 +117,7 @@ public class Node {
 			Pattern p = Pattern.compile("^((.*?)\\^)?(.*?)?(@(.*?))(\\?(.*?))?(#(.*?))?(\\|(.*?))?$");
 			String head = buf.readLine();
 			Matcher m = p.matcher(head);
+			Log.i("123", "Error 3");
 			if (m.find()) 
 			{	 
 				 parent = m.group(2);
@@ -126,6 +127,7 @@ public class Node {
 				 value = new Node(host, m.group(9));
 				 felse = m.group(11);
 			}
+			Log.i("123", "Error 4");
 			next = buf.readLine();
 			
 			local.clear();
