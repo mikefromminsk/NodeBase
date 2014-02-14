@@ -109,7 +109,6 @@ public class Adapter extends ArrayAdapter {
 			super.onPostExecute(result);
 			try 
 			{
-				
 				textView.setText(URLDecoder.decode(node.query, "Windows-1251").replace('\n', ' '));
 				textView.setTag(textView.getText().toString());
 			} 

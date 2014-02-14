@@ -1,8 +1,13 @@
 package com.example.notepad;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,13 +15,16 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,6 +32,7 @@ public class Node {
 	
 	String host;
 	String query;
+	File rootDir;
 	
 	public String parent, name, id, parameters, felse;
 	
@@ -39,6 +48,14 @@ public class Node {
 		this.query = query;
 		
 		local = new ArrayList<Node>();
+		
+		
+		if (this.query.charAt(0) == '@')
+		{
+			id = this.query;
+			this.query = "";
+			getNode();
+		}
 	}
 	
 	public String getUrl()
@@ -54,14 +71,31 @@ public class Node {
 			return query;
 	}
 	
+	public void getNode()
+	{
+		if (id != null)
+		{
+			try 
+			{
+				File file = new File(rootDir, pathNode());
+				InputStream in = new BufferedInputStream(new FileInputStream(file.getAbsolutePath() + "/node.meta"));
+				setBody(in);
+			} 
+			catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public void loadNode() 
 	{
 		try 
 		{
 			URLConnection conn = new URL(getUrl()).openConnection();
-			setNodeStream(conn.getInputStream());
+			setBody(conn.getInputStream());
 			if (id != "")
 				query = "";
+			saveNode();
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
@@ -69,8 +103,13 @@ public class Node {
 			
 	}
 	
+	public void addLocal(String localBody)
+	{
+		local.add(new Node(host, localBody));
+	}
+	
 	@SuppressLint("NewApi")
-	public void setNodeStream(InputStream body)
+	public void setBody(InputStream body)
 	{
     	try
     	{
@@ -96,17 +135,62 @@ public class Node {
 				String str = "";
 				while ((str = buf.readLine()) != null)
 			    	 if (!str.isEmpty())
-			    		 local.add(new Node(host, str));
+			    		 addLocal(str);
 			}
 			buf.close();
-			
-		}catch (Exception e){
-			Log.i("GET RESPONSE", "Error " + e.getMessage());
+		}
+    	catch (Exception e){
+    		e.printStackTrace();
 		}	
 	}
 	
+	public String getBody()
+	{
+		String body = "";
+		if (parent != null) 	body = parent + "^";
+		if (name != null) 		body += name;
+		if (id != null) 		body += id;
+		if (parameters != null) body += "?" + parameters;
+		if (value != null) 		body += "#" + value.getName();
+		if (felse != null) 		body += "|" + felse;
+		
+		if (next != null) 		body += "\n" + next;
+		
+		for (int i=0; i<local.size(); i++)
+			body += "\n\n" + local.get(i).getName();	
+		return body;
+	}
+	
+	@SuppressWarnings("deprecation")
+	public String pathNode()
+	{
+		String path = "";
+		for (int i=0;i<id.length();i++)
+			path += URLEncoder.encode(String.valueOf(id.charAt(i))) + File.separator;
+		return path;
+	}
+	
+	public void saveNode()
+	{
+		if (id != null)
+		{
+			try 
+			{	
+				File dir = new File(rootDir, pathNode());
+				dir.mkdirs();
+				FileWriter filewrite = new FileWriter(dir.getAbsolutePath() + "/node.meta");
+				filewrite.write(getBody());
+				filewrite.flush();
+				filewrite.close();
+			} 
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 
-	public void setNode()
+	public void sendNode()
 	{
 		try
 		{
@@ -115,31 +199,18 @@ public class Node {
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
 			
-			String body = "";
-			if (parent != null) 	body = parent + "^";
-			if (name != null) 		body += name;
-			if (id != null) 		body += id;
-			if (parameters != null) body += "?" + parameters;
-			if (value != null) 		body += "#" + value;
-			if (felse != null) 		body += "|" + felse;
-			
-			if (next != null) 		body += "\n" + next;
-			
-			for (int i=0; i<local.size(); i++)
-				body += "\n\n" + local.get(i);
-			
 			DataOutputStream output = new DataOutputStream(conn.getOutputStream());
-			output.writeBytes(body);
+			output.writeBytes(getBody());
 			output.flush();
 			output.close();
 
-			setNodeStream(conn.getInputStream());
+			setBody(conn.getInputStream());
 
 		}
-		catch (Exception e)
-			{Log.i("test", "Error " + e.getMessage());}		
+		catch (Exception e){
+			e.printStackTrace();
+		}		
 		
 	}
-
 
 }

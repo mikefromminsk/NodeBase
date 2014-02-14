@@ -234,12 +234,14 @@ procedure TGG.IdHTTPServer1CommandGet(AThread: TIdPeerThread;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 var
   List: TStringList;
+  i:Integer;
   Stream: TMemoryStream;
 begin
 
   QueryBox.Lines.Add(ARequestInfo.Command + ' ' + ARequestInfo.Document);
-  Base.Get('');
-  
+  Base.Module := nil;
+  Base.Prev := nil;
+
   if ARequestInfo.Command = 'GET' then
   begin
     AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Copy(ARequestInfo.Document, 2, MaxInt)));
@@ -249,7 +251,12 @@ begin
     try
       Stream := TMemoryStream.Create;
       Stream.LoadFromStream(ARequestInfo.PostStream);
-      AResponseInfo.ContentText := MemoryStreamToString(Stream);
+      List := TStringList.Create;
+      List.Text := MemoryStreamToString(Stream);
+      for i:=0 to List.Count - 1 do
+        Base.Get(List.Strings[i]);
+      List.Free;
+      AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Copy(ARequestInfo.Document, 2, MaxInt)));
     finally
       Stream.Free;
     end;

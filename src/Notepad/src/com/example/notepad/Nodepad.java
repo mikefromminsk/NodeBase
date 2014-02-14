@@ -48,6 +48,9 @@ import android.widget.Toast;
 
 public class Nodepad extends Activity {
 
+	
+	File rootDir = new File(Environment.getExternalStorageDirectory(), "meta");
+	
 	Node root;
 
 	@Override
@@ -55,8 +58,42 @@ public class Nodepad extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.notepad);
 		
-		root = new Node("http://178.124.178.151/", "!hello");
-		//root.loadNode();
+		
+		String host = "";
+		String rootNode = "";
+
+		try 
+		{	
+			BufferedReader buf = new BufferedReader(new FileReader(rootDir.getAbsolutePath() + "/params.ini"));
+			host = buf.readLine();
+			rootNode = buf.readLine();
+			root = new Node(host, rootNode);
+			root.loadNode();
+			Toast.makeText(getApplication(), host + rootNode, Toast.LENGTH_LONG).show();
+			buf.close();
+			
+		}
+		catch (IOException e) {
+			
+			host = "http://178.124.178.151/";
+			rootNode = "!hello";
+			root = new Node(host, rootNode);
+			root.loadNode();
+			try 
+			{
+				FileWriter filewrite = new FileWriter(rootDir.getAbsolutePath() + "/params.ini");
+				filewrite.write(root.host + "\n");
+				filewrite.write(root.id + "\n");
+				filewrite.flush();
+				filewrite.close();
+			} 
+			catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+
+	
+		
 		
 		ListView List = (ListView)findViewById(R.id.listView1);
 		Adapter adapter = new Adapter(this, R.layout.list_item, root);
@@ -67,7 +104,6 @@ public class Nodepad extends Activity {
 			
 			@Override
 			public void onClick(View arg0){
-					writeFile();
 				    Intent intent = new Intent(Nodepad.this, NodeEdit.class);
 				    intent.putExtra("data", "");
 				    startActivityForResult(intent, 0);
@@ -80,47 +116,22 @@ public class Nodepad extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		
-		
+
 		if (resultCode == RESULT_OK)
 		{
-			try {
-				root.local.add(new Node(root.host, "!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251")));
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
+			try 
+			{
+				root.addLocal("!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251"));
+				root.sendNode();
+			} 
+			catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
 	  
-	  void writeFile(){
-		  
-				
-				try 
-				{	
 
-					File dir = new File(Environment.getExternalStorageDirectory(), "meta");
-					dir.mkdirs();
-					FileWriter filewrite = new FileWriter(dir.getAbsolutePath() + "/test.txt", true);
-					//filewrite.write("1211");
-					filewrite.append("12345");
-					filewrite.flush();
-					filewrite.close();
-				} 
-				catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		  }
-
-		  void readFile() throws IOException {
-		    	String str = "";
-		    	BufferedReader buf = new BufferedReader(new FileReader(""));
-		    	while ((str = buf.readLine()) != null) 
-			        Log.d("Adapter", str); 
-		    	buf.close();
-		  }
 
 
 }
