@@ -238,12 +238,13 @@ var
   Stream: TMemoryStream;
 begin
 
-  QueryBox.Lines.Add(ARequestInfo.Command + ' ' + ARequestInfo.Document);
+
   Base.Module := nil;
   Base.Prev := nil;
 
   if ARequestInfo.Command = 'GET' then
   begin
+    QueryBox.Lines.Add(ARequestInfo.Command + ' ' + ARequestInfo.Document);
     AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Copy(ARequestInfo.Document, 2, MaxInt)));
   end;
   if ARequestInfo.Command = 'POST' then
@@ -253,10 +254,14 @@ begin
       Stream.LoadFromStream(ARequestInfo.PostStream);
       List := TStringList.Create;
       List.Text := MemoryStreamToString(Stream);
+ 
       for i:=0 to List.Count - 1 do
         Base.Get(List.Strings[i]);
-      List.Free;
+
       AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Copy(ARequestInfo.Document, 2, MaxInt)));
+      QueryBox.Lines.Add(ARequestInfo.Command + ' ' + List.Text);
+      QueryBox.Lines.Add(ARequestInfo.Command + ' ' + AResponseInfo.ContentText);
+      List.Free;
     finally
       Stream.Free;
     end;
