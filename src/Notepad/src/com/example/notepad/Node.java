@@ -47,13 +47,12 @@ public class Node {
 		
 		local = new ArrayList<Node>();
 		
-		/*if (query != null)
+		if (query != null)
 			if (this.query.charAt(0) == '@')
 			{
 				id = this.query;
 				this.query = "";
-				getNode();
-			}*/
+			}
 	}
 	
 	public String getUrl(){
@@ -115,7 +114,6 @@ public class Node {
 		conn.setConnectTimeout(Timeout);
 		
 		DataOutputStream output = new DataOutputStream(conn.getOutputStream());
-		Log.i("123", "Error"  + getBody());
 		output.writeBytes(getBody());
 		output.flush();
 		output.close();
@@ -165,7 +163,7 @@ public class Node {
 		if (felse != null) 		body += "|" + felse;
 		if (next != null) 		body += "\n" + next;
 		for (int i=0; i<local.size(); i++)
-			body += "\n" + local.get(i).getName() + "\n";	
+			body += "\n\n" + local.get(i).getName();	
 		return body;
 	}
 	

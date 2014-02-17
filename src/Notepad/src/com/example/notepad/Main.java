@@ -36,17 +36,17 @@ public class Main extends Activity{
 		try
 		{
 			String host = "http://178.124.178.151/";
-			String rootNode = "!hello";
+			String rootNode = "@101";
 
 			File params = new File(rootDir, "params.ini");
 			
-			if (params.exists())
+			/*if (params.exists())
 			{
 				BufferedReader buf = new BufferedReader(new FileReader(params));
 				host = buf.readLine();
 				rootNode = buf.readLine();
 				buf.close();
-			}
+			}*/
 			
 			root = new Node(host, rootNode);
 

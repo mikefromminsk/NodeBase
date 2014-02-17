@@ -233,36 +233,48 @@ end;
 procedure TGG.IdHTTPServer1CommandGet(AThread: TIdPeerThread;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 var
-  List: TStringList;
+  Node: TStringList;
   i:Integer;
   Stream: TMemoryStream;
+  Document, Path, Id: String;
 begin
-
-
-  Base.Module := nil;
-  Base.Prev := nil;
+  Document := Copy(ARequestInfo.Document, 2, MaxInt);
 
   if ARequestInfo.Command = 'GET' then
   begin
-    QueryBox.Lines.Add(ARequestInfo.Command + ' ' + ARequestInfo.Document);
-    AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Copy(ARequestInfo.Document, 2, MaxInt)));
+    Base.Module := nil;
+    Base.Prev := nil;
+    AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Document));
+    //QueryBox.Lines.Add(ARequestInfo.Command + #10 + AResponseInfo.ContentText);
   end;
   if ARequestInfo.Command = 'POST' then
   begin
     try
       Stream := TMemoryStream.Create;
       Stream.LoadFromStream(ARequestInfo.PostStream);
-      List := TStringList.Create;
-      List.Text := MemoryStreamToString(Stream);
- 
-      for i:=0 to List.Count - 1 do
-        Base.Get(List.Strings[i]);
+      Node := TStringList.Create;
+      Node.Text := MemoryStreamToString(Stream);
 
-      AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Copy(ARequestInfo.Document, 2, MaxInt)));
-      QueryBox.Lines.Add(ARequestInfo.Command + ' ' + List.Text);
-      QueryBox.Lines.Add(ARequestInfo.Command + ' ' + AResponseInfo.ContentText);
-      List.Free;
+      with Base do
+      begin
+        Module := nil;
+        Prev := nil;
+        Get(Document);
+        SetLength(Module.Local, 0);
+        Module.SaveTime := 0;
+        SaveNode(Module);
+        Module := nil;
+        Prev := nil;
+        for i:=0 to Node.Count - 1 do
+          Get(Node.Strings[i]);
+        AResponseInfo.ContentText := GetNodeBody(Module) + #10;
+      end;
+
+      QueryBox.Lines.Add('«¿œ–Œ—'#10 + Node.Text);
+      QueryBox.Lines.Add('Œ“¬≈“'#10 + AResponseInfo.ContentText);
+
     finally
+      Node.Free;
       Stream.Free;
     end;
   end;

@@ -788,7 +788,7 @@ begin
 end;
 begin
   if Node = nil then Exit;
-  while (High(Node.Local) = -1) and (Node.RefCount = 0) and (High(Node.Index) = -1) and (Node.SaveTime = 0) do
+  while (Node.SaveTime = 0) and (High(Node.Local) = -1) and (Node.RefCount = 0) and (High(Node.Index) = -1)  do
   begin
     if Node.ParentName <> nil then
     begin
@@ -919,7 +919,7 @@ begin
   if Node.Source <> nil then
     Result := Result + GetIndex(Node.Source) + '^';
   if Node.ParentName <> nil then
-    Result := Result + EncodeName(GetIndex(Node.ParentName), 2);
+    Result := Result + {EncodeName}(GetIndex(Node.ParentName){, 2});
   Result := Result + GetIndex(Node);
   if Node.FType <> nil then
     Result := Result + ':' + GetIndex(Node.FType);
@@ -954,11 +954,11 @@ begin
   Next := Node.Next;
   while Next <> nil do
   begin
-    Result := Result + #13#10 + GetIndex(Next);
+    Result := Result + #10 + GetIndex(Next);
     Next := Next.Next;
   end;
   for i:=0 to High(Node.Local) do
-    Result := Result + #13#10#13#10 + GetIndex(Node.Local[i]);
+    Result := Result + #10#10 + GetIndex(Node.Local[i]);
 end;
 
 initialization
