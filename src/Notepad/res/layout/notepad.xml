@@ -13,15 +13,24 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:text="Добавить" />
-
-    <ListView
-        android:id="@+id/listView1"
+    
+    <view
+        class="com.example.notepad.BackgroundContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button1"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true">
-
-    </ListView>
+        android:layout_height="match_parent"
+        android:id="@+id/listViewBackground">
+        
+	    <ListView
+	        android:id="@+id/listView1"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_above="@+id/button1"
+	        android:layout_alignParentLeft="true"
+	        android:layout_alignParentTop="true">
+	
+	    </ListView>
+	    
+    </view>
+	 
 
 </RelativeLayout>
