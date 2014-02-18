@@ -4,6 +4,7 @@ package com.example.notepad;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.HashMap;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -17,18 +18,37 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class List extends ArrayAdapter {
-	
+public class List extends ArrayAdapter<Node> {
+
 	Context context;
+	HashMap<Node, Integer> mIdMap = new HashMap<Node, Integer>();
 	View.OnTouchListener mTouchListener;
 	Node root;
 	
-
 	public List(Context context, int resource, Node root, View.OnTouchListener mTouchListener) {
 		super(context, resource);
 		this.context = context;
 		this.mTouchListener = mTouchListener;
 		this.root = root;
+        for (int i = 0; i < root.local.size(); ++i) {
+            mIdMap.put(root.local.get(i), i);
+        }
+	}
+
+
+    @Override
+    public long getItemId(int position) {
+        Node item = root.local.get(position);
+        return mIdMap.get(item);
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+    
+	public void Delete(int position) {
+		root.local.remove(position);
 	}
 
 	@Override
@@ -37,10 +57,9 @@ public class List extends ArrayAdapter {
 		LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View row = inflater.inflate(R.layout.list_item, parent, false);
 		
-        if (row != convertView) 
-        {
+        if (row != convertView)
         	row.setOnTouchListener(mTouchListener);
-        }
+
 		TextView textView = (TextView)row.findViewById(R.id.textView1);		
 		new DownloadLocalNode().execute(textView, root.local.get(position));
 		
@@ -88,6 +107,9 @@ public class List extends ArrayAdapter {
 		}
 
     }
+
+
+
 
 
 

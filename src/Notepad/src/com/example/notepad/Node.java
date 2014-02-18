@@ -44,9 +44,7 @@ public class Node {
 	{
 		this.host = host;
 		this.query = query;
-		
 		local = new ArrayList<Node>();
-		
 		if (query != null)
 			if (this.query.charAt(0) == '@')
 			{

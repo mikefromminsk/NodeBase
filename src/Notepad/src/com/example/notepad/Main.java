@@ -124,7 +124,8 @@ public class Main extends Activity {
         float mDownX;
         private int mSwipeSlop = -1;
         
-        @Override
+        @SuppressLint("NewApi")
+		@Override
         public boolean onTouch(final View v, MotionEvent event) {
             if (mSwipeSlop < 0) {
                 mSwipeSlop = ViewConfiguration.get(Main.this).
@@ -163,7 +164,7 @@ public class Main extends Activity {
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                {
+                {            
                     // User let go - figure out whether to animate the view out, or back into place
                     if (mSwiping) {
                         float x = event.getX() + v.getTranslationX();
@@ -244,7 +245,8 @@ public class Main extends Activity {
 
         final ViewTreeObserver observer = listview.getViewTreeObserver();
         observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            public boolean onPreDraw() {
+            @SuppressLint("NewApi")
+			public boolean onPreDraw() {
                 observer.removeOnPreDrawListener(this);
                 boolean firstAnimation = true;
                 int firstVisiblePosition = listview.getFirstVisiblePosition();
