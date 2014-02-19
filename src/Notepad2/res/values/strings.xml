@@ -3,5 +3,7 @@
 
     <string name="app_name">Notepad2</string>
     <string name="action_settings">Settings</string>
-    
+    <string name="title_activity_edit">Edit</string>
+    <string name="hello_world">Hello world!</string>
+
 </resources>
