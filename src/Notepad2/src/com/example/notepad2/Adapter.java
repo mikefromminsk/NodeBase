@@ -15,15 +15,12 @@ import android.widget.Toast;
 
 public class Adapter extends ArrayAdapter<Node> {
 
-
-	Context context;
 	LayoutInflater inflater;
 	List<Node> list;
 	private SparseBooleanArray selected;
 
 	public Adapter(Context context, int resourceId, List<Node> list) {
 		super(context, resourceId, list);
-		this.context = context;
 		this.list = list;
 		selected = new SparseBooleanArray();
 		inflater = LayoutInflater.from(context);
@@ -32,10 +29,11 @@ public class Adapter extends ArrayAdapter<Node> {
 	public View getView(int position, View row, ViewGroup parent) {
 
 		if (row == null) 
+		{
 			row = inflater.inflate(R.layout.listview_item, null);
-		TextView textView = (TextView)row.findViewById(R.id.textView);
-		new DownloadLocalNode().execute(textView, getItem(position));
-		
+			TextView textView = (TextView)row.findViewById(R.id.textView);
+			new Download().execute(getItem(position), textView, getContext());
+		}
 		return row;
 	}
 	
@@ -68,36 +66,4 @@ public class Adapter extends ArrayAdapter<Node> {
 		return selected;
 	}
 	
-	
-	class DownloadLocalNode extends AsyncTask<Object, Void, Void>{
-
-		TextView textView;
-		Node node;
-
-        @Override
-        protected Void doInBackground(Object... params) {   
-
-        	try {
-	        	textView = (TextView)params[0];
-	        	node = (Node)params[1];
-	        	node.loadNode();
-	        	
-        	} catch (IOException e) {
-    			Toast.makeText(context, "Error " + e.getMessage(), Toast.LENGTH_LONG).show();
-    		}
-			return null;
-        }
-        
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-			try {
-				textView.setText(URLDecoder.decode(node.value.getName(), "Windows-1251").replace('\n', ' '));
-				
-			}catch (IOException e){
-				Toast.makeText(context, "Error " + e.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		}
-
-    }
 }

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URLEncoder;
-
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -54,13 +53,9 @@ public class Main extends Activity {
 				buf.close();
 			}*/
 			
-			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-			StrictMode.setThreadPolicy(policy); 
 			
 			root = new Node(host, rootNode);
-			
-			root.loadNode();
+			new Download().execute(root, null, null);
 			
 			/*
 			FileWriter file = new FileWriter(params);

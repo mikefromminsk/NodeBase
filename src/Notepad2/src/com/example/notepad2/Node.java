@@ -21,8 +21,12 @@ import java.util.regex.Pattern;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import android.annotation.SuppressLint;
@@ -115,18 +119,14 @@ public class Node {
 
 	public void sendNode() throws IOException
 	{
-		/*HttpURLConnection conn = (HttpURLConnection)new URL(getUrl()).openConnection();
-		conn.setRequestMethod("POST");						
-		conn.setDoInput(true);
-		conn.setDoOutput(true);
-		conn.setConnectTimeout(Timeout);
-		
-		DataOutputStream output = new DataOutputStream(conn.getOutputStream());
-		output.writeBytes(getBody());
-		output.flush();
-		output.close();
-
-		setBody(conn.getInputStream());*/
+		HttpClient client = new DefaultHttpClient();
+		HttpPost post = new HttpPost(getUrl());
+		StringEntity entity = new StringEntity(getBody());
+		post.setEntity(entity);
+	    HttpResponse responseGet = client.execute(post);
+	    HttpEntity resEntityGet = responseGet.getEntity();
+	    if (resEntityGet != null) 
+	    	setBody(resEntityGet.getContent());
 	}
 	
 	@SuppressLint("NewApi")
