@@ -157,8 +157,19 @@ public class Main extends Activity {
 		{
 			try 
 			{
-				root.addLocal("!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251"));
-				root.sendNode();
+				if (data.getStringExtra("node") == null)
+				{
+					root.addLocal("!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251"));
+					root.sendNode();
+				}
+				else
+					for (int i=0;i<root.local.size();i++)
+						if (root.local.get(i).id == data.getStringExtra("node"))
+						{
+							root.local.get(i).value.query = "!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251");
+							root.local.get(i).value.loadNode();
+							break;
+						}
 			}
 			catch (IOException e)
 			{

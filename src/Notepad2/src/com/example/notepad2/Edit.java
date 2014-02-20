@@ -11,12 +11,8 @@ import android.widget.EditText;
 
 public class Edit extends Activity {
 
-	@Override
-	protected void onStart() {
-		
-		super.onStart();
-	}
-
+	String node;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -25,6 +21,8 @@ public class Edit extends Activity {
 		
 		final EditText edittext = (EditText)findViewById(R.id.editText1);
 		edittext.setText(getIntent().getExtras().getString("data"));
+		node = getIntent().getExtras().getString("node");
+		
         
         Button button = (Button)findViewById(R.id.button2);
         button.setOnClickListener(new View.OnClickListener() {
@@ -34,6 +32,7 @@ public class Edit extends Activity {
 			{
 				Intent intent = new Intent();
 				intent.putExtra("result", edittext.getText().toString());
+				intent.putExtra("node", node);
 				setResult(RESULT_OK, intent);
 				finish();
 			}
