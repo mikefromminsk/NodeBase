@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URLEncoder;
+
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -36,7 +37,7 @@ public class Main extends Activity {
 		setContentView(R.layout.main);
 
 		
-		rootDir.mkdirs();
+		rootDir.mkdirs(); 
 		
 		try
 		{
@@ -53,9 +54,13 @@ public class Main extends Activity {
 				buf.close();
 			}*/
 			
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+			StrictMode.setThreadPolicy(policy); 
 			
 			root = new Node(host, rootNode);
-			new Download().execute(root, null, null);
+			
+			root.loadNode();
 			
 			/*
 			FileWriter file = new FileWriter(params);
@@ -90,14 +95,14 @@ public class Main extends Activity {
 				public void onItemCheckedStateChanged(ActionMode mode,
 						int position, long id, boolean checked) {
 					final int checkedCount = List.getCheckedItemCount();
-					mode.setTitle(checkedCount + " Selected");
+					mode.setTitle(checkedCount + " Выделено");
 					adapter.toggleSelection(position);
 				}
 	
 				@Override
 				public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 					switch (item.getItemId()) {
-					case R.id.action_settings:
+					case R.id.delete:
 						SparseBooleanArray selected = adapter.getSelectedIds();
 						for (int i = (selected.size() - 1); i >= 0; i--) {
 							if (selected.valueAt(i)) {
@@ -106,6 +111,12 @@ public class Main extends Activity {
 							}
 						}
 						mode.finish();
+						try {
+							root.sendNode();
+							
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 						return true;
 					default:
 						return false;
