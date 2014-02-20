@@ -6,17 +6,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
+
 import android.content.Context;
+import android.content.Intent;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
+import android.app.Activity;
 
 public class Adapter extends ArrayAdapter<Node> {
 
 
-	Context context;
+	final Context context;
 	LayoutInflater inflater;
 	List<Node> list;
 	private SparseBooleanArray selected;
@@ -37,6 +42,22 @@ public class Adapter extends ArrayAdapter<Node> {
 			
 		}
 		TextView textView = (TextView)row.findViewById(R.id.textView);
+		textView.setTag(getItem(position));
+		row.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View row) {
+				try {
+					Node node = (Node)((TextView)row.findViewById(R.id.textView)).getTag();
+					Intent intent = new Intent(context, Edit.class);
+					intent.putExtra("data", URLDecoder.decode(node.value.getName(), "Windows-1251"));
+				    intent.putExtra("node", node.id);
+				    ((Activity)context).startActivityForResult(intent, 0);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		new DownloadLocalNode().execute(textView, getItem(position));
 		return row;
 	}

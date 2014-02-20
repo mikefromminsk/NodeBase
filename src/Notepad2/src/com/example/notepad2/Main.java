@@ -86,6 +86,8 @@ public class Main extends Activity {
 			adapter = new Adapter(this, R.layout.listview_item, root.local);
 	
 			List.setAdapter(adapter);
+
+			
 			List.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 	
 			
@@ -157,19 +159,30 @@ public class Main extends Activity {
 		{
 			try 
 			{
-				if (data.getStringExtra("node") == null)
+				String node_id = data.getStringExtra("node");
+				if (node_id == null)
 				{
 					root.addLocal("!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251"));
 					root.sendNode();
 				}
 				else
+				{
+					
 					for (int i=0;i<root.local.size();i++)
-						if (root.local.get(i).id == data.getStringExtra("node"))
+					{
+						Node node = root.local.get(i);
+						
+						if (node.id == node_id)
 						{
-							root.local.get(i).value.query = "!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251");
-							root.local.get(i).value.loadNode();
+							
+							node.query = "!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251");
+							node.id = "";
+							
+							root.sendNode();
 							break;
 						}
+					}
+				}
 			}
 			catch (IOException e)
 			{
