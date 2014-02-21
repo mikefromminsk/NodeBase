@@ -38,9 +38,11 @@ public class Adapter extends ArrayAdapter<Node> {
 	public View getView(int position, View row, ViewGroup parent) {
 
 		if (row == null) 
+		{
 			row = inflater.inflate(R.layout.listview_item, parent, false);
-		TextView textView = (TextView)row.findViewById(R.id.textView);
-		textView.setTag(getItem(position));
+			TextView textView = (TextView)row.findViewById(R.id.textView);
+			textView.setTag(getItem(position));
+		}
 		new DownloadLocalNode().execute(row);
 		return row;
 	}
