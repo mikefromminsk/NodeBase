@@ -22,27 +22,25 @@ import android.app.Activity;
 public class Adapter extends ArrayAdapter<Node> {
 
 
-	final Context context;
 	LayoutInflater inflater;
 	List<Node> list;
 	private SparseBooleanArray selected;
 
 	public Adapter(Context context, int resourceId, List<Node> list) {
 		super(context, resourceId, list);
-		this.context = context;
 		this.list = list;
 		selected = new SparseBooleanArray();
 		inflater = LayoutInflater.from(context);
 	}
 
 	public View getView(int position, View row, ViewGroup parent) {
-
+		TextView textView;
 		if (row == null) 
 		{
 			row = inflater.inflate(R.layout.listview_item, parent, false);
-			TextView textView = (TextView)row.findViewById(R.id.textView);
-			textView.setTag(getItem(position));
 		}
+		textView = (TextView)row.findViewById(R.id.textView);
+		textView.setTag(getItem(position));
 		new DownloadLocalNode().execute(row);
 		return row;
 	}
@@ -99,7 +97,7 @@ public class Adapter extends ArrayAdapter<Node> {
 	        	node.loadNode();
 	        	
         	} catch (IOException e) {
-    			Toast.makeText(context, "Error " + e.getMessage(), Toast.LENGTH_LONG).show();
+    			Toast.makeText(getContext(), "Error " + e.getMessage(), Toast.LENGTH_LONG).show();
     		}
 			return null;
         }
