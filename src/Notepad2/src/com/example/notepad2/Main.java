@@ -3,6 +3,7 @@ package com.example.notepad2;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import android.os.Bundle;
@@ -17,8 +18,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView.MultiChoiceModeListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class Main extends Activity {
@@ -82,15 +86,24 @@ public class Main extends Activity {
 			});	
 			
 			List = (ListView) findViewById(R.id.listview);
-	
 			adapter = new Adapter(this, R.layout.listview_item, root.local);
-	
 			List.setAdapter(adapter);
+	
+			List.setOnItemClickListener(new OnItemClickListener() {
 
+				@Override
+				public void onItemClick(AdapterView<?> arg0, View row,
+						int arg2, long arg3) {
+					
+					Node node = (Node)((TextView)row.findViewById(R.id.textView)).getTag();
+					Intent intent = new Intent(Main.this, Edit.class);
+					intent.putExtra("data", Node.DecodeName(node.value.getName()));
+				    intent.putExtra("node", node.id);
+				    startActivityForResult(intent, 0);
+				}
+			});
 			
 			List.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-	
-			
 			List.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 				
 				@Override
@@ -115,7 +128,6 @@ public class Main extends Activity {
 						mode.finish();
 						try {
 							root.sendNode();
-							
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -162,8 +174,9 @@ public class Main extends Activity {
 				String node_id = data.getStringExtra("node");
 				if (node_id == null)
 				{
-					root.addLocal("!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251"));
+					root.addLocal("!" + Node.EncodeName(data.getStringExtra("result")));
 					root.sendNode();
+					adapter.notifyDataSetChanged();
 				}
 				else
 				{
@@ -171,14 +184,11 @@ public class Main extends Activity {
 					for (int i=0;i<root.local.size();i++)
 					{
 						Node node = root.local.get(i);
-						
-						if (node.id == node_id)
+						if (node.id.equals(node_id))
 						{
-							
-							node.query = "!" + URLEncoder.encode(data.getStringExtra("result"), "Windows-1251");
-							node.id = "";
-							
+							node.query = "!" + Node.EncodeName(data.getStringExtra("result"));
 							root.sendNode();
+							adapter.notifyDataSetChanged();
 							break;
 						}
 					}

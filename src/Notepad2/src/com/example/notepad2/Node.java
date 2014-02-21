@@ -9,9 +9,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +73,26 @@ public class Node {
 			return id;
 		else
 			return query;
+	}
+	
+	public static String DecodeName(String str)
+	{
+		try {
+			return URLDecoder.decode(str, "Windows-1251");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return str;
+	}
+	
+	public static String EncodeName(String str)
+	{
+		try {
+			return URLEncoder.encode(str, "Windows-1251");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return str;
 	}
 	
 	public void addLocal(String localBody) throws IOException
@@ -173,12 +195,11 @@ public class Node {
 		return body;
 	}
 	
-	@SuppressWarnings("deprecation")
 	public String pathNode()
 	{
 		String path = "";
 		for (int i=0;i<id.length();i++)
-			path += URLEncoder.encode(String.valueOf(id.charAt(i))) + File.separator;
+			path += EncodeName(String.valueOf(id.charAt(i))) + File.separator;
 		return path;
 	}
 	

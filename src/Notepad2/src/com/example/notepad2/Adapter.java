@@ -1,6 +1,7 @@
 package com.example.notepad2;
 
 import android.os.AsyncTask;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,36 +37,18 @@ public class Adapter extends ArrayAdapter<Node> {
 
 	public View getView(int position, View row, ViewGroup parent) {
 
-		//if (row == null) 
-		{
-			row = inflater.inflate(R.layout.listview_item, null);
-			
-		}
+		if (row == null) 
+			row = inflater.inflate(R.layout.listview_item, parent, false);
 		TextView textView = (TextView)row.findViewById(R.id.textView);
 		textView.setTag(getItem(position));
-		row.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View row) {
-				try {
-					Node node = (Node)((TextView)row.findViewById(R.id.textView)).getTag();
-					Intent intent = new Intent(context, Edit.class);
-					intent.putExtra("data", URLDecoder.decode(node.value.getName(), "Windows-1251"));
-				    intent.putExtra("node", node.id);
-				    ((Activity)context).startActivityForResult(intent, 0);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		new DownloadLocalNode().execute(textView, getItem(position));
+		new DownloadLocalNode().execute(row);
 		return row;
 	}
 	
 	@Override
 	public void remove(Node object) {
 		list.remove(object);
-		notifyDataSetChanged();
+		//notifyDataSetChanged();
 	}
 
 	public void toggleSelection(int position) {
@@ -74,13 +57,13 @@ public class Adapter extends ArrayAdapter<Node> {
 
 	public void removeSelection() {
 		selected = new SparseBooleanArray();
-		notifyDataSetChanged();
+		//notifyDataSetChanged();
 	}
 
 	public void selectView(int position, boolean value) {
 		if (value) 	selected.put(position, value);
 		else 		selected.delete(position);
-		notifyDataSetChanged();
+		//notifyDataSetChanged();
 	}
 
 	public int getSelectedCount() {
@@ -94,6 +77,12 @@ public class Adapter extends ArrayAdapter<Node> {
 	
 	class DownloadLocalNode extends AsyncTask<Object, Void, Void>{
 
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+		}
+
 		TextView textView;
 		Node node;
 
@@ -101,8 +90,10 @@ public class Adapter extends ArrayAdapter<Node> {
         protected Void doInBackground(Object... params) {   
 
         	try {
-	        	textView = (TextView)params[0];
-	        	node = (Node)params[1];
+        		View row = (View)params[0];
+        		textView = (TextView)row.findViewById(R.id.textView);
+	        	node = (Node)textView.getTag();
+	        	
 	        	node.loadNode();
 	        	
         	} catch (IOException e) {
@@ -114,12 +105,8 @@ public class Adapter extends ArrayAdapter<Node> {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			try {
-				textView.setText(URLDecoder.decode(node.value.getName(), "Windows-1251").replace('\n', ' '));
+			textView.setText(Node.DecodeName(node.value.getName()).replace('\n', ' '));
 				
-			}catch (IOException e){
-				Toast.makeText(context, "Error " + e.getMessage(), Toast.LENGTH_LONG).show();
-			}
 		}
 
     }
