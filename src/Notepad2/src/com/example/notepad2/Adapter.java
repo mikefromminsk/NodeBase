@@ -7,17 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.List;
-
 import android.content.Context;
-import android.content.Intent;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
-import android.app.Activity;
 
 public class Adapter extends ArrayAdapter<Node> {
 
@@ -77,12 +71,6 @@ public class Adapter extends ArrayAdapter<Node> {
 	
 	class DownloadLocalNode extends AsyncTask<Object, Void, Void>{
 
-		@Override
-		protected void onPreExecute() {
-			// TODO Auto-generated method stub
-			super.onPreExecute();
-		}
-
 		TextView textView;
 		Node node;
 
@@ -93,20 +81,22 @@ public class Adapter extends ArrayAdapter<Node> {
         		View row = (View)params[0];
         		textView = (TextView)row.findViewById(R.id.textView);
 	        	node = (Node)textView.getTag();
-	        	
 	        	node.loadNode();
 	        	
         	} catch (IOException e) {
     			Toast.makeText(getContext(), "Error " + e.getMessage(), Toast.LENGTH_LONG).show();
     		}
 			return null;
+			
         }
         
 		@Override
 		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-			textView.setText(Node.DecodeName(node.value.getName()).replace('\n', ' '));
-				
+			
+			if (node.value != null)
+				textView.setText(Node.DecodeName(node.value.getName()).replace('\n', ' '));	
+			else
+				textView.setText(Node.DecodeName(node.query).replace('\n', ' '));	
 		}
 
     }

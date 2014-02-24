@@ -108,18 +108,23 @@ public class Node {
 			if (file.exists())
 				setBody(new BufferedInputStream(new FileInputStream(file)));
 		} 
-		//loadNode();
 	}
 	
 	public void loadNode() throws IOException
 	{
-	    HttpClient client = new DefaultHttpClient();
-	    HttpGet get = new HttpGet(getUrl());
-	    HttpResponse responseGet = client.execute(get);
-	    HttpEntity resEntityGet = responseGet.getEntity();
-	    if (resEntityGet != null) 
-	    	setBody(resEntityGet.getContent());
-		//saveNode();
+		try
+		{
+		    HttpClient client = new DefaultHttpClient();
+		    HttpGet get = new HttpGet(getUrl());
+		    HttpResponse responseGet = client.execute(get);
+		    HttpEntity resEntityGet = responseGet.getEntity();
+		    if (resEntityGet != null) 
+		    	setBody(resEntityGet.getContent());
+		}
+		catch (IOException e)
+		{
+			getNode();
+		}
 	}
 	
 	public void saveNode() throws IOException
@@ -133,23 +138,27 @@ public class Node {
 			file.flush();
 			file.close();
 		}
-		//sendNode();
 	}
 	
-
 	public void sendNode() throws IOException
 	{
-		HttpClient client = new DefaultHttpClient();
-		HttpPost post = new HttpPost(getUrl());
-		StringEntity entity = new StringEntity(getBody());
-		post.setEntity(entity);
-	    HttpResponse responseGet = client.execute(post);
-	    HttpEntity resEntityGet = responseGet.getEntity();
-	    if (resEntityGet != null) 
-	    	setBody(resEntityGet.getContent());
+		try
+		{
+			HttpClient client = new DefaultHttpClient();
+			HttpPost post = new HttpPost(getUrl());
+			StringEntity entity = new StringEntity(getBody());
+			post.setEntity(entity);
+		    HttpResponse responseGet = client.execute(post);
+		    HttpEntity resEntityGet = responseGet.getEntity();
+		    if (resEntityGet != null) 
+		    	setBody(resEntityGet.getContent());
+		}
+		catch (IOException e)
+		{
+			saveNode();
+		}
 	}
 	
-	@SuppressLint("NewApi")
 	public void setBody(InputStream body) throws IOException
 	{
 		BufferedReader buf = new BufferedReader(new InputStreamReader(body));
@@ -178,6 +187,7 @@ public class Node {
 		buf.close();
 		if (id != "")
 			query = "";
+		saveNode();
 	}
 	
 	public String getBody()
