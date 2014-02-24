@@ -96,10 +96,13 @@ public class Main extends Activity {
 						int arg2, long arg3) {
 					
 					Node node = (Node)((TextView)row.findViewById(R.id.textView)).getTag();
-					Intent intent = new Intent(Main.this, Edit.class);
-					intent.putExtra("data", Node.DecodeName(node.value.getName()));
-				    intent.putExtra("node", node.id);
-				    startActivityForResult(intent, 0);
+					if (node.value != null)
+					{
+						Intent intent = new Intent(Main.this, Edit.class);
+						intent.putExtra("data", Node.DecodeName(node.value.getName()));
+					    intent.putExtra("node", node.id);
+					    startActivityForResult(intent, 0);
+					}
 				}
 			});
 			
