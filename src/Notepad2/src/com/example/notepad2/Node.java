@@ -57,11 +57,12 @@ public class Node {
 		local = new ArrayList<Node>();
 		
 		if (query != null)
-			if (this.query.charAt(0) == '@')
-			{
-				id = this.query;
-				this.query = "";
-			}
+			if (!query.isEmpty())
+				if (this.query.charAt(0) == '@')
+				{
+					id = this.query;
+					this.query = "";
+				}
 	}
 	
 	public String getUrl(){
@@ -158,12 +159,14 @@ public class Node {
 	
 	public void setBody(InputStream body) throws IOException
 	{
+		Log.i("123", "Error beg");
 		BufferedReader buf = new BufferedReader(new InputStreamReader(body));
 		Pattern p = Pattern.compile("^((.*?)\\^)?(.*?)?(@(.*?))(\\?(.*?))?(#(.*?))?(\\|(.*?))?$");
 		String head = buf.readLine();
 		Matcher m = p.matcher(head);
 		if (m.find()) 
 		{	 
+			
 			 parent = m.group(2);
 			 name = m.group(3);
 			 id = m.group(4);
@@ -184,6 +187,7 @@ public class Node {
 		buf.close();
 		if (id != "")
 			query = "";
+		Log.i("123", "Error end");
 		saveNode();
 	}
 	
