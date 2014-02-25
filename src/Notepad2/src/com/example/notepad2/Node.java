@@ -69,10 +69,7 @@ public class Node {
 	}
 	
 	public String getName(){
-		if (query == "")
-			return id;
-		else
-			return query;
+		return query == "" ? id : query;
 	}
 	
 	public static String DecodeName(String str)
