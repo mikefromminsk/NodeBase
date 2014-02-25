@@ -172,7 +172,8 @@ public class Node {
 			 id = m.group(4);
 			 parameters = m.group(7);
 			 if (m.group(9) != null)
-				 value = new Node(host, m.group(9));
+				 if (!m.group(9).isEmpty())
+					 value = new Node(host, m.group(9));
 			 felse = m.group(11);
 		}
 		next = buf.readLine();

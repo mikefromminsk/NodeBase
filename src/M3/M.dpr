@@ -6,7 +6,9 @@ uses
 {$R *.res}
 
 var i: Integer;
+
 begin
+
   Application.Initialize;
   Base := TMeta.Create;
   Application.CreateForm(TGG, GG);

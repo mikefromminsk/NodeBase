@@ -30,29 +30,33 @@ type
 
 
 
-    Name        : String;     //pointers
-    ParentName  : PNode;
-    Index       : ANode;
-    ParentIndex : PNode;
-    Local       : ANode;
-    ParentLocal : PNode;
-    Value       : PNode;
-    ParentField : PNode;
-    Fields      : ANode;
-    Source      : PNode;
-    FType       : PNode;
-    FTrue       : PNode;
-    FElse       : PNode;
-    ParentParams: PNode;
-    Params      : ANode;
-    Next        : PNode;
-    Prev        : PNode;
+    Name          : String;     //pointers
+    ParentName    : PNode;
+    Index         : ANode;
+    ParentIndex   : PNode;
+    Local         : ANode;
+    ParentLocal   : PNode;
+    Value         : PNode;
+    ParentField   : PNode;
+    Fields        : ANode;
+    Source        : PNode;
+    FType         : PNode;
+    FTrue         : PNode;
+    FElse         : PNode;
+    ParentParams  : PNode;
+    Params        : ANode;
+    Next          : PNode;
+    Prev          : PNode;
+
 
     Attr        : Integer;    //system
     Count       : Integer;
     Handle      : Integer;
     SaveTime    : Double;
     RefCount    : Integer;
+
+    ControlsName  : array of String;
+    ControlsValues: array of String;
 
     Generate    : Integer;     //controls
     RunCount    : Integer;

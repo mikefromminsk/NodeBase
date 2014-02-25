@@ -77,19 +77,19 @@ constructor TLine.Create(LURI: string);
 begin
   CreateP(LURI, True);
 end;
-
-constructor TLine.CreateP(var LURI: String; FirstRun: Boolean = False);
-var
+                                                         //регул€рка из Notepad
+constructor TLine.CreateP(var LURI: String; FirstRun: Boolean = False);   //более простую дл€ базы
+var                                                              //более сложную дл€ пользовател€
   s, LS: string;
   Index, i, dx: Integer;
 begin
-  if length(LURI) = 0 then Exit;
+  if length(LURI) = 0 then Exit;                               //выход если пусто
   Name := '';
 
   Index := NextIndex(0, [' '], LURI);
   if Index <> MaxInt then
   begin
-    LS := Copy(LURI, Index + 1, MaxInt);
+    LS := Copy(LURI, Index + 1, MaxInt);                     //список Local
     Delete(LURI, Index, MaxInt);
   end;
 
@@ -97,26 +97,26 @@ begin
   begin
     Index := NextIndex(0, [' '], LS);
     s := Copy(LS, 1, Index-1);
-    SetLength(Local, High(Local)+2);
+    SetLength(Local, High(Local)+2);                                //Local
     Local[High(Local)] := TLine.CreateP(s);
     Delete(LS, 1, Index);
   end;
 
-  Index := NextIndex(0, ['?', ':', '=', '&', ';', '#', '|'], LURI);
+  Index := NextIndex(0, ['?', ':', '=', '&', ';', '#', '|'], LURI);     //в пор€дке веро€тности
 
 
   if Index > 1 then
   begin
     Name := Copy(LURI, 1, Index - 1);    //Name
-    Source := Copy(Name, 1, Pos('^', Name) - 1);
+    Source := Copy(Name, 1, Pos('^', Name) - 1);                      //Source
     Delete(Name, 1, Pos('^', Name));
     if Length(Name) > 0 then
     begin
-      ParentLocal := Copy(Name, 1, Pos('@', Name) - 1);
+      ParentLocal := Copy(Name, 1, Pos('@', Name) - 1);               //ParentLocal
       Delete(Name, 1, Pos('@', Name)-1);
     end;
     Delete(LURI, 1, Index-1);
-    if NextIndex(0, ['\', '/'], Name) <> MaxInt then
+    if NextIndex(0, ['\', '/'], Name) <> MaxInt then               //обработка до функции
     begin
       for i:=0 to Length(Name) do
         if Name[i] = '\' then
@@ -124,18 +124,18 @@ begin
       if not (Name[1] in ['\', '/']) then
         Name := '/' + Name;
       SetLength(Path, 1);
-      Path[0] := Name;
+      Path[0] := Name;                                              //Path
     end;
     if Name[1] <> '!' then
     begin
-      if Pos('$', Name) <> 0 then
+      if Pos('$', Name) <> 0 then                                  //контролы в UpperCase
       begin
         S := UpperCase(Copy(Name, Pos('$', Name) + 1, MaxInt));
         Delete(Name, Pos('$', Name), MaxInt);
         while S <> '' do
         begin
-          SetLength(Names, High(Names) + 2);
-          SetLength(Values, High(Values) + 2);
+          SetLength(Names, High(Names) + 2);                     //Names
+          SetLength(Values, High(Values) + 2);                   //Values
           Names[High(Names)] := S[1];
           Delete(S, 1, 1);
           for i:=1 to Length(S) do
@@ -145,54 +145,42 @@ begin
           Delete(S, 1, i-1);
         end;
       end;
-      {while Pos('..', Name) <> 0 do
-        Insert('0', Name, Pos('..', Name) + 1);
-      i := 1;
-      dx := 0;
-      while dx <> MaxInt do
-      begin
-        dx := PosI(i, '.', Name);
-        SetLength(Path, High(Path)+2);
-        Path[High(Path)] := Copy(Name, i, dx - i);
-        i := dx + 1;
-      end;
-      Name := Path[0];}
     end
     else
-    begin
+    begin                                                          //?
       SetLength(Path, 1);
       Path[0] := Name;
     end;
-    
-    if Length(LURI) = 0 then Exit;
-  end;
 
-  if LURI[1] = '|' then
+    if Length(LURI) = 0 then Exit;                                //?
+  end;
+                                                  //отрезали всЄ до управл€ющего символа
+  if LURI[1] = '|' then                             //обработка else в верхней функции
   begin
     Exit;
   end;
 
-  if LURI[1] = ':' then
+  if LURI[1] = ':' then                           //FType
   begin
     Delete(LURI, 1, 1);
     Index := NextIndex(0, ['?', ':', '=', '&', ';', '#'], LURI);
 
-    if Index = MaxInt then
+    if Index = MaxInt then                     //нету управл€ющих символов
     begin
       FType := TLine.CreateP(LURI);
       Delete(LURI, 1, Length(LURI));
     end
     else
-    if LURI[Index] = '=' then
+    if LURI[Index] = '=' then                  
     begin
       s := Copy(LURI, 1, Index-1);
       FType := TLine.CreateP(s);
       Delete(LURI, 1, Index);
-      Value := TLine.CreateP(LURI);
+      Value := TLine.CreateP(LURI);          //следующее значение
     end
     else
     begin
-      if Length(LURI) > 0 then
+      if Length(LURI) > 0 then                 //дальше функци€
         FType := TLine.CreateP(LURI);
     end;
     Exit;
