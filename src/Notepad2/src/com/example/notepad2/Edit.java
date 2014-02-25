@@ -17,8 +17,7 @@ public class Edit extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.node_edit);
-		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-		
+
 		final EditText edittext = (EditText)findViewById(R.id.editText1);
 		edittext.setText(getIntent().getExtras().getString("data"));
 		node = getIntent().getExtras().getString("node");
