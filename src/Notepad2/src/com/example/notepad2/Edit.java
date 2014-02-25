@@ -3,6 +3,7 @@ package com.example.notepad2;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
@@ -32,7 +33,9 @@ public class Edit extends Activity {
 				Intent intent = new Intent();
 				intent.putExtra("result", edittext.getText().toString());
 				intent.putExtra("node", node);
-				setResult(RESULT_OK, intent);
+				setResult(RESULT_OK, intent);	
+				if ((edittext.getText().toString().isEmpty()) & (node == null))
+					setResult(RESULT_CANCELED, intent);
 				finish();
 			}
 				
