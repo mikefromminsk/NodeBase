@@ -366,5 +366,204 @@ begin
 
 end;      }
 
+procedure FastParseMetaBaseLink(var Str: String);
+// подразумеваетс€ что в строке есть символ @
+// если его нету то записываетс€ в ID
+//пример строки parent^name@id$controls?params#value|else
+var
+  i, Str_Length, Index_Parent, Index_ID, Index_Controls, Index_Params, Index_Value, Index_Felse: Integer;
+  Parent, Name, ID, Controls, Params, Value, Felse: String;
+  Chr: Char;
+begin
+
+
+  Index_Parent   := 0;
+  //Index_ID       := 0;
+  Index_Controls := 0;
+  Index_Params   := 0;
+  Index_Value    := 0;
+  Index_Felse    := 0;
+
+  //реализаци€ быстрого поиска индексов
+  for i:=1 to Length(Str) do
+  begin
+    Chr := Str[i];
+    if Chr = '@' then
+      Index_ID := i
+    else
+      if Chr = '^' then     //последовательность ифов по веро€тности встречаемости
+        Index_Parent := i
+      else
+        if Chr = '$' then
+          Index_Controls := i
+        else
+          if Chr = '?' then
+            Index_Params := i
+          else
+            if Chr = '#' then
+              Index_Value := i
+            else
+              if Chr = '|' then
+              begin
+                Index_Felse := i;
+                Break;
+              end;
+  end;
+
+
+  //реализаци€ быстрой записи в переменные
+  //перечислим все возможные ситуации не использу€ математические операции
+  // ѕарсим с начала  parent^name@
+  if Index_Parent <> 0 then
+  begin
+    Parent := Copy(Str, 1, Index_Parent - 1);
+    Name := Copy(Str, Index_Parent - 1, Index_ID - Index_Parent - 1);
+  end
+  else
+  begin
+    Name := Copy(Str, 1, Index_ID - 1);
+  end;
+
+  // ѕарсим с конца  @id$controls?params#value|else
+  //блоки аналогичные в блоках else нужно заменить переменную ифа на переменную верхнего ифа
+
+  if Index_Felse <> 0 then
+  begin
+    Felse := Copy(Str, Index_Felse + 1, MaxInt);
+    if Index_Value <> 0 then
+    begin
+      Value := Copy(Str, Index_Value + 1, Index_Felse - Index_Value - 1);
+      if Index_Params <> 0 then
+      begin
+        Params := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
+        if Index_Controls <> 0 then
+        begin
+          Controls := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
+          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+        end
+        else
+        begin
+          Controls := '';
+          ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
+        end;
+      end
+      else
+      begin
+        Params := '';
+        if Index_Controls <> 0 then
+        begin
+          Controls := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
+          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+        end
+        else
+        begin
+          Controls := '';
+          ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
+        end;
+      end;
+    end
+    else
+    begin
+      Value := '';
+      if Index_Params <> 0 then
+      begin
+        Params := Copy(Str, Index_Params + 1, Index_Felse - Index_Params - 1);
+        if Index_Controls <> 0 then
+        begin
+          Controls := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
+          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+        end
+        else
+        begin
+          Controls := '';
+          ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
+        end;
+      end
+      else
+      begin
+        Params := '';
+        if Index_Controls <> 0 then
+        begin
+          Controls := Copy(Str, Index_Controls + 1, Index_Felse - Index_Controls - 1);
+          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+        end
+        else
+        begin
+          Controls := '';
+          ID := Copy(Str, Index_ID + 1, Index_Felse - Index_ID - 1);
+        end;
+      end;
+    end;
+  end
+  else
+  begin
+    Felse := '';
+    if Index_Value <> 0 then
+    begin
+      Value := Copy(Str, Index_Value + 1, MaxInt - Index_Value - 1);
+      if Index_Params <> 0 then
+      begin
+        Params := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
+        if Index_Controls <> 0 then
+        begin
+          Controls := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
+          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+        end
+        else
+        begin
+          Controls := '';
+          ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
+        end;
+      end
+      else
+      begin
+        Params := '';
+        if Index_Controls <> 0 then
+        begin
+          Controls := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
+          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+        end
+        else
+        begin
+          Controls := '';
+          ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
+        end;
+      end;
+    end
+    else
+    begin
+      Value := '';
+      if Index_Params <> 0 then
+      begin
+        Params := Copy(Str, Index_Params + 1, MaxInt - Index_Params - 1);
+        if Index_Controls <> 0 then
+        begin
+          Controls := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
+          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+        end
+        else
+        begin
+          Controls := '';
+          ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
+        end;
+      end
+      else
+      begin
+        Params := '';
+        if Index_Controls <> 0 then
+        begin
+          Controls := Copy(Str, Index_Controls + 1, MaxInt - Index_Controls - 1);
+          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+        end
+        else
+        begin
+          Controls := '';
+          ID := Copy(Str, Index_ID + 1, MaxInt - Index_ID - 1);
+        end;
+      end;
+    end;
+  end;
+end;
+
 end.
 
