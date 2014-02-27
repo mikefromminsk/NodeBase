@@ -33,6 +33,19 @@ public class Main extends Activity {
 
 	File rootDir = new File(Environment.getExternalStorageDirectory(), "meta");
 	
+	public void deleteDir(File file)
+ 	{
+		if(!file.exists())
+			return;
+		if(file.isDirectory())
+		{
+			for(File f : file.listFiles())
+				deleteDir(f);
+			file.delete();
+		}
+		else
+			file.delete();
+ 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +55,7 @@ public class Main extends Activity {
 
 		
 		rootDir.mkdirs(); 
+		
 		
 		try
 		{
@@ -120,6 +134,10 @@ public class Main extends Activity {
 				@Override
 				public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 					switch (item.getItemId()) {
+					case R.id.delete_cash:
+						deleteDir(rootDir);
+						rootDir.mkdir();
+						return true;
 					case R.id.delete:
 						SparseBooleanArray selected = adapter.getSelectedIds();
 						for (int i = (selected.size() - 1); i >= 0; i--) {

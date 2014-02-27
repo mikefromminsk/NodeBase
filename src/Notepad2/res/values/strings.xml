@@ -5,7 +5,9 @@
     <string name="title_activity_edit"></string>
     
     <string name="delete">Удалить</string>
+    <string name="delete_cash">Удалить кэш</string>
     <string name="save">Сохранить</string>
     <string name="add">Добавить</string>
+   
     
 </resources>
