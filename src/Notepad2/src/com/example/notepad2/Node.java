@@ -121,7 +121,7 @@ public class Node {
 		}
 		catch (IOException e)
 		{
-			getNode();
+			//getNode();
 		}
 	}
 	
@@ -159,7 +159,6 @@ public class Node {
 	
 	public void setBody(InputStream body) throws IOException
 	{
-		Log.i("123", "Error beg");
 		BufferedReader buf = new BufferedReader(new InputStreamReader(body));
 		Pattern p = Pattern.compile("^((.*?)\\^)?(.*?)?(@(.*?))(\\?(.*?))?(#(.*?))?(\\|(.*?))?$");
 		String head = buf.readLine();
@@ -188,7 +187,6 @@ public class Node {
 		buf.close();
 		if (id != "")
 			query = "";
-		Log.i("123", "Error end");
 		saveNode();
 	}
 	

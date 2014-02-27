@@ -35,6 +35,11 @@ public class Adapter extends ArrayAdapter<Node> {
 		}
 		textView = (TextView)row.findViewById(R.id.textView);
 		textView.setTag(getItem(position));
+		try{
+			getItem(position).getNode();
+			textView.setText(Node.DecodeName(((Node)textView.getTag()).value.getName()).replace('\n', ' '));
+		}catch (Exception e){}
+		
 		new DownloadLocalNode().execute(row);
 		return row;
 	}
