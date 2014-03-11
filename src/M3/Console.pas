@@ -27,8 +27,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure CreateParams(var Params: TCreateParams); override;
     procedure FormShow(Sender: TObject);
-    function Send(Line: String; WriteToConsole: Boolean = False): String;
-    procedure OutputBoxKeyPress(Sender: TObject; var Key: Char);
+    function ConsoleExec(Line: String; WriteToConsole: Boolean = False): String;
     procedure IdHTTPServer1CommandGet(AThread: TIdPeerThread;
       ARequestInfo: TIdHTTPRequestInfo;
       AResponseInfo: TIdHTTPResponseInfo);
@@ -50,21 +49,25 @@ uses
 
 {$R *.dfm}
 
-function TGG.Send(Line: String; WriteToConsole: Boolean = False): String;
+function TGG.ConsoleExec(Line: String; WriteToConsole: Boolean = False): String;
 var
   Node, Data: PNode;
 begin
-  Node := Base.Get(Line);               
+  Node := Base.Exec(Line);
   if Node <> nil then
   begin
     Data := Base.GetData(Node);
     if Data <> nil then
+    begin
       Result := Data.Name;
-    if Length(Result) = 4 then
-      Result := IntToStr(StrToInt4(Result))
-    else if Length(Result) = 8 then
-      Result := FloatToStr(StrToFloat8(Result))
-    else Result := EncodeName(Result);
+      if Length(Result) = 4 then
+        Result := IntToStr(StrToInt4(Result))
+      else
+        if Length(Result) = 8 then
+          Result := FloatToStr(StrToFloat8(Result))
+        else
+          Result := EncodeName(Result);
+    end;
   end;
   if Result = '' then
     Result := 'NULL';
@@ -109,7 +112,7 @@ begin
       for i:=Query.IndexOf('') + 1 to Query.Count - 1 do
       begin
         body := Query.Strings[i];
-        Get(Query.Strings[i]);
+        Exec(Query.Strings[i]);
       end;
 
       Socket.SendText(HttpResponse(GetNodeBody(Base.Module)));       //GetNodeBody(Module)
@@ -122,7 +125,7 @@ begin
   if Head.Strings[0] = 'GET' then
   begin
     Body := Copy(Head.Strings[1], 2, MaxInt);
-    Socket.SendText(HttpResponse(Base.GetNodeBody(Base.Get(Body))));
+    Socket.SendText(HttpResponse(Base.GetNodeBody(Base.Exec(Body))));
   end;
 
   Socket.Close;
@@ -147,7 +150,7 @@ procedure TGG.InputBoxKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if Key = 13 then
-    Send(InputBox.Lines[InputBox.Lines.Count-1]);
+    ConsoleExec(InputBox.Lines[InputBox.Lines.Count-1]);
 end;
 
 procedure TGG.CreateParams(var Params: TCreateParams);
@@ -161,17 +164,12 @@ var i: Integer;
 begin
   //RegisterHotKey(GG.Handle, VK_F9, 0, VK_F9);
   for i:=0 to InputBox.Lines.Count - 1 do
-    Send(InputBox.Lines[i]);
+    ConsoleExec(InputBox.Lines[i]);
 end;
 
 procedure TGG.FormShow(Sender: TObject);
 begin
   InputBox.SelStart := Length(InputBox.Lines.Text);
-end;
-
-procedure TGG.OutputBoxKeyPress(Sender: TObject; var Key: Char);
-begin
-
 end;
 
 // TRAY
@@ -244,7 +242,7 @@ begin
   begin
     Base.Module := nil;
     Base.Prev := nil;
-    AResponseInfo.ContentText := Base.GetNodeBody(Base.Get(Document));
+    AResponseInfo.ContentText := Base.GetNodeBody(Base.Exec(Document));
     //QueryBox.Lines.Add(ARequestInfo.Command + #10 + AResponseInfo.ContentText);
   end;
   if ARequestInfo.Command = 'POST' then
@@ -259,14 +257,14 @@ begin
       begin
         Module := nil;
         Prev := nil;
-        Get(Document);
+        Exec(Document);
         SetLength(Module.Local, 0);
         Module.SaveTime := 0;
         SaveNode(Module);
         Module := nil;
         Prev := nil;
         for i:=0 to Node.Count - 1 do
-          Get(Node.Strings[i]);
+          Exec(Node.Strings[i]);
         AResponseInfo.ContentText := GetNodeBody(Module) + #10;
       end;
 

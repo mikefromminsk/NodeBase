@@ -32,10 +32,9 @@ type
     Value: TLine;
     FElse: TLine;
     constructor CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
-    constructor CreateP(var LURI: String; FirstRun: Boolean = False);
+    constructor Script(var LURI: String; FirstRun: Boolean = False);
     constructor Create(LURI: string);
     destructor Destroy;
-    function GetLine: string;
   end;
 
 
@@ -75,10 +74,10 @@ end;
 
 constructor TLine.Create(LURI: string);
 begin
-  CreateP(LURI, True);
+  Script(LURI, True);
 end;
                                                          //регулярка из Notepad
-constructor TLine.CreateP(var LURI: String; FirstRun: Boolean = False);   //более простую для базы
+constructor TLine.Script(var LURI: String; FirstRun: Boolean = False);   //более простую для базы
 var                                                              //более сложную для пользователя
   s, LS: string;
   Index, i, dx: Integer;
@@ -98,7 +97,7 @@ begin
     Index := NextIndex(0, [' '], LS);
     s := Copy(LS, 1, Index-1);
     SetLength(Local, High(Local)+2);                                //Local
-    Local[High(Local)] := TLine.CreateP(s);
+    Local[High(Local)] := TLine.Script(s);
     Delete(LS, 1, Index);
   end;
 
@@ -167,21 +166,21 @@ begin
 
     if Index = MaxInt then                     //нету управляющих символов
     begin
-      FType := TLine.CreateP(LURI);
+      FType := TLine.Script(LURI);
       Delete(LURI, 1, Length(LURI));
     end
     else
     if LURI[Index] = '=' then                  
     begin
       s := Copy(LURI, 1, Index-1);
-      FType := TLine.CreateP(s);
+      FType := TLine.Script(s);
       Delete(LURI, 1, Index);
-      Value := TLine.CreateP(LURI);          //следующее значение
+      Value := TLine.Script(LURI);          //следующее значение
     end
     else
     begin
       if Length(LURI) > 0 then                 //дальше функция
-        FType := TLine.CreateP(LURI);
+        FType := TLine.Script(LURI);
     end;
     Exit;
   end;
@@ -192,7 +191,7 @@ begin
     {Index := NextIndex(0, ['&', '#'], LURI);
     s := Copy(LURI, 1, Index-1);
     Delete(LURI, 1, Index-1);}
-    Value := TLine.CreateP(LURI);
+    Value := TLine.Script(LURI);
     Exit;
   end;
 
@@ -216,7 +215,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLine.CreateP(s);
+          Params[High(Params)] := TLine.Script(s);
         end
         else
           Break;
@@ -226,7 +225,7 @@ begin
       if LURI[Index] in [':', '='] then
       begin
         SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TLine.CreateP(LURI);
+        Params[High(Params)] := TLine.Script(LURI);
         Continue;
       end;
 
@@ -237,7 +236,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLine.CreateP(s);
+          Params[High(Params)] := TLine.Script(s);
         end;
         Continue;
       end;
@@ -249,7 +248,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLine.CreateP(s);
+          Params[High(Params)] := TLine.Script(s);
         end;
         Break;
       end;
@@ -257,7 +256,7 @@ begin
       if LURI[Index] = '?' then
       begin
         SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TLine.CreateP(LURI);
+        Params[High(Params)] := TLine.Script(LURI);
       end;
 
     until False;
@@ -266,105 +265,32 @@ begin
   if (Length(LURI) > 0) and (LURI[1] = '#') and (FirstRun = True) then
   begin
     Delete(LURI, 1, 1);
-    Value := TLine.CreateP(LURI);
+    Value := TLine.Script(LURI);
   end;
 
   if (Length(LURI) > 0) and (LURI[1] = '|') then
   begin
     Delete(LURI, 1, 1);
-    FElse := TLine.CreateP(LURI);
+    FElse := TLine.Script(LURI);
   end;
 
 end;
 
-function TLine.GetLine: String;
-var
-  i: Integer;
-begin
-  if Source <> '' then
-    Result := Source + '^';
-  Result := Result + ParentLocal + Name;
-  for i:=0 to High(Names) do
-    Result := Result + Names[i] + Values[i];
-  if FType <> nil then
-    Result := Result + ':' + FType.GetLine;
-  if Params <> nil then
-  begin
-    Result := Result + '?';
-    for i:=0 to High(Params) do
-    begin
-      Result := Result + StringReplace(Params[i].GetLine, '#', '=', []);
-      if i <> High(Params) then
-        Result := Result + '&';
-    end;
-    Result := Result + ';';
-  end;
-  if Value <> nil then
-    if (Params <> nil) or (FElse <> nil)
-    then Result := Result + '#' + Value.GetLine
-    else Result := Result + '=' + Value.GetLine;
-  if FElse <> nil then
-    Result := Result + '|' + FElse.GetLine;
-  for i:=0 to High(Local) do
-    Result := Result + ' ' + Local[i].GetLine;
-end;
 
 
-{procedure TMeta.SaveNode(Node: PNode);
-var
-  Line: TLine;
-  List: TStringList;
-  IndexNode, IndexWin: String;
-  i: Integer;
-  Parent, BufNode: PNode;
-
-function SaveName(Node: PNode): String;
-begin
-  Result := '';
-  if Node = nil then Exit;
-  if (Node.Attr = naData) or (Node.Attr = naFile) or (Node.Attr = naLink)
-  then Result := EncodeName(GetIndex(Node), 2)
-  else Result := EncodeName(GetIndex(Node), 1);
-end;
-
-begin
-  if Node = nil then Exit;
-
-  //with TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '') of
-  //begin
-  {List := TStringList.Create;
-  Line :=
-
-  if Node.Attr <> naIndex then
-  begin
-    List.Text := Line.GetLine;
-    if Node.Next <> nil then
-      List.Add(SaveName(Node.Next));
-    for i:=0 to High(Node.Local) do
-      List.Add(#10 + SaveName(Node.Local[i]));
-
-    IndexNode := GetIndex(Node);
-    IndexWin  := RootPath;
-    for i:=1 to Length(IndexNode) do
-    begin
-      if IndexNode[i] in [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|']
-      then IndexWin := IndexWin + '\' + IntToHex(Ord(IndexNode[i]), 2)
-      else IndexWin := IndexWin + '\' + IndexNode[i];
-        CreateDir(IndexWin);
-    end;
-
-    List.SaveToFile(IndexWin + '\Node.meta');
-
-    if Node.Source <> nil then
-      Dec(Node.Source.RefCount);
-  end;
 
 
-  Line.Free;
-  List.Free; 
-  end;
 
-end;      }
+
+
+
+
+
+
+
+
+
+
 
 procedure FastParseMetaBaseLink(var Str: String);
 // подразумевается что в строке есть символ @

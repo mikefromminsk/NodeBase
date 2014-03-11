@@ -140,7 +140,58 @@ save when SafeTime is not nil
 else not save
 
 
-console.pas change to interface.pas
+
+
+
+
+
+[test]
+
+/../dll/math.dll.meta$run
+
+func?a:float#res
+res=0,0
+i=1,0
+dx=1,0
+while
+fje?i&a#exit|
+i=finc?i
+res=fadd?res&dx
+dx=fdiv?1,0&fsqr?i
+jmp#lab|
+while^lab
+here^exit
+res=fsqrt?fmul?res&6,0
+
+func$run?750,0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

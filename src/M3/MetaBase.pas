@@ -114,8 +114,8 @@ type
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
-    procedure Analysing(Node: PNode); virtual;
-    function Get(Line: String): PNode;
+    //procedure Analysing(Node: PNode); virtual;
+    function Exec(Line: String): PNode;
     function GetNodeBody(Node: PNode): String;
   end;
 
@@ -449,7 +449,7 @@ begin
     Module := Node;
     List.LoadFromFile(FileName);
     for i:=0 to List.Count-1 do
-      Get(List.Strings[i]);
+      Exec(List.Strings[i]);
     Module := PrevModule;
   end;
   List.Free;
@@ -710,7 +710,7 @@ var FuncResult, i: Integer;
 begin
   NextNode:
   if Node = nil then Exit;
-  Analysing(Node);
+  //Analysing(Node);
   if Node.Exception = 1 then
     ExceptionFlag1 := True;
 
@@ -876,12 +876,12 @@ begin
   Dispose(TimeLine);
 end;
 
-procedure TMeta.Analysing(Node: PNode);
+{procedure TMeta.Analysing(Node: PNode);
 begin
 
-end;
+end;}
 
-function TMeta.Get(Line: String): PNode;
+function TMeta.Exec(Line: String): PNode;
 var
   Data: String;
   i: Integer;
@@ -964,6 +964,63 @@ begin
   for i:=0 to High(Node.Local) do
     Result := Result + #10#10 + GetIndex(Node.Local[i]);
 end;
+
+
+{procedure TMeta.SaveNode(Node: PNode);
+var
+  Line: TLine;
+  List: TStringList;
+  IndexNode, IndexWin: String;
+  i: Integer;
+  Parent, BufNode: PNode;
+
+function SaveName(Node: PNode): String;
+begin
+  Result := '';
+  if Node = nil then Exit;
+  if (Node.Attr = naData) or (Node.Attr = naFile) or (Node.Attr = naLink)
+  then Result := EncodeName(GetIndex(Node), 2)
+  else Result := EncodeName(GetIndex(Node), 1);
+end;
+
+begin
+  if Node = nil then Exit;
+
+  //with TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '') of
+  //begin
+  {List := TStringList.Create;
+  Line :=
+
+  if Node.Attr <> naIndex then
+  begin
+    List.Text := Line.GetLine;
+    if Node.Next <> nil then
+      List.Add(SaveName(Node.Next));
+    for i:=0 to High(Node.Local) do
+      List.Add(#10 + SaveName(Node.Local[i]));
+
+    IndexNode := GetIndex(Node);
+    IndexWin  := RootPath;
+    for i:=1 to Length(IndexNode) do
+    begin
+      if IndexNode[i] in [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|']
+      then IndexWin := IndexWin + '\' + IntToHex(Ord(IndexNode[i]), 2)
+      else IndexWin := IndexWin + '\' + IndexNode[i];
+        CreateDir(IndexWin);
+    end;
+
+    List.SaveToFile(IndexWin + '\Node.meta');
+
+    if Node.Source <> nil then
+      Dec(Node.Source.RefCount);
+  end;
+
+
+  Line.Free;
+  List.Free;
+  end;
+
+end;      }
 
 initialization
   //Base := TMeta.Create;
