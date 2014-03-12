@@ -114,7 +114,6 @@ type
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
-    //procedure Analysing(Node: PNode); virtual;
     function Exec(Line: String): PNode;
     function GetNodeBody(Node: PNode): String;
   end;
@@ -877,11 +876,6 @@ begin
   Base.TimeLine := TimeLine.Next;
   Dispose(TimeLine);
 end;
-
-{procedure TMeta.Analysing(Node: PNode);
-begin
-
-end;}
 
 function TMeta.Exec(Line: String): PNode;
 var

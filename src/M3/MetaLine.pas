@@ -97,11 +97,7 @@ begin
       SetLength(Path, 1);
       Path[0] := Name;                                              //Path
     end;
-    if Name[1] <> '!' then
-    begin
-
-    end
-    else
+    if Name[1] = '!' then
     begin                                                          //?
       SetLength(Path, 1);
       Path[0] := Name;

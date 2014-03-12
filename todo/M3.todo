@@ -8,8 +8,9 @@ differents with code and interfeis is fields pos
 support MG
 
 
-
 [optimization]
+ideal math model
+
 Index is First
 
 CamelCase, mixedCase, lower_case
@@ -25,11 +26,12 @@ union all module to one file
 storage time in numbers or in codes
 41608,6161969676 or %01%02%03%04%05%06%07%08
 
-FElse
-(FElse <> nil) and (FElse <> Pointer(1)) -> (Integer(FElse) > 1)
+x64
 
-ideal math model
+multithreading
+option: active_kernel = 2
 
+search in branch cash
 
 
 [localization]
@@ -39,27 +41,14 @@ parser c
 
 
 [System]
-module is class
-
-Next: ANode
-
-x64
 
 planner
 
-option: active_kernel = 2
-
 data to number
-
-bpg
 
 save metanode to /math/math.dll
 
 id to $
-
-/math.dll in /math.dll.meta
-
-~delete
 
 naPointer
 
@@ -79,19 +68,21 @@ Hello+all+world@123
 world+all+Hello@123
 all+Hello+world@123
 
-Лучший способ выучить новое слово — повторить его 160 раз за 14 минут
-В результате мозг запомнит слово навсегда
+160 count 14 min not delete
 
-
+M3 is old paradigm
+Generator is new paradigm
 
 [controls]
+development
 
+value control is Node
 
 Node.ParentParam
 
 source in sys params
 
-source^name@id$controls:type?param=value&params#result|else
+source^name@id$sysdata:type?param=value&params#result|else
 
 point
 
@@ -103,41 +94,9 @@ branch cash
 
 
 
-
-[task of interest control]
-development and support
-
-
-
 [find space]
 auto set 
 
-search in branch cash
-
-FindRoot: PNode
-
-
-M3 is old paradigm
-Generator is new paradigm
-
-
-development
-
-
-trracert graph
-world graph
-
-plastic attr
-  
-
-
-create New Project MetaParser
-for testing
-
-
-
-save when SafeTime is not nil
-else not save
 
 
 
@@ -147,6 +106,16 @@ else not save
 
 
 
+
+
+
+
+update_time=4000.1212412
+
+
+auntification
+http
+right
 
 
 
