@@ -630,13 +630,15 @@ begin
 
   for i:=0 to High(Line.Names) do
   begin
-    case Line.Names[i][1] of
+    if Line.Names[i] = 'RUN' then
+      Result.RunCount := StrToIntDef(Line.Values[i], 1);
+    {case Line.Names[i][1] of
       'C' : Result.Count := StrToInt(Line.Values[i]);
       'T' : Result.SaveTime := StrToFloat(Line.Values[i]);
       'G' : Result.Generate := StrToInt(Line.Values[i]);
-      'R' : Result.RunCount := StrToInt(Line.Values[i]);
+      'R' :
       'E' : Result.Exception := StrToInt(Line.Values[i]);
-    end;
+    end;  }
   end;
 
   if Result.Attr = naWord then
@@ -966,7 +968,21 @@ begin
 end;
 
 
-{procedure TMeta.SaveNode(Node: PNode);
+{
+constructor TLine.CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
+begin
+  inherited Create;
+  if IdNode = '' then Exit;
+  if SourceNode <> '' then
+    Source := SourceNode;
+  if NameNode <> '' then
+    Name := Name + NameNode;
+  Name := Name + IdNode;
+  if ControlsNode <> '' then
+    Name := Name + '$' + ControlsNode;
+end;
+
+procedure TMeta.SaveNode(Node: PNode);
 var
   Line: TLine;
   List: TStringList;

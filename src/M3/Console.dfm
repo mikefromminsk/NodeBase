@@ -94,7 +94,7 @@ object GG: TGG
     Font.Name = 'Arial'
     Font.Style = []
     Lines.Strings = (
-      '/../dll/math.meta$R1'
+      '/../dll/math.meta$run'
       ''
       'func?a:float#res'
       'res=0,0'
@@ -110,7 +110,7 @@ object GG: TGG
       'here^exit'
       'res=fsqrt?fmul?res&6,0'
       ''
-      'func$R1?750,0')
+      'func$run;?750,0')
     ParentColor = True
     ParentFont = False
     ScrollBars = ssVertical

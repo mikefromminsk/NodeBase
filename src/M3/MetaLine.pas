@@ -3,7 +3,7 @@ unit MetaLine;
 {
   Line: TLine;
 begin
-  Line := TLine.Create('name$I5');
+  Line := TLine.Create('name$run');
   ShowMessage(Line.ControlsValues[0]);
   Exit;
   }
@@ -11,7 +11,7 @@ begin
 interface
 
 uses
-  SysUtils, MetaUtils;
+  SysUtils, MetaUtils, Classes;
 
 type
 
@@ -31,7 +31,6 @@ type
     Params: array of TLine;
     Value: TLine;
     FElse: TLine;
-    constructor CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
     constructor Script(var LURI: String; FirstRun: Boolean = False);
     constructor Create(LURI: string);
     destructor Destroy;
@@ -41,46 +40,19 @@ type
 implementation
 
 
-destructor TLine.Destroy;
-var i: Integer;
-begin           
-  if FType <> nil then
-    FType.Destroy;
-  for i:=0 to High(Params) do
-    if Params[i] <> nil then
-      Params[i].Destroy;
-  if Value <> nil then
-    Value.Destroy;
-  if FElse <> nil then
-    FElse.Destroy;
-  for i:=0 to High(Local) do
-    if Local[i] <> nil then
-      Local[i].Destroy;
-  inherited Destroy;
-end;
 
-constructor TLine.CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
-begin
-  inherited Create;
-  if IdNode = '' then Exit;
-  if SourceNode <> '' then
-    Source := SourceNode;
-  if NameNode <> '' then
-    Name := Name + NameNode;
-  Name := Name + IdNode;
-  if ControlsNode <> '' then
-    Name := Name + '$' + ControlsNode;
-end;
 
 constructor TLine.Create(LURI: string);
 begin
   Script(LURI, True);
 end;
-                                                         //регулярка из Notepad
-constructor TLine.Script(var LURI: String; FirstRun: Boolean = False);   //более простую для базы
+                                                         
+                                                         //потоковая обработка ссылок
+constructor TLine.Script(var LURI: String; FirstRun: Boolean = False);
 var                                                              //более сложную для пользователя
-  s, LS: string;
-  Index, i, dx: Integer;
+  s, LS, Str: string;                                            //более простую для базы
+  Index, i, LocalIndex: Integer;
+  List: TStringList;
 begin
   if length(LURI) = 0 then Exit;                               //выход если пусто
   Name := '';
@@ -101,7 +73,7 @@ begin
     Delete(LS, 1, Index);
   end;
 
-  Index := NextIndex(0, ['?', ':', '=', '&', ';', '#', '|'], LURI);     //в порядке вероятности
+  Index := NextIndex(0, ['$', '?', ':', '=', '&', ';', '#', '|'], LURI);     //в порядке вероятности
 
 
   if Index > 1 then
@@ -127,23 +99,7 @@ begin
     end;
     if Name[1] <> '!' then
     begin
-      if Pos('$', Name) <> 0 then                                  //контролы в UpperCase
-      begin
-        S := UpperCase(Copy(Name, Pos('$', Name) + 1, MaxInt));
-        Delete(Name, Pos('$', Name), MaxInt);
-        while S <> '' do
-        begin
-          SetLength(Names, High(Names) + 2);                     //Names
-          SetLength(Values, High(Values) + 2);                   //Values
-          Names[High(Names)] := S[1];
-          Delete(S, 1, 1);
-          for i:=1 to Length(S) do
-            if not (S[i] in ['0'..'9', ',', '.']) then
-              Break;
-          Values[High(Values)] := Copy(S, 1, i-1);
-          Delete(S, 1, i-1);
-        end;
-      end;
+
     end
     else
     begin                                                          //?
@@ -159,6 +115,54 @@ begin
     Exit;
   end;
 
+  if LURI[1] = '$' then
+  begin
+    Delete(LURI, 1, 1);
+    repeat
+
+      Index := NextIndex(0, ['?', ':', '&', ';', '#'], LURI);
+
+      if (Index = MaxInt) or (LURI[Index] = ';') then
+      begin
+        s := Copy(LURI, 1, Index-1);
+        Delete(LURI, 1, Index);
+        if Length(s) > 0 then
+        begin
+          SetLength(Names, High(Names)+2);
+          SetLength(Values, High(Values)+2);
+          Names[High(Names)] := Copy(s, 1, Pos('=', s) -1);
+          if Names[High(Names)] = ''
+          then Names[High(Names)] := s
+          else Values[High(Names)] := Copy(s, Pos('=', s) + 1, MaxInt);
+          Names[High(Names)] := AnsiUpperCase(Names[High(Names)]);
+        end;
+        Break;
+      end;
+
+      if LURI[Index] = '&' then
+      begin
+        s := Copy(LURI, 1, Index-1);
+        Delete(LURI, 1, Index);
+        if Length(s) > 0 then
+        begin
+          SetLength(Names, High(Names)+2);
+          SetLength(Values, High(Values)+2);
+          Names[High(Names)] := Copy(s, 1, Pos('=', s) -1);
+          if Names[High(Names)] = ''
+          then Names[High(Names)] := s
+          else Values[High(Names)] := Copy(s, Pos('=', s) + 1, MaxInt);
+          Names[High(Names)] := AnsiUpperCase(Names[High(Names)]);
+        end;
+        Continue;
+      end;
+
+      Break;
+    until False;
+    Index := NextIndex(0, ['?', ':', '=', '&', ';', '#', '|'], LURI);
+    if (Index = MaxInt) then
+      Exit;
+  end;
+
   if LURI[1] = ':' then                           //FType
   begin
     Delete(LURI, 1, 1);
@@ -170,7 +174,7 @@ begin
       Delete(LURI, 1, Length(LURI));
     end
     else
-    if LURI[Index] = '=' then                  
+    if LURI[Index] = '=' then
     begin
       s := Copy(LURI, 1, Index-1);
       FType := TLine.Script(s);
@@ -490,6 +494,27 @@ begin
     end;
   end;
 end;
+
+
+destructor TLine.Destroy;
+var i: Integer;
+begin
+  if FType <> nil then
+    FType.Destroy;
+  for i:=0 to High(Params) do
+    if Params[i] <> nil then
+      Params[i].Destroy;
+  if Value <> nil then
+    Value.Destroy;
+  if FElse <> nil then
+    FElse.Destroy;
+  for i:=0 to High(Local) do
+    if Local[i] <> nil then
+      Local[i].Destroy;
+  inherited Destroy;
+end;
+
+
 
 end.
 

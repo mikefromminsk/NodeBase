@@ -19,9 +19,6 @@ type
     IdHTTPServer1: TIdHTTPServer;
     procedure InputBoxKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    procedure ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
-    procedure ServerClientError(Sender: TObject; Socket: TCustomWinSocket;
-      ErrorEvent: TErrorEvent; var ErrorCode: Integer);
     procedure InputBoxKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
@@ -83,62 +80,6 @@ begin
   GG.QueryBox.Lines.Add('************************'#10);
 end;
 
-procedure TGG.ServerClientRead(Sender: TObject; Socket: TCustomWinSocket);
-var
-  Query, Head: TStrings;
-  Body, Ansver: String;
-  i: Integer;
-  PrevModule: PNode;
-begin
-  Query := TStringList.Create;
-  Head := TStringList.Create;
-  Body := '';
-
-  Query.Text := Socket.ReceiveText;
-
-  Head.Delimiter := ' ';
-  Head.DelimitedText := Query.Strings[0];
-
-  QueryBox.Text := QueryBox.Text + Query.Text;
-  QueryBox.Lines.Add('************************'#10);
-
-  if Head.Strings[0] = 'POST' then
-  begin
-    with Base do
-    begin
-      PrevModule := Base.Module;
-      Base.Prev := nil;
-      Base.Module := nil;
-      for i:=Query.IndexOf('') + 1 to Query.Count - 1 do
-      begin
-        body := Query.Strings[i];
-        Exec(Query.Strings[i]);
-      end;
-
-      Socket.SendText(HttpResponse(GetNodeBody(Base.Module)));       //GetNodeBody(Module)
-      Base.Module := PrevModule;
-      Base.Prev := nil;
-    end;
-
-
-  end;
-  if Head.Strings[0] = 'GET' then
-  begin
-    Body := Copy(Head.Strings[1], 2, MaxInt);
-    Socket.SendText(HttpResponse(Base.GetNodeBody(Base.Exec(Body))));
-  end;
-
-  Socket.Close;
-  Query.Free;
-  Head.Free;
-end;
-
-procedure TGG.ServerClientError(Sender: TObject; Socket: TCustomWinSocket;
-  ErrorEvent: TErrorEvent; var ErrorCode: Integer);
-begin
-  QueryBox.Lines.Add(TimeToStr(Now) + 'SocketError ' + IntToStr(ErrorCode));
-end;
-
 procedure TGG.InputBoxKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
@@ -153,6 +94,7 @@ begin
     ConsoleExec(InputBox.Lines[InputBox.Lines.Count-1]);
 end;
 
+//Style Form mini
 procedure TGG.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
@@ -162,7 +104,6 @@ end;
 procedure TGG.FormCreate(Sender: TObject);
 var i: Integer;
 begin
-  //RegisterHotKey(GG.Handle, VK_F9, 0, VK_F9);
   for i:=0 to InputBox.Lines.Count - 1 do
     ConsoleExec(InputBox.Lines[i]);
 end;

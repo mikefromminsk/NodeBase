@@ -1,13 +1,15 @@
 program M;
 
 uses
-  Forms, Console, MetaBase;
+  Forms, Console, MetaBase, MetaLine, Dialogs;
 
 {$R *.res}
 
 var i: Integer;
 
+
 begin
+
 
   Application.Initialize;
   Base := TMeta.Create;
