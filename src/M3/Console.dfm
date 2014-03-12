@@ -94,7 +94,7 @@ object GG: TGG
     Font.Name = 'Arial'
     Font.Style = []
     Lines.Strings = (
-      '/../dll/math.dll.meta$R1'
+      '/../dll/math.meta$R1'
       ''
       'func?a:float#res'
       'res=0,0'
