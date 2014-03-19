@@ -102,8 +102,20 @@ begin
 end;
 
 procedure TGG.FormCreate(Sender: TObject);
-var i: Integer;
+var
+  i: Integer;
+  Options: TStringList;
+const
+  OptionsFileName = 'metabase.cfg';
 begin
+  if FileExists(OptionsFileName) then
+  begin
+    Options := TStringList.Create;
+    Options.LoadFromFile(OptionsFileName);
+    IdHTTPServer1.DefaultPort := StrToIntDef(Options.Values['ServerPort'], 80);
+    Options.Free;
+  end;
+  IdHTTPServer1.Active := True;
   for i:=0 to InputBox.Lines.Count - 1 do
     ConsoleExec(InputBox.Lines[i]);
 end;

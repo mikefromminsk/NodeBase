@@ -124,7 +124,6 @@ object GG: TGG
     Top = 8
   end
   object IdHTTPServer1: TIdHTTPServer
-    Active = True
     Bindings = <>
     CommandHandlers = <>
     Greeting.NumericCode = 0

@@ -92,6 +92,9 @@ number branch
 
 branch cash
 
+Next: ANode
+for Generator for подмены лучшей функцией
+
 
 
 [find space]
@@ -118,25 +121,26 @@ http
 right
 
 
+$run read default 1
+$default readwrite 
 
 
 
 
 
 
+алгоритм добавления в стандарт узлов
 
 
 
 
 
 
+options file
 
 
 
-
-
-
-
+method DUMP
 
 
 
