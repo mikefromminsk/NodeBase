@@ -1,7 +1,7 @@
 object GG: TGG
   Left = 204
   Top = 115
-  Width = 557
+  Width = 759
   Height = 510
   BorderIcons = [biSystemMenu]
   Color = clGrayText
@@ -17,8 +17,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 414
-    Width = 549
+    Top = 410
+    Width = 743
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -28,10 +28,10 @@ object GG: TGG
     ResizeStyle = rsLine
   end
   object Splitter1: TSplitter
-    Left = 460
+    Left = 284
     Top = 0
     Width = 4
-    Height = 414
+    Height = 410
     Align = alRight
     Color = cl3DDkShadow
     MinSize = 1
@@ -39,8 +39,8 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 418
-    Width = 549
+    Top = 414
+    Width = 743
     Height = 58
     Align = alBottom
     BevelInner = bvNone
@@ -58,10 +58,10 @@ object GG: TGG
     WordWrap = False
   end
   object QueryBox: TRichEdit
-    Left = 464
+    Left = 288
     Top = 0
-    Width = 85
-    Height = 414
+    Width = 455
+    Height = 410
     Align = alRight
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -82,8 +82,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 460
-    Height = 414
+    Width = 284
+    Height = 410
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone

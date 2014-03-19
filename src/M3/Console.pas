@@ -106,7 +106,7 @@ var
   i: Integer;
   Options: TStringList;
 const
-  OptionsFileName = 'metabase.cfg';
+  OptionsFileName = 'config.ini';
 begin
   if FileExists(OptionsFileName) then
   begin
@@ -115,7 +115,12 @@ begin
     IdHTTPServer1.DefaultPort := StrToIntDef(Options.Values['ServerPort'], 80);
     Options.Free;
   end;
-  IdHTTPServer1.Active := True;
+  try
+    IdHTTPServer1.Active := True;
+  except
+    on E: Exception do
+      QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) + ' already open. Change ServerPort in config file.');
+  end;
   for i:=0 to InputBox.Lines.Count - 1 do
     ConsoleExec(InputBox.Lines[i]);
 end;

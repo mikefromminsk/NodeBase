@@ -13,7 +13,6 @@ type
     function RandomNode(Node: PNode): PNode;
     function RandomParams(Func: PNode; Node: PNode): String;
     procedure GenScript(Node: PNode);
-    procedure Analysing(Node: PNode); override;
   end;
 
 var
@@ -148,7 +147,7 @@ end;
 
 
 
-procedure TMGen.Analysing(Node: PNode);
+procedure Analysing(Node: PNode);
 var
   i: Integer;
 begin
