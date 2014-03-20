@@ -48,19 +48,22 @@ type
     Next          : PNode;
     Prev          : PNode;
 
-
-    Attr        : Integer;    //system
-    Count       : Integer;
-    Handle      : Integer;
-    SaveTime    : Double;
-    RefCount    : Integer;
-
     ControlsName  : array of String;
     ControlsValues: array of String;
 
-    Generate    : Integer;     //controls
+    Attr        : Integer;    //public system params
+    Count       : Integer;
     RunCount    : Integer;
     Exception   : Integer;
+
+    Handle      : Integer;    //private system params
+    SaveTime    : Double;
+    RefCount    : Integer;
+
+
+
+    //Generate    : Integer;     //controls
+
 
   end;
 
@@ -162,6 +165,33 @@ begin
   Root := AllocMem(SizeOf(TNode));
   Root.Attr := naRoot;
   Module := NewNode(NextID);
+end;
+
+procedure SetControl(Node: PNode; Param, Value: String);
+begin
+  Param := AnsiUpperCase(Param);
+  Value := AnsiUpperCase(Value);
+  if Param = 'ATTR' then
+    Node.Attr := StrToIntDef(Value, 0)
+  else
+  if Param = 'COUNT' then
+    Node.Count := StrToIntDef(Value, 0)
+  else
+  if Param = 'RUN' then
+    Node.RunCount := StrToIntDef(Value, 1);
+end;
+
+function GetControls(Node: PNode): String;
+begin
+  Result := '';
+  if Node = nil then Exit;
+  if Node.Attr <> 0 then
+    Result := Result + '&' + 'ATTR' + '=' + IntToStr(Node.Attr);
+  if Node.Count <> 0 then
+    Result := Result + '&' + 'COUNT' + '=' + IntToStr(Node.Count);
+  if Node.RunCount <> 0 then
+    Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
+  Delete(Result, 1, 1);
 end;
 
 procedure TMeta.Load;
@@ -628,17 +658,7 @@ begin
   end;
 
   for i:=0 to High(Line.Names) do
-  begin
-    if Line.Names[i] = 'RUN' then
-      Result.RunCount := StrToIntDef(Line.Values[i], 1);
-    {case Line.Names[i][1] of
-      'C' : Result.Count := StrToInt(Line.Values[i]);
-      'T' : Result.SaveTime := StrToFloat(Line.Values[i]);
-      'G' : Result.Generate := StrToInt(Line.Values[i]);
-      'R' :
-      'E' : Result.Exception := StrToInt(Line.Values[i]);
-    end;  }
-  end;
+    SetControl(Result, Line.Names[i], Line.Values[i]);
 
   if Result.Attr = naWord then
   begin
@@ -896,21 +916,9 @@ end;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 function TMeta.GetNodeBody(Node: PNode): String;
 var
-  Str: String;
+  Str, Controls: String;
   i: Integer;
   Next: PNode;
 begin
@@ -923,11 +931,8 @@ begin
   Result := Result + GetIndex(Node);
   if Node.FType <> nil then
     Result := Result + ':' + GetIndex(Node.FType);
-  Str := '';
-  if Node.Generate <> 0 then
-    Str := Str + 'G' + IntToStr(Node.Generate);
-  if Str <> '' then
-    Result := Result + '$' + Str;
+
+  Result := Result + '$' + GetControls(Node);
   Str := '';
   for i:=0 to High(Node.Params) do
     Str := Str + GetIndex(Node.Params[i]) + '&';
