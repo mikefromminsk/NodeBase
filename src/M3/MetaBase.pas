@@ -54,17 +54,12 @@ type
     Attr        : Integer;    //public system params
     Count       : Integer;
     RunCount    : Integer;
+    Time        : Double;
     Exception   : Integer;
 
     Handle      : Integer;    //private system params
     SaveTime    : Double;
     RefCount    : Integer;
-
-
-
-    //Generate    : Integer;     //controls
-
-
   end;
 
   TInterest = record
@@ -174,6 +169,9 @@ begin
   if Param = 'ATTR' then
     Node.Attr := StrToIntDef(Value, 0)
   else
+  if Param = 'TIME' then
+    Node.Time := StrToFloatDef(Value, 0)
+  else
   if Param = 'COUNT' then
     Node.Count := StrToIntDef(Value, 0)
   else
@@ -187,6 +185,8 @@ begin
   if Node = nil then Exit;
   if Node.Attr <> 0 then
     Result := Result + '&' + 'ATTR' + '=' + IntToStr(Node.Attr);
+  if Node.Time <> 0 then
+    Result := Result + '&' + 'TIME' + '=' + FloatToStr(Node.Time);
   if Node.Count <> 0 then
     Result := Result + '&' + 'COUNT' + '=' + IntToStr(Node.Count);
   if Node.RunCount <> 0 then
@@ -443,8 +443,11 @@ begin
     then Result := AddIndex(Result, Name[i])
     else Result := Result.Index[Index];
   end;
-  if Result <> Root
-  then Inc(Result.Count)
+  if Result <> Root then
+  begin
+    Inc(Result.Count);
+    Result.Time := Now;
+  end
   else Result := nil;
 end;
 
@@ -649,6 +652,7 @@ begin
   if Result = nil then Exit;
   if Line.Name[1] <> '@' then
     Result := AddLocal(Result);
+
   case Line.Name[1] of
     '!' : Result.Attr := naData;
     '@' : Result.Attr := naLink;
