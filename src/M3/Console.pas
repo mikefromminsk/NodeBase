@@ -30,6 +30,8 @@ type
       AResponseInfo: TIdHTTPResponseInfo);
     procedure IdHTTPServer1CreatePostStream(ASender: TIdPeerThread;
       var VPostStream: TStream);
+    procedure IdHTTPServer1Exception(AThread: TIdPeerThread;
+      AException: Exception);
   private
     procedure ControlWindow(var Msg: TMessage); message WM_SYSCOMMAND;
     procedure IconMouse(var Msg: TMessage); message WM_USER + 1;
@@ -240,6 +242,12 @@ procedure TGG.IdHTTPServer1CreatePostStream(ASender: TIdPeerThread;
   var VPostStream: TStream);
 begin
   VPostStream := TMemoryStream.Create;
+end;
+
+procedure TGG.IdHTTPServer1Exception(AThread: TIdPeerThread;
+  AException: Exception);
+begin
+  QueryBox.Lines.Add('Error: ' + StringReplace(AException.Message, #13#10, #32, [rfReplaceAll]));
 end;
 
 end.

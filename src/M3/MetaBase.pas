@@ -85,7 +85,6 @@ type
     ExceptionFlag1: Boolean;
 
     constructor Create;
-    procedure Load;
     function NextID: String;
     function AddSubNode(var Arr: ANode): PNode;
     function AddIndex(Node: PNode; Name: Char): PNode;
@@ -137,7 +136,6 @@ implementation
 constructor TMeta.Create;
 var Method: TMethod;
 begin
-  Load;
 
   with Interest do
   begin
@@ -192,21 +190,6 @@ begin
   if Node.RunCount <> 0 then
     Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
   Delete(Result, 1, 1);
-end;
-
-procedure TMeta.Load;
-var MetaOptions: TStringList;
-begin
-  if FileExists('metaoptions.ini') then
-  begin
-    MetaOptions := TStringList.Create;
-    with MetaOptions do
-    begin
-      LoadFromFile('metaoptions.ini');  //StRootValue
-      ID := StrToInt(Values['ID']);
-      TimerInterval := StrToInt(Values['TimerInterval']);
-    end;
-  end;
 end;
 
 function TMeta.NextID: String;

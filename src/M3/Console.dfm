@@ -17,8 +17,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 410
-    Width = 743
+    Top = 414
+    Width = 751
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -28,10 +28,10 @@ object GG: TGG
     ResizeStyle = rsLine
   end
   object Splitter1: TSplitter
-    Left = 284
+    Left = 292
     Top = 0
     Width = 4
-    Height = 410
+    Height = 414
     Align = alRight
     Color = cl3DDkShadow
     MinSize = 1
@@ -39,8 +39,8 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 414
-    Width = 743
+    Top = 418
+    Width = 751
     Height = 58
     Align = alBottom
     BevelInner = bvNone
@@ -58,10 +58,10 @@ object GG: TGG
     WordWrap = False
   end
   object QueryBox: TRichEdit
-    Left = 288
+    Left = 296
     Top = 0
     Width = 455
-    Height = 410
+    Height = 414
     Align = alRight
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -82,8 +82,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 284
-    Height = 410
+    Width = 292
+    Height = 414
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -128,6 +128,7 @@ object GG: TGG
     CommandHandlers = <>
     Greeting.NumericCode = 0
     MaxConnectionReply.NumericCode = 0
+    OnException = IdHTTPServer1Exception
     ReplyExceptionCode = 0
     ReplyTexts = <>
     ReplyUnknownCommand.NumericCode = 0
