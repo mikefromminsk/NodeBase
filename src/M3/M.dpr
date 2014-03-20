@@ -1,7 +1,7 @@
 program M;
 
 uses
-  Forms, Console, MetaBase, MetaLine, Dialogs;
+  Forms, Console, MetaBase, MetaLine, Dialogs, SysUtils;
 
 {$R *.res}
 
@@ -19,6 +19,10 @@ begin
   //GG.InputBox.Clear;
   {for i:=0 to GG.InputBox.Lines.Count - 1 do
     GG.M(GG.InputBox.Lines[i], False); }
-
-  Application.Run;
+  try
+    Application.Run;
+  except
+    on E: Exception do
+      ShowMessage(e.Message);
+  end;
 end.

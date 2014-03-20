@@ -148,7 +148,6 @@ begin
     from := 50000;
   end;
 
-  CreateDir(RootPath);
   TimerInterval := 100;
   TimerProc(Method) := Self.OnTimer;
   //Windows.SetTimer(0, 0, Round(TimerInterval), Method.Code);
@@ -987,6 +986,7 @@ end;
 
 begin
   if Node = nil then Exit;
+  CreateDir(RootPath);
 
   //with TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '') of
   //begin
