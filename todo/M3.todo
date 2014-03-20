@@ -115,14 +115,13 @@ auto set
 
 update_time=4000.1212412
 
-
 auntification
 http
 right
 
 
-$run read default 1
-$default readwrite 
+$run read/write
+$count read
 
 
 
@@ -132,17 +131,9 @@ $default readwrite
 алгоритм добавления в стандарт узлов
 
 
-
-
-
-
-options file
-
-
-
 method DUMP
 
-
+auto find port
 
 
 
