@@ -30,6 +30,8 @@ x64
 
 multithreading
 option: active_kernel = 2
+set in task manager
+write in documetation
 
 search in branch cash
 
@@ -123,9 +125,11 @@ right
 $run read/write
 $count read
 
+$comment 
+don`t run
 
-
-
+$multitreading
+run in differnt thead
 
 
 алгоритм добавления в стандарт узлов

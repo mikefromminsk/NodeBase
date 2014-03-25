@@ -197,7 +197,7 @@ var
   Document, Path, Id: String;
 begin
   Document := Copy(ARequestInfo.Document, 2, MaxInt);
-
+  AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); //Разрешение на выполнения запросов
   if ARequestInfo.Command = 'GET' then
   begin
     Base.Module := nil;
