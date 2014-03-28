@@ -1,0 +1,5 @@
+C:\Documents and Settings\GaidukMD\Desktop\meta\exe\TestConsole\TestConsole\bin\TestConsole.dll
+C:\Documents and Settings\GaidukMD\Desktop\meta\exe\TestConsole\TestConsole\bin\TestConsole.pdb
+C:\Documents and Settings\GaidukMD\Desktop\meta\exe\TestConsole\TestConsole\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\GaidukMD\Desktop\meta\exe\TestConsole\TestConsole\obj\Debug\TestConsole.dll
+C:\Documents and Settings\GaidukMD\Desktop\meta\exe\TestConsole\TestConsole\obj\Debug\TestConsole.pdb
