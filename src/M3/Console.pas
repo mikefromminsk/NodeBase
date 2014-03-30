@@ -119,6 +119,7 @@ begin
   end;
   try
     IdHTTPServer1.Active := True;
+    QueryBox.Lines.Add('DefaultPort: ' + IntToStr(IdHTTPServer1.DefaultPort));
   except
     on E: Exception do
       QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) + ' already open. Change ServerPort in config file.');

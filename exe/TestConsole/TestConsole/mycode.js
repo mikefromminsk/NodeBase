@@ -1,42 +1,87 @@
-﻿$(function () {
+﻿var metaNodes = [];
+
+$(function () {
+
+    
+
+    
+    loadNode("@1");
 
     setMode();
-    var node = {
-        query: "",
-        id: "",
-        name
-    
-    };
-
-
 });
 
 
 function openmenu() {
-
-    httpGet("http://google.by");
+    alert(metaNodes.length);
 }
 
+function indexOf(id) {
+    for (var i = 0; i < metaNodes.length; i++) {
+        if (metaNodes[i].id == id) {
+            return metaNodes[i];
+        }
+    }
+}
 
-function httpGet(theUrl) {
-
+function loadNode(query) {
+    var host = "http://localhost:82/";
     $.ajax({
         type: "GET",
-        url: "http://localhost:80/!hello",
-        /*async: true,
-        crossDomain: true,*/
-        success: function (text) {
-            alert(text);
+        url: host + query,
+        success: function (get) {
+
+            var nodesArr = get.split('\n\n@');
+            var expr = /^((.*?)\^)?(.*?)?(@(.*?))(\$(.*?))?(\?(.*?))?(#(.*?))?(\|(.*?))?(\r(.*?))?$/g;
+            var groups = expr.exec(nodesArr[0]);
+            nodesArr.shift();
+            var focusNode = indexOf(groups[5]);
+
+            if (!!!focusNode) {
+                //create
+                metaNodes.push({
+                    query: "",
+                    parent: groups[2],
+                    name: groups[3],
+                    id: groups[5],
+                    sysparams: groups[7],
+                    params: groups[9],
+                    value: groups[11],
+                    felse: groups[13],
+                    next: groups[15],
+                    local: nodesArr
+                });
+                focusNode = metaNodes[metaNodes.length - 1];
+            }
+            else {
+                //update
+                focusNode.query = "";
+                focusNode.parent = groups[2];
+                focusNode.name = groups[3];
+                focusNode.id = groups[5];
+                focusNode.sysparams = groups[7];
+                focusNode.params = groups[9];
+                focusNode.value = groups[11];
+                focusNode.felse = groups[13];
+                focusNode.next = groups[15];
+                focusNode.local = nodesArr;
+            }
+
+
+            for (var i = 0; i < nodesArr.length; i++) {
+                metaNodes.push({
+                    query: nodesArr,
+                    cx: !!!focusNode.cx ? 50 : focusNode.cx + 50,
+                    cy: !!!focusNode.cy ? (i * 50) + 50 : focusNode.cy + (i * 50) + 50
+                });
+                loadNode("@" + nodesArr[i]);
+            }
+
         },
         error: function (request, error) {
-            alert("Can't do because: " + error);
+
         }
     });
-}
-
-
-function nodesToJson() {
-
+    
 }
 
 
@@ -45,9 +90,83 @@ var mode = 1;
 
 function setMode() {
 
+
+    if (mode == 1) {
+
+        var viewAttr = [20, 3, 5, 12];
+
+        var innerRadius = 30;
+        var outerRadius = 50;
+        var width = document.getElementById('content').clientWidth;
+        var height = document.getElementById('content').clientHeight;
+
+        var color = d3.scale.category20();
+
+        var pie = d3.layout.pie()
+                .sort(null);
+
+        var arc = d3.svg.arc()
+                .innerRadius(innerRadius)
+                .outerRadius(outerRadius);
+
+
+        var svg = d3.select("#content").append("svg")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .append("g")
+                    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+        setInterval(update, 500);
+
+        function update() {
+
+            var nodeGroup = svg.selectAll("g")
+                    .data(metaNodes)
+                    .enter()
+                    .append("g")
+                    .attr("transform", function (d) { return "translate(" + d.cx + "," + d.cy + ")"; })
+                    .attr("opacity", function (d) {
+                        return d.query == "" ? "1" : "0.3";
+                    })
+                    .on('click', function (d) {
+                        alert('click - ' + d);
+                    })
+                    .selectAll("path")
+                        .data(pie(viewAttr))
+                        .enter()
+                        .append("path")
+                        .attr("fill", function (d, i) { return color(i) })
+                        .attr("d", arc)
+                        .each(function (d) { this._current = d; });
+
+
+            var newRadius = viewAttr[0];
+            setAttr();
+
+            svg.selectAll("g").selectAll("path").data(pie(viewAttr)).transition().duration(500).attrTween("d", function (a) {
+                var i = d3.interpolate(this._current, a),
+                k = d3.interpolate(arc.outerRadius()(), newRadius);
+                this._current = i(0);
+                return function (t) {
+                    return arc.innerRadius(k(t) / 4).outerRadius(k(t))(i(t));
+                };
+            });
+        }
+
+        function setAttr() {
+            for (var i = 1; i < viewAttr.length; i++) {
+                viewAttr[i] = Math.floor(Math.random() * 10) + 1;
+            }
+            
+        }
+    }
+
+
+
+
+
+
     if (mode == 2) {
-
-
 
         var treeData = { 
             "name": "A",    
@@ -122,71 +241,7 @@ function setMode() {
 
 
 
-    if (mode == 1) {
-        var nodeAttr = [20, 1, 1, 1, 1, 1];
-
-        var innerRadius = 120;
-        var outerRadius = 30;
-        var width = document.getElementById('content').clientWidth;
-        var height = document.getElementById('content').clientHeight;
-
-        var color = d3.scale.category20();
-
-        var pie = d3.layout.pie()
-                .sort(null);
-
-        var arc = d3.svg.arc()
-                .innerRadius(innerRadius)
-                .outerRadius(outerRadius);
-
-
-        var svg = d3.select("#content").append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .append("g")
-                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-        var nodeGroup = svg.selectAll("g")
-                .data(nodeAttr)
-                .enter()
-                .append("g")
-                .attr("transform", function (d, i) { return "translate(" + 100 * i + ",0)"; });
-
-        var path = nodeGroup.selectAll("path").data(pie(nodeAttr))
-                .enter()
-                .append("path")
-                .attr("fill", function (d, i) { return color(i) })
-                .attr("d", arc)
-                .each(function (d) { this._current = d; }); // store the initial values
-
-        /*$(svg).bind("monitor", worker);
-        $(svg).trigger("monitor");*/
-        setInterval(worker, 500);
-
-        function worker() {
-            nodeAttr[0] += 1;
-            var newRadius = nodeAttr[0];
-
-
-            setAttr();
-
-            path.data(pie(nodeAttr)).transition().duration(500).attrTween("d", function (a) {
-                var i = d3.interpolate(this._current, a),
-             k = d3.interpolate(arc.outerRadius()(), newRadius);
-                this._current = i(0);
-                return function (t) {
-                    return arc.innerRadius(k(t) / 4).outerRadius(k(t))(i(t));
-                };
-            });
-
-        }
-
-        function setAttr() {
-            for (var i = 1; i < nodeAttr.length; i++) {
-                nodeAttr[i] = Math.floor(Math.random() * 10) + 1;
-            }
-        }
-    }
+    
 }
 
 

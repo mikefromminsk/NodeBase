@@ -945,11 +945,11 @@ begin
   Next := Node.Next;
   while Next <> nil do
   begin
-    Result := Result + #10#13 + GetIndex(Next);
+    Result := Result + #10 + GetIndex(Next);
     Next := Next.Next;
   end;
   for i:=0 to High(Node.Local) do
-    Result := Result + #10#13#10#13 + GetIndex(Node.Local[i]);
+    Result := Result + #10#10 + GetIndex(Node.Local[i]);
 end;
 
 
