@@ -88,7 +88,7 @@ function loadNode(query) {
 }
 
 
-var mode = 3;
+var mode = 1;
 
 
 function setMode() {
@@ -98,11 +98,14 @@ function setMode() {
 
         var viewAttr = [20, 3, 5, 12];
 
-        var innerRadius = 30;
-        var outerRadius = 50;
-        var width = document.getElementById('content').clientWidth,
-            height = document.getElementById('content').clientHeight,
-            margin = { top: -5, right: height / 2, bottom: -5, left: width / 2 };
+
+
+
+        var startInnerRadius = 12;
+        var startOuterRadius = 20;
+        var margin = { top: 0, right: 0, bottom: 0, left: 0 },
+            width = document.getElementById('content').clientWidth,
+            height = document.getElementById('content').clientHeight;
 
 
         var color = d3.scale.category20();
@@ -111,10 +114,8 @@ function setMode() {
                 .sort(null);
 
         var arc = d3.svg.arc()
-                .innerRadius(innerRadius)
-                .outerRadius(outerRadius);
-
-
+                .innerRadius(startInnerRadius)
+                .outerRadius(startOuterRadius);
                 
         var zoom = d3.behavior.zoom()
             .scaleExtent([1, 10])
@@ -125,16 +126,31 @@ function setMode() {
             .on("dragstart", dragstarted)
             .on("drag", dragged)
             .on("dragend", dragended);
-            
+
+        var svg = d3.select("#content").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
+            .call(zoom);
+                   
+        var rect = svg.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .style("fill", "none")
+            .style("pointer-events", "all");
+
+        svg = svg.append("g");
+
         function zoomed() {
-            container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+            svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         }
 
         function dragstarted(d) {
             d3.event.sourceEvent.stopPropagation();
             d3.select(this).classed("dragging", true);
         }
-
+        
         function dragged(d) {
             d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
         }
@@ -142,19 +158,7 @@ function setMode() {
         function dragended(d) {
             d3.select(this).classed("dragging", false);
         }
-
         
-
-
-        var svg = d3.select("#content").append("svg")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
-                    .call(zoom);
-
-
-
 
         setInterval(update, 500);
 
@@ -174,7 +178,8 @@ function setMode() {
                 .append("path")
                 .attr("fill", function (d, i) { return color(i) })
                 .attr("d", arc)
-                .each(function (d) { this._current = d; });
+                .each(function (d) { this._current = d; })
+                .call(drag);
 
             /*var label = nodeGroup.append("text")
                .text(function (d) { return d.name; });*/
@@ -193,14 +198,14 @@ function setMode() {
                     .data(pie(viewAttr))
                     .transition()
                     .duration(500)
-                    .attrTween("d", function (a) {
+                    /*.attrTween("d", function (a) {
                 var i = d3.interpolate(this._current, a),
                 k = d3.interpolate(arc.outerRadius()(), newRadius);
                 this._current = i(0);
                 return function (t) {
                     return arc.innerRadius(k(t) / 4).outerRadius(k(t))(i(t));
                 };
-            });
+            })*/;
         }
 
         
@@ -276,87 +281,6 @@ function setMode() {
                 .attr("text-anchor", function (d) { return d.children ? "end" : "start"; })
                 .text(function (d) { return d.name; })
     }
-
-
-
-
-    if (mode == 3) {
-
-        var margin = { top: -5, right: -5, bottom: -5, left: -5 },
-            width = 960 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
-
-        var zoom = d3.behavior.zoom()
-            .scaleExtent([1, 10])
-            .on("zoom", zoomed);
-
-        var drag = d3.behavior.drag()
-            .origin(function (d) { return d; })
-            .on("dragstart", dragstarted)
-            .on("drag", dragged)
-            .on("dragend", dragended);
-
-        var svg = d3.select("#content").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
-            .call(zoom);
-
-        var rect = svg.append("rect")
-            .attr("width", width)
-            .attr("height", height)
-            .style("fill", "none")
-            .style("pointer-events", "all");
-
-        var container = svg.append("g");
-
-        container.append("g")
-            .attr("class", "x axis")
-          .selectAll("line")
-            .data(d3.range(0, width, 10))
-          .enter().append("line")
-            .attr("x1", function (d) { return d; })
-            .attr("y1", 0)
-            .attr("x2", function (d) { return d; })
-            .attr("y2", height);
-
-        container.append("g")
-            .attr("class", "y axis")
-          .selectAll("line")
-            .data(d3.range(0, height, 10))
-          .enter().append("line")
-            .attr("x1", 0)
-            .attr("y1", function (d) { return d; })
-            .attr("x2", width)
-            .attr("y2", function (d) { return d; });
-
-   
-
-       /* function dottype(d) {
-            d.x = +d.x;
-            d.y = +d.y;
-            return d;
-        }*/
-
-        function zoomed() {
-            container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        }
-
-        function dragstarted(d) {
-            d3.event.sourceEvent.stopPropagation();
-            d3.select(this).classed("dragging", true);
-        }
-
-        function dragged(d) {
-            d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-        }
-
-        function dragended(d) {
-            d3.select(this).classed("dragging", false);
-        }
-    }
-
 
 
 
