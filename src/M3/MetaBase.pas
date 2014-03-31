@@ -906,7 +906,6 @@ function TMeta.GetNodeBody(Node: PNode): String;
 var
   Str, Controls: String;
   i: Integer;
-  Next: PNode;
 begin
   Result := '';
   if Node = nil then Exit;
@@ -942,12 +941,8 @@ begin
     else
       Result := Result + '#' + GetIndex(Node.Value);
   end;
-  Next := Node.Next;
-  while Next <> nil do
-  begin
-    Result := Result + #10 + GetIndex(Next);
-    Next := Next.Next;
-  end;
+  if Node.Next <> nil then
+    Result := Result + #10 + GetIndex(Node.Next);
   for i:=0 to High(Node.Local) do
     Result := Result + #10#10 + GetIndex(Node.Local[i]);
 end;
