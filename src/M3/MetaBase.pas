@@ -924,7 +924,7 @@ begin
   if Str <> '' then
   begin
     Delete(Str, Length(Str), 1);
-    Result := Result + '?' + Str + ';';
+    Result := Result + '?' + Str {+ ';'};
   end;
   if (Node.FTrue <> nil) or (Node.FElse <> nil) then
   begin

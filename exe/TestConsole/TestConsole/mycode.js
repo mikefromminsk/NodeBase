@@ -37,6 +37,9 @@ function loadNode(query) {
                 return;
             nodesArr.shift();
 
+
+            var paramsArr = !!groups[9] ? groups[9].split('&') : [];
+
             var focusNode = indexOf(groups[4]);
 
             if (!!!focusNode) {
@@ -47,7 +50,7 @@ function loadNode(query) {
                     name: groups[3],
                     id: groups[4],
                     sysparams: groups[7],
-                    params: groups[9],
+                    params: paramsArr,
                     value: groups[11],
                     felse: groups[13],
                     next: groups[15],
@@ -62,25 +65,61 @@ function loadNode(query) {
                 focusNode.name = groups[3];
                 focusNode.id = groups[4];
                 focusNode.sysparams = groups[7];
-                focusNode.params = groups[9];
+                focusNode.params = paramsArr;
                 focusNode.value = groups[11];
                 focusNode.felse = groups[13];
                 focusNode.next = groups[15];
                 focusNode.local = nodesArr;
             }
 
+            if (!!focusNode.local)
+                for (var i = 0; i < focusNode.local.length; i++) {
+                    metaNodes.push({
+                        query: focusNode.local[i],
+                        x: !!focusNode.x ? focusNode.x + 50 : 50,
+                        y: !!focusNode.y ? focusNode.y + (i * 50) + 50 : (i * 50) + 50,
+                        color: "red"
+                    });
+                    loadNode(nodesArr[i]);
+                }
 
-            for (var i = 0; i < nodesArr.length; i++) {
+            /*
+          
+            if (!!focusNode.params)
+                for (var i = 0; i < focusNode.params.length; i++) {
+                    metaNodes.push({
+                        query: focusNode.params[i],
+                        x: !!focusNode.x ? focusNode.x + (i * 40) + 40 : (i * 40) + 40,
+                        y: !!focusNode.y ? focusNode.y - 20 : -20,
+                        color: "orange"
+                    });
+                    loadNode(focusNode.params[i]);
+                }
+
+            if (!!focusNode.value) {
                 metaNodes.push({
-                    query: nodesArr[i],
-                    cx: !!!focusNode.cx ? 50 : focusNode.cx + 50,
-                    cy: !!!focusNode.cy ? (i * 50) + 50 : focusNode.cy + (i * 50) + 50
+                    query: focusNode.value,
+                    x: !!focusNode.x ? focusNode.x + 40 : 40,
+                    y: !!focusNode.y ? focusNode.y : 0,
+                    color: "blue"
                 });
-                loadNode(nodesArr[i]);
+                loadNode(focusNode.value);
+            }*/
+
+            if (!!focusNode.next) {
+                metaNodes.push({
+                    query: focusNode.next,
+                    x: !!focusNode.x ? focusNode.x : 0,
+                    y: !!focusNode.y ? focusNode.y + 40 : 40,
+                    color: "black"
+                });
+                loadNode(focusNode.next);
             }
+
 
         },
         error: function (request, error) {
+            sleep(3000);
             loadNode(query);
         }
     });
@@ -169,20 +208,36 @@ function setMode() {
                 .data(metaNodes)
                 .enter()
                 .append("g")
-                .attr("transform", function (d) { return "translate(" + d.cx + "," + d.cy + ")"; })
-                .on('click', function (d) { alert(d.query); });
+                .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
+                //.on('click', function (d) { alert(JSON.stringify(d)); })
+                .attr("cx", function (d) { return d.x; })
+                .attr("cy", function (d) { return d.y; })
+                .call(drag);
 
             var path = nodeGroup.selectAll("path")
                 .data(pie(viewAttr))
                 .enter()
+                
                 .append("path")
                 .attr("fill", function (d, i) { return color(i) })
                 .attr("d", arc)
                 .each(function (d) { this._current = d; })
+                .attr("cx", function (d) { return d.x; })
+                .attr("cy", function (d) { return d.y; })
                 .call(drag);
 
+            var circle = nodeGroup
+                .append("circle")
+                .attr("r", 20)
+                .attr("fill", function (d) { return d.color; })
+                .attr("opacity", 0.5)
+                .attr("cx", function (d) { return d.x; })
+                .attr("cy", function (d) { return d.y; })
+                .call(drag)
+           ;
+
             /*var label = nodeGroup.append("text")
-               .text(function (d) { return d.name; });*/
+               .text(function (d) { return JSON.stringify(d.params); });*/
 
 
             //udpate
