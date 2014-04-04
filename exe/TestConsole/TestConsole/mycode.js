@@ -2,9 +2,6 @@
 
 $(function () {
 
-    
-
-    
     loadNode("@1");
 
     setMode();
@@ -192,8 +189,10 @@ function setMode() {
         
         function dragged(d) {
             d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+            document.getElementById("footer").innerHTML = d.x;
         }
 
+        
         function dragended(d) {
             d3.select(this).classed("dragging", false);
         }
@@ -202,22 +201,34 @@ function setMode() {
         setInterval(update, 500);
 
         function update() {
+        
+  /*g = svg.selectAll("g")
+    .data(blocks);
 
+  gEnter = g.enter().append("g")
+    .call(drag);
+
+  g.attr("transform", function(d) { return "translate("+d.x+","+d.y+")"; });
+
+  gEnter.append("rect")
+    .attr("height", 100)
+    .attr("width", 100);*/
+
+            var g = svg.selectAll("g")
+                .data(metaNodes);
             //create
-            var nodeGroup = svg.selectAll("g")
-                .data(metaNodes)
+            var nodeGroup = g
                 .enter()
                 .append("g")
-                .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
+                
                 //.on('click', function (d) { alert(JSON.stringify(d)); })
-                .attr("cx", function (d) { return d.x; })
-                .attr("cy", function (d) { return d.y; })
-                .call(drag);
+                ;
+
+            g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
             var path = nodeGroup.selectAll("path")
                 .data(pie(viewAttr))
                 .enter()
-                
                 .append("path")
                 .attr("fill", function (d, i) { return color(i) })
                 .attr("d", arc)
@@ -231,11 +242,11 @@ function setMode() {
                 .attr("r", 20)
                 .attr("fill", function (d) { return d.color; })
                 .attr("opacity", 0.5)
-                .attr("cx", function (d) { return d.x; })
+                /*.attr("cx", function (d) { return d.x; })
                 .attr("cy", function (d) { return d.y; })
-                .call(drag)
+                .call(drag)*/
            ;
-
+            nodeGroup.call(drag);
             /*var label = nodeGroup.append("text")
                .text(function (d) { return JSON.stringify(d.params); });*/
 

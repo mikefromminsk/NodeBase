@@ -136,6 +136,7 @@ end;
 // TRAY
 procedure TGG.Ic(n: Integer; Icon: TIcon);
 var Nim: TNotifyIconData;
+  tip : array[0..63] of Char;
 begin
   with Nim do
   begin
@@ -145,6 +146,7 @@ begin
     uFlags := NIF_ICON or NIF_MESSAGE or NIF_TIP;
     hicon := Icon.Handle;
     uCallbackMessage := WM_USER + 1;
+    lstrcpyn(szTip, PChar(GG.Caption), SizeOf(szTip));
   end;
   case n of
     1: Shell_NotifyIcon(Nim_Add, @Nim);
