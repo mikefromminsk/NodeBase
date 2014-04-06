@@ -12,7 +12,8 @@ function openmenu() {
     alert(metaNodes.length);
 }
 
-function indexOf(id) {
+function getNode(id) {
+    if (!!!id) return;
     for (var i = 0; i < metaNodes.length; i++) {
         if ((metaNodes[i].query == id) | (metaNodes[i].id == id)) {
             return metaNodes[i];
@@ -39,13 +40,13 @@ function loadNode(query, n) {
 
             var paramsArr = !!groups[9] ? groups[9].split('&') : [];
 
-            var focusNode = indexOf(groups[4]);
+            var focusNode = getNode(groups[4]);
 
             if (!!!focusNode) {
                 //create
                 metaNodes.push({
                     query: "",
-                    parent: groups[2],
+                    source: groups[2],
                     name: groups[3],
                     id: groups[4],
                     sysparams: groups[7],
@@ -60,7 +61,7 @@ function loadNode(query, n) {
             else {
                 //update
                 focusNode.query = "";
-                focusNode.parent = groups[2];
+                focusNode.source = groups[2];
                 focusNode.name = groups[3];
                 focusNode.id = groups[4];
                 focusNode.sysparams = groups[7];
@@ -73,29 +74,85 @@ function loadNode(query, n) {
         },
         error: function (request, error) {
             if (n < 3)
-                loadNode(query, n + 1);
+                loadgetNode(query, n + 1);
         }
     });
 
 }
 
-function loadLinks(focusNode) {
 
 
-    if (!!focusNode.local)
-        for (var i = 0; i < focusNode.local.length; i++) {
-            metaNodes.push({
-                query: focusNode.local[i],
-                x: !!focusNode.x ? focusNode.x + 50 : 50,
-                y: !!focusNode.y ? focusNode.y + (i * 50) + 50 : (i * 50) + 50,
-                color: "red"
-            });
-            loadNode(focusNode.local[i]);
+
+function loadLinks(node) {
+
+
+    var height = !!node.height ? node.height : 0;
+
+    if (node.query == "")
+
+    if (!!node.local)//and expand true
+        for (var i = 0; i < node.local.length; i++) {
+            metaNodes.push({query: node.local[i], color: "red", parentLocal: node.id});
+            loadNode(node.local[i]);
         }
 
+    if (!!node.next) {
+        metaNodes.push({query: node.next, color: "green", prev: node.id });
+        loadNode(node.next);
+    }
+    setPosition(node);
+}
 
-       
 
+var r = 40;
+var distance = 10;
+var right = r;
+var down = r + distance;
+
+function setPosition(root) {
+    if (!!!root) return;
+
+    var x = !!root.x ? root.x : 0,
+        y = !!root.y ? root.y : 0,
+        height = 0;
+
+    if (!!root.local) {
+        
+        for (var i = 0; i < root.local.length; i++) {
+            var node = getNode(root.local[i]);
+            node.y = y + down + (i * down) + !!node.height ? node.height : 0;
+            node.x = x + right;
+
+            height += down;
+        }
+        
+    }
+    
+    /*
+    var next = root.next,
+        next_count = 0;
+
+    for (; ; ) {
+        if (!!!next)
+            break;
+        var node = getNode(next);
+        
+        node.y = y + height + (next_count * down);
+        node.x = x;
+
+        height += down;
+
+        next_count += 1;
+        next = node.next;
+    }
+    
+
+
+    
+    setPosition(getNode(root.prev));*/
+
+    root.height = height;
+    setPosition(getNode(root.parentLocal));
 }
 
 var mode = 1;
