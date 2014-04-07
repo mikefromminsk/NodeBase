@@ -21,6 +21,27 @@ function getNode(id) {
     }
 }
 
+function deleteNode(id) {
+    if (!!!id) return;
+    for (var i = 0; i < metaNodes.length; i++) {
+        if ((metaNodes[i].query == id) | (metaNodes[i].id == id)) {
+            metaNodes.splice(i, 1);
+            return;
+        }
+    }
+}
+
+function deleteTree(id) {
+    var node = getNode(id);
+    if (!!!node) return;
+    if (!!node.local) {
+        for (var i = 0; i < node.local.length; i++)
+            deleteTree(node.local[i]);
+    }
+    deleteNode(node.id);
+}
+
+
 function loadNode(query, n) {
     if (!!n == false)
         n = 1;
@@ -73,15 +94,16 @@ function loadNode(query, n) {
             }
         },
         error: function (request, error) {
-            if (n < 3)
-                loadgetNode(query, n + 1);
+            if (n < 3) {
+                loadNode(query, n + 1)
+            }
+            else {
+                deleteNode(query);
+            }
         }
     });
 
 }
-
-
-
 
 function loadLinks(node) {
 
@@ -100,7 +122,6 @@ function loadLinks(node) {
         metaNodes.push({query: node.next, color: "green", prev: node.id });
         loadNode(node.next);
     }
-    setPosition(node);
 }
 
 
@@ -109,50 +130,85 @@ var distance = 10;
 var right = r;
 var down = r + distance;
 
+function setHeight(root) {
+
+    var height = 0;
+
+    if ((!!root.local)) {
+        for (var i = 0; i < root.local.length; i++) {
+            var node = getNode(root.local[i]);
+            if (!!!node) continue;
+            setHeight(node);
+            height += down + node.height;
+        }
+    }
+
+    for (var next = root.next; ; ) {
+        var node = getNode(next);
+        if (!!!node) break;
+        setHeight(node);
+        height += down + node.height;
+        next = node.next;
+    }
+
+    root.height = height;
+}
+
 function setPosition(root) {
     if (!!!root) return;
 
     var x = !!root.x ? root.x : 0,
-        y = !!root.y ? root.y : 0,
-        height = 0;
+        y = !!root.y ? root.y : 0;
+    var top = 0;
 
-    if (!!root.local) {
-        
+    if ((!!root.local)) 
         for (var i = 0; i < root.local.length; i++) {
             var node = getNode(root.local[i]);
-            node.y = y + down + (i * down) + !!node.height ? node.height : 0;
-            node.x = x + right;
+            if (!!!node) break;
 
-            height += down;
+            if (!!root.expand ? root.expand : false) {
+                top += down;
+                node.y = y + top;
+                node.x = x + right;
+                setPosition(node);
+                top += node.height;
+            }
+            else {
+                deleteTree(node.id);
+            }
+        }
+    for (var next = root.next; ; ) {
+        var node = getNode(next);
+        if (!!!node) break;
+
+        if (!!root.expand ? root.expand : false) {
+            top += down;
+            node.y = y + top;
+            node.x = x;
+            setPosition(node);
+            top += node.height;
+        }
+        else {
+            deleteTree(node.id);
         }
         
-    }
-    
-    /*
-    var next = root.next,
-        next_count = 0;
-
-    for (; ; ) {
-        if (!!!next)
-            break;
-        var node = getNode(next);
-        
-        node.y = y + height + (next_count * down);
-        node.x = x;
-
-        height += down;
-
-        next_count += 1;
         next = node.next;
     }
+        /*
+    var next = root.next;
+
+    for (; ; ) {
+
+        var node = getNode(next);
+        if (!!!node) break;
+   
+       
+        next = node.next;
+    }*/
+
+
+
     
-
-
-    
-    setPosition(getNode(root.prev));*/
-
-    root.height = height;
-    setPosition(getNode(root.parentLocal));
 }
 
 var mode = 1;
@@ -196,7 +252,6 @@ function setMode() {
         var svg = d3.select("#content").append("svg")
             .attr("width", width)
             .attr("height", height)
-            .on("dblclick.zoom", null)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
             .call(zoom)
@@ -233,19 +288,23 @@ function setMode() {
         setInterval(update, 500);
 
         function update() {
-        
+            setHeight(getNode("@1"));
+            setPosition(getNode("@1"));
 
             var g = svg.selectAll("g")
                 .data(metaNodes);
+
+            //delete
+            g.exit().remove();
 
             //create
             var nodeGroup = g
                 .enter()
                 .append("g")
                 .call(drag);
-                
-            g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
+            g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+            
             var path = nodeGroup.selectAll("path")
                 .data(pie(viewAttr))
                 .enter()
@@ -260,38 +319,42 @@ function setMode() {
                 .attr("fill", function (d) { return d.color; })
                 .attr("opacity", 0.5)
                 .on("dblclick", function (d) {
-
-                    d.expand = !!d.expand ? !d.expand : true;    
-                    loadLinks(d);
-      
+                    d.expand = !!d.expand ? !d.expand : true;
+                    if (d.expand == true)
+                        loadLinks(d);
+                    else
+                        setPosition(d);
                 });
                 ;
 
-            /*var label = nodeGroup.append("text")
-               .text(function (d) { return JSON.stringify(d.params); });*/
+           var label = nodeGroup.append("text").text(function (d) { return d.name + d.id; });
 
 
             //udpate
 
-            var newRadius = viewAttr[0];
 
-            /*for (var i = 1; i < viewAttr.length; i++) 
-                viewAttr[i] = Math.floor(Math.random() * 10) + 1;*/
+
+           /*
+           var newRadius = viewAttr[0];
+           for (var i = 1; i < viewAttr.length; i++) 
+           viewAttr[i] = Math.floor(Math.random() * 10) + 1;*/
 
             svg.selectAll("g")
-                    .attr("opacity", function (d) { return d.query == "" ? "1" : "0.3"; })
+                    .attr("opacity", function (d) { return d.query == "" ? (!!d.deleted ? d.deleted : 1) : 0.3; })
                     .selectAll("path")
                     .data(pie(viewAttr))
-                    /*.transition()
-                    .duration(500)
-                    .attrTween("d", function (a) {
-                var i = d3.interpolate(this._current, a),
-                k = d3.interpolate(arc.outerRadius()(), newRadius);
-                this._current = i(0);
-                return function (t) {
-                    return arc.innerRadius(k(t) / 4).outerRadius(k(t))(i(t));
-                };
+            /*.transition()
+            .duration(500)
+            .attrTween("d", function (a) {
+            var i = d3.interpolate(this._current, a),
+            k = d3.interpolate(arc.outerRadius()(), newRadius);
+            this._current = i(0);
+            return function (t) {
+            return arc.innerRadius(k(t) / 4).outerRadius(k(t))(i(t));
+            };
             })*/;
+
+            
         }
     }
 

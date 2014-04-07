@@ -444,17 +444,19 @@ begin
   if not FileExists(FileName) then Exit;
   List := TStringList.Create;
   FileExt := LowerCase(ExtractFileExt(FileName));
-  if FileExt = '.dll' then
+  if (FileExt = '.dll') then
   begin
-    Node.Handle := GetImageFunctionList(FileName, List);
-    for i:=0 to List.Count-1 do
+    if Node.Handle = 0 then
     begin
-      Func := NewNode(List.Strings[i]);
-      Func.Attr := naFunc;
-      Func.Handle := GetProcAddress(Node.Handle, List.Strings[i]);
-      AddLocal(Node, Func);
+      Node.Handle := GetImageFunctionList(FileName, List);
+      for i:=0 to List.Count-1 do
+      begin
+        Func := NewNode(List.Strings[i]);
+        Func.Attr := naFunc;
+        Func.Handle := GetProcAddress(Node.Handle, List.Strings[i]);
+        AddLocal(Node, Func);
+      end;
     end;
-    //if FileExists(FileName + '.meta') then
   end
   else
   if FileExt = '.meta' then
