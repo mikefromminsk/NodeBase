@@ -53,9 +53,10 @@ type
 
     Attr        : Integer;    //public system params
     Count       : Integer;
-    RunCount    : Integer;
     Time        : Double;
     Exception   : Integer;
+    RunCount    : Integer;
+    Activate    : Double;
 
     Handle      : Integer;    //private system params
     SaveTime    : Double;
@@ -167,13 +168,16 @@ begin
     Node.Attr := StrToIntDef(Value, 0)
   else
   if Param = 'TIME' then
-    Node.Time := StrToFloatDef(Value, 0)
+    Node.Time := StrToFloatDef(Value, Now)
   else
   if Param = 'COUNT' then
     Node.Count := StrToIntDef(Value, 0)
   else
   if Param = 'RUN' then
-    Node.RunCount := StrToIntDef(Value, 1);
+    Node.RunCount := StrToIntDef(Value, 1)
+  else
+  if Param = 'ACTIVATE' then
+    Node.Activate := StrToFloatDef(Value, Now);
 end;
 
 function GetControls(Node: PNode): String;
@@ -181,13 +185,15 @@ begin
   Result := '';
   if Node = nil then Exit;
   if Node.Attr <> 0 then
-    Result := Result + '&' + 'ATTR' + '=' + IntToStr(Node.Attr);
+    Result := Result + '&' + 'ATTR' + '=' + IntToStr(Node.Attr); //merge strings
   if Node.Time <> 0 then
     Result := Result + '&' + 'TIME' + '=' + FloatToStr(Node.Time);
   if Node.Count <> 0 then
     Result := Result + '&' + 'COUNT' + '=' + IntToStr(Node.Count);
   if Node.RunCount <> 0 then
     Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
+  if Node.Activate <> 0 then
+    Result := Result + '&' + 'ACTIVATE' + '=' + FloatToStr(Node.Activate);
   Delete(Result, 1, 1);
 end;
 
@@ -249,7 +255,7 @@ begin
   Node.Value := Result;
 end;
 
-function TMeta.AddField(Node: PNode; Field: PNode): PNode;
+function TMeta.AddField(Node: PNode; Field: PNode): PNode; //not workt
 var i: Integer;
 begin
   Result := nil;
@@ -425,15 +431,12 @@ begin
     then Result := AddIndex(Result, Name[i])
     else Result := Result.Index[Index];
   end;
-  if Result <> Root then
-  begin
-    Inc(Result.Count);
-    Result.Time := Now;
-  end
+  if Result <> Root
+  then Inc(Result.Count)
   else Result := nil;
 end;
 
-procedure TMeta.NewModule(Node: PNode);
+procedure TMeta.NewModule(Node: PNode);  //change name to LoadFile
 var
   i: Integer;
   Func, PrevModule: PNode;
@@ -720,49 +723,54 @@ begin
   NextNode:
   if Node = nil then Exit;
   //Analysing(Node);
+
+
+  {for i:=1 to Node.RunCount - 1 do    // -1 becose we in first cycle
+    Run(Node);  //add except  }
+
   if Node.Exception = 1 then
     ExceptionFlag1 := True;
 
-  if ExceptionFlag1 = True then
-    Exit;         
+  if ExceptionFlag1 = True then      //exit in top
+    Exit;
 
   if Node.Attr = naFile then
     NewModule(Node);
-  for i:=0 to High(Node.Params) do
+  for i:=0 to High(Node.Params) do  //run params
     Run(Node.Params[i]);
   if (Node.Source <> nil) and (((Node.Source.ParentLocal = Module) and (Node.Source.Next <> nil))
-    or (Node.Source.Attr = naFunc)) then
+    or (Node.Source.Attr = naFunc)) then   // run dll func
   begin
     for i:=0 to High(Node.Params) do
       AddParam(GetSource(Node), GetValue(Node.Params[i]), i);
     Run(Node.Source);
     Node.Value := GetData(Node.Source);
   end;
-  if Node.Attr = naFunc then
+  if Node.Attr = naFunc then     //call dll func
     CallFunc(Node);
-  if Node.FElse <> nil then
+  if Node.FElse <> nil then     //node is if
   begin
-    FuncResult := CompareWithZero(GetData(Node));
-    if (FuncResult = 1) and (Node.FTrue <> nil) then
+    FuncResult := CompareWithZero(GetData(Node));   //del funcresult
+    if (FuncResult = 1) and (Node.FTrue <> nil) then   //true
     begin
       Node := GetSource(Node.FTrue);
       Goto NextNode;
     end;
-    if (FuncResult = 0) and (Node.FElse <> Pointer(1)) then
+    if (FuncResult = 0) and (Node.FElse <> Pointer(1)) then   //false
     begin
       Node := GetSource(Node.FElse);
       Goto NextNode;
     end;
   end
   else
-  if (Node.Value <> nil) and (Node.Source <> nil) then
+  if (Node.Value <> nil) and (Node.Source <> nil) then   //run value
   begin
     Run(Node.Value);
     Node.Source.Value := GetValue(Node.Value);
   end;
 
   Node := Node.Next;
-  Goto NextNode;
+  Goto NextNode;      //stack overflow
 end;
 
 procedure TMeta.NextNode(var PrevNode: PNode; Node: PNode);
@@ -893,13 +901,16 @@ begin
   Result := NewNode(Line);
   NextNode(Prev, Result);
   if Result <> nil then
-    for i:=1 to Result.RunCount do
+  begin
+    if Result.RunCount <> 0 then
+      Run(Result);
+    {for i:=1 to Result.RunCount do //del
     begin
       Run(Result);
-      if ExceptionFlag1 = True then
-      if ExceptionFlag1 = True then
+      if ExceptionFlag1 = True then //except
         Break;
-    end;
+    end; }
+  end;
 end;
 
 

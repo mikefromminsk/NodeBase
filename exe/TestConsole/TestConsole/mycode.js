@@ -161,7 +161,7 @@ function setPosition(root) {
         y = !!root.y ? root.y : 0;
     var top = 0;
 
-    if ((!!root.local)) 
+    if ((!!root.local)) {
         for (var i = 0; i < root.local.length; i++) {
             var node = getNode(root.local[i]);
             if (!!!node) break;
@@ -177,6 +177,7 @@ function setPosition(root) {
                 deleteTree(node.id);
             }
         }
+    }
     for (var next = root.next; ; ) {
         var node = getNode(next);
         if (!!!node) break;
@@ -194,20 +195,6 @@ function setPosition(root) {
         
         next = node.next;
     }
-        /*
-    var next = root.next;
-
-    for (; ; ) {
-
-        var node = getNode(next);
-        if (!!!node) break;
-   
-       
-        next = node.next;
-    }*/
-
-
-
     
 }
 
@@ -327,18 +314,17 @@ function setMode() {
                 });
                 ;
 
-           var label = nodeGroup.append("text").text(function (d) { return d.name + d.id; });
+           var label = nodeGroup.append("text");
 
-
+           
             //udpate
-
+           svg.selectAll("text").text(function (d) { return d.name + d.id; });
 
 
            /*
            var newRadius = viewAttr[0];
            for (var i = 1; i < viewAttr.length; i++) 
            viewAttr[i] = Math.floor(Math.random() * 10) + 1;*/
-
             svg.selectAll("g")
                     .attr("opacity", function (d) { return d.query == "" ? (!!d.deleted ? d.deleted : 1) : 0.3; })
                     .selectAll("path")
