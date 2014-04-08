@@ -61,6 +61,7 @@ type
     Handle      : Integer;    //private system params
     SaveTime    : Double;
     RefCount    : Integer;
+    n           : Integer;
   end;
 
   TInterest = record
@@ -718,15 +719,25 @@ end;
 
 procedure TMeta.Run(Node: PNode);
 label NextNode; //Change name
-var FuncResult, i: Integer;
+var FuncResult, i, n: Integer;
 begin
   NextNode:
   if Node = nil then Exit;
   //Analysing(Node);
 
-
-  {for i:=1 to Node.RunCount - 1 do    // -1 becose we in first cycle
-    Run(Node);  //add except  }
+  if (Node.RunCount >= 1) and (Node.n = 0) then
+    Node.n := Node.RunCount;
+  if Node.n > 0 then
+  begin
+    Dec(Node.n);
+    Run(Node);
+  end
+  else
+  begin
+    Exit;
+  end;
+      // -1 becose we in first cycle
+      //add except
 
   if Node.Exception = 1 then
     ExceptionFlag1 := True;
@@ -770,7 +781,7 @@ begin
   end;
 
   Node := Node.Next;
-  Goto NextNode;      //stack overflow
+  Goto NextNode;      //stack overflow when many next node
 end;
 
 procedure TMeta.NextNode(var PrevNode: PNode; Node: PNode);

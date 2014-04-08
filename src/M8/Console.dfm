@@ -100,6 +100,7 @@ object GG: TGG
       'func?a:float#res'
       'res=0,0'
       'i=1,0'
+      'i$run=100;=finc?i'
       'dx=1,0'
       'while'
       'fje?i&a#exit|'
