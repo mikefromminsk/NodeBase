@@ -56,12 +56,11 @@ type
     Time        : Double;
     Exception   : Integer;
     RunCount    : Integer;
-    Activate    : Double;
+    Activate    : Integer;
 
     Handle      : Integer;    //private system params
     SaveTime    : Double;
     RefCount    : Integer;
-    n           : Integer;
   end;
 
   TInterest = record
@@ -178,7 +177,7 @@ begin
     Node.RunCount := StrToIntDef(Value, 1)
   else
   if Param = 'ACTIVATE' then
-    Node.Activate := StrToFloatDef(Value, Now);
+    Node.Activate := StrToIntDef(Value, 1);
 end;
 
 function GetControls(Node: PNode): String;
@@ -619,7 +618,7 @@ begin
   end;
 end;
 
-function  TMeta.NewNode(Line: String): PNode;
+function  TMeta.NewNode(Line: String): PNode;      //fastload
 begin Result := NewNode(TLine.Create(Line)); end;
 
 function TMeta.NewNode(Line: TLine): PNode;
@@ -724,20 +723,6 @@ begin
   NextNode:
   if Node = nil then Exit;
   //Analysing(Node);
-
-  if (Node.RunCount >= 1) and (Node.n = 0) then
-    Node.n := Node.RunCount;
-  if Node.n > 0 then
-  begin
-    Dec(Node.n);
-    Run(Node);
-  end
-  else
-  begin
-    Exit;
-  end;
-      // -1 becose we in first cycle
-      //add except
 
   if Node.Exception = 1 then
     ExceptionFlag1 := True;
@@ -913,8 +898,13 @@ begin
   NextNode(Prev, Result);
   if Result <> nil then
   begin
-    if Result.RunCount <> 0 then
+    if Result.Activate <> 0 then
+    begin
+      if Result.RunCount = 0 then
+        Result.RunCount := 1;
       Run(Result);
+      Result.Activate := 0;
+    end;
     {for i:=1 to Result.RunCount do //del
     begin
       Run(Result);
