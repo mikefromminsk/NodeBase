@@ -928,10 +928,9 @@ begin
   if Node.ParentName <> nil then
     Result := Result + {EncodeName}(GetIndex(Node.ParentName){, 2});
   Result := Result + GetIndex(Node);
+  Result := Result + '$' + GetControls(Node);
   if Node.FType <> nil then
     Result := Result + ':' + GetIndex(Node.FType);
-
-  Result := Result + '$' + GetControls(Node);
   Str := '';
   for i:=0 to High(Node.Params) do
     Str := Str + GetIndex(Node.Params[i]) + '&';

@@ -49,6 +49,8 @@ function deleteTree(id) {
 
 
 function loadNode(query, n) {
+
+    if (query.indexOf('@') == -1) { return; }
     var host = "http://localhost:82/";
     $.ajax({
         type: "GET",
@@ -56,29 +58,30 @@ function loadNode(query, n) {
         success: function (get) {
 
             var nodesArr = get.split('\n\n');
-            var expr = /^((.*?)\^)?(.*?)?(@(.*?))(\$(.*?))?(\?(.*?))?(#(.*?))?(\|(.*?))?(\n(.*?))?$/g;
-            var groups = expr.exec(nodesArr[0]);
-            if (groups == null)
+            var expr = /^((.*?)\^)?(.*?)?(@(.*?))(\$(.*?))?(:(.*?))?(\?(.*?))?(#(.*?))?(\|(.*?))?(\n(.*?))?$/g;
+            var group = expr.exec(nodesArr[0]);
+            if (group == null)
                 return;
             nodesArr.shift();
 
 
-            var paramsArr = !!groups[9] ? groups[9].split('&') : [];
+            var paramsArr = !!group[11] ? group[11].split('&') : [];
 
-            var focusNode = getNode(groups[4]);
+            var focusNode = getNode(group[4]);
 
             if (!!!focusNode) {
                 //create
                 metaNodes.push({
                     query: "",
-                    source: groups[2],
-                    name: groups[3],
-                    id: groups[4],
-                    sysparams: groups[7],
+                    source: group[2],
+                    name: group[3],
+                    id: group[4],
+                    sysparams: group[7],
+                    ftype: group[9],
                     params: paramsArr,
-                    value: groups[11],
-                    felse: groups[13],
-                    next: groups[15],
+                    value: group[13],
+                    felse: group[15],
+                    next: group[17],
                     local: nodesArr
                 });
                 focusNode = metaNodes[metaNodes.length - 1];
@@ -86,14 +89,15 @@ function loadNode(query, n) {
             else {
                 //update
                 focusNode.query = "";
-                focusNode.source = groups[2];
-                focusNode.name = groups[3];
-                focusNode.id = groups[4];
-                focusNode.sysparams = groups[7];
+                focusNode.source = group[2];
+                focusNode.name = group[3];
+                focusNode.id = group[4];
+                focusNode.sysparams = group[7];
+                focusNode.ftype = group[9],
                 focusNode.params = paramsArr;
-                focusNode.value = groups[11];
-                focusNode.felse = groups[13];
-                focusNode.next = groups[15];
+                focusNode.value = group[13];
+                focusNode.felse = group[15];
+                focusNode.next = group[17];
                 focusNode.local = nodesArr;
             }
         },
@@ -114,31 +118,40 @@ function loadLinks(node) {
 
     var height = !!node.height ? node.height : 0;
 
-    if (node.query == "")
+    if (node.query != "") return;
 
-    if (!!node.local)//and expand true
+    if (!!node.local) {//and expand true
         for (var i = 0; i < node.local.length; i++) {
             metaNodes.push({query: node.local[i], color: "red", parentLocal: node.id});
             loadNode(node.local[i]);
         }
+    }
 
     if (!!node.next) {
         metaNodes.push({query: node.next, color: "green", prev: node.id });
         loadNode(node.next);
     }
 
-    if (!!node.params)
+    if (!!node.params) {
         for (var i = 0; i < node.params.length; i++) {
             metaNodes.push({ query: node.params[i], color: "orange", parentParams: node.id });
             loadNode(node.params[i]);
         }
+    }
+
+    if (!!node.value) {
+        metaNodes.push({ query: node.value, color: "blue", parentValue: node.id });
+        loadNode(node.value);
+    }
+
 }
 
 
-var r = 40;
-var distance = 10;
-var right = r / 2;
-var down = r + distance;
+var D = 40;
+var R = D / 2;
+var dist = 10;
+var dRight = D + dist;
+var dDown = D + dist;
 
 function setHeight(root) {
 
@@ -149,35 +162,18 @@ function setHeight(root) {
             var node = getNode(root.local[i]);
             if (!!!node) continue;
             setHeight(node);
-            height += down + node.height;
+            height += dist + node.height;
         }
     }
     if (!!root.next) {
         var node = getNode(root.next);
         if (!!node) {
             setHeight(node);
-            height += down + node.height;
-        }        
+            height += dDown + node.height;
+        }
     }
 
     root.height = height;
-}
-
-function setWidth(root) {
-
-    var width = 0;
-
-    if (!!root.params) {
-        for (var i = 0; i < root.params.length; i++) {
-            var node = getNode(root.params[i]);
-            if (!!!node) continue;
-            setWidth(node);
-            width += right + node.width;
-        }
-    }
-    
-
-    root.width = width;
 }
 
 
@@ -187,6 +183,7 @@ function setPosition(root) {
     var x = !!root.x ? root.x : 0,
         y = !!root.y ? root.y : 0;
     var top = 0;
+    var right = 0;
 
     if (!!root.local) {
         for (var i = 0; i < root.local.length; i++) {
@@ -194,9 +191,9 @@ function setPosition(root) {
             if (!!!node) break;
 
             if (!!root.expand ? root.expand : false) {
-                top += down;
+                top += dDown;
                 node.y = y + top;
-                node.x = x + right;
+                node.x = x + dRight;
                 setPosition(node);
                 top += node.height;
             }
@@ -207,16 +204,35 @@ function setPosition(root) {
     }
 
     if (!!root.params) {
+        right += dRight + root.labelWidth + dRight;
         for (var i = 0; i < root.params.length; i++) {
             var node = getNode(root.params[i]);
             if (!!!node) break;
 
             if (!!root.expand ? root.expand : false) {
-                //top += down;
+
                 node.y = y + top;
                 node.x = x + right;
                 setPosition(node);
-                top += node.height;
+                right += dRight + node.labelWidth + dRight;
+            }
+            else {
+                deleteTree(node.id);
+            }
+        }
+    }
+
+    if (!!root.value) {
+        right += dRight;
+        var node = getNode(root.value);
+        if (!!node) {
+
+            if (!!root.expand ? root.expand : false) {
+
+                node.y = y + top;
+                node.x = x + right;
+                setPosition(node);
+                right += dRight + node.labelWidth + dRight;
             }
             else {
                 deleteTree(node.id);
@@ -229,7 +245,7 @@ function setPosition(root) {
         var node = getNode(root.next);
         if (!!node) {
             if (!!root.expand ? root.expand : false) {
-                top += down;
+                top += dDown;
                 node.y = y + top;
                 node.x = x;
                 setPosition(node);
@@ -371,7 +387,8 @@ function setMode() {
             //udpate
            svg.selectAll("text")
                 .text(function (d) { return d.name + d.id; })
-                .attr("transform", function () { return "translate(" + right + "," + 0 + ")"; })
+                .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
+                .attr("transform", function () { return "translate(" + (R + dist) + "," + 0 + ")"; })
                 ;
 
            /*var params = nodeGroup
@@ -382,10 +399,10 @@ function setMode() {
                 ;
 
            svg.selectAll(".params")
-                .attr("transform", function (d) { return "translate(" + (d.box.width) + "," + 0 + ")"; })
+                .attr("transform", function (d) { return "translate(" + (d.labelWidth + R + dist + R) + "," + 0 + ")"; })
                 ;
+                
                 */
-
            svg.selectAll("g")
                 .attr("opacity", function (d) { return d.query == "" ? (!!d.deleted ? d.deleted : 1) : 0.3; })
                 .selectAll("path")
