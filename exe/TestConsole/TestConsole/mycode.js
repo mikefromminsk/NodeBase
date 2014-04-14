@@ -126,6 +126,12 @@ function loadLinks(node) {
         metaNodes.push({query: node.next, color: "green", prev: node.id });
         loadNode(node.next);
     }
+
+    if (!!node.params)
+        for (var i = 0; i < node.params.length; i++) {
+            metaNodes.push({ query: node.params[i], color: "orange", parentParams: node.id });
+            loadNode(node.params[i]);
+        }
 }
 
 
@@ -157,6 +163,24 @@ function setHeight(root) {
     root.height = height;
 }
 
+function setWidth(root) {
+
+    var width = 0;
+
+    if (!!root.params) {
+        for (var i = 0; i < root.params.length; i++) {
+            var node = getNode(root.params[i]);
+            if (!!!node) continue;
+            setWidth(node);
+            width += right + node.width;
+        }
+    }
+    
+
+    root.width = width;
+}
+
+
 function setPosition(root) {
     if (!!!root) return;
 
@@ -181,15 +205,16 @@ function setPosition(root) {
             }
         }
     }
-    if (!!root.next) {
 
-        var node = getNode(root.next);
-        if (!!node) {
+    if (!!root.params) {
+        for (var i = 0; i < root.params.length; i++) {
+            var node = getNode(root.params[i]);
+            if (!!!node) break;
+
             if (!!root.expand ? root.expand : false) {
-                top += down;
+                //top += down;
                 node.y = y + top;
-                node.x = x;
-                
+                node.x = x + right;
                 setPosition(node);
                 top += node.height;
             }
@@ -198,7 +223,24 @@ function setPosition(root) {
             }
         }
     }
-    
+
+    if (!!root.next) {
+
+        var node = getNode(root.next);
+        if (!!node) {
+            if (!!root.expand ? root.expand : false) {
+                top += down;
+                node.y = y + top;
+                node.x = x;
+                setPosition(node);
+                top += node.height;
+            }
+            else {
+                deleteTree(node.id);
+            }
+        }
+    }
+
 }
 
 var mode = 1;
