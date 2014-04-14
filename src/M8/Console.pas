@@ -203,9 +203,7 @@ begin
   AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); //Разрешение на выполнения запросов
   if ARequestInfo.Command = 'GET' then
   begin
-    Base.Module := nil;
-    Base.Prev := nil;
-    AResponseInfo.ContentText := Base.GetNodeBody(Base.Exec(Document));
+    AResponseInfo.ContentText := Base.GetNodeBody(Base.NewNode(Document));
     //QueryBox.Lines.Add(ARequestInfo.Command + #10 + AResponseInfo.ContentText);
   end;
   if ARequestInfo.Command = 'POST' then

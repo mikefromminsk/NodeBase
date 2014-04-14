@@ -1,8 +1,11 @@
 ﻿var metaNodes = [];
+var rootID;
 
 $(function () {
 
-    loadNode("@1");
+    rootID = "@1";
+
+    loadNode(rootID);
 
     setMode();
 });
@@ -15,7 +18,7 @@ function openmenu() {
 function getNode(id) {
     if (!!!id) return;
     for (var i = 0; i < metaNodes.length; i++) {
-        if ((metaNodes[i].query == id) | (metaNodes[i].id == id)) {
+        if ((metaNodes[i].query == id) || (metaNodes[i].id == id)) {
             return metaNodes[i];
         }
     }
@@ -24,7 +27,7 @@ function getNode(id) {
 function deleteNode(id) {
     if (!!!id) return;
     for (var i = 0; i < metaNodes.length; i++) {
-        if ((metaNodes[i].query == id) | (metaNodes[i].id == id)) {
+        if ((metaNodes[i].query == id) || (metaNodes[i].id == id)) {
             metaNodes.splice(i, 1);
             return;
         }
@@ -38,13 +41,14 @@ function deleteTree(id) {
         for (var i = 0; i < node.local.length; i++)
             deleteTree(node.local[i]);
     }
+    if (!!node.next) {
+        deleteTree(node.next);
+    }
     deleteNode(node.id);
 }
 
 
 function loadNode(query, n) {
-    if (!!n == false)
-        n = 1;
     var host = "http://localhost:82/";
     $.ajax({
         type: "GET",
@@ -94,11 +98,11 @@ function loadNode(query, n) {
             }
         },
         error: function (request, error) {
+            if (!!!n) n = 1;
             if (n < 3) {
                 loadNode(query, n + 1)
-            }
-            else {
-                deleteNode(query);
+            }else {
+                deleteTree(query);
             }
         }
     });
@@ -127,14 +131,14 @@ function loadLinks(node) {
 
 var r = 40;
 var distance = 10;
-var right = r;
+var right = r / 2;
 var down = r + distance;
 
 function setHeight(root) {
 
     var height = 0;
 
-    if ((!!root.local)) {
+    if (!!root.local) {
         for (var i = 0; i < root.local.length; i++) {
             var node = getNode(root.local[i]);
             if (!!!node) continue;
@@ -142,13 +146,12 @@ function setHeight(root) {
             height += down + node.height;
         }
     }
-
-    for (var next = root.next; ; ) {
-        var node = getNode(next);
-        if (!!!node) break;
-        setHeight(node);
-        height += down + node.height;
-        next = node.next;
+    if (!!root.next) {
+        var node = getNode(root.next);
+        if (!!node) {
+            setHeight(node);
+            height += down + node.height;
+        }        
     }
 
     root.height = height;
@@ -161,7 +164,7 @@ function setPosition(root) {
         y = !!root.y ? root.y : 0;
     var top = 0;
 
-    if ((!!root.local)) {
+    if (!!root.local) {
         for (var i = 0; i < root.local.length; i++) {
             var node = getNode(root.local[i]);
             if (!!!node) break;
@@ -178,27 +181,30 @@ function setPosition(root) {
             }
         }
     }
-    for (var next = root.next; ; ) {
-        var node = getNode(next);
-        if (!!!node) break;
+    if (!!root.next) {
 
-        if (!!root.expand ? root.expand : false) {
-            top += down;
-            node.y = y + top;
-            node.x = x;
-            setPosition(node);
-            top += node.height;
+        var node = getNode(root.next);
+        if (!!node) {
+            if (!!root.expand ? root.expand : false) {
+                top += down;
+                node.y = y + top;
+                node.x = x;
+                
+                setPosition(node);
+                top += node.height;
+            }
+            else {
+                deleteTree(node.id);
+            }
         }
-        else {
-            deleteTree(node.id);
-        }
-        
-        next = node.next;
     }
     
 }
 
 var mode = 1;
+
+
+var timerCounter = 0;
 
 
 function setMode() {
@@ -275,8 +281,9 @@ function setMode() {
         setInterval(update, 500);
 
         function update() {
-            setHeight(getNode("@1"));
-            setPosition(getNode("@1"));
+
+            setHeight(getNode(rootID));
+            setPosition(getNode(rootID));
 
             var g = svg.selectAll("g")
                 .data(metaNodes);
@@ -288,7 +295,8 @@ function setMode() {
             var nodeGroup = g
                 .enter()
                 .append("g")
-                .call(drag);
+                .call(drag)
+                ;
 
             g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
             
@@ -307,28 +315,43 @@ function setMode() {
                 .attr("opacity", 0.5)
                 .on("dblclick", function (d) {
                     d.expand = !!d.expand ? !d.expand : true;
-                    if (d.expand == true)
+                    if (d.expand) {
                         loadLinks(d);
-                    else
-                        setPosition(d);
-                });
+                        update();
+                    }
+                })
+                
                 ;
 
            var label = nodeGroup.append("text");
 
            
             //udpate
-           svg.selectAll("text").text(function (d) { return d.name + d.id; });
+           svg.selectAll("text")
+                .text(function (d) { return d.name + d.id; })
+                .attr("transform", function () { return "translate(" + right + "," + 0 + ")"; })
+                ;
+
+           /*var params = nodeGroup
+                .append("circle")
+                .attr("r", 20)
+                .attr("fill", function () { return "red"; })
+                .attr("class", "params")
+                ;
+
+           svg.selectAll(".params")
+                .attr("transform", function (d) { return "translate(" + (d.box.width) + "," + 0 + ")"; })
+                ;
+                */
+
+           svg.selectAll("g")
+                .attr("opacity", function (d) { return d.query == "" ? (!!d.deleted ? d.deleted : 1) : 0.3; })
+                .selectAll("path")
+                .data(pie(viewAttr))
+                    
 
 
-           /*
-           var newRadius = viewAttr[0];
-           for (var i = 1; i < viewAttr.length; i++) 
-           viewAttr[i] = Math.floor(Math.random() * 10) + 1;*/
-            svg.selectAll("g")
-                    .attr("opacity", function (d) { return d.query == "" ? (!!d.deleted ? d.deleted : 1) : 0.3; })
-                    .selectAll("path")
-                    .data(pie(viewAttr))
+
             /*.transition()
             .duration(500)
             .attrTween("d", function (a) {
