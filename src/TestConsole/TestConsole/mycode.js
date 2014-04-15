@@ -15,7 +15,10 @@ $(function () {
     loadNode(rootID);
 
     setMode();
+
 });
+
+
 
 
 function openmenu() {
@@ -497,6 +500,7 @@ function setMode() {
                         update();
                     }
                 })
+                .style("cursor", "pointer")
                 ;
 
             g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
@@ -528,7 +532,7 @@ function setMode() {
            
             //udpate
             svg.selectAll("text")
-                .text(function (d) { return d.name + d.id; })
+                .text(function (d) { return d.name; })
                 .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
                 .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
                 ;
