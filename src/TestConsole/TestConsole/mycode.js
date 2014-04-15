@@ -44,13 +44,19 @@ function deleteTree(id) {
     if (!!node.next) {
         deleteTree(node.next);
     }
+    if (!!node.params) {
+        for (var i = 0; i < node.params.length; i++)
+            deleteTree(node.params[i]);
+    }
+    if (!!node.value) {
+        deleteTree(node.value);
+    }
     deleteNode(node.id);
 }
 
 
 function loadNode(query, n) {
 
-    if (query.indexOf('@') == -1) { return; }
     var host = "http://localhost:82/";
     $.ajax({
         type: "GET",
@@ -140,8 +146,10 @@ function loadLinks(node) {
     }
 
     if (!!node.value) {
-        metaNodes.push({ query: node.value, color: "blue", parentValue: node.id });
-        loadNode(node.value);
+        if (node.value.indexOf('@') != -1) {
+            metaNodes.push({ query: node.value, color: "blue", parentValue: node.id });
+            loadNode(node.value);
+        }
     }
 
 }
@@ -162,7 +170,7 @@ function setHeight(root) {
             var node = getNode(root.local[i]);
             if (!!!node) continue;
             setHeight(node);
-            height += dist + node.height;
+            height += dDown + node.height;
         }
     }
     if (!!root.next) {
@@ -204,7 +212,7 @@ function setPosition(root) {
     }
 
     if (!!root.params) {
-        right += dRight + root.labelWidth + dRight;
+        right += dRight + root.labelWidth;
         for (var i = 0; i < root.params.length; i++) {
             var node = getNode(root.params[i]);
             if (!!!node) break;
@@ -214,7 +222,7 @@ function setPosition(root) {
                 node.y = y + top;
                 node.x = x + right;
                 setPosition(node);
-                right += dRight + node.labelWidth + dRight;
+                right += dRight + node.labelWidth;
             }
             else {
                 deleteTree(node.id);
@@ -223,7 +231,6 @@ function setPosition(root) {
     }
 
     if (!!root.value) {
-        right += dRight;
         var node = getNode(root.value);
         if (!!node) {
 
@@ -232,7 +239,7 @@ function setPosition(root) {
                 node.y = y + top;
                 node.x = x + right;
                 setPosition(node);
-                right += dRight + node.labelWidth + dRight;
+                right += dRight + node.labelWidth;
             }
             else {
                 deleteTree(node.id);
@@ -290,7 +297,7 @@ function setMode() {
                 .outerRadius(startOuterRadius);
                 
         var zoom = d3.behavior.zoom()
-            .scaleExtent([1, 10])
+            .scaleExtent([-10, 20])
             .on("zoom", zoomed)
             ;
            
@@ -319,6 +326,8 @@ function setMode() {
 
         function zoomed() {
             svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+            svg.selectAll("text").each(function (d) { d.labelWidth = this.getComputedTextLength(); }); //update label width
+            update();
         }
 
         function dragstarted(d) {
@@ -336,9 +345,11 @@ function setMode() {
         }
         
 
-        setInterval(update, 500);
-
+        setInterval(update, 1000);
+        
         function update() {
+
+
 
             setHeight(getNode(rootID));
             setPosition(getNode(rootID));
@@ -381,14 +392,16 @@ function setMode() {
                 
                 ;
 
-           var label = nodeGroup.append("text");
+            var label = nodeGroup
+                .append("text")
+                .attr("font-size", "14px");
 
            
             //udpate
            svg.selectAll("text")
-                .text(function (d) { return d.name + d.id; })
+                .text(function (d) { return d.name; })
+                .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
                 .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
-                .attr("transform", function () { return "translate(" + (R + dist) + "," + 0 + ")"; })
                 ;
 
            /*var params = nodeGroup
