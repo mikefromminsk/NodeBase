@@ -8,3 +8,8 @@ C:\Users\Hist\Desktop\meta\exe\TestConsole\TestConsole\bin\TestConsole.pdb
 C:\Users\Hist\Desktop\meta\exe\TestConsole\TestConsole\obj\Debug\ResolveAssemblyReference.cache
 C:\Users\Hist\Desktop\meta\exe\TestConsole\TestConsole\obj\Debug\TestConsole.dll
 C:\Users\Hist\Desktop\meta\exe\TestConsole\TestConsole\obj\Debug\TestConsole.pdb
+C:\Documents and Settings\GaidukMD\Desktop\meta\src\TestConsole\TestConsole\bin\TestConsole.dll
+C:\Documents and Settings\GaidukMD\Desktop\meta\src\TestConsole\TestConsole\bin\TestConsole.pdb
+C:\Documents and Settings\GaidukMD\Desktop\meta\src\TestConsole\TestConsole\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\GaidukMD\Desktop\meta\src\TestConsole\TestConsole\obj\Debug\TestConsole.dll
+C:\Documents and Settings\GaidukMD\Desktop\meta\src\TestConsole\TestConsole\obj\Debug\TestConsole.pdb

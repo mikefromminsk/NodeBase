@@ -943,8 +943,9 @@ begin
   begin
     if Node.FTrue <> nil then
       Result := Result + '#' + GetIndex(Node.FTrue);
+    Result := Result + '|';
     if Integer(Node.FElse) > 1 then
-      Result := Result + '|' + GetIndex(Node.FElse);
+      Result := Result + GetIndex(Node.FElse);
   end
   else
   if Node.Value <> nil then

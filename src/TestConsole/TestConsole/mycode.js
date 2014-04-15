@@ -3,6 +3,13 @@ var rootID;
 
 $(function () {
 
+    /*d3.select("#footer")
+        .style("height", "0px")
+        .style("min-height", "0px");
+    d3.select("#menu")
+        .style("width", "0px")
+        .style("min-width", "0px");*/
+
     rootID = "@1";
 
     loadNode(rootID);
@@ -34,25 +41,7 @@ function deleteNode(id) {
     }
 }
 
-function deleteTree(id) {
-    var node = getNode(id);
-    if (!!!node) return;
-    if (!!node.local) {
-        for (var i = 0; i < node.local.length; i++)
-            deleteTree(node.local[i]);
-    }
-    if (!!node.next) {
-        deleteTree(node.next);
-    }
-    if (!!node.params) {
-        for (var i = 0; i < node.params.length; i++)
-            deleteTree(node.params[i]);
-    }
-    if (!!node.value) {
-        deleteTree(node.value);
-    }
-    deleteNode(node.id);
-}
+
 
 
 function loadNode(query, n) {
@@ -64,7 +53,7 @@ function loadNode(query, n) {
         success: function (get) {
 
             var nodesArr = get.split('\n\n');
-            var expr = /^((.*?)\^)?(.*?)?(@(.*?))(\$(.*?))?(:(.*?))?(\?(.*?))?(#(.*?))?(\|(.*?))?(\n(.*?))?$/g;
+            var expr = /^((.*?)\^)?(.*?)?(@(.*?))(\$(.*?))?(:(.*?))?(\?(.*?))?(#(.*?))?((\|)(.*?))?(\n(.*?))?$/g;
             var group = expr.exec(nodesArr[0]);
             if (group == null)
                 return;
@@ -85,9 +74,10 @@ function loadNode(query, n) {
                     sysparams: group[7],
                     ftype: group[9],
                     params: paramsArr,
-                    value: group[13],
-                    felse: group[15],
-                    next: group[17],
+                    value: !!!group[14] ? group[13] : undefined,
+                    ftrue: !!group[14] ? group[13] : undefined,
+                    felse: group[16],
+                    next: group[18],
                     local: nodesArr
                 });
                 focusNode = metaNodes[metaNodes.length - 1];
@@ -101,9 +91,10 @@ function loadNode(query, n) {
                 focusNode.sysparams = group[7];
                 focusNode.ftype = group[9],
                 focusNode.params = paramsArr;
-                focusNode.value = group[13];
-                focusNode.felse = group[15];
-                focusNode.next = group[17];
+                focusNode.value = !!!group[14] ? group[13] : undefined,
+                focusNode.ftrue = !!group[14] ? group[13] : undefined,
+                focusNode.felse = group[16];
+                focusNode.next = group[18];
                 focusNode.local = nodesArr;
             }
         },
@@ -118,6 +109,38 @@ function loadNode(query, n) {
     });
 
 }
+
+
+function deleteTree(id) {
+    var node = getNode(id);
+    if (!!!node) return;
+    if (!!node.local) {
+        for (var i = 0; i < node.local.length; i++)
+            deleteTree(node.local[i]);
+    }
+    if (!!node.next) {
+        deleteTree(node.next);
+    }
+    if (!!node.params) {
+        for (var i = 0; i < node.params.length; i++)
+            deleteTree(node.params[i]);
+    }
+    if (!!node.value) {
+        deleteTree(node.value);
+    }
+    if (!!node.ftype) {
+        deleteTree(node.ftype);
+    }
+
+    if (!!node.ftrue) {
+        deleteTree(node.ftrue);
+    }
+    if (!!node.felse) {
+        deleteTree(node.felse);
+    }
+    deleteNode(node.id);
+}
+
 
 function loadLinks(node) {
 
@@ -152,6 +175,20 @@ function loadLinks(node) {
         }
     }
 
+    if (!!node.ftype) {
+        metaNodes.push({ query: node.ftype, color: "purple", parentType: node.id });
+        loadNode(node.ftype);
+    }
+
+    if (!!node.ftrue) {
+        metaNodes.push({ query: node.ftrue, color: "white", parentTrue: node.id });
+        loadNode(node.ftrue);
+    }
+
+    if (!!node.felse) {
+        metaNodes.push({ query: node.felse, color: "black", parentElse: node.id });
+        loadNode(node.felse);
+    }
 }
 
 
@@ -162,7 +199,7 @@ var dRight = D + dist;
 var dDown = D + dist;
 
 function setHeight(root) {
-
+    if (!!!root) return;
     var height = 0;
 
     if (!!root.local) {
@@ -188,20 +225,43 @@ function setHeight(root) {
 function setPosition(root) {
     if (!!!root) return;
 
+    
+
     var x = !!root.x ? root.x : 0,
         y = !!root.y ? root.y : 0;
     var top = 0;
     var right = 0;
 
+
+    if (!!root.ftype) {
+        var node = getNode(root.ftype);
+        if (!!node) {
+
+            if (!!root.expand ? root.expand : false) {
+                if (!(!!(node.dragging) && (node.dragging))) {
+                    node.y = y + R;
+                    node.x = x + R;
+                }
+                setPosition(node);
+            }
+            else {
+                deleteTree(node.id);
+            }
+        }
+    }
+
     if (!!root.local) {
         for (var i = 0; i < root.local.length; i++) {
             var node = getNode(root.local[i]);
-            if (!!!node) break;
+            if (!!!node) continue;
+            
 
             if (!!root.expand ? root.expand : false) {
                 top += dDown;
-                node.y = y + top;
-                node.x = x + dRight;
+                if (!(!!(node.dragging) && (node.dragging))) {
+                    node.y = y + top;
+                    node.x = x + dRight;
+                }
                 setPosition(node);
                 top += node.height;
             }
@@ -215,12 +275,13 @@ function setPosition(root) {
         right += dRight + root.labelWidth;
         for (var i = 0; i < root.params.length; i++) {
             var node = getNode(root.params[i]);
-            if (!!!node) break;
-
+            if (!!!node) continue;
+            
             if (!!root.expand ? root.expand : false) {
-
-                node.y = y + top;
-                node.x = x + right;
+                if (!(!!(node.dragging) && (node.dragging))) {
+                    node.y = y + top;
+                    node.x = x + right;
+                }
                 setPosition(node);
                 right += dRight + node.labelWidth;
             }
@@ -229,6 +290,45 @@ function setPosition(root) {
             }
         }
     }
+
+
+    if (!!root.ftrue) {
+        var node = getNode(root.ftrue);
+        if (!!node) {
+
+            if (!!root.expand ? root.expand : false) {
+
+                if (!(!!(node.dragging) && (node.dragging))) {
+                    node.y = y + top - dDown;
+                    node.x = x + right + dRight;
+                }
+                setPosition(node);
+            }
+            else {
+                deleteTree(node.id);
+            }
+        }
+    }
+
+
+    if (!!root.felse) {
+        var node = getNode(root.felse);
+        if (!!node) {
+
+            if (!!root.expand ? root.expand : false) {
+
+                if (!(!!(node.dragging) && (node.dragging))) {
+                    node.y = y + top + dDown;
+                    node.x = x + right + dRight;
+                }
+                setPosition(node);
+            }
+            else {
+                deleteTree(node.id);
+            }
+        }
+    }
+
 
     if (!!root.value) {
         var node = getNode(root.value);
@@ -236,8 +336,10 @@ function setPosition(root) {
 
             if (!!root.expand ? root.expand : false) {
 
-                node.y = y + top;
-                node.x = x + right;
+                if (!(!!(node.dragging) && (node.dragging))) {
+                    node.y = y + top;
+                    node.x = x + right;
+                }
                 setPosition(node);
                 right += dRight + node.labelWidth;
             }
@@ -247,14 +349,19 @@ function setPosition(root) {
         }
     }
 
+
+
+
     if (!!root.next) {
 
         var node = getNode(root.next);
         if (!!node) {
             if (!!root.expand ? root.expand : false) {
                 top += dDown;
-                node.y = y + top;
-                node.x = x;
+                if (!(!!(node.dragging) && (node.dragging))) {
+                    node.y = y + top;
+                    node.x = x;
+                }
                 setPosition(node);
                 top += node.height;
             }
@@ -331,21 +438,39 @@ function setMode() {
         }
 
         function dragstarted(d) {
+            d.dragging = true;
             d3.event.sourceEvent.stopPropagation();
             //d3.select(this).classed("dragging", true);
         }
         
         function dragged(d) {
-            d3.select(this).attr("transform", function (d) { return "translate(" + (d.x = d3.event.x) + "," +  (d.y = d3.event.y) + ")"; });//
+            d3.select(this).attr("transform", function (d) { return "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")"; });
+            update();
             document.getElementById("footer").innerHTML = d.x;
         }
 
         function dragended(d) {
+            d.dragging = false;
             //d3.select(this).classed("dragging", false);
         }
+
+        d3.selection.prototype.moveToFront = function () {
+            return this.each(function () {
+                this.parentNode.appendChild(this);
+            });
+        };
+
+        d3.selection.prototype.moveToBack = function () {
+            return this.each(function () {
+                var firstChild = this.parentNode.firstChild;
+                if (firstChild) {
+                    this.parentNode.insertBefore(this, firstChild);
+                }
+            });
+        };
         
 
-        setInterval(update, 1000);
+        setInterval(update, 300);
         
         function update() {
 
@@ -365,23 +490,6 @@ function setMode() {
                 .enter()
                 .append("g")
                 .call(drag)
-                ;
-
-            g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
-            
-            var path = nodeGroup.selectAll("path")
-                .data(pie(viewAttr))
-                .enter()
-                .append("path")
-                .attr("fill", function (d, i) { return color(i) })
-                .attr("d", arc)
-                .each(function (d) { this._current = d; });
-
-            var circle = nodeGroup
-                .append("circle")
-                .attr("r", 20)
-                .attr("fill", function (d) { return d.color; })
-                .attr("opacity", 0.5)
                 .on("dblclick", function (d) {
                     d.expand = !!d.expand ? !d.expand : true;
                     if (d.expand) {
@@ -389,8 +497,29 @@ function setMode() {
                         update();
                     }
                 })
-                
                 ;
+
+            g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+
+            var circle = nodeGroup
+                .append("circle")
+                .attr("r", 20)
+                .attr("fill", function (d) { return d.color; })
+                .attr("opacity", 0.5)
+                ;
+
+            var path = nodeGroup.selectAll("path")
+                .data(pie(viewAttr))
+                .enter()
+                .append("path")
+                .attr("fill", function (d, i) { return color(i) })
+                .attr("d", arc)
+                .each(function (d) { this._current = d; })
+                ;
+                
+
+            
 
             var label = nodeGroup
                 .append("text")
@@ -398,8 +527,8 @@ function setMode() {
 
            
             //udpate
-           svg.selectAll("text")
-                .text(function (d) { return d.name; })
+            svg.selectAll("text")
+                .text(function (d) { return d.name + d.id; })
                 .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
                 .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
                 ;
@@ -417,7 +546,7 @@ function setMode() {
                 
                 */
            svg.selectAll("g")
-                .attr("opacity", function (d) { return d.query == "" ? (!!d.deleted ? d.deleted : 1) : 0.3; })
+                .attr("opacity", function (d) { return d.query == "" ? 1 : 0.3; })
                 .selectAll("path")
                 .data(pie(viewAttr))
                     
