@@ -1,25 +1,34 @@
 ﻿var metaNodes = [];
-var rootID;
+var host = "http://localhost:82/";
+var rootID = "@1";
 
 $(function () {
-
-    /*d3.select("#footer")
-        .style("height", "0px")
-        .style("min-height", "0px");
-    d3.select("#menu")
-        .style("width", "0px")
-        .style("min-width", "0px");*/
-
-    rootID = "@1";
 
     loadNode(rootID);
 
     setMode();
 
+    $("#search").keydown(function (event) {
+
+        if (event.keyCode == 13) {
+            deleteTree(rootID);
+
+            var query = document.getElementById('search').value;
+
+            var URLexpr = /(.+(:\/\/).+?(\/|$))(.*)/g;
+            var group = URLexpr.exec(query);
+            if (group != null) {
+                host = group[1] + (!!group[3] ? "" : "/");
+                query = group[4];
+            }
+
+            update();
+            loadNode(query);
+            document.getElementById('search').value = query;
+        }
+    });
+
 });
-
-
-
 
 function openmenu() {
     alert(metaNodes.length);
@@ -49,15 +58,15 @@ function deleteNode(id) {
 
 function loadNode(query, n) {
 
-    var host = "http://localhost:82/";
+
     $.ajax({
         type: "GET",
         url: host + query,
         success: function (get) {
 
             var nodesArr = get.split('\n\n');
-            var expr = /^((.*?)\^)?(.*?)?(@(.*?))(\$(.*?))?(:(.*?))?(\?(.*?))?(#(.*?))?((\|)(.*?))?(\n(.*?))?$/g;
-            var group = expr.exec(nodesArr[0]);
+            var MetaExpr = /^((.*?)\^)?(.*?)?(@(.*?))(\$(.*?))?(:(.*?))?(\?(.*?))?(#(.*?))?((\|)(.*?))?(\n(.*?))?$/g;
+            var group = MetaExpr.exec(nodesArr[0]);
             if (group == null)
                 return;
             nodesArr.shift();
@@ -66,6 +75,10 @@ function loadNode(query, n) {
             var paramsArr = !!group[11] ? group[11].split('&') : [];
 
             var focusNode = getNode(group[4]);
+
+            if (metaNodes.length == 0) {
+                rootID = group[4];
+            }
 
             if (!!!focusNode) {
                 //create
@@ -100,12 +113,14 @@ function loadNode(query, n) {
                 focusNode.next = group[18];
                 focusNode.local = nodesArr;
             }
+
+
         },
         error: function (request, error) {
             if (!!!n) n = 1;
             if (n < 3) {
                 loadNode(query, n + 1)
-            }else {
+            } else {
                 deleteTree(query);
             }
         }
@@ -381,6 +396,8 @@ var mode = 1;
 
 var timerCounter = 0;
 
+var update;
+
 
 function setMode() {
 
@@ -473,9 +490,9 @@ function setMode() {
         };
         
 
-        setInterval(update, 300);
         
-        function update() {
+        
+        update = function () {
 
 
 
@@ -532,7 +549,7 @@ function setMode() {
            
             //udpate
             svg.selectAll("text")
-                .text(function (d) { return d.name; })
+                .text(function (d) { return d.name+d.id; })
                 .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
                 .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
                 ;
@@ -568,8 +585,11 @@ function setMode() {
             };
             })*/;
 
-            
-        }
+
+       }
+
+
+       setInterval(update, 300);
     }
 
 
