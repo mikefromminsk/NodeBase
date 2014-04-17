@@ -659,20 +659,20 @@ begin
       Result := AddField(Result, NewNode(Line.Path[i]));
     if Line.Source <> '' then
     begin
-      NextNode(Prev, NewNode(Line.Source));
-      Inc(Result.Source.RefCount);  //!!!
-      AddEvent(Result);             //!!!
+      NextNode(Prev, NewNode(Line.Source));         //del
+      Inc(Result.Source.RefCount);                  //del
+      AddEvent(Result);                             //del
       Result := GetSource(Result);
       Result.Source := Prev;
     end;
     if (Result.Source = nil) and (Line.Value <> nil) and (Prev <> nil) and (Prev <> Module) then
     begin
-      NextNode(Prev, NewNode(Line.Name));
+      NextNode(Prev, NewNode(Line.Name));                //del
       Result.Source := Prev;
     end;
   end;
   if Line.Source <> '' then
-    Result.Source := NewNode(Line.Source);
+    Result.Source := NewNode(Line.Source);            //Source(result)
 
   for i:=0 to High(Line.Params) do
     AddParam(Result, NewNode(Line.Params[i]), i);

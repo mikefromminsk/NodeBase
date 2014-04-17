@@ -2,6 +2,11 @@
 var host = "http://localhost:82/";
 var rootID = "@1";
 
+
+function show(message) {
+    document.getElementById("footer").innerHTML = message;
+}
+
 $(function () {
 
     loadNode(rootID);
@@ -80,6 +85,9 @@ function loadNode(query, n) {
                 rootID = group[4];
             }
 
+            show( "value =" + ((group[14] == null) ? group[13] : undefined) +
+                "<br>ftrue =" + ((group[14] != null) ? group[13] : undefined));
+
             if (!!!focusNode) {
                 //create
                 metaNodes.push({
@@ -105,10 +113,10 @@ function loadNode(query, n) {
                 focusNode.name = group[3];
                 focusNode.id = group[4];
                 focusNode.sysparams = group[7];
-                focusNode.ftype = group[9],
+                focusNode.ftype = group[9];
                 focusNode.params = paramsArr;
-                focusNode.value = !!!group[14] ? group[13] : undefined,
-                focusNode.ftrue = !!group[14] ? group[13] : undefined,
+                focusNode.value = !!!group[14] ? group[13] : undefined;
+                focusNode.ftrue = !!group[14] ? group[13] : undefined;
                 focusNode.felse = group[16];
                 focusNode.next = group[18];
                 focusNode.local = nodesArr;
@@ -199,12 +207,12 @@ function loadLinks(node) {
     }
 
     if (!!node.ftrue) {
-        metaNodes.push({ query: node.ftrue, color: "white", parentTrue: node.id });
+        metaNodes.push({ query: node.ftrue, color: "black", parentTrue: node.id });
         loadNode(node.ftrue);
     }
 
     if (!!node.felse) {
-        metaNodes.push({ query: node.felse, color: "black", parentElse: node.id });
+        metaNodes.push({ query: node.felse, color: "white", parentElse: node.id });
         loadNode(node.felse);
     }
 }
@@ -466,7 +474,7 @@ function setMode() {
         function dragged(d) {
             d3.select(this).attr("transform", function (d) { return "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")"; });
             update();
-            document.getElementById("footer").innerHTML = d.x;
+            
         }
 
         function dragended(d) {
