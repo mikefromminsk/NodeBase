@@ -85,8 +85,14 @@ function loadNode(query, n) {
                 rootID = group[4];
             }
 
-            show( "value =" + ((group[14] == null) ? group[13] : undefined) +
-                "<br>ftrue =" + ((group[14] != null) ? group[13] : undefined));
+
+            var sysParamsArr = !!group[7] ? group[7].split('&') : [];
+            var sysParams = [];
+            for (var i = 0; i < sysParamsArr.length; i++) {
+                var param = sysParamsArr[i].split('=');
+                sysParams[param[0]] = !!param[1] ? param[1] : "";
+            }
+
 
             if (!!!focusNode) {
                 //create
@@ -95,7 +101,7 @@ function loadNode(query, n) {
                     source: group[2],
                     name: group[3],
                     id: group[4],
-                    sysparams: group[7],
+                    sysparams: sysParams,
                     ftype: group[9],
                     params: paramsArr,
                     value: !!!group[14] ? group[13] : undefined,
@@ -112,7 +118,7 @@ function loadNode(query, n) {
                 focusNode.source = group[2];
                 focusNode.name = group[3];
                 focusNode.id = group[4];
-                focusNode.sysparams = group[7];
+                focusNode.sysparams = sysParams;
                 focusNode.ftype = group[9];
                 focusNode.params = paramsArr;
                 focusNode.value = !!!group[14] ? group[13] : undefined;
@@ -121,7 +127,6 @@ function loadNode(query, n) {
                 focusNode.next = group[18];
                 focusNode.local = nodesArr;
             }
-
 
         },
         error: function (request, error) {
@@ -412,13 +417,12 @@ function setMode() {
 
     if (mode == 1) {
 
-        var viewAttr = [20, 3, 5, 12];
+        var viewAttr = [1];
 
 
         var startInnerRadius = 12;
         var startOuterRadius = 20;
-        var margin = { top: 0, right: 0, bottom: 0, left: 0 },
-            width = document.getElementById('content').clientWidth,
+        var width = document.getElementById('content').clientWidth,
             height = document.getElementById('content').clientHeight;
 
 
@@ -430,9 +434,10 @@ function setMode() {
         var arc = d3.svg.arc()
                 .innerRadius(startInnerRadius)
                 .outerRadius(startOuterRadius);
-                
+
         var zoom = d3.behavior.zoom()
             .scaleExtent([-10, 20])
+            .translate([width / 2, height / 2])
             .on("zoom", zoomed)
             ;
            
@@ -445,12 +450,13 @@ function setMode() {
         var svg = d3.select("#content").append("svg")
             .attr("width", width)
             .attr("height", height)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
             .call(zoom)
             .on("dblclick.zoom", null)
+            .append("g")
             ;
-                   
+
+        
+
         var rect = svg.append("rect")
             .attr("width", width)
             .attr("height", height)
@@ -458,6 +464,8 @@ function setMode() {
             .style("pointer-events", "all");
 
         svg = svg.append("g");
+
+        
 
         function zoomed() {
             svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -468,18 +476,19 @@ function setMode() {
         function dragstarted(d) {
             d.dragging = true;
             d3.event.sourceEvent.stopPropagation();
-            //d3.select(this).classed("dragging", true);
         }
-        
+
         function dragged(d) {
-            d3.select(this).attr("transform", function (d) { return "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")"; });
+            d3.select(this).attr("transform", function (d) {
+                console.log(d.x);
+                return "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")";
+            });
             update();
-            
+
         }
 
         function dragended(d) {
             d.dragging = false;
-            //d3.select(this).classed("dragging", false);
         }
 
         d3.selection.prototype.moveToFront = function () {
@@ -496,10 +505,10 @@ function setMode() {
                 }
             });
         };
-        
 
-        
-        
+
+
+
         update = function () {
 
 
@@ -546,39 +555,50 @@ function setMode() {
                 .attr("d", arc)
                 .each(function (d) { this._current = d; })
                 ;
-                
 
-            
+
+
 
             var label = nodeGroup
                 .append("text")
                 .attr("font-size", "14px");
 
-           
+
             //udpate
             svg.selectAll("text")
-                .text(function (d) { return d.name+d.id; })
+                .text(function (d) { return d.name + d.id; })
                 .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
                 .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
                 ;
 
-           /*var params = nodeGroup
-                .append("circle")
-                .attr("r", 20)
-                .attr("fill", function () { return "red"; })
-                .attr("class", "params")
-                ;
+            /*var params = nodeGroup
+            .append("circle")
+            .attr("r", 20)
+            .attr("fill", function () { return "red"; })
+            .attr("class", "params")
+            ;
 
-           svg.selectAll(".params")
-                .attr("transform", function (d) { return "translate(" + (d.labelWidth + R + dist + R) + "," + 0 + ")"; })
-                ;
+            svg.selectAll(".params")
+            .attr("transform", function (d) { return "translate(" + (d.labelWidth + R + dist + R) + "," + 0 + ")"; })
+            ;
                 
-                */
-           svg.selectAll("g")
+            */
+
+
+
+            svg.selectAll("g")
                 .attr("opacity", function (d) { return d.query == "" ? 1 : 0.3; })
                 .selectAll("path")
                 .data(pie(viewAttr))
-                    
+              /*  .data(function (d) {
+                    var values = [];
+                    for (var m in d.sysparams) {
+                        values.push(parseFloat(d.sysparams[m]);
+                    }
+                    return pie(values);
+                })*/
+
+
 
 
 
@@ -594,13 +614,15 @@ function setMode() {
             })*/;
 
 
-       }
+        }
 
 
        setInterval(update, 300);
-    }
+   }
 
 
+
+   svg.call(zoom.event); // show initialize zoom
 
     
 }

@@ -657,22 +657,15 @@ begin
       Result.Source := FindNode(Result.ParentName);
     for i:=1 to High(Line.Path) do
       Result := AddField(Result, NewNode(Line.Path[i]));
-    if Line.Source <> '' then
-    begin
-      NextNode(Prev, NewNode(Line.Source));         //del
-      Inc(Result.Source.RefCount);                  //del
-      AddEvent(Result);                             //del
-      Result := GetSource(Result);
-      Result.Source := Prev;
-    end;
-    if (Result.Source = nil) and (Line.Value <> nil) and (Prev <> nil) and (Prev <> Module) then
-    begin
-      NextNode(Prev, NewNode(Line.Name));                //del
-      Result.Source := Prev;
-    end;
   end;
+
   if Line.Source <> '' then
-    Result.Source := NewNode(Line.Source);            //Source(result)
+  begin
+    Node := GetSource(Result);
+    Node.Source := NewNode(Line.Source);           
+    if Result.Attr = naWord then
+      Result := Node.Source;
+  end;
 
   for i:=0 to High(Line.Params) do
     AddParam(Result, NewNode(Line.Params[i]), i);
@@ -739,7 +732,7 @@ begin
   begin
     for i:=0 to High(Node.Params) do
       AddParam(GetSource(Node), GetValue(Node.Params[i]), i);
-    Run(Node.Source);
+    Run(Node.Source);                   //run source
     Node.Value := GetData(Node.Source);
   end;
   if Node.Attr = naFunc then     //call dll func
