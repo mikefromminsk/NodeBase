@@ -216,6 +216,14 @@ $end
 [var.var.var]
 
 
+[link clusters]
+node links
+local links
+history links
+
+[history]
+prevState: AString;
+
 
 
 

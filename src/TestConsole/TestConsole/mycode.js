@@ -33,6 +33,8 @@ $(function () {
         }
     });
 
+    window.onresize = setMode;
+
 });
 
 function openmenu() {
@@ -417,13 +419,18 @@ function setMode() {
 
     if (mode == 1) {
 
-        var viewAttr = [1];
+
+        var myNode = document.getElementById("content");
+        while (myNode.firstChild) {
+            myNode.removeChild(myNode.firstChild);
+        }
 
 
         var startInnerRadius = 12;
         var startOuterRadius = 20;
         var width = document.getElementById('content').clientWidth,
             height = document.getElementById('content').clientHeight;
+
 
 
         var color = d3.scale.category20();
@@ -455,13 +462,30 @@ function setMode() {
             .append("g")
             ;
 
-        
-
+        var defs = svg.append("defs");
+        var filter = defs.append("filter")
+            .attr("id", "dropshadow")
+        filter.append("feGaussianBlur")
+            .attr("in", "SourceAlpha")
+            .attr("stdDeviation", 1)
+            .attr("result", "blur");
+        filter.append("feOffset")
+            .attr("in", "blur")
+            .attr("dx", -2)
+            .attr("dy", 2)
+            .attr("result", "offsetBlur");
+        var feMerge = filter.append("feMerge");
+        feMerge.append("feMergeNode")
+            .attr("in", "offsetBlur")
+        feMerge.append("feMergeNode")
+            .attr("in", "SourceGraphic");
         var rect = svg.append("rect")
             .attr("width", width)
             .attr("height", height)
             .style("fill", "none")
             .style("pointer-events", "all");
+
+
 
         svg = svg.append("g");
 
@@ -545,18 +569,8 @@ function setMode() {
                 .attr("r", 20)
                 .attr("fill", function (d) { return d.color; })
                 .attr("opacity", 0.5)
+                .attr("filter", "url(#dropshadow)")
                 ;
-
-            var path = nodeGroup.selectAll("path")
-                .data(pie(viewAttr))
-                .enter()
-                .append("path")
-                .attr("fill", function (d, i) { return color(i) })
-                .attr("d", arc)
-                .each(function (d) { this._current = d; })
-                ;
-
-
 
 
             var label = nodeGroup
@@ -566,41 +580,35 @@ function setMode() {
 
             //udpate
             svg.selectAll("text")
-                .text(function (d) { return d.name + d.id; })
+                .text(function (d) { return /*(!!d.name ?*/ d.name /*: "")*/ + d.id; })
                 .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
                 .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
                 ;
 
-            /*var params = nodeGroup
-            .append("circle")
-            .attr("r", 20)
-            .attr("fill", function () { return "red"; })
-            .attr("class", "params")
-            ;
 
-            svg.selectAll(".params")
-            .attr("transform", function (d) { return "translate(" + (d.labelWidth + R + dist + R) + "," + 0 + ")"; })
-            ;
-                
-            */
-
-
-
-            svg.selectAll("g")
+            var path = svg.selectAll("g")
                 .attr("opacity", function (d) { return d.query == "" ? 1 : 0.3; })
                 .selectAll("path")
-                .data(pie(viewAttr))
-              /*  .data(function (d) {
-                    var values = [];
-                    for (var m in d.sysparams) {
-                        values.push(parseFloat(d.sysparams[m]);
+                .data(function (d) { //sysparams to viewParams
+                    if (!!d.sysparams) {
+                        var values = new Array();
+                        for (var key in d.sysparams) {
+                            values.push(d.sysparams[key]);
+                        }
+                        return pie(values);
                     }
-                    return pie(values);
-                })*/
-
-
-
-
+                    else {
+                        return pie([]);
+                    }
+                })
+                .enter()
+                .append("path")
+                .attr("fill", function (d, i) { return color(i) })
+                .attr("d", arc)
+                .each(function (d) { this._current = d; })
+                .style("stroke-width", "3")
+                
+                
 
             /*.transition()
             .duration(500)

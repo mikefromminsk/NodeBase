@@ -1,6 +1,5 @@
 ﻿body
 {
-    color: White;
     margin: 0px;
     width: 100%;
     height: 100%;
@@ -17,7 +16,7 @@
 }
 #content
 {
-    background-color: Gray;
+    /*background-color: Gray;*/
     height: 93%;
 }
 #footer
@@ -28,24 +27,25 @@
     width: 100%;
     height: 7%;
     min-height: 32px;
-    /*visibility: hidden;*/
+    visibility: hidden;
 }
 
 
 #header 
 {
-    background-color: Black;
+    background-color: #F1F1F1;
     height: 7%;
     min-height: 64;
-
+    border-bottom:solid 1px #d9d9d9; 
+    
 }
 
 input
 {
     width: 70%; 
-    font-size: 32px;
-    background-color: Gray;
-    
+    font-size: 17px;
+    height: 32px;
+    padding: 0 0 0 10px;
     font-family:arial, sans-serif; 
     border:solid 1px #d9d9d9; 
     border-top:solid 1px #c0c0c0; 
