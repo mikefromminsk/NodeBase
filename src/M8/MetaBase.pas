@@ -117,7 +117,7 @@ type
   end;
 
 const
-  naIndex = 0;
+  naIndex = 0;            //sort
   naWord = 1;
   naLink = 2;
   naData = 3;
@@ -157,7 +157,7 @@ begin
 
   Root := AllocMem(SizeOf(TNode));
   Root.Attr := naRoot;
-  Module := NewNode(NextID);
+  Module := NewNode('meta');
 end;
 
 procedure SetControl(Node: PNode; Param, Value: String);

@@ -436,10 +436,15 @@ function setMode() {
         var color = d3.scale.category20();
 
         var pie = d3.layout.pie()
-                .sort(null);
+            .value(function (d) {
+                return d.value; 
+            })
+            .sort(null);
 
-        var arc = d3.svg.arc()
-                .innerRadius(startInnerRadius)
+            var arc = d3.svg.arc()
+                .innerRadius(function (d) {
+                    return startOuterRadius - (startOuterRadius - startInnerRadius) * ((d.data.count / 20) > 1 ? 1 : (d.data.count / 20));
+                })
                 .outerRadius(startOuterRadius);
 
         var zoom = d3.behavior.zoom()
@@ -554,6 +559,7 @@ function setMode() {
                 .on("dblclick", function (d) {
                     d.expand = !!d.expand ? !d.expand : true;
                     if (d.expand) {
+                        loadNode(d.id); //del
                         loadLinks(d);
                         update();
                     }
@@ -580,7 +586,7 @@ function setMode() {
 
             //udpate
             svg.selectAll("text")
-                .text(function (d) { return /*(!!d.name ?*/ d.name /*: "")*/ + d.id; })
+                .text(function (d) { return /*(!!d.name ?*/d.name /*: "")*/ + d.id; })
                 .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
                 .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
                 ;
@@ -590,16 +596,18 @@ function setMode() {
                 .attr("opacity", function (d) { return d.query == "" ? 1 : 0.3; })
                 .selectAll("path")
                 .data(function (d) { //sysparams to viewParams
+                    var viewParams = [];
                     if (!!d.sysparams) {
-                        var values = new Array();
                         for (var key in d.sysparams) {
-                            values.push(d.sysparams[key]);
+                            if (key == 'COUNT') continue;
+                            viewParams.push({
+                                attr: key,
+                                count: d.sysparams['COUNT'],
+                                value: d.sysparams[key]
+                            });
                         }
-                        return pie(values);
                     }
-                    else {
-                        return pie([]);
-                    }
+                    return pie(viewParams);
                 })
                 .enter()
                 .append("path")
@@ -607,8 +615,8 @@ function setMode() {
                 .attr("d", arc)
                 .each(function (d) { this._current = d; })
                 .style("stroke-width", "3")
-                
-                
+
+
 
             /*.transition()
             .duration(500)
