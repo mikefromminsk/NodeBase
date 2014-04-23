@@ -441,17 +441,19 @@ function setMode() {
             })
             .sort(null);
 
-            var arc = d3.svg.arc()
-                .innerRadius(function (d) {
-                    return startOuterRadius - (startOuterRadius - startInnerRadius) * ((d.data.count / 20) > 1 ? 1 : (d.data.count / 20));
-                })
-                .outerRadius(startOuterRadius);
+        var arc = d3.svg.arc()
+            .innerRadius(function (d) {
+                return startOuterRadius - (startOuterRadius - startInnerRadius) * ((d.data.count / 20) > 1 ? 1 : (d.data.count / 20));
+            })
+            .outerRadius(startOuterRadius);
 
+        var transition = d3.transition()
+            .duration(1000)
+            .ease("linear");
         var zoom = d3.behavior.zoom()
             .scaleExtent([-10, 20])
             .translate([width / 2, height / 2])
-            .on("zoom", zoomed)
-            ;
+            .on("zoom", zoomed);
            
         var drag = d3.behavior.drag()
             .origin(function (d) { return d; })
@@ -464,8 +466,7 @@ function setMode() {
             .attr("height", height)
             .call(zoom)
             .on("dblclick.zoom", null)
-            .append("g")
-            ;
+            .append("g");
 
         var defs = svg.append("defs");
         var filter = defs.append("filter")
@@ -549,7 +550,12 @@ function setMode() {
                 .data(metaNodes);
 
             //delete
-            g.exit().remove();
+            g.exit()
+                .attr("opacity", "1")
+                .transition()
+                .attr("opacity", "0")
+                .remove();
+            
 
             //create
             var nodeGroup = g
@@ -567,12 +573,17 @@ function setMode() {
                 .style("cursor", "pointer")
                 ;
 
-            g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+            g.transition().duration(1000)
+                .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
 
             var circle = nodeGroup
                 .append("circle")
-                .attr("r", 20)
+                .attr("opacity", "0")
+                .transition()
+                .attr("opacity", "1")
+                .attr("r", startOuterRadius - 0.5)
                 .attr("fill", function (d) { return d.color; })
                 .attr("opacity", 0.5)
                 .attr("filter", "url(#dropshadow)")
@@ -593,7 +604,7 @@ function setMode() {
 
 
             var path = svg.selectAll("g")
-                .attr("opacity", function (d) { return d.query == "" ? 1 : 0.3; })
+            //.attr("opacity", function (d) { return d.query == "" ? 1 : 0.3; })
                 .selectAll("path")
                 .data(function (d) { //sysparams to viewParams
                     var viewParams = [];
@@ -610,7 +621,11 @@ function setMode() {
                     return pie(viewParams);
                 })
                 .enter()
+
                 .append("path")
+                .attr("opacity", "0")
+                .transition()
+                .attr("opacity", "1")
                 .attr("fill", function (d, i) { return color(i) })
                 .attr("d", arc)
                 .each(function (d) { this._current = d; })
@@ -633,7 +648,7 @@ function setMode() {
         }
 
 
-       setInterval(update, 300);
+       setInterval(update, 1000);
    }
 
 
