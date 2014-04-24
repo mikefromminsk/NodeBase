@@ -37,9 +37,6 @@ $(function () {
 
 });
 
-function openmenu() {
-    alert(metaNodes.length);
-}
 
 function getNode(id) {
     if (!!!id) return;
@@ -99,7 +96,7 @@ function loadNode(query, n) {
             if (!!!focusNode) {
                 //create
                 metaNodes.push({
-                    query: "",
+                    query: undefined,
                     source: group[2],
                     name: group[3],
                     id: group[4],
@@ -116,7 +113,7 @@ function loadNode(query, n) {
             }
             else {
                 //update
-                focusNode.query = "";
+                focusNode.query = undefined;
                 focusNode.source = group[2];
                 focusNode.name = group[3];
                 focusNode.id = group[4];
@@ -133,11 +130,10 @@ function loadNode(query, n) {
         },
         error: function (request, error) {
             if (!!!n) n = 1;
-            if (n < 3) {
-                loadNode(query, n + 1)
-            } else {
-                deleteTree(query);
-            }
+            if (n < 3)
+            { loadNode(query, n + 1) }
+            else
+            { deleteTree(query); }
         }
     });
 
@@ -147,30 +143,13 @@ function loadNode(query, n) {
 function deleteTree(id) {
     var node = getNode(id);
     if (!!!node) return;
-    if (!!node.local) {
-        for (var i = 0; i < node.local.length; i++)
-            deleteTree(node.local[i]);
-    }
-    if (!!node.next) {
-        deleteTree(node.next);
-    }
-    if (!!node.params) {
-        for (var i = 0; i < node.params.length; i++)
-            deleteTree(node.params[i]);
-    }
-    if (!!node.value) {
-        deleteTree(node.value);
-    }
-    if (!!node.ftype) {
-        deleteTree(node.ftype);
-    }
-
-    if (!!node.ftrue) {
-        deleteTree(node.ftrue);
-    }
-    if (!!node.felse) {
-        deleteTree(node.felse);
-    }
+    if (!!node.local) { for (var local in node.local) deleteTree(local); }
+    if (!!node.next) { deleteTree(node.next); }
+    if (!!node.params) { for (var param in node.params) deleteTree(param); }
+    if (!!node.value) { deleteTree(node.value); }
+    if (!!node.ftype) { deleteTree(node.ftype); }
+    if (!!node.ftrue) { deleteTree(node.ftrue); }
+    if (!!node.felse) { deleteTree(node.felse); }
     deleteNode(node.id);
 }
 
@@ -180,7 +159,7 @@ function loadLinks(node) {
 
     var height = !!node.height ? node.height : 0;
 
-    if (node.query != "") return;
+    if (!!node.query) return;
 
     if (!!node.local) {//and expand true
         for (var i = 0; i < node.local.length; i++) {
@@ -234,7 +213,6 @@ var dDown = D + dist;
 function setHeight(root) {
     if (!!!root) return;
     var height = 0;
-
     if (!!root.local) {
         for (var i = 0; i < root.local.length; i++) {
             var node = getNode(root.local[i]);
@@ -250,16 +228,12 @@ function setHeight(root) {
             height += dDown + node.height;
         }
     }
-
     root.height = height;
 }
 
 
-function setPosition(root) {
+function setXY(root) {
     if (!!!root) return;
-
-    
-
     var x = !!root.x ? root.x : 0,
         y = !!root.y ? root.y : 0;
     var top = 0;
@@ -275,7 +249,7 @@ function setPosition(root) {
                     node.y = y + R;
                     node.x = x + R;
                 }
-                setPosition(node);
+                setXY(node);
             }
             else {
                 deleteTree(node.id);
@@ -295,7 +269,7 @@ function setPosition(root) {
                     node.y = y + top;
                     node.x = x + dRight;
                 }
-                setPosition(node);
+                setXY(node);
                 top += node.height;
             }
             else {
@@ -315,7 +289,7 @@ function setPosition(root) {
                     node.y = y + top;
                     node.x = x + right;
                 }
-                setPosition(node);
+                setXY(node);
                 right += dRight + node.labelWidth;
             }
             else {
@@ -335,7 +309,7 @@ function setPosition(root) {
                     node.y = y + top - dDown;
                     node.x = x + right + dRight;
                 }
-                setPosition(node);
+                setXY(node);
             }
             else {
                 deleteTree(node.id);
@@ -354,7 +328,7 @@ function setPosition(root) {
                     node.y = y + top + dDown;
                     node.x = x + right + dRight;
                 }
-                setPosition(node);
+                setXY(node);
             }
             else {
                 deleteTree(node.id);
@@ -373,7 +347,7 @@ function setPosition(root) {
                     node.y = y + top;
                     node.x = x + right;
                 }
-                setPosition(node);
+                setXY(node);
                 right += dRight + node.labelWidth;
             }
             else {
@@ -381,9 +355,6 @@ function setPosition(root) {
             }
         }
     }
-
-
-
 
     if (!!root.next) {
 
@@ -395,7 +366,7 @@ function setPosition(root) {
                     node.y = y + top;
                     node.x = x;
                 }
-                setPosition(node);
+                setXY(node);
                 top += node.height;
             }
             else {
@@ -406,8 +377,6 @@ function setPosition(root) {
 
 }
 
-var mode = 1;
-
 
 var timerCounter = 0;
 
@@ -417,245 +386,214 @@ var update;
 function setMode() {
 
 
-    if (mode == 1) {
 
 
-        var myNode = document.getElementById("content");
-        while (myNode.firstChild) {
-            myNode.removeChild(myNode.firstChild);
-        }
+    var myNode = document.getElementById("content");
+    while (myNode.firstChild) {
+        myNode.removeChild(myNode.firstChild);
+    }
 
 
-        var startInnerRadius = 12;
-        var startOuterRadius = 20;
-        var width = document.getElementById('content').clientWidth,
-            height = document.getElementById('content').clientHeight;
+    var startInnerRadius = 12;
+    var startOuterRadius = 20;
+    var width = document.getElementById('content').clientWidth,
+        height = document.getElementById('content').clientHeight;
 
 
 
-        var color = d3.scale.category20();
+    var color = d3.scale.category20();
 
-        var pie = d3.layout.pie()
-            .value(function (d) {
-                return d.value; 
-            })
-            .sort(null);
+    var pie = d3.layout.pie()
+        .value(function (d) { return d.value; })
+        .sort(null);
 
-        var arc = d3.svg.arc()
-            .innerRadius(function (d) {
-                return startOuterRadius - (startOuterRadius - startInnerRadius) * ((d.data.count / 20) > 1 ? 1 : (d.data.count / 20));
-            })
-            .outerRadius(startOuterRadius);
+    var arc = d3.svg.arc()
+        .innerRadius(function (d) { return startOuterRadius - (startOuterRadius - startInnerRadius) * ((d.data.count / 20) > 1 ? 1 : (d.data.count / 20)); })
+        .outerRadius(startOuterRadius);
 
-        var transition = d3.transition()
-            .duration(1000)
-            .ease("linear");
-        var zoom = d3.behavior.zoom()
-            .scaleExtent([-10, 20])
-            .translate([width / 2, height / 2])
-            .on("zoom", zoomed);
+    var transition = d3.transition()
+        .duration(1000)
+        .ease("linear");
+    var zoom = d3.behavior.zoom()
+        .scaleExtent([-10, 20])
+        .translate([width / 2, height / 2])
+        .on("zoom", zoomed);
            
-        var drag = d3.behavior.drag()
-            .origin(function (d) { return d; })
-            .on("dragstart", dragstarted)
-            .on("drag", dragged)
-            .on("dragend", dragended);
+    var drag = d3.behavior.drag()
+        .origin(function (d) { return d; })
+        .on("dragstart", dragstarted)
+        .on("drag", dragged)
+        .on("dragend", dragended);
 
-        var svg = d3.select("#content").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .call(zoom)
-            .on("dblclick.zoom", null)
-            .append("g");
+    //create svg
+    var svg = d3.select("#content").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .call(zoom)
+        .on("dblclick.zoom", null)
+        .append("g");
 
-        var defs = svg.append("defs");
-        var filter = defs.append("filter")
-            .attr("id", "dropshadow")
-        filter.append("feGaussianBlur")
-            .attr("in", "SourceAlpha")
-            .attr("stdDeviation", 1)
-            .attr("result", "blur");
-        filter.append("feOffset")
-            .attr("in", "blur")
-            .attr("dx", -2)
-            .attr("dy", 2)
-            .attr("result", "offsetBlur");
-        var feMerge = filter.append("feMerge");
-        feMerge.append("feMergeNode")
-            .attr("in", "offsetBlur")
-        feMerge.append("feMergeNode")
-            .attr("in", "SourceGraphic");
-        var rect = svg.append("rect")
-            .attr("width", width)
-            .attr("height", height)
-            .style("fill", "none")
-            .style("pointer-events", "all");
-
-
-
-        svg = svg.append("g");
-
+    //filter 
+    var defs = svg.append("defs");
+    var filter = defs.append("filter")
+        .attr("id", "dropshadow")
+    filter.append("feGaussianBlur")
+        .attr("in", "SourceAlpha")
+        .attr("stdDeviation", 1)
+        .attr("result", "blur");
+    filter.append("feOffset")
+        .attr("in", "blur")
+        .attr("dx", -2)
+        .attr("dy", 2)
+        .attr("result", "offsetBlur");
+    var feMerge = filter.append("feMerge");
+    feMerge.append("feMergeNode")
+        .attr("in", "offsetBlur")
+    feMerge.append("feMergeNode")
+        .attr("in", "SourceGraphic");
+    var rect = svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "none")
+        .style("pointer-events", "all");
         
 
-        function zoomed() {
-            svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-            svg.selectAll("text").each(function (d) { d.labelWidth = this.getComputedTextLength(); }); //update label width
-            update();
-        }
+    function zoomed() {
+        svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        svg.selectAll("text").each(function (d) { d.labelWidth = this.getComputedTextLength(); }); //update label width
+        update();
+    }
 
-        function dragstarted(d) {
-            d.dragging = true;
-            d3.event.sourceEvent.stopPropagation();
-        }
+    function dragstarted(d) {
+        d.dragging = true;
+        d3.event.sourceEvent.stopPropagation();
+    }
 
-        function dragged(d) {
-            d3.select(this).attr("transform", function (d) {
-                console.log(d.x);
-                return "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")";
-            });
-            update();
+    function dragged(d) {
+        d3.select(this).attr("transform", function (d) {
+            return "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")";
+        });
+        update();
+    }
 
-        }
+    function dragended(d) {
+        d.dragging = false;
+    }
 
-        function dragended(d) {
-            d.dragging = false;
-        }
+    d3.selection.prototype.moveToFront = function () {
+        return this.each(function () {
+            this.parentNode.appendChild(this);
+        });
+    };
 
-        d3.selection.prototype.moveToFront = function () {
-            return this.each(function () {
-                this.parentNode.appendChild(this);
-            });
-        };
+    d3.selection.prototype.moveToBack = function () {
+        return this.each(function () {
+            var firstChild = this.parentNode.firstChild;
+            if (firstChild) {
+                this.parentNode.insertBefore(this, firstChild);
+            }
+        });
+    };
 
-        d3.selection.prototype.moveToBack = function () {
-            return this.each(function () {
-                var firstChild = this.parentNode.firstChild;
-                if (firstChild) {
-                    this.parentNode.insertBefore(this, firstChild);
+
+
+
+    update = function () {
+        setHeight(getNode(rootID));
+        setXY(getNode(rootID));
+
+        var g = svg.selectAll("g")
+            .data(metaNodes);
+
+        //delete
+        g.exit()
+            .attr("opacity", "1")
+            .transition()
+            .attr("opacity", "0")
+            .remove();
+
+
+        //create
+        var nodeGroup = g
+            .enter()
+            .append("g")
+            .call(drag)
+            .on("dblclick", function (d) {
+                d.expand = !!d.expand ? !d.expand : true;
+                if (d.expand) {
+                    loadNode(d.id); //del
+                    loadLinks(d);
                 }
-            });
-        };
+                update();
+            })
+            .style("cursor", "pointer")
+            ;
 
 
+        g.transition()
+            .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
 
-        update = function () {
-
-
-
-            setHeight(getNode(rootID));
-            setPosition(getNode(rootID));
-
-            var g = svg.selectAll("g")
-                .data(metaNodes);
-
-            //delete
-            g.exit()
-                .attr("opacity", "1")
-                .transition()
-                .attr("opacity", "0")
-                .remove();
+        var circle = nodeGroup
+            .append("circle")
             
+            .attr("r", startOuterRadius - 0.5)
+            .attr("fill", function (d) { return d.color; })
+            .attr("opacity", 0.5)
+            .attr("filter", "url(#dropshadow)")
+            .attr("opacity", "0")
+            .transition()
+            .attr("opacity", "1")
+            ;
 
-            //create
-            var nodeGroup = g
-                .enter()
-                .append("g")
-                .call(drag)
-                .on("dblclick", function (d) {
-                    d.expand = !!d.expand ? !d.expand : true;
-                    if (d.expand) {
-                        loadNode(d.id); //del
-                        loadLinks(d);
-                        update();
+
+        var label = nodeGroup
+            .append("text")
+            .attr("font-size", "14px");
+
+
+        //udpate
+        svg.selectAll("text")
+            .text(function (d) {
+                if (!!d.name) return d.name;
+                if (!!d.id) return d.id;
+                if (!!d.query) return d.query;
+                return "";
+            })
+            .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
+            .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
+            ;
+
+
+        var path = svg.selectAll("g")
+            .attr("opacity", function (d) { return !!!d.query ? 1 : 0.3; })
+            .selectAll("path")
+            .data(function (d) { //sysparams to viewParams
+                var viewParams = [];
+                if (!!d.sysparams) {
+                    for (var key in d.sysparams) {
+                        if (key == 'COUNT') continue;
+                        viewParams.push({
+                            attr: key,
+                            count: d.sysparams['COUNT'],
+                            value: d.sysparams[key]
+                        });
                     }
-                })
-                .style("cursor", "pointer")
-                ;
+                }
+                return pie(viewParams);
+            })
+            .enter()
+            .append("path")
+            .attr("fill", function (d, i) { return color(i) })
+            .attr("d", arc)
+            .style("stroke-width", "3")
+            .attr("opacity", "0")
+            .transition()
+            .attr("opacity", "1")
 
-
-            g.transition().duration(1000)
-                .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
-
-
-            var circle = nodeGroup
-                .append("circle")
-                .attr("opacity", "0")
-                .transition()
-                .attr("opacity", "1")
-                .attr("r", startOuterRadius - 0.5)
-                .attr("fill", function (d) { return d.color; })
-                .attr("opacity", 0.5)
-                .attr("filter", "url(#dropshadow)")
-                ;
-
-
-            var label = nodeGroup
-                .append("text")
-                .attr("font-size", "14px");
-
-
-            //udpate
-            svg.selectAll("text")
-                .text(function (d) { return /*(!!d.name ?*/d.name /*: "")*/ + d.id; })
-                .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
-                .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
-                ;
-
-
-            var path = svg.selectAll("g")
-            //.attr("opacity", function (d) { return d.query == "" ? 1 : 0.3; })
-                .selectAll("path")
-                .data(function (d) { //sysparams to viewParams
-                    var viewParams = [];
-                    if (!!d.sysparams) {
-                        for (var key in d.sysparams) {
-                            if (key == 'COUNT') continue;
-                            viewParams.push({
-                                attr: key,
-                                count: d.sysparams['COUNT'],
-                                value: d.sysparams[key]
-                            });
-                        }
-                    }
-                    return pie(viewParams);
-                })
-                .enter()
-
-                .append("path")
-                .attr("opacity", "0")
-                .transition()
-                .attr("opacity", "1")
-                .attr("fill", function (d, i) { return color(i) })
-                .attr("d", arc)
-                .each(function (d) { this._current = d; })
-                .style("stroke-width", "3")
-
-
-
-            /*.transition()
-            .duration(500)
-            .attrTween("d", function (a) {
-            var i = d3.interpolate(this._current, a),
-            k = d3.interpolate(arc.outerRadius()(), newRadius);
-            this._current = i(0);
-            return function (t) {
-            return arc.innerRadius(k(t) / 4).outerRadius(k(t))(i(t));
-            };
-            })*/;
-
-
-        }
-
-
-       setInterval(update, 1000);
-   }
-
-
-
-   svg.call(zoom.event); // show initialize zoom
-
-    
+    }
+    setInterval(update, 1000);
+    svg.call(zoom.event); // show initialize zoom
 }
 
 

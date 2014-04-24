@@ -44,7 +44,7 @@ var
 implementation
 
 uses
-  MetaBase, MetaUtils, MetaLine, IdHTTPHeaderInfo;
+  MetaBaseModule, MetaUtils, MetaLine, IdHTTPHeaderInfo;
 
 {$R *.dfm}
 

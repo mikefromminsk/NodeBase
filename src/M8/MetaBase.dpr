@@ -1,7 +1,7 @@
-program M;
+program MetaBase;
 
 uses
-  Forms, Console, MetaBase, MetaLine, Dialogs, SysUtils;
+  Forms, Console, MetaBaseModule, MetaLine, Dialogs, SysUtils;
 
 {$R *.res}
 

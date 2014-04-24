@@ -46,7 +46,7 @@ var
 implementation
 
 uses
-  MetaBase;
+  MetaBaseModule;
 
 
 function GetProcAddress(Handle: Integer; FuncName: String): Integer;
