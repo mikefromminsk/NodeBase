@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, ScktComp, AppEvnts, ShellApi,
   IdBaseComponent, IdComponent, IdTCPServer, IdCustomHTTPServer,
-  IdHTTPServer, IdTCPConnection, IdTCPClient, IdHTTP;
+  IdHTTPServer, IdTCPConnection, IdTCPClient, IdHTTP, Menus;
 
 type
   TGG = class(TForm)
@@ -17,6 +17,9 @@ type
     Splitter1: TSplitter;
     InputBox: TRichEdit;
     IdHTTPServer1: TIdHTTPServer;
+    RightClickToIcon: TPopupMenu;
+    Exit: TMenuItem;
+    Console: TMenuItem;
     procedure InputBoxKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure InputBoxKeyDown(Sender: TObject; var Key: Word;
@@ -32,10 +35,13 @@ type
       var VPostStream: TStream);
     procedure IdHTTPServer1Exception(AThread: TIdPeerThread;
       AException: Exception);
+    procedure FormDestroy(Sender: TObject);
+    procedure ExitClick(Sender: TObject);
+    procedure ConsoleClick(Sender: TObject);
   private
     procedure ControlWindow(var Msg: TMessage); message WM_SYSCOMMAND;
     procedure IconMouse(var Msg: TMessage); message WM_USER + 1;
-    procedure Ic(n: Integer; Icon: TIcon);
+    procedure IconMode(n: Integer; Icon: TIcon);
   end;
 
 var
@@ -128,6 +134,7 @@ begin
   end;
   for i:=0 to InputBox.Lines.Count - 1 do
     ConsoleExec(InputBox.Lines[i]);
+  IconMode(1, Application.Icon);
 end;
 
 procedure TGG.FormShow(Sender: TObject);
@@ -136,7 +143,7 @@ begin
 end;
 
 // TRAY
-procedure TGG.Ic(n: Integer; Icon: TIcon);
+procedure TGG.IconMode(n: Integer; Icon: TIcon);
 var Nim: TNotifyIconData;
   tip : array[0..63] of Char;
 begin
@@ -161,9 +168,8 @@ procedure TGG.ControlWindow(var Msg: TMessage);
 begin
   if Msg.WParam = SC_MINIMIZE then
   begin
-    Ic(1, Application.Icon);
     ShowWindow(Handle, SW_HIDE);
-    ShowWindow(Application.Handle, SW_HIDE);   
+    ShowWindow(Application.Handle, SW_HIDE);
   end
   else
     inherited;
@@ -176,14 +182,14 @@ begin
   case Msg.LParam of
     WM_LBUTTONUP, WM_LBUTTONDBLCLK:
       begin
-        Ic(2, Application.Icon);
-        ShowWindow(Application.Handle, SW_SHOW);
         ShowWindow(Handle, SW_SHOW);
+        ShowWindow(Application.Handle, SW_SHOW);
       end;
     WM_RBUTTONUP:
       begin
-        SetForegroundWindow(Handle);
-        PostMessage(Handle, WM_NULL, 0, 0);
+        RightClickToIcon.Popup(p.X, p.Y);
+        {SetForegroundWindow(Handle);
+        PostMessage(Handle, WM_NULL, 0, 0);}
       end;
   end;
 end;
@@ -260,6 +266,21 @@ procedure TGG.IdHTTPServer1Exception(AThread: TIdPeerThread;
   AException: Exception);
 begin
   QueryBox.Lines.Add('Error: ' + StringReplace(AException.Message, #13#10, #32, [rfReplaceAll]));
+end;
+
+procedure TGG.FormDestroy(Sender: TObject);
+begin
+  IconMode(2, Application.Icon);
+end;
+
+procedure TGG.ExitClick(Sender: TObject);
+begin
+  Application.Terminate;
+end;
+
+procedure TGG.ConsoleClick(Sender: TObject);
+begin
+  ShellExecute(Handle, 'open', PChar('http://localhost:' + IntToStr(IdHTTPServer1.DefaultPort)), nil, nil, SW_SHOW);
 end;
 
 end.
