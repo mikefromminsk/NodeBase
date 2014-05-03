@@ -41,6 +41,10 @@ type
 var
   GG: TGG;
 
+const
+  OptionsFileName = 'config.ini';
+  ConsoleFileName = 'Console.html';
+
 implementation
 
 uses
@@ -107,8 +111,6 @@ procedure TGG.FormCreate(Sender: TObject);
 var
   i: Integer;
   Options: TStringList;
-const
-  OptionsFileName = 'config.ini';
 begin
   if FileExists(OptionsFileName) then
   begin
@@ -122,7 +124,7 @@ begin
     QueryBox.Lines.Add('DefaultPort: ' + IntToStr(IdHTTPServer1.DefaultPort));
   except
     on E: Exception do
-      QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) + ' already open. Change ServerPort in config file.');
+      QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) + ' already open. Change ServerPort in ' + OptionsFileName +' file.');
   end;
   for i:=0 to InputBox.Lines.Count - 1 do
     ConsoleExec(InputBox.Lines[i]);
@@ -201,10 +203,19 @@ var
 begin
   Document := Copy(ARequestInfo.Document, 2, MaxInt);
   AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); //Разрешение на выполнения запросов
+
+
   if ARequestInfo.Command = 'GET' then
   begin
-    AResponseInfo.ContentText := Base.GetNodeBody(Base.NewNode(Document));
-    //QueryBox.Lines.Add(ARequestInfo.Command + #10 + AResponseInfo.ContentText);
+    if Document = '' then   // return html console
+    begin
+      AResponseInfo.ContentStream := TFileStream.Create(ConsoleFileName, fmOpenRead or fmShareCompat);  // to local dir
+    end
+    else
+    begin
+      AResponseInfo.ContentText := Base.GetNodeBody(Base.NewNode(Document));
+      //QueryBox.Lines.Add(ARequestInfo.Command + #10 + AResponseInfo.ContentText);
+    end;
   end;
   if ARequestInfo.Command = 'POST' then
   begin
