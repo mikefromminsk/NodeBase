@@ -1,5 +1,4 @@
 [M8]
-c:\Users\ %User%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\
 http://habrahabr.ru/post/214525/
 differents with code and interfeis is fields pos
 
@@ -9,13 +8,11 @@ support MG
 
 
 [optimization]
-ideal math model
 
 Index is First
 
+Like nodes
 CamelCase, mixedCase, lower_case
-
-save data and count control in file attr
 
 saveNode to segment code with addlocal(to up)
 
