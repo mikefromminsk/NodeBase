@@ -1,7 +1,7 @@
 [M8]
 http://habrahabr.ru/post/214525/
 differents with code and interfeis is fields pos
-
+metabase neurobase
 
 [basic task]
 support MG
@@ -222,6 +222,7 @@ history links
 prevState: AString;
 not DUMP
 
-
+интерфейс для delphi
+развернуться на linux
 
 

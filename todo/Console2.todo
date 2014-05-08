@@ -1,0 +1,31 @@
+[Console2]
+
+[Page]
+1) Демонстрация
+2) Планы
+3) Документация
+4) Исходники
+
+
+[Планы]
+RedMine
+from Plans.todo
+http://learn.javascript.ru/task/raskryvausheesya-derevo
+http://metabrain.by:3000/redmine/projects/metabrain/issues
+
+
+[Mode]
+1) Edit mode (liner)
+2) Global mode (buble)
+3) Monitoring mode (tree)
+
+
+
+[Global mode]
+http://bl.ocks.org/mbostock/4063530
+http://bl.ocks.org/mbostock/1893974
+http://mbostock.github.io/d3/talk/20111116/pack-hierarchy.html
+
+
+[monitoring mode]
+http://mbostock.github.io/d3/talk/20111116/force-collapsible.html
