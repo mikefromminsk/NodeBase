@@ -1,18 +1,5 @@
 [Console2]
 
-[Page]
-1) Демонстрация
-2) Планы
-3) Документация
-4) Исходники
-
-
-[Планы]
-RedMine
-from Plans.todo
-http://learn.javascript.ru/task/raskryvausheesya-derevo
-http://metabrain.by:3000/redmine/projects/metabrain/issues
-
 
 [Mode]
 1) Edit mode (liner)
