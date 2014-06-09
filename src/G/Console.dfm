@@ -1,5 +1,5 @@
 object Form1: TForm1
-  Left = 192
+  Left = 193
   Top = 124
   Width = 928
   Height = 480
@@ -11,6 +11,7 @@ object Form1: TForm1
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
 end

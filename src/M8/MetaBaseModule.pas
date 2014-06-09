@@ -73,7 +73,7 @@ type
     from : Double;
   end;
 
-  TMeta = class
+  TFocus = class
   public
     ID: Integer;
     Root: PNode;
@@ -112,7 +112,7 @@ type
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
-    function Exec(Line: String): PNode;
+    function Exec(Line: String): PNode; virtual;
     function GetNodeBody(Node: PNode): String;
   end;
 
@@ -130,11 +130,11 @@ const
   RootPath = 'data';
 
 var
-  Base: TMeta; //Meta: TRoot;
+  Base: TFocus; //Meta: TRoot;
 
 implementation
 
-constructor TMeta.Create;
+constructor TFocus.Create;
 var Method: TMethod;
 begin
 
@@ -197,20 +197,20 @@ begin
   Delete(Result, 1, 1);
 end;
 
-function TMeta.NextID: String;
+function TFocus.NextID: String;
 begin
   Inc(ID);
   Result := '@' + IntToStr(ID);
 end;
 
-function TMeta.AddSubNode(var Arr: ANode): PNode;
+function TFocus.AddSubNode(var Arr: ANode): PNode;
 begin
   SetLength(Arr, High(Arr) + 2);
   Result := AllocMem(SizeOf(TNode));
   Arr[High(Arr)] := Result;
 end;
 
-function TMeta.AddIndex(Node: PNode; Name: Char): PNode;
+function TFocus.AddIndex(Node: PNode; Name: Char): PNode;
 begin
   Result := AddSubNode(Node.Index);
   Result.Attr := naIndex;
@@ -226,7 +226,7 @@ begin
   end;
 end;
 
-function TMeta.AddLocal(Node: PNode; Local: PNode): PNode;
+function TFocus.AddLocal(Node: PNode; Local: PNode): PNode;
 begin
   AddSubNode(Node.Local);
   if Node.Attr = naIndex
@@ -242,12 +242,12 @@ begin
   end;
 end;
 
-function TMeta.AddLocal(Node: PNode): PNode;
+function TFocus.AddLocal(Node: PNode): PNode;
 begin
   Result := AddLocal(Node, NewIndex(NextID));
 end;
 
-function TMeta.AddValue(Node: PNode; Value: String): PNode;
+function TFocus.AddValue(Node: PNode; Value: String): PNode;
 begin
   Result := AllocMem(SizeOf(TNode));
   Result.Name := Value;
@@ -255,7 +255,7 @@ begin
   Node.Value := Result;
 end;
 
-function TMeta.AddField(Node: PNode; Field: PNode): PNode; //not workt
+function TFocus.AddField(Node: PNode; Field: PNode): PNode; //not workt
 var i: Integer;
 begin
   Result := nil;
@@ -275,7 +275,7 @@ begin
   Result := Field;
 end;
 
-function TMeta.AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
+function TFocus.AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
 var i: Integer;
 begin
   Result := nil;
@@ -312,7 +312,7 @@ begin
   end;
 end;
 
-function TMeta.GetIndex(Node: PNode): String;
+function TFocus.GetIndex(Node: PNode): String;
 begin
   Result := '';
   if Node <> nil then
@@ -323,7 +323,7 @@ begin
     end;
 end;
 
-function TMeta.SetValue(Node: PNode; Value: String): PNode;
+function TFocus.SetValue(Node: PNode; Value: String): PNode;
 begin
   Result := AddValue(Node, Value);
   if Node.Source <> nil then
@@ -342,7 +342,7 @@ begin
   end;
 end;
 
-function TMeta.GetValue(Node: PNode): PNode;
+function TFocus.GetValue(Node: PNode): PNode;
 var ValueStack: ANode;
 begin
   Result := nil;
@@ -363,7 +363,7 @@ begin
   SetLength(ValueStack, 0);
 end;
 
-function TMeta.GetParam(Node: PNode): PNode;
+function TFocus.GetParam(Node: PNode): PNode;
 begin
   Result := nil;
   while Node <> nil do
@@ -373,7 +373,7 @@ begin
   end;
 end;
 
-function TMeta.GetData(Node: PNode): PNode;
+function TFocus.GetData(Node: PNode): PNode;
 var ValueStack: ANode;
 begin
   Result := nil;
@@ -394,7 +394,7 @@ begin
   SetLength(ValueStack, 0);
 end;
 
-function TMeta.GetSource(Node: PNode): PNode;
+function TFocus.GetSource(Node: PNode): PNode;
 begin
   Result := Node;
   if Node = nil then Exit;
@@ -405,7 +405,7 @@ begin
   end;
 end;
 
-function TMeta.GetType(Node: PNode): PNode;
+function TFocus.GetType(Node: PNode): PNode;
 begin
   Result := nil;
   if Node = nil then Exit;
@@ -414,7 +414,7 @@ begin
   else Result := GetData(Node.FType);
 end;
 
-function TMeta.NewIndex(Name: String): PNode;
+function TFocus.NewIndex(Name: String): PNode;
 var i, j, Index: Integer;
 begin
   Result := Root;
@@ -436,7 +436,7 @@ begin
   else Result := nil;
 end;
 
-procedure TMeta.NewModule(Node: PNode);  //change name to LoadFile
+procedure TFocus.NewModule(Node: PNode);  //change name to LoadFile
 var
   i: Integer;
   Func, PrevModule: PNode;
@@ -474,7 +474,7 @@ begin
   List.Free;
 end;
 
-procedure TMeta.CallFunc(Node: PNode);
+procedure TFocus.CallFunc(Node: PNode);
 var
   Value: PNode;
   Params, Param: String;
@@ -597,7 +597,7 @@ begin
     end;
 end;
 
-function TMeta.FindNode(Index: PNode): PNode;
+function TFocus.FindNode(Index: PNode): PNode;
 var Node, Find: PNode;
 begin
   Result := nil;
@@ -618,10 +618,10 @@ begin
   end;
 end;
 
-function  TMeta.NewNode(Line: String): PNode;      //fastload
+function  TFocus.NewNode(Line: String): PNode;      //fastload
 begin Result := NewNode(TLine.Create(Line)); end;
 
-function TMeta.NewNode(Line: TLine): PNode;
+function TFocus.NewNode(Line: TLine): PNode;
 var
   i: Integer;
   Node: PNode;
@@ -709,7 +709,7 @@ begin
   end;
 end;
 
-procedure TMeta.Run(Node: PNode);
+procedure TFocus.Run(Node: PNode);
 label NextNode; //Change name
 var FuncResult, i, n: Integer;
 begin
@@ -762,7 +762,7 @@ begin
   Goto NextNode;      //stack overflow when many next node
 end;
 
-procedure TMeta.NextNode(var PrevNode: PNode; Node: PNode);
+procedure TFocus.NextNode(var PrevNode: PNode; Node: PNode);
 begin
   if PrevNode <> nil then
   begin
@@ -783,7 +783,7 @@ end;
 
 
 
-procedure TMeta.SaveNode(Node: PNode);
+procedure TFocus.SaveNode(Node: PNode);
 var ParentIndex: PNode;
 procedure DeleteArrayValue(var Arr: ANode; Value: Pointer);
 var i: Integer;
@@ -822,7 +822,7 @@ begin
   end;
 end;
 
-procedure TMeta.AddEvent(Node: PNode);
+procedure TFocus.AddEvent(Node: PNode);
 var Event, NewEvent: PEvent;
 begin
   Node.SaveTime := Now + TimerInterval;     //formula
@@ -863,7 +863,7 @@ begin
   end;
 end;
 
-procedure TMeta.OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
+procedure TFocus.OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
 var
   i: Integer;
   TimeLine: PEvent;
@@ -882,7 +882,7 @@ begin
   Dispose(TimeLine);
 end;
 
-function TMeta.Exec(Line: String): PNode;
+function TFocus.Exec(Line: String): PNode;
 var
   Data: String;
   i: Integer;
@@ -909,7 +909,7 @@ end;
 
 
 
-function TMeta.GetNodeBody(Node: PNode): String;
+function TFocus.GetNodeBody(Node: PNode): String;
 var
   Str, Controls: String;
   i: Integer;
@@ -969,7 +969,7 @@ begin
     Name := Name + '$' + ControlsNode;
 end;
 
-procedure TMeta.SaveNode(Node: PNode);
+procedure TFocus.SaveNode(Node: PNode);
 var
   Line: TLine;
   List: TStringList;
@@ -1027,5 +1027,5 @@ begin
 end;      }
 
 initialization
-  //Base := TMeta.Create;
+  //Base := TFocus.Create;
 end.

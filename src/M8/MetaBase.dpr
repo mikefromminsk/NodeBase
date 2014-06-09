@@ -12,7 +12,7 @@ begin
 
 
   Application.Initialize;
-  Base := TMeta.Create;
+  Base := TFocus.Create;
   Application.CreateForm(TGG, GG);
 
 

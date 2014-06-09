@@ -2,7 +2,9 @@ program G;
 
 uses
   Forms,
-  Console in 'Console.pas' {Form1};
+  Console in 'Console.pas' {Form1},
+  MetaBaseModule in '..\M8\MetaBaseModule.pas',
+  MetaUtils in '..\M8\MetaUtils.pas';
 
 {$R *.res}
 
