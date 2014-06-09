@@ -12,6 +12,7 @@ type
     function CreateNode(Node: PNode): PNode;
     function AddNode(var Arr: ANode; Node: PNode): PNode;
     procedure CreateModule(Node: PNode);
+    procedure CreateUses(Node: PNode);
     procedure CreateObjects(Node: PNode);
     procedure CreateCopys(Node: PNode);
     procedure CreateData(Node: PNode);
@@ -19,6 +20,7 @@ type
     procedure CreateFunctionHead(Node: PNode);
     procedure CreateParameters(Node: PNode);
     procedure CreateResult(Node: PNode);
+    procedure CreateFunctionBody(Node: PNode);
     procedure CreateSequence(Node: PNode);
     procedure CreateValue(Node: PNode);
     procedure SetParameters(Node: PNode);
