@@ -26,7 +26,7 @@ implementation
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   MG := TG.Create;
-  MG.Exec('@2');
+  MG.Execute('@2');
 end;
 
 end.

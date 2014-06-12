@@ -96,7 +96,8 @@ type
     function AddField(Node: PNode; Field: PNode): PNode;
     function AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
     function GetIndex(Node: PNode): String;
-    function SetValue(Node: PNode; Value: String): PNode;
+    function SetValue(Node: PNode; Value: String): PNode;  overload;
+    function SetValue(Node: PNode; Value: PNode): PNode;  overload;
     function GetValue(Node: PNode): PNode;
     function GetParam(Node: PNode): PNode;
     function GetData(Node: PNode): PNode;
@@ -108,23 +109,28 @@ type
     function NewNode(Line: String): PNode; overload;
     function NewNode(Line: TLine): PNode; overload;
     procedure Run(Node: PNode);
-    procedure NextNode(var PrevNode: PNode; Node: PNode);
+    procedure NextNode(var PrevNode: PNode; NextNode: PNode);
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
-    function Exec(Line: String): PNode; virtual;
+    function Execute(Line: String): PNode; virtual;
     function GetNodeBody(Node: PNode): String;
   end;
 
 const
+  //na - NodeAttribyte
   naIndex = 0;            //sort
   naWord = 1;
   naLink = 2;
   naData = 3;
   naFile = 4;
   naFunc = 5;          //naStdFunc = $51; naFastCallFunc = $52;
-  naNumber = 6;
-  naRoot = 7;
+  naInt = 6;
+  naFloat = 7;
+  naRoot = 8;
+  //nt - NameType
+  ntInt = 'int';
+  ntFloat = 'float';
 
   msec = 86400000;
   RootPath = 'data';
@@ -330,6 +336,14 @@ begin
     Node.Source.Value := Result;
 end;
 
+function TFocus.SetValue(Node: PNode; Value: PNode): PNode;
+begin
+  if Node.Source = nil then
+    Node.Value := Value
+  else
+    Node.Source.Value := Value;
+end;
+
 function FindValue(var ValueStack: ANode; Value: PNode): Boolean;
 var i: Integer;
 begin
@@ -468,7 +482,7 @@ begin
     Module := Node;
     List.LoadFromFile(FileName);
     for i:=0 to List.Count-1 do
-      Exec(List.Strings[i]);
+      Execute(List.Strings[i]);
     Module := PrevModule;
   end;
   List.Free;
@@ -644,7 +658,10 @@ begin
     '!' : Result.Attr := naData;
     '@' : Result.Attr := naLink;
     '/' : Result.Attr := naFile;
-    '0'..'9', '-': Result.Attr := naNumber;
+    '0'..'9', '-':
+        if Pos(',', Line.Name) = 0
+        then Result.Attr := naInt
+        else Result.Attr := naFloat;
     else  Result.Attr := naWord;
   end;
 
@@ -674,10 +691,16 @@ begin
     AddValue(Result, DecodeName(Copy(Line.Name, 2, MaxInt)));
     Result.Value.Attr := naData;
   end;
-  if (Result.Attr = naNumber) and (Result.ParentField = nil) then
-    if Pos(',', Line.Name) = 0
-    then Result.Value := NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Line.Name))))
-    else Result.Value := NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Line.Name))));
+  if Result.Attr = naInt then
+  begin
+    Result.Value := NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Line.Name))));
+    Result.FType := NewNode('!' + ntInt);
+  end;
+  if Result.Attr = naFloat then
+  begin
+    Result.Value := NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Line.Name))));
+    Result.FType := NewNode('!' + ntFloat);
+  end;
   if Line.FElse <> nil then
   begin
     Result.FElse := NewNode(Line.FElse);
@@ -762,23 +785,23 @@ begin
   Goto NextNode;      //stack overflow when many next node
 end;
 
-procedure TFocus.NextNode(var PrevNode: PNode; Node: PNode);
+procedure TFocus.NextNode(var PrevNode: PNode; NextNode: PNode);
 begin
   if PrevNode <> nil then
   begin
-    if Node <> nil then
-      Node.Prev := PrevNode;
-    PrevNode.Next := Node;
+    if NextNode <> nil then
+      NextNode.Prev := PrevNode;
+    PrevNode.Next := NextNode;
   end
   else
-    if Node <> nil then
+    if NextNode <> nil then
     begin
       if Module = nil then
-        Module := Node
+        Module := NextNode
       else
-        AddLocal(Module, Node);
+        AddLocal(Module, NextNode);
     end;
-  PrevNode := Node;
+  PrevNode := NextNode;
 end;
 
 
@@ -882,7 +905,7 @@ begin
   Dispose(TimeLine);
 end;
 
-function TFocus.Exec(Line: String): PNode;
+function TFocus.Execute(Line: String): PNode;
 var
   Data: String;
   i: Integer;

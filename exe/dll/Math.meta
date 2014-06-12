@@ -1,11 +1,11 @@
 
 /../dll/math.dll$activate
 
-int=!4
+int=!int
 
-float=!8
+float=!float
 
-string=!*
+string=!string
 
 
 add?a:int&b:int
