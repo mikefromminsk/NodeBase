@@ -3,24 +3,23 @@ unit GModule;
 interface
 
 uses
-  MetaBaseModule, Dialogs, Types, Math;
+  MetaBaseModule, Dialogs, Types, Math, SysUtils;
 
 type
   TG = class (TFocus)
   public
     function Exec(Line: String): PNode; override;
-    function CreateNode(Node: PNode): PNode;
     function AddNode(var Arr: ANode; Node: PNode): PNode;
     procedure CreateModule(Node: PNode);
-    procedure CreateUses(Node: PNode);
-    procedure CreateObjects(Node: PNode);
-    procedure CreateCopys(Node: PNode);
-    procedure CreateData(Node: PNode);
-    procedure CreateTypes(Node: PNode);
-    procedure CreateFunctionHead(Node: PNode);
-    procedure CreateParameters(Node: PNode);
-    procedure CreateResult(Node: PNode);
-    procedure CreateFunctionBody(Node: PNode);
+      procedure CreateLocal(Node: PNode);
+        procedure CreateUses(Node: PNode);
+        procedure CreateObjects(Node: PNode);
+        procedure CreateData(Node: PNode);
+        procedure CreateTypes(Node: PNode);
+      procedure CreateFunctionHead(Node: PNode);
+        procedure CreateParameters(Node: PNode);
+        procedure CreateResult(Node: PNode);
+      procedure CreateFunctionBody(Node: PNode);
     procedure CreateSequence(Node: PNode);
     procedure CreateValue(Node: PNode);
     procedure SetParameters(Node: PNode);
@@ -30,10 +29,32 @@ type
 
 const
   LocalCount = 10;
+  Data4Count = 1;
+  Data8Count = 2;
+
+  IntBeginRange = -3;
+  IntCenterRange = 0;
+  IntEndRange = 10;
+  FracBeginRange = 0;  // >= 0
+  FracCenterRange = 0;
+  FracEndRange = 10;
+
+  DataSCount = 0;
   FunctionCount = 3;
 
 implementation
 
+function CauchyRandomMod(BeginRange, CenterRange, EndRange: Integer): Integer;
+var MaxRange, MinRange: Integer;
+begin
+  repeat
+    MaxRange := Max(CenterRange - BeginRange, EndRange - CenterRange);
+    MinRange := Min(CenterRange - BeginRange, EndRange - CenterRange);
+    Result := Round(Tan(PI * (Random(MaxInt) / MaxInt - 0.5)));
+    Result := Result mod (MaxRange + 1);
+    Result := Result + CenterRange;
+  until (Result >= BeginRange) and (Result <= EndRange);
+end;
 
 
 function Random(Range: Integer): Integer;
@@ -62,39 +83,62 @@ begin
   end;
 end;
 
+procedure TG.CreateUses(Node: PNode);
+var i: Integer;
+begin
+  for i:=0 to High(Module.Local) do
+    AddLocal(Node, Module.Local[i]);
+end;
+
 procedure TG.CreateObjects(Node: PNode);
 var i: Integer;
 begin
   for i:=0 to LocalCount do
-  begin
-    LocalNode := NewNode(NextId);
-    AddLocal(Node, LocalNode);
-  end;
+    AddLocal(Node, NewNode(NextId));
 end;
 
-procedure TG.CreateParameters(Node: PNode);
-begin
-
-end;
-
-procedure TG.CreateFunctionHead(Node: PNode);
+procedure TG.CreateData(Node: PNode);
 var i: Integer;
 begin
-  for i:=0 to FunctionCount do
-  begin
-    CreateParameters(Node);
-  end;
+  for i:=0 to Data4Count do
+    AddLocal(Node, NewNode(IntToStr(CauchyRandomMod(IntBeginRange, IntCenterRange, IntEndRange))));
+
+  for i:=0 to Data8Count do
+    AddLocal(Node, NewNode(
+            IntToStr(CauchyRandomMod(IntBeginRange, IntCenterRange, IntEndRange))
+            + ',' +
+            IntToStr(CauchyRandomMod(FracBeginRange, FracCenterRange, FracEndRange)) ));
 end;
 
-function TG.CreateModule(Node: PNode): PNode;
+procedure TG.CreateTypes(Node: PNode);
 begin
-  CreateLocal(Result);
-  Result := Node;
+{TypeName [Int, Float, Binary, Array]
+TypeLong [4, 8, 0] }
 end;
+
+
+procedure TG.CreateLocal(Node: PNode);
+begin
+  CreateUses(Node);
+  CreateObjects(Node);
+  CreateData(Node);
+  CreateTypes(Node);
+end;
+
+procedure TG.CreateModule(Node: PNode);
+begin
+  CreateLocal(Node);
+end;
+
 
 function TG.Exec(Line: String): PNode;
 begin
-  Result := CreateModule(inherited Exec(Line));
+  Result := inherited Exec(Line);
+  CreateModule(Result);
 end;
+
+
+
+
 
 end.
