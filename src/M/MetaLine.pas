@@ -51,11 +51,12 @@ end;
 constructor TLine.Script(var LURI: String; FirstRun: Boolean = False);
 var                                                              //более сложную для пользователя
   s, LS, Str: string;                                            //более простую для базы
-  Index, i, LocalIndex: Integer;
+  Index, i, LocalIndex: Integer;         //нету загрузки local как @1\n\n@2\n\n@3\n\n
   List: TStringList;
 begin
   if length(LURI) = 0 then Exit;                               //выход если пусто
   Name := '';
+  s := ''; LS := ''; Str := '';
 
   Index := NextIndex(0, [' '], LURI);
   if Index <> MaxInt then

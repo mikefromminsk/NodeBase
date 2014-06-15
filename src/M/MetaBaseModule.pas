@@ -78,7 +78,7 @@ type
     ID: Integer;
     Root: PNode;
     Prev: PNode;
-    Module: PNode;
+    Module: PNode;  //now focus, session state
     TimeLine: PEvent;
     TimerInterval: Double;
     Interest: TInterest;
@@ -113,7 +113,7 @@ type
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
-    function Execute(Line: String): PNode; virtual;
+    function Execute(Line: String): PNode; virtual;  //Create GetMethod
     function GetNodeBody(Node: PNode): String;
   end;
 
