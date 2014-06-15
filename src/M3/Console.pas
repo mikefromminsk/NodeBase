@@ -62,7 +62,7 @@ function TGG.ConsoleExec(Line: String; WriteToConsole: Boolean = False): String;
 var
   Node, Data: PNode;
 begin
-  Node := Base.Exec(Line);
+  Node := Base.Execute(Line);
   if Node <> nil then
   begin
     Data := Base.GetData(Node);
@@ -235,14 +235,14 @@ begin
       begin
         Module := nil;
         Prev := nil;
-        Exec(Document);
+        Execute(Document);
         SetLength(Module.Local, 0);
         Module.SaveTime := 0;
         SaveNode(Module);
         Module := nil;
         Prev := nil;
         for i:=0 to Node.Count - 1 do
-          Exec(Node.Strings[i]);
+          Execute(Node.Strings[i]);
         AResponseInfo.ContentText := GetNodeBody(Module) + #10;
       end;
 

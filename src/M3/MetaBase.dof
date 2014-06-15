@@ -90,7 +90,7 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=..\..\exe\M8
+OutputDir=..\..\exe\M
 UnitOutputDir=$(DELPHI)\Doc\
 PackageDLLOutputDir=
 PackageDCPOutputDir=
@@ -112,7 +112,7 @@ RootDir=
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=0
-MajorVer=8
+MajorVer=3
 MinorVer=0
 Release=0
 Build=0
@@ -126,7 +126,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=
 FileDescription=
-FileVersion=8.0.0.0
+FileVersion=3.0.0.0
 InternalName=
 LegalCopyright=
 LegalTrademarks=
@@ -143,6 +143,7 @@ Item0=$(DELPHI)\Doc\
 Item1=c:\Program Files (x86)\Borland\Delphi7\Doc\
 Item2=c:\Program Files\Borland\Delphi7\Doc\
 [HistoryLists\hlOutputDirectorry]
-Count=2
-Item0=..\..\exe\M8
-Item1=..\..\exe\M3
+Count=3
+Item0=..\..\exe\M
+Item1=..\..\exe\M8
+Item2=..\..\exe\M3

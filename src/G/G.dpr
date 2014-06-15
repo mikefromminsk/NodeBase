@@ -3,8 +3,8 @@ program G;
 uses
   Forms,
   Console in 'Console.pas' {Form1},
-  MetaBaseModule in '..\M8\MetaBaseModule.pas',
-  MetaUtils in '..\M8\MetaUtils.pas';
+  MetaBaseModule in '..\M\MetaBaseModule.pas',
+  MetaUtils in '..\M\MetaUtils.pas';
 
 {$R *.res}
 
