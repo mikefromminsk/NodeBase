@@ -9,7 +9,6 @@ type
   TG = class (TFocus)
   public
     function Execute(Line: String): PNode; override;
-    function AddNode(var Arr: ANode; Node: PNode): PNode;
     function RandomIndexInArr(Arr: TIntegerDynArray): Integer;
     function NewRandomNode(Node: PNode; ToNode: PNode = nil): PNode;
     procedure CreateModule(Node: PNode);
@@ -26,7 +25,9 @@ type
     procedure CreateIf(Node: PNode);                  
     procedure CreateFor(Node: PNode);                  }
   end;
-
+var
+  RandomVariable: Integer;
+  
 const
   LocalCount = 10;
   Data4Count = 1;
@@ -46,8 +47,7 @@ const
 
 implementation
 
-var
-  RandomVariable: Integer;
+
 
 function Random(Range: Integer): Integer;    //предсказуемый рандом
 begin
@@ -65,12 +65,6 @@ begin
     Result := Result mod (MaxRange + 1);
     Result := Result + CenterRange;
   until (Result >= BeginRange) and (Result <= EndRange);
-end;
-
-function TG.AddNode(var Arr: ANode; Node: PNode): PNode;
-begin
-  Result := AddSubNode(Arr);
-  Arr[High(Arr)] := Node;
 end;
 
 function TG.RandomIndexInArr(Arr: TIntegerDynArray): Integer;
