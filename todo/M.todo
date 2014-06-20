@@ -165,7 +165,7 @@ res=fsqrt?fmul?res&6,0
 
 func$run;?750,0
 
-
+@ change to ¹
 
 
 fast load

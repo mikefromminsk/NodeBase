@@ -15,6 +15,7 @@ type
     procedure CreateLink(Node: PNode);
     procedure CreateFuncHead(Node: PNode);
     function NewRandomNode(Node: PNode): PNode;
+    function NewRandomType(): String;
   end;
 var
   RandomVariable: Integer;
@@ -36,28 +37,17 @@ const
   FunctionParamsCount = 3;
   FunctionSequenceCount = 10;
 
+  TypesArr : array[0..1] of string = ('int', 'float');
 implementation
 
 
-function Random(Range: Integer): Integer;
+function Random(Range: Integer): Integer; overload;
 begin
   Inc(RandomVariable);
   Result := RandomVariable mod Range;
 end;
 
-function CauchyRandomMod(BeginRange, CenterRange, EndRange: Integer): Integer;
-var MaxRange, MinRange: Integer;
-begin
-  repeat
-    MaxRange := Max(CenterRange - BeginRange, EndRange - CenterRange);
-    MinRange := Min(CenterRange - BeginRange, EndRange - CenterRange);
-    Result := Round(Tan(PI * (Random(MaxInt) / MaxInt - 0.5)));
-    Result := Result mod (MaxRange + 1);
-    Result := Result + CenterRange;
-  until (Result >= BeginRange) and (Result <= EndRange);
-end;
-
-function RandomIndexInArrays(Arr: TIntegerDynArray; var InnerIndex: Integer): Integer;
+function Random(Arr: TIntegerDynArray; var InnerIndex: Integer): Integer;  overload;
 var i: Integer;
 begin
   InnerIndex := Random(MaxInt) mod SumInt(Arr);
@@ -72,6 +62,23 @@ begin
   end;
 end;
 
+function Random(Arr: TIntegerDynArray): Integer; overload;
+var InnerIndex: Integer;
+begin
+  Result := Random(Arr, InnerIndex);
+end;
+
+function CauchyRandomMod(BeginRange, CenterRange, EndRange: Integer): Integer;
+var MaxRange, MinRange: Integer;
+begin
+  repeat
+    MaxRange := Max(CenterRange - BeginRange, EndRange - CenterRange);
+    MinRange := Min(CenterRange - BeginRange, EndRange - CenterRange);
+    Result := Round(Tan(PI * (Random(MaxInt) / MaxInt - 0.5)));
+    Result := Result mod (MaxRange + 1);
+    Result := Result + CenterRange;
+  until (Result >= BeginRange) and (Result <= EndRange);
+end;
 
 procedure TGFocus.CreateNode(Node: PNode);
 var i: Integer;
@@ -106,7 +113,7 @@ begin
   Arr[0] := High(Node.Local) + 1;
   Arr[1] := High(Node.Params) + 1;
   Arr[2] := IfThen(Node.Value = nil, 0, 1);
-  case RandomIndexInArrays(Arr, Index) of
+  case Random(Arr, Index) of
     0: Result := Node.Local[Index];
     1: Result := Node.Params[Index];
     2: Result := Node.Value;
@@ -117,6 +124,16 @@ begin
   Result := NewNode(GetIndex(Result) + '^' + NextID);
 end;
 
+function TGFocus.NewRandomType(): String;
+var Arr: TIntegerDynArray;
+begin
+  SetLength(Arr, 2);
+  Arr[0] := 2;
+  Arr[1] := 2;
+  Result := TypesArr[Random(Arr)];
+  SetLength(Arr, 0);
+end;
+
 procedure TGFocus.CreateFuncHead(Node: PNode);
 var
   i, j: Integer;
@@ -124,12 +141,10 @@ var
 begin
   for i:=0 to FunctionCount do
   begin
-    AddLocal(Node, NewRandomNode(Node));
-    {FuncNode := NewNode(NextId);
+    FuncNode := NewNode(NextId);
+    AddLocal(Node, FuncNode);
     for j:=0 to FunctionParamsCount do
-    begin
-      AddParam(Node, NewRandomNode(Node), j);
-    end;   }
+      AddParam(FuncNode, NewNode(NextID + ':' + NewRandomType), j);
   end;
 end;
 
