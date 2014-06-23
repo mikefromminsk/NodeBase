@@ -94,7 +94,7 @@ OutputDir=..\..\exe\G
 UnitOutputDir=$(DELPHI)\Doc\
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=$(DELPHI)\Doc\
+SearchPath=
 Packages=vcl;rtl
 Conditionals=
 DebugSourceDirs=
@@ -137,16 +137,9 @@ Comments=
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
-[HistoryLists\hlSearchPath]
+[HistoryLists\hlUnitOutputDirectory]
 Count=1
 Item0=$(DELPHI)\Doc\
-[HistoryLists\hlUnitOutputDirectory]
-Count=3
-Item0=$(DELPHI)\Doc\
-Item1=c:\Program Files (x86)\Borland\Delphi7\Doc\
-Item2=c:\Program Files\Borland\Delphi7\Doc\
 [HistoryLists\hlOutputDirectorry]
-Count=3
+Count=1
 Item0=..\..\exe\G
-Item1=..\..\exe\M8
-Item2=..\..\exe\M3

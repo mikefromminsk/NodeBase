@@ -288,12 +288,6 @@ begin
   if Param.FType <> nil then
   begin
     Param.Source := nil;
-    for i:=0 to High(Node.Params) do
-      if Node.Params[i].ParentName = Param.ParentName then
-      begin
-        Result := Node.Params[i];
-        Exit;
-      end;
     AddSubNode(Node.Params);
     Node.Params[High(Node.Params)] := Param;
     Param.ParentParams := Node;
@@ -338,10 +332,7 @@ end;
 
 function TFocus.SetValue(Node: PNode; Value: PNode): PNode;
 begin
-  if Node.Source = nil then
-    Node.Value := Value
-  else
-    Node.Source.Value := Value;
+  Node.Value := Value;
 end;
 
 function FindValue(var ValueStack: ANode; Value: PNode): Boolean;

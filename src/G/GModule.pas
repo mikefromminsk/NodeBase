@@ -6,29 +6,25 @@ uses
   MetaBaseModule, Dialogs, Types, Math, SysUtils;
 
 type
-  TG = class (TFocus)
+
+  TGFocus = class (TFocus)
   public
-    function NewRandomNode(Node: PNode; ToNode: PNode = nil): PNode;
-
-    function Execute(Line: String): PNode; override;
-
-    procedure CreateFunc(Node: PNode);
-
-    procedure CreateLink(Node: PNode);
+    procedure CreateFunc(Node: PNode; Level: Integer);
     procedure CreateNode(Node: PNode);
     procedure CreateData(Node: PNode);
-    procedure CreateLocalFunc(Node: PNode);
-
+    procedure CreateLink(Node: PNode);
+    procedure CreateFuncHead(Node: PNode; Level: Integer);
+    procedure SetParams(Node: PNode; FuncNode: PNode);
     procedure CreateSequence(FuncNode: PNode);
-
-    {procedure CreateIf(Node: PNode);
-    procedure CreateFor(Node: PNode);}
+    procedure CreateFuncBody(Node: PNode; Level: Integer);
+    function NewRandomNode(Node: PNode): PNode;
+    function NewRandomType: String;
   end;
 var
   RandomVariable: Integer;
 
 const
-  LocalCount = 10;
+  LocalCount = 2;
   Data4Count = 1;
   Data8Count = 2;
 
@@ -41,17 +37,39 @@ const
 
   DataSCount = 0;
   FunctionCount = 3;
-  FunctionParamsCount = 3;
+  FunctionParamsCount = 1;
   FunctionSequenceCount = 10;
+  FunctionLevel = 1;
 
+  TypesArr : array[0..1] of string = ('int', 'float');
 implementation
 
 
-
-function Random(Range: Integer): Integer;    //предсказуемый рандом
+function Random(Range: Integer): Integer; overload;
 begin
   Inc(RandomVariable);
   Result := RandomVariable mod Range;
+end;
+
+function Random(Arr: TIntegerDynArray; var InnerIndex: Integer): Integer;  overload;
+var i: Integer;
+begin
+  InnerIndex := Random(MaxInt) mod SumInt(Arr);
+  for i:=0 to High(Arr) do
+  begin
+    if InnerIndex - Arr[i] < 0 then
+    begin
+      Result := i;
+      Exit;
+    end;
+    InnerIndex := InnerIndex - Arr[i];
+  end;
+end;
+
+function Random(Arr: TIntegerDynArray): Integer; overload;
+var InnerIndex: Integer;
+begin
+  Result := Random(Arr, InnerIndex);
 end;
 
 function CauchyRandomMod(BeginRange, CenterRange, EndRange: Integer): Integer;
@@ -66,57 +84,14 @@ begin
   until (Result >= BeginRange) and (Result <= EndRange);
 end;
 
-function RandomIndexInArr(Arr: TIntegerDynArray): Integer;
-var i, Index: Integer;
-begin
-  Index := Random(MaxInt) mod SumInt(Arr);
-  for i:=0 to High(Arr) do
-  begin
-    if Index - Arr[i] < 0 then
-    begin
-      Result := i;
-      Exit;
-    end;
-    Index := Index - Arr[i];
-  end;
-end;
-
-function TG.NewRandomNode(Node: PNode; ToNode: PNode = nil): PNode;
-var Index: Integer; Arr: TIntegerDynArray;
-begin
-  SetLength(Arr, 4);
-  Arr[0] := High(Node.Local) + 1;
-  Arr[1] := High(Node.Params) + 1;
-  Arr[2] := IfThen(Node.Value = nil, 0, 1);
-  case RandomIndexInArr(Arr) of
-    0: Result := Node.Local[Index];
-    1: Result := Node.Params[Index];
-    2: Result := Node.Value;
-  end;
-  SetLength(Arr, 0);
-  if Result = ToNode then
-    Result := NewRandomNode(Node);
-  if Result.Attr = naFile then
-    Result := NewRandomNode(Result);
-  Result := NewNode(GetIndex(Result) + '^' + NextID);
-end;
-
-
-procedure TG.CreateLink(Node: PNode);
-var i: Integer;
-begin
-  for i:=0 to High(Module.Local) do
-    AddLocal(Node, Module.Local[i]);
-end;
-
-procedure TG.CreateNode(Node: PNode);
+procedure TGFocus.CreateNode(Node: PNode);
 var i: Integer;
 begin
   for i:=0 to LocalCount do
     AddLocal(Node, NewNode(NextId));
 end;
 
-procedure TG.CreateData(Node: PNode);
+procedure TGFocus.CreateData(Node: PNode);
 var i: Integer;
 begin
   for i:=0 to Data4Count do
@@ -128,86 +103,102 @@ begin
       IntToStr(CauchyRandomMod(FracBeginRange, FracCenterRange, FracEndRange)) ));
 end;
 
-procedure TG.CreateLocalFunc(Node: PNode);
-var
-  i: Integer;
-  UnitNode: PNode;
-
-  j: Integer;
-  RandomeNode, TypeNode: PNode;
+procedure TGFocus.CreateLink(Node: PNode);
+var i: Integer;
 begin
+  for i:=0 to High(Module.Local) do
+    AddLocal(Node, Module.Local[i]);
+end;
+
+function TGFocus.NewRandomNode(Node: PNode): PNode;
+var Index: Integer; Arr: TIntegerDynArray;
+begin
+  SetLength(Arr, 4);
+  Arr[0] := High(Node.Local) + 1;
+  Arr[1] := High(Node.Params) + 1;
+  Arr[2] := IfThen(Node.Value = nil, 0, 1);
+  case Random(Arr, Index) of
+    0: Result := Node.Local[Index];
+    1: Result := Node.Params[Index];
+    2: Result := Node.Value;
+  end;
+  SetLength(Arr, 0);
+  if Result.Attr = naFile then
+    Result := NewRandomNode(Result);
+  Result := NewNode(GetIndex(Result) + '^' + NextID);
+end;
+
+function TGFocus.NewRandomType(): String;
+var Arr: TIntegerDynArray;
+begin
+  SetLength(Arr, 2);
+  Arr[0] := 2;
+  Arr[1] := 2;
+  Result := TypesArr[Random(Arr)];
+  SetLength(Arr, 0);
+end;
+
+procedure TGFocus.CreateFuncHead(Node: PNode; Level: Integer);
+var
+  i, j: Integer;
+  FuncNode: PNode;
+begin
+  if Level < 0 then Exit;
   for i:=0 to FunctionCount do
   begin
-    UnitNode := NewNode(NextId);
+    FuncNode := NewNode(NextId);
+    AddLocal(Node, FuncNode);
     for j:=0 to FunctionParamsCount do
-    begin
-      repeat
-        RandomeNode := NewRandomNode(Node.ParentLocal);
-      until RandomeNode.FType = nil;
-      TypeNode := GetType(RandomeNode);
-      AddParam(Node, NewNode(NextID + ':' + TypeNode.Name), i);
-    end;
-
-    repeat
-      RandomeNode := NewRandomNode(Node.ParentLocal);
-    until RandomeNode.FType = nil;
-    TypeNode := GetType(RandomeNode);
-    NewNode(GetIndex(Node) + '#' + NextId + ':' + TypeNode.Name);
+      AddParam(FuncNode, NewNode(NextID + ':' + NewRandomType), j);
+    SetValue(FuncNode, NewNode(NextID));
   end;
 end;
 
-
-procedure TG.CreateSequence(FuncNode: PNode);
-var
-  i: Integer;
-  PrevNode: PNode;
-
-procedure SetParameters(Node: PNode; ParentNode: PNode);
+procedure TGFocus.SetParams(Node, FuncNode: PNode);
 var i: Integer;
 begin
   for i:=0 to High(Node.Params) do
-    AddParam(Node, NewRandomNode(ParentNode), i);
+    AddParam(Node, NewRandomNode(FuncNode), i);
 end;
 
-
+procedure TGFocus.CreateSequence(FuncNode: PNode);
+var
+  i: Integer;
+  Node, Buf: PNode;
 begin
-  for i:=0 to High(Node.Local) do
-    if Node.Local[i].Params <> nil then
-    begin
-
-  PrevNode := FuncNode;
+  Node := FuncNode;
   for i:=0 to FunctionSequenceCount do
   begin
-    NextNode(PrevNode, NewRandomNode(FuncNode.ParentLocal));
-    if PrevNode.Params <> nil then
-      SetParameters(PrevNode, FuncNode)
+    NextNode(Node, NewRandomNode(FuncNode));
+    if Node.Source.Params <> nil then
+      SetParams(Node, FuncNode)
     else
     begin
-      SetValue(PrevNode, NewRandomNode(FuncNode.ParentLocal));
-      if PrevNode.Value.Params <> nil then
-        SetParameters(PrevNode.Value, FuncNode);
+      SetValue(Node, NewRandomNode(FuncNode));
+      if Node.Value.Source.Params <> nil then
+        SetParams(Node.Value, FuncNode);
     end;
   end;
 end;
 
-procedure TG.CreateFunc(Node: PNode);
-var i: Integer;
+procedure TGFocus.CreateFuncBody(Node: PNode; Level: Integer);
+var
+  i: Integer;
 begin
-  CreateLink(Node);
+  for i:=0 to High(Node.Local) do
+    if Node.Local[i].Params <> nil then
+      CreateFunc(Node.Local[i], Level - 1);
+end;
+
+procedure TGFocus.CreateFunc(Node: PNode; Level: Integer);
+begin
   CreateNode(Node);
   CreateData(Node);
-  CreateLocalFunc(Node);
+  CreateLink(Node);
+  CreateFuncHead(Node, Level);
   CreateSequence(Node);
-end;
-
-function TG.Execute(Line: String): PNode;
-begin
-  Result := inherited Execute(Line);
-  CreateFunc(Result);
+  CreateFuncBody(Node, Level);
 end;
 
 
-
-initialization
-  RandomVariable := 1;
 end.

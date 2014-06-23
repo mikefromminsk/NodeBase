@@ -2,14 +2,15 @@ program G;
 
 uses
   Forms,
-  Console in 'Console.pas' {Form1},
+  Console in 'Console.pas' {GG},
   MetaBaseModule in '..\M\MetaBaseModule.pas',
-  MetaUtils in '..\M\MetaUtils.pas';
+  MetaUtils in '..\M\MetaUtils.pas',
+  MetaLine in '..\M\MetaLine.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TGG, GG);
   Application.Run;
 end.
