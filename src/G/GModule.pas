@@ -113,6 +113,7 @@ end;
 function TGFocus.NewRandomNode(Node: PNode): PNode;
 var Index: Integer; Arr: TIntegerDynArray;
 begin
+  Result := nil;
   SetLength(Arr, 4);
   Arr[0] := High(Node.Local) + 1;
   Arr[1] := High(Node.Params) + 1;
@@ -164,7 +165,7 @@ end;
 procedure TGFocus.CreateSequence(FuncNode: PNode);
 var
   i: Integer;
-  Node, Buf: PNode;
+  Node: PNode;
 begin
   Node := FuncNode;
   for i:=0 to FunctionSequenceCount do

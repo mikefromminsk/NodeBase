@@ -282,7 +282,6 @@ begin
 end;
 
 function TFocus.AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
-var i: Integer;
 begin
   Result := nil;
   if Param.FType <> nil then
@@ -724,12 +723,11 @@ begin
 end;
 
 procedure TFocus.Run(Node: PNode);
-label NextNode; //Change name
+label NextNode; 
 var FuncResult, i, n: Integer;
 begin
   NextNode:
   if Node = nil then Exit;
-  //Analysing(Node);
 
   if Node.Exception = 1 then
     ExceptionFlag1 := True;
