@@ -16,7 +16,9 @@ type
     procedure CreateFuncHead(Node: PNode; Level: Integer);
     procedure SetParams(Node: PNode; FuncNode: PNode);
     procedure CreateSequence(FuncNode: PNode);
+    procedure CreateCase(FuncNode: PNode);
     procedure CreateFuncBody(Node: PNode; Level: Integer);
+
     function NewRandomNode(Node: PNode): PNode;
     function NewRandomType: String;
   end;
@@ -40,6 +42,7 @@ const
   FunctionParamsCount = 1;
   FunctionSequenceCount = 10;
   FunctionLevel = 1;
+  IfCount = 2;
 
   TypesArr : array[0..1] of string = ('int', 'float');
 implementation
@@ -172,7 +175,11 @@ begin
   begin
     NextNode(Node, NewRandomNode(FuncNode));
     if Node.Source.Params <> nil then
-      SetParams(Node, FuncNode)
+    begin
+      SetParams(Node, FuncNode);
+      if Random((High(FuncNode.Local) + 1) / IfCount) mod  then
+        NewNode(GetIndex(Node) + '#' + NewRandomNode(FuncNode) + '|');
+    end
     else
     begin
       SetValue(Node, NewRandomNode(FuncNode));
@@ -191,6 +198,31 @@ begin
       CreateFunc(Node.Local[i], Level - 1);
 end;
 
+procedure TGFocus.CreateCase(FuncNode: PNode);
+var
+  NextCount, FromPos, ToPos, i: Integer;
+  Node: PNode;
+begin
+  Node := FuncNode;
+  while Node.Next <> nil do
+  begin
+    Inc(NextCount);
+    Node := Node.Next;
+  end;
+  FromPos := Random(NextCount);
+  ToPos := Random(NextCount);
+  Node := FuncNode;
+  while Node <> nil do
+  begin
+    Inc(i);
+    if i = FromPos then
+      FromNode := Node;
+    if i = ToPos then
+      ToPos := Node;
+  end;
+  NewNode(GetIndex(FromNode) + '#' GetIndex(ToNode) + '|');
+end;
+
 procedure TGFocus.CreateFunc(Node: PNode; Level: Integer);
 begin
   CreateNode(Node);
@@ -198,8 +230,11 @@ begin
   CreateLink(Node);
   CreateFuncHead(Node, Level);
   CreateSequence(Node);
+  CreateCase(Node);
   CreateFuncBody(Node, Level);
 end;
+
+
 
 
 end.
