@@ -7,8 +7,6 @@ client
 
 
 
-
-
 [console]
 убрать таймер trigger monitor
 редактирование связей POST
@@ -16,6 +14,22 @@ client
 другой вид представления детализация нодов при увеличении zoom
 Деньги на восстание машин
 Доллар за идею. С реализацией умножаем всё на пять. Если идея плохая то делим на 5. Сопровождать письмом. [галка]Соглашаюсь с условиями. [галка]Мне не нужны твои подачки. 
+
+[Mode]
+1) Edit mode (liner)
+2) Global mode (buble)
+3) Monitoring mode (tree)
+
+
+
+[Global mode]
+http://bl.ocks.org/mbostock/4063530
+http://bl.ocks.org/mbostock/1893974
+http://mbostock.github.io/d3/talk/20111116/pack-hierarchy.html
+
+
+[monitoring mode]
+http://mbostock.github.io/d3/talk/20111116/force-collapsible.html
 
 
 
