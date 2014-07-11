@@ -1,6 +1,6 @@
 object GG: TGG
-  Left = 192
-  Top = 124
+  Left = 234
+  Top = 150
   Width = 928
   Height = 480
   Color = clBtnFace
@@ -13,18 +13,20 @@ object GG: TGG
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 23
-  object Splitter: TSplitter
-    Left = 469
-    Top = 41
-    Height = 401
-    Align = alRight
+  object Splitter1: TSplitter
+    Left = 0
+    Top = 153
+    Width = 912
+    Height = 3
+    Cursor = crVSplit
+    Align = alTop
   end
   object ListBox: TListBox
     Left = 0
-    Top = 41
-    Width = 469
-    Height = 401
-    Align = alClient
+    Top = 33
+    Width = 912
+    Height = 120
+    Align = alTop
     BorderStyle = bsNone
     ItemHeight = 23
     TabOrder = 0
@@ -34,22 +36,28 @@ object GG: TGG
     Left = 0
     Top = 0
     Width = 912
-    Height = 41
+    Height = 33
     Align = alTop
     BevelInner = bvLowered
     BiDiMode = bdLeftToRight
     Ctl3D = False
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -19
+    Font.Name = 'Arial Narrow'
+    Font.Style = []
     ParentBiDiMode = False
     ParentCtl3D = False
+    ParentFont = False
     TabOrder = 1
     OnKeyDown = AddressKeyDown
   end
   object SeqBox: TListBox
-    Left = 472
-    Top = 41
-    Width = 440
-    Height = 401
-    Align = alRight
+    Left = 0
+    Top = 156
+    Width = 912
+    Height = 286
+    Align = alClient
     BorderStyle = bsNone
     ItemHeight = 23
     TabOrder = 2

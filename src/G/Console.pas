@@ -4,14 +4,14 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, GModule, MetaBaseModule, ExtCtrls;
+  Dialogs, StdCtrls, GModule, MetaBaseModule, ExtCtrls, MetaLine;
 
 type
   TGG = class(TForm)
     ListBox: TListBox;
     Address: TMemo;
     SeqBox: TListBox;
-    Splitter: TSplitter;
+    Splitter1: TSplitter;
     procedure FormShow(Sender: TObject);
     procedure ListBoxDblClick(Sender: TObject);
     procedure AddressKeyDown(Sender: TObject; var Key: Word;
@@ -74,14 +74,46 @@ end;
 procedure TGG.ShowSequence(Node: PNode);
 var
   Body: String;
+  Line: TLine;
+  Str: String;
+
+
+  function ShowLikeFunc(Node: PNode): String;
+  var Str: String;
+  i: Integer;
+  begin
+    if Node.Params = nil then begin Result := ''; Exit; end;
+    Str := Str + '(';
+    for i:=0 to High(Node.Params) do
+      Str := Str + Base.GetIndex(Node.Params[i]) + ', ';
+    Delete(Str, Length(Str) - 1, 2);
+    Str := Str + ');';
+    Result := Str;
+  end;
 begin
+
   SeqBox.Clear;
+  with Base do
   while Node <> nil do
   begin
     Body := Base.GetNodeBody(Node);
     if Pos(#10, Body) <> 0 then
       Delete(Body, Pos(#10, Body), MaxInt);
-    SeqBox.Items.Add(Body);
+    Line := TLine.Create(Body);
+    Str := GetIndex(Node);
+    if Node.Source <> nil then
+      Str := GetIndex(Node.Source);
+    if Node.Value <> nil then
+      begin
+        Str := Str + ' := ' + GetIndex(Node.Value.Source);
+        if Node.Value <> nil then
+        begin
+          if Node.Value.Source <> nil then
+            Str := Str + ShowLikeFunc(Node.Value.Source);
+        end;
+      end;
+    Str := '  ' + Str;
+    SeqBox.Items.Add(Str);
     Node := Node.Next;
   end;
 end;

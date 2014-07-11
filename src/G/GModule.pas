@@ -177,8 +177,8 @@ begin
     if Node.Source.Params <> nil then
     begin
       SetParams(Node, FuncNode);
-      if Random((High(FuncNode.Local) + 1) / IfCount) mod  then
-        NewNode(GetIndex(Node) + '#' + NewRandomNode(FuncNode) + '|');
+      //if Random((High(FuncNode.Local) + 1) / IfCount) mod  then
+        //NewNode(GetIndex(Node) + '#' + NewRandomNode(FuncNode) + '|');
     end
     else
     begin
@@ -203,7 +203,7 @@ var
   NextCount, FromPos, ToPos, i: Integer;
   Node: PNode;
 begin
-  Node := FuncNode;
+  {Node := FuncNode;
   while Node.Next <> nil do
   begin
     Inc(NextCount);
@@ -220,7 +220,7 @@ begin
     if i = ToPos then
       ToPos := Node;
   end;
-  NewNode(GetIndex(FromNode) + '#' GetIndex(ToNode) + '|');
+  NewNode(GetIndex(FromNode) + '#' GetIndex(ToNode) + '|'); }
 end;
 
 procedure TGFocus.CreateFunc(Node: PNode; Level: Integer);
