@@ -87,6 +87,11 @@ begin
   until (Result >= BeginRange) and (Result <= EndRange);
 end;
 
+
+
+
+
+
 procedure TGFocus.CreateNode(Node: PNode);
 var i: Integer;
 begin
@@ -135,7 +140,7 @@ end;
 function TGFocus.NewRandomType(): String;
 var Arr: TIntegerDynArray;
 begin
-  SetLength(Arr, 2);
+  SetLength(Arr, 2); //if Random(100) > 50 then
   Arr[0] := 2;
   Arr[1] := 2;
   Result := TypesArr[Random(Arr)];
@@ -227,10 +232,11 @@ procedure TGFocus.CreateFunc(Node: PNode; Level: Integer);
 begin
   CreateNode(Node);
   CreateData(Node);
-  CreateLink(Node);
+  CreateLocalVar(Node);
   CreateFuncHead(Node, Level);
   CreateSequence(Node);
-  CreateCase(Node);
+  CreateIf(Node);
+  CreateWhile(Node);
   CreateFuncBody(Node, Level);
 end;
 

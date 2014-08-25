@@ -1,152 +1,13 @@
-[M8]
-http://habrahabr.ru/post/214525/
-differents with code and interfeis is fields pos
-metabase neurobase NodeBase
+[M4]
+MetaBase NeuroBase NodeBase
+language for machines, not for human
+
 
 [basic task]
-support MG
+Generation Pi Code
 
 
-[optimization]
-
-Index is First
-
-Like nodes
-CamelCase, mixedCase, lower_case
-
-saveNode to segment code with addlocal(to up)
-
-record packed
-
-union all module to one file
-
-storage time in numbers or in codes
-41608,6161969676 or %01%02%03%04%05%06%07%08
-
-x64
-
-multithreading
-option: active_kernel = 2
-set in task manager
-write in documetation
-
-search in branch cash
-
-
-[localization]
-meta to down code (c++)
-parser c
-
-
-
-[System]
-
-planner
-
-data to number
-
-save metanode to /math/math.dll
-
-id to $
-
-naPointer
-
-Parse and Build
-
-rec code access trues
-
-filestruct in file like word
-
-cotext is parentlocal
-
-sentence
-Hello@1 world@3 all@2 
-@1 @3 @2
-@1 @2 @3
-Hello+all+world@123
-world+all+Hello@123
-all+Hello+world@123
-
-160 count 14 min not delete
-
-M3 is old paradigm
-Generator is new paradigm
-
-[controls]
-development
-
-value control is Node
-
-Node.ParentParam
-
-source in sys params
-
-source^name@id$sysdata:type?param=value&params#result|else
-
-point
-
-
-
-number branch 
-
-branch cash
-
-Next: ANode
-for Generator for подмены лучшей функцией
-
-
-
-[find space]
-auto set 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-update_time=4000.1212412
-
-auntification
-http
-right
-
-
-$run read/write
-$count read
-
-$comment 
-don`t run
-
-$multitreading
-run in differnt thead
-
-
-алгоритм добавления в стандарт узлов
-
-
-method DUMP
-
-auto find port
-
-restart metabase
-
-
-for runCount
-
-$activate
-all write run
-timeline enter
-
-
-
+[test]
 /../dll/math.meta$run
 
 func?a:float#res
@@ -165,64 +26,167 @@ res=fsqrt?fmul?res&6,0
 
 func$run;?750,0
 
-@ change to №
 
-
-fast load
-
-
-
-[if,for,while]
-/../dll/math.meta$run
-
-func#res
-res=0,0
-dx=1,0
-for$run=10#i=1,0
-	res=fadd?res&dx
-	dx=fdiv?1,0&fsqr?i
-for$end#i=finc?i
-res=fsqrt?fmul?res&6,0
-
-
-$if?a
-	$if?a
-		inc?i
-	$else
-		dec?i
-	$end
-$else
-	$if?a
-		inc?i
-	$else
-		dec?i
-	$end
-$end
-
-$while?i
-	inc?i
-$end
-
-$dowhile
-
-$end
+[optimization]
 
 
 
-[local\local\local]
-[var.var.var]
+record packed
+
+release
+union all module to one file
+
+saveNode to segment code with addlocal(to up)
+
+task manager
+
+documetation
+
+search in branch cash
 
 
-[link clusters]
-node links
-local links
-history links
 
-[history]
+
+[Application System]
+
+restart metabase
+
+GUI
+Linux
+x64
+
+алгоритм добавления в стандарт узлов
+
+planner
+
+auto find port
+
+method DUMP
+
+
+
+[Kernel Standart System]
+
+data to number
+
+id to $
+
+naPointer
+
+Parse and Build
+
+delete int type
+
+rec code access trues
+
+filestruct in file like word
+
+context
+
+new branch Node
+sentence group
+
+160 count 14 min not delete
+
+Like nodes
+
+converter c++ to meta
+
+history
 prevState: AString;
-not DUMP
 
-интерфейс для delphi
-развернуться на linux
+local\local\local
+var.var.var
+
+value control is Node
+
+Node.ParentParam
+
+source in sys params
+
+for$run=10#i=1,0
+for$end#i=finc?i
+
+branch cash ! @ 1
+
+Next: ANode
+for Generator for подмены лучшей функцией
+
+http auntification
+
+
+$run read/write
+$count read
+
+$comment 
+don`t run
+
+$multitreading
+active_kernel = 2
+
+$transaction=992402
+
+
+
+
+
+
+[if while for]
+
+
+if (i<10)
+ 
+equal (i<10)
+code
+exit^jump
+else
+exit
+
+
+while (i<10)
+
+while 
+equal i<10
+
+code
+
+while^jump
+exit
+
+
+for (int i=0; i<10; i++)
+
+for
+init i=0
+equal i<10
+code g++ 
+iter i++
+equal^jump
+exit
+
+
+while = for
+
+
+
+randome utils to unit
+
+delete word meta from units
+
+
+meta -> Base
+
+G -> Generator
+
+Line -> Link
+
+
+M.todo -> MetaBrain.todo
+
+Index is First
+
+
+delete ddp file in project
+delete designdgm70.bpl
 
 
