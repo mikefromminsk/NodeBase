@@ -1,4 +1,4 @@
-[M4]
+[M4 G2]
 MetaBase NeuroBase NodeBase
 language for machines, not for human
 
@@ -131,31 +131,48 @@ $transaction=992402
 
 
 
+
+
+
+
+
+
+
+
+
 [if while for]
 
-
-if (i<10)
+//if (i<10)
  
 equal (i<10)
-code
-exit^jump
+
 else
-exit
 
 
-while (i<10)
+//while (i<10)
 
-while 
 equal i<10
 
-code
+equal^jump
+else
 
-while^jump
+
+//if (i<10) else
+ 
+equal (i<10)
+
+exit^jump
+else
+
 exit
 
 
-for (int i=0; i<10; i++)
 
+
+
+
+
+//for (int i=0; i<10; i++)
 for
 init i=0
 equal i<10
@@ -165,28 +182,5 @@ equal^jump
 exit
 
 
-while = for
-
-
-
-randome utils to unit
-
-delete word meta from units
-
-
-meta -> Base
-
-G -> Generator
-
-Line -> Link
-
-
-M.todo -> MetaBrain.todo
-
-Index is First
-
-
-delete ddp file in project
-delete designdgm70.bpl
 
 

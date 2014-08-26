@@ -1,8 +1,8 @@
 object GG: TGG
   Left = 234
   Top = 150
-  Width = 928
-  Height = 480
+  Width = 578
+  Height = 816
   Color = clBtnFace
   Font.Charset = RUSSIAN_CHARSET
   Font.Color = clWindowText
@@ -15,8 +15,8 @@ object GG: TGG
   TextHeight = 23
   object Splitter1: TSplitter
     Left = 0
-    Top = 153
-    Width = 912
+    Top = 401
+    Width = 570
     Height = 3
     Cursor = crVSplit
     Align = alTop
@@ -24,8 +24,8 @@ object GG: TGG
   object ListBox: TListBox
     Left = 0
     Top = 33
-    Width = 912
-    Height = 120
+    Width = 570
+    Height = 368
     Align = alTop
     BorderStyle = bsNone
     ItemHeight = 23
@@ -35,7 +35,7 @@ object GG: TGG
   object Address: TMemo
     Left = 0
     Top = 0
-    Width = 912
+    Width = 570
     Height = 33
     Align = alTop
     BevelInner = bvLowered
@@ -54,9 +54,9 @@ object GG: TGG
   end
   object SeqBox: TListBox
     Left = 0
-    Top = 156
-    Width = 912
-    Height = 286
+    Top = 404
+    Width = 570
+    Height = 378
     Align = alClient
     BorderStyle = bsNone
     ItemHeight = 23

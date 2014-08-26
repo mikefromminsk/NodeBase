@@ -1,10 +1,10 @@
-unit MetaBaseModule;
+unit NodeBaseKernel;
 
 interface
 
 uses
   Types{TIntegerDynArray},  Math{SumInt}, SysUtils{AllocMem, Now},
-  Classes{TStrings}, MetaLine, Windows{SetTimer}, MetaUtils, Dialogs;
+  Classes{TStrings}, NodeLink, Windows{SetTimer}, NodeUtils, Dialogs;
 
 type
   TimerProc = procedure (wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) of object; stdcall;
@@ -25,14 +25,13 @@ type
 
 
   TNode = record
+
     Path  : String;          //test variable
     LocalName: String;
 
-
-
     Name          : String;     //pointers
-    ParentName    : PNode;
     Index         : ANode;
+    ParentName    : PNode;
     ParentIndex   : PNode;
     Local         : ANode;
     ParentLocal   : PNode;
@@ -107,7 +106,7 @@ type
     procedure CallFunc(Node: PNode);
     function FindNode(Index: PNode): PNode;
     function NewNode(Line: String): PNode; overload;
-    function NewNode(Line: TLine): PNode; overload;
+    function NewNode(Line: TLink): PNode; overload;
     procedure Run(Node: PNode);
     procedure NextNode(var PrevNode: PNode; NextNode: PNode);
     procedure OnTimer(wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) stdcall;
@@ -124,7 +123,7 @@ const
   naLink = 2;
   naData = 3;
   naFile = 4;
-  naFunc = 5;          //naStdFunc = $51; naFastCallFunc = $52;
+  naDLLFunc = 5;          //naStdFunc = $51; naFastCallFunc = $52;
   naInt = 6;
   naFloat = 7;
   naRoot = 8;
@@ -136,7 +135,7 @@ const
   RootPath = 'data';
 
 var
-  Base: TFocus; //Meta: TRoot;
+  Base: TFocus; 
 
 implementation
 
@@ -163,7 +162,7 @@ begin
 
   Root := AllocMem(SizeOf(TNode));
   Root.Attr := naRoot;
-  Module := NewNode('meta');
+  Module := NewNode('root');
 end;
 
 procedure SetControl(Node: PNode; Param, Value: String);
@@ -459,14 +458,14 @@ begin
       for i:=0 to List.Count-1 do
       begin
         Func := NewNode(List.Strings[i]);
-        Func.Attr := naFunc;
+        Func.Attr := naDLLFunc;
         Func.Handle := GetProcAddress(Node.Handle, List.Strings[i]);
         AddLocal(Node, Func);
       end;
     end;
   end
   else
-  if FileExt = '.meta' then
+  if FileExt = '.node' then
   begin
     PrevModule := Module;
     Module := Node;
@@ -623,9 +622,9 @@ begin
 end;
 
 function  TFocus.NewNode(Line: String): PNode;      //fastload
-begin Result := NewNode(TLine.Create(Line)); end;
+begin Result := NewNode(TLink.Create(Line)); end;
 
-function TFocus.NewNode(Line: TLine): PNode;
+function TFocus.NewNode(Line: TLink): PNode;
 var
   i: Integer;
   Node: PNode;
@@ -740,14 +739,14 @@ begin
   for i:=0 to High(Node.Params) do  //run params
     Run(Node.Params[i]);
   if (Node.Source <> nil) and (((Node.Source.ParentLocal = Module) and (Node.Source.Next <> nil))
-    or (Node.Source.Attr = naFunc)) then   // run dll func
+    or (Node.Source.Attr = naDLLFunc)) then   // run dll func
   begin
     for i:=0 to High(Node.Params) do
       AddParam(GetSource(Node), GetValue(Node.Params[i]), i);
     Run(Node.Source);                   //run source
     Node.Value := GetData(Node.Source);
   end;
-  if Node.Attr = naFunc then     //call dll func
+  if Node.Attr = naDLLFunc then     //call dll func
     CallFunc(Node);
   if Node.FElse <> nil then     //node is if
   begin
@@ -771,7 +770,7 @@ begin
   end;
 
   Node := Node.Next;
-  Goto NextNode;      //stack overflow when many next node
+  Goto NextNode;    
 end;
 
 procedure TFocus.NextNode(var PrevNode: PNode; NextNode: PNode);
@@ -968,7 +967,7 @@ end;
 
 
 {
-constructor TLine.CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
+constructor TLink.CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
 begin
   inherited Create;
   if IdNode = '' then Exit;
@@ -983,7 +982,7 @@ end;
 
 procedure TFocus.SaveNode(Node: PNode);
 var
-  Line: TLine;
+  Line: TLink;
   List: TStringList;
   IndexNode, IndexWin: String;
   i: Integer;
@@ -1002,7 +1001,7 @@ begin
   if Node = nil then Exit;
   CreateDir(RootPath);
 
-  //with TLine.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '') of
+  //with TLink.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '') of
   //begin
   {List := TStringList.Create;
   Line :=
@@ -1025,7 +1024,7 @@ begin
         CreateDir(IndexWin);
     end;
 
-    List.SaveToFile(IndexWin + '\Node.meta');
+    List.SaveToFile(IndexWin + '\Node.node');
 
     if Node.Source <> nil then
       Dec(Node.Source.RefCount);

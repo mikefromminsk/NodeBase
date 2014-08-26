@@ -1,29 +1,26 @@
-unit GModule;
+unit GeneratorModule;
 
 interface
 
 uses
-  MetaBaseModule, Dialogs, Types, Math, SysUtils;
+  Dialogs, SysUtils, NodeBaseKernel, GeneratorUtils;
 
 type
 
-  TGFocus = class (TFocus)
+  TGFocus = class (TFocus) //TGeneratorFocus
   public
     procedure CreateFunc(Node: PNode; Level: Integer);
     procedure CreateNode(Node: PNode);
     procedure CreateData(Node: PNode);
-    procedure CreateLink(Node: PNode);
+    procedure CreateLocalVar(Node: PNode);
     procedure CreateFuncHead(Node: PNode; Level: Integer);
     procedure SetParams(Node: PNode; FuncNode: PNode);
     procedure CreateSequence(FuncNode: PNode);
-    procedure CreateCase(FuncNode: PNode);
+    procedure CreateIfElseWhile(FuncNode: PNode);
     procedure CreateFuncBody(Node: PNode; Level: Integer);
-
     function NewRandomNode(Node: PNode): PNode;
     function NewRandomType: String;
   end;
-var
-  RandomVariable: Integer;
 
 const
   LocalCount = 2;
@@ -44,52 +41,8 @@ const
   FunctionLevel = 1;
   IfCount = 2;
 
-  TypesArr : array[0..1] of string = ('int', 'float');
+  IfWhileElseFrequency: Array[0..3] of Integer = (1{null}, 1000000{If}, 0{While}, 0{else});
 implementation
-
-
-function Random(Range: Integer): Integer; overload;
-begin
-  Inc(RandomVariable);
-  Result := RandomVariable mod Range;
-end;
-
-function Random(Arr: TIntegerDynArray; var InnerIndex: Integer): Integer;  overload;
-var i: Integer;
-begin
-  InnerIndex := Random(MaxInt) mod SumInt(Arr);
-  for i:=0 to High(Arr) do
-  begin
-    if InnerIndex - Arr[i] < 0 then
-    begin
-      Result := i;
-      Exit;
-    end;
-    InnerIndex := InnerIndex - Arr[i];
-  end;
-end;
-
-function Random(Arr: TIntegerDynArray): Integer; overload;
-var InnerIndex: Integer;
-begin
-  Result := Random(Arr, InnerIndex);
-end;
-
-function CauchyRandomMod(BeginRange, CenterRange, EndRange: Integer): Integer;
-var MaxRange, MinRange: Integer;
-begin
-  repeat
-    MaxRange := Max(CenterRange - BeginRange, EndRange - CenterRange);
-    MinRange := Min(CenterRange - BeginRange, EndRange - CenterRange);
-    Result := Round(Tan(PI * (Random(MaxInt) / MaxInt - 0.5)));
-    Result := Result mod (MaxRange + 1);
-    Result := Result + CenterRange;
-  until (Result >= BeginRange) and (Result <= EndRange);
-end;
-
-
-
-
 
 
 procedure TGFocus.CreateNode(Node: PNode);
@@ -111,7 +64,7 @@ begin
       IntToStr(CauchyRandomMod(FracBeginRange, FracCenterRange, FracEndRange)) ));
 end;
 
-procedure TGFocus.CreateLink(Node: PNode);
+procedure TGFocus.CreateLocalVar(Node: PNode);
 var i: Integer;
 begin
   for i:=0 to High(Module.Local) do
@@ -138,13 +91,10 @@ begin
 end;
 
 function TGFocus.NewRandomType(): String;
-var Arr: TIntegerDynArray;
 begin
-  SetLength(Arr, 2); //if Random(100) > 50 then
-  Arr[0] := 2;
-  Arr[1] := 2;
-  Result := TypesArr[Random(Arr)];
-  SetLength(Arr, 0);
+  if Random(100) > 50
+  then Result := 'int'
+  else Result := 'float';
 end;
 
 procedure TGFocus.CreateFuncHead(Node: PNode; Level: Integer);
@@ -203,31 +153,60 @@ begin
       CreateFunc(Node.Local[i], Level - 1);
 end;
 
-procedure TGFocus.CreateCase(FuncNode: PNode);
+procedure TGFocus.CreateIfElseWhile(FuncNode: PNode);
 var
-  NextCount, FromPos, ToPos, i: Integer;
+  i, IfWhileElse: Integer;
+  FirstPos, SecondPos, ThirdPos: Integer;
+  FirstNode, SecondNode, ThirdNode: PNode;
+  ElseNode, ExitNode: PNode;
   Node: PNode;
 begin
-  {Node := FuncNode;
+
+  Node := FuncNode;
   while Node.Next <> nil do
   begin
-    Inc(NextCount);
+    Inc(i);
     Node := Node.Next;
   end;
-  FromPos := Random(NextCount);
-  ToPos := Random(NextCount);
+
+  FirstPos  := Random(i);
+  SecondPos := Random(i);
+  ThirdPos  := Random(i);
+
   Node := FuncNode;
   while Node <> nil do
   begin
     Inc(i);
-    if i = FromPos then
-      FromNode := Node;
-    if i = ToPos then
-      ToPos := Node;
+    if i = FirstPos  then FirstNode  := Node;
+    if i = SecondPos then SecondNode := Node;
+    if i = ThirdPos  then ThirdNode  := Node;
+    Node := Node.Next;
   end;
-  NewNode(GetIndex(FromNode) + '#' GetIndex(ToNode) + '|'); }
-end;
 
+  IfWhileElse := Random(IfWhileElseFrequency);
+  
+  if IfWhileElse = 1 then   // if
+  begin
+    NewNode(GetIndex(FirstNode) + '#|' + GetIndex(SecondNode));
+  end;
+
+  if IfWhileElse = 2 then  // while
+  begin
+    NewNode(GetIndex(FirstNode) + '#|' + GetIndex(SecondNode));
+    ElseNode := NewNode('1#' + GetIndex(FirstNode) + '|');
+    NextNode(SecondNode.Prev, ElseNode);
+    NextNode(ElseNode, SecondNode);
+  end;
+
+  if IfWhileElse = 3 then // if else
+  begin
+    NewNode(GetIndex(FirstNode) + '#|' + GetIndex(SecondNode));
+    ElseNode := NewNode('1#' + GetIndex(ThirdNode) + '|');
+    NextNode(SecondNode.Prev, ElseNode);
+    NextNode(ElseNode, SecondNode);
+  end;
+end;
+    
 procedure TGFocus.CreateFunc(Node: PNode; Level: Integer);
 begin
   CreateNode(Node);
@@ -235,12 +214,8 @@ begin
   CreateLocalVar(Node);
   CreateFuncHead(Node, Level);
   CreateSequence(Node);
-  CreateIf(Node);
-  CreateWhile(Node);
+  CreateIfElseWhile(Node);
   CreateFuncBody(Node, Level);
 end;
-
-
-
 
 end.

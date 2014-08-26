@@ -1,4 +1,4 @@
-unit MetaUtils;
+unit NodeUtils;
 
 interface
 
@@ -46,7 +46,7 @@ var
 implementation
 
 uses
-  MetaBaseModule;
+  NodeBaseKernel;
 
 
 function GetProcAddress(Handle: Integer; FuncName: String): Integer;

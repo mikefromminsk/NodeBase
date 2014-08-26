@@ -1,24 +1,29 @@
-unit MetaLine;
-
+unit NodeLink;
+// *
+// * NodeLink ver 1.0
+// * source^name@id$vars:type?params#values|else
+// *
 {
-  Line: TLine;
+
+
+  Link: TLink;
 begin
-  Line := TLine.Create('name$run');
-  ShowMessage(Line.ControlsValues[0]);
+  Link := TLink.Create('name$run');
+  ShowMessage(Link.ControlsValues[0]);
   Exit;
   }
 
 interface
 
 uses
-  SysUtils, MetaUtils, Classes;
+  SysUtils, NodeUtils, Classes;
 
 type
 
   //Set of illegal characters
   //Set of filename reserved characters
 
-  TLine = class
+  TLink = class
   public
     Name: string;
     Path: array of string;
@@ -26,11 +31,11 @@ type
     Source: string;
     Names: array of String;       //to ControlNames
     Values: array of String;       //property Controls[Index: Integer]: string read Get write Put;
-    FType: TLine;
-    Local: array of TLine;
-    Params: array of TLine;
-    Value: TLine;
-    FElse: TLine;
+    FType: TLink;
+    Local: array of TLink;
+    Params: array of TLink;
+    Value: TLink;
+    FElse: TLink;
     constructor Script(var LURI: String; FirstRun: Boolean = False);
     constructor Create(LURI: string);
     destructor Destroy;
@@ -42,15 +47,15 @@ implementation
 
 
 
-constructor TLine.Create(LURI: string);
+constructor TLink.Create(LURI: string);
 begin
   Script(LURI, True);
 end;
                                                          
                                                          //потоковая обработка ссылок
-constructor TLine.Script(var LURI: String; FirstRun: Boolean = False);
-var                                                              //более сложную для пользователя
-  s, LS, Str: string;                                            //более простую для базы
+constructor TLink.Script(var LURI: String; FirstRun: Boolean = False);   //более сложную для пользователя
+var
+  s, LS, Str: string;
   Index, i, LocalIndex: Integer;         //нету загрузки local как @1\n\n@2\n\n@3\n\n
   List: TStringList;
 begin
@@ -70,7 +75,7 @@ begin
     Index := NextIndex(0, [' '], LS);
     s := Copy(LS, 1, Index-1);
     SetLength(Local, High(Local)+2);                                //Local
-    Local[High(Local)] := TLine.Script(s);
+    Local[High(Local)] := TLink.Script(s);
     Delete(LS, 1, Index);
   end;
 
@@ -167,21 +172,21 @@ begin
 
     if Index = MaxInt then                     //нету управляющих символов
     begin
-      FType := TLine.Script(LURI);
+      FType := TLink.Script(LURI);
       Delete(LURI, 1, Length(LURI));
     end
     else
     if LURI[Index] = '=' then
     begin
       s := Copy(LURI, 1, Index-1);
-      FType := TLine.Script(s);
+      FType := TLink.Script(s);
       Delete(LURI, 1, Index);
-      Value := TLine.Script(LURI);          //следующее значение
+      Value := TLink.Script(LURI);          //следующее значение
     end
     else
     begin
       if Length(LURI) > 0 then                 //дальше функция
-        FType := TLine.Script(LURI);
+        FType := TLink.Script(LURI);
     end;
     Exit;
   end;
@@ -192,7 +197,7 @@ begin
     {Index := NextIndex(0, ['&', '#'], LURI);
     s := Copy(LURI, 1, Index-1);
     Delete(LURI, 1, Index-1);}
-    Value := TLine.Script(LURI);
+    Value := TLink.Script(LURI);
     Exit;
   end;
 
@@ -216,7 +221,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLine.Script(s);
+          Params[High(Params)] := TLink.Script(s);
         end
         else
           Break;
@@ -226,7 +231,7 @@ begin
       if LURI[Index] in [':', '='] then
       begin
         SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TLine.Script(LURI);
+        Params[High(Params)] := TLink.Script(LURI);
         Continue;
       end;
 
@@ -237,7 +242,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLine.Script(s);
+          Params[High(Params)] := TLink.Script(s);
         end;
         Continue;
       end;
@@ -249,7 +254,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLine.Script(s);
+          Params[High(Params)] := TLink.Script(s);
         end;
         Break;
       end;
@@ -257,7 +262,7 @@ begin
       if LURI[Index] = '?' then
       begin
         SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TLine.Script(LURI);
+        Params[High(Params)] := TLink.Script(LURI);
       end;
 
     until False;
@@ -266,13 +271,13 @@ begin
   if (Length(LURI) > 0) and (LURI[1] = '#') and (FirstRun = True) then
   begin
     Delete(LURI, 1, 1);
-    Value := TLine.Script(LURI);
+    Value := TLink.Script(LURI);
   end;
 
   if (Length(LURI) > 0) and (LURI[1] = '|') then
   begin
     Delete(LURI, 1, 1);
-    FElse := TLine.Script(LURI);
+    FElse := TLink.Script(LURI);
   end;
 
 end;
@@ -281,19 +286,7 @@ end;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-procedure FastParseMetaBaseLink(var Str: String);
+procedure FastParseNodeBaseLink(var Str: String);  //более простую для базы
 // подразумевается что в строке есть символ @
 // если его нету то записывается в ID
 //пример строки parent^name@id$controls?params#value|else
@@ -493,7 +486,7 @@ begin
 end;
 
 
-destructor TLine.Destroy;
+destructor TLink.Destroy;
 var i: Integer;
 begin
   if FType <> nil then

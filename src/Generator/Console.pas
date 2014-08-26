@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, GModule, MetaBaseModule, ExtCtrls, MetaLine;
+  Dialogs, StdCtrls, ExtCtrls, GeneratorModule, NodeBaseKernel, NodeLink;
 
 type
   TGG = class(TForm)
@@ -37,7 +37,7 @@ begin
   Base := TGFocus.Create;
   with Base do
   begin
-    Execute('/../dll/math.meta$activate');
+    Execute('/../dll/math.node$activate');
     FuncNode := NewNode(NextID + '#' + NextID);
     CreateFunc(FuncNode, FunctionLevel);
     Run(FuncNode);
@@ -58,7 +58,7 @@ begin
     Body := StringReplace(Body, #10, ' ', []);
     Body := StringReplace(Body, #10#10, #10, [rfReplaceAll]);
     Items.Text := Body;
-    Address.Text := Items[0];
+    Address.Text := Copy(Items[0], Pos('@', Items[0]), Pos('$', Items[0]) - Pos('@', Items[0]));
     Items[0] := '..';
     for i:=1 to Items.Count - 1 do
     begin
@@ -74,7 +74,7 @@ end;
 procedure TGG.ShowSequence(Node: PNode);
 var
   Body: String;
-  Line: TLine;
+  //Link: TLink;
   Str: String;
 
 
@@ -99,7 +99,7 @@ begin
     Body := Base.GetNodeBody(Node);
     if Pos(#10, Body) <> 0 then
       Delete(Body, Pos(#10, Body), MaxInt);
-    Line := TLine.Create(Body);
+    //Link := TLink.Create(Body);
     Str := GetIndex(Node);
     if Node.Source <> nil then
       Str := GetIndex(Node.Source);

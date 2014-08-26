@@ -54,7 +54,7 @@ const
 implementation
 
 uses
-  MetaBaseModule, MetaUtils, MetaLine, IdHTTPHeaderInfo;
+  NodeBaseKernel, NodeUtils, NodeLink, IdHTTPHeaderInfo;
 
 {$R *.dfm}
 

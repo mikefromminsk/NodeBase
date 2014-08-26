@@ -4,7 +4,7 @@ object GG: TGG
   Width = 759
   Height = 510
   BorderIcons = [biSystemMenu]
-  Caption = 'MetaBase'
+  Caption = 'NodeBase'
   Color = clGrayText
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,8 +19,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 410
-    Width = 743
+    Top = 414
+    Width = 751
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -30,10 +30,10 @@ object GG: TGG
     ResizeStyle = rsLine
   end
   object Splitter1: TSplitter
-    Left = 284
+    Left = 292
     Top = 0
     Width = 4
-    Height = 410
+    Height = 414
     Align = alRight
     Color = cl3DDkShadow
     MinSize = 1
@@ -41,8 +41,8 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 414
-    Width = 743
+    Top = 418
+    Width = 751
     Height = 58
     Align = alBottom
     BevelInner = bvNone
@@ -60,10 +60,10 @@ object GG: TGG
     WordWrap = False
   end
   object QueryBox: TRichEdit
-    Left = 288
+    Left = 296
     Top = 0
     Width = 455
-    Height = 410
+    Height = 414
     Align = alRight
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -84,8 +84,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 284
-    Height = 410
+    Width = 292
+    Height = 414
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -96,7 +96,7 @@ object GG: TGG
     Font.Name = 'Arial'
     Font.Style = []
     Lines.Strings = (
-      '/../dll/math.meta$activate'
+      '/../dll/math.node$activate'
       ''
       'func?a:float#res'
       'res=0,0'
@@ -107,7 +107,7 @@ object GG: TGG
       'i=finc?i'
       'res=fadd?res&dx'
       'dx=fdiv?1,0&fsqr?i'
-      'jmp#while|'
+      '1#while|'
       'here^exit'
       'res=fsqrt?fmul?res&6,0'
       ''

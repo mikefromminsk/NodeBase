@@ -1,7 +1,7 @@
-program MetaBase;
+program NodeBase;
 
 uses
-  Forms, Console, MetaBaseModule, MetaLine, Dialogs, SysUtils;
+  Console, Forms, Dialogs, SysUtils, NodeBaseKernel, NodeLink;
 
 {$R *.res}
 
