@@ -158,10 +158,10 @@ var
   i, IfWhileElse: Integer;
   FirstPos, SecondPos, ThirdPos: Integer;
   FirstNode, SecondNode, ThirdNode: PNode;
-  ElseNode, ExitNode: PNode;
+  ElseNode: PNode;
   Node: PNode;
 begin
-
+  i := 0;
   Node := FuncNode;
   while Node.Next <> nil do
   begin
@@ -173,6 +173,7 @@ begin
   SecondPos := Random(i);
   ThirdPos  := Random(i);
 
+  i := 0;
   Node := FuncNode;
   while Node <> nil do
   begin

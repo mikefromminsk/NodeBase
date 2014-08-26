@@ -144,7 +144,7 @@ $transaction=992402
 
 //if (i<10)
  
-equal (i<10)
+equal i<10
 
 else
 
@@ -159,7 +159,7 @@ else
 
 //if (i<10) else
  
-equal (i<10)
+equal i<10
 
 exit^jump
 else
