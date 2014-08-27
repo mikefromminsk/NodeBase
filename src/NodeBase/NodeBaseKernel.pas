@@ -44,8 +44,8 @@ type
     FElse         : PNode;
     ParentParams  : PNode;
     Params        : ANode;
-    Next          : PNode;
     Prev          : PNode;
+    Next          : PNode;
 
     ControlsName  : array of String;
     ControlsValues: array of String;
@@ -578,8 +578,7 @@ begin
     Result := Node.Value;
   if (Result = nil) and (Node.FTrue <> nil) and (Node.FTrue.ParentName = Index) then
     Result := Node.FTrue;
-  if (Result = nil) and (Node.FElse <> nil) and (Node.FElse <> Pointer(1))
-      and (Node.FElse.ParentName = Index) then
+  if (Result = nil) and (Node.FElse <> nil) and (Node.FElse.ParentName = Index) then
     Result := Node;
   if Result = nil then
     for i:=0 to High(Node.Local) do
@@ -692,10 +691,8 @@ begin
   end;
   if Line.FElse <> nil then
   begin
-    Result.FElse := NewNode(Line.FElse);
-    if Result.FElse = nil then
-      Result.FElse := Pointer(1);
     Result.FTrue := NewNode(Line.Value);
+    Result.FElse := NewNode(Line.FElse);
   end
   else
   if Line.Value <> nil then
@@ -748,7 +745,7 @@ begin
   end;
   if Node.Attr = naDLLFunc then     //call dll func
     CallFunc(Node);
-  if Node.FElse <> nil then     //node is if
+  if (Node.FTrue <> nil) or (Node.FElse <> nil) then     //node is if
   begin
     FuncResult := CompareWithZero(GetData(Node));   //del funcresult
     if (FuncResult = 1) and (Node.FTrue <> nil) then   //true
@@ -756,7 +753,7 @@ begin
       Node := GetSource(Node.FTrue);
       Goto NextNode;
     end;
-    if (FuncResult = 0) and (Node.FElse <> Pointer(1)) then   //false
+    if (FuncResult = 0) and (Node.FElse <> nil) then   //false
     begin
       Node := GetSource(Node.FElse);
       Goto NextNode;
@@ -791,8 +788,6 @@ begin
     end;
   PrevNode := NextNode;
 end;
-
-
 
 procedure TFocus.SaveNode(Node: PNode);
 var ParentIndex: PNode;
@@ -948,7 +943,7 @@ begin
     if Node.FTrue <> nil then
       Result := Result + '#' + GetIndex(Node.FTrue);
     Result := Result + '|';
-    if Integer(Node.FElse) > 1 then
+    if Node.FElse <> nil then
       Result := Result + GetIndex(Node.FElse);
   end
   else

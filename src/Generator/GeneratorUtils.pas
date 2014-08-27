@@ -12,7 +12,7 @@ function Random(Range: Integer): Integer; overload;
 function Random(Arr: TIntegerDynArray; var InnerIndex: Integer): Integer;  overload;
 function Random(Arr: TIntegerDynArray): Integer; overload;
 function Random(const Arr: array of integer): Integer; overload;
-function CauchyRandomMod(BeginRange, CenterRange, EndRange: Integer): Integer;
+function CauchyRandom(BeginRange, CenterRange, EndRange: Integer): Integer;
 function IfThen(AValue: Boolean; const ATrue: Integer; const AFalse: Integer = 0): Integer;
 
 var
@@ -48,7 +48,7 @@ begin
   Result := Random(Arr, InnerIndex);
 end;
 
-function CauchyRandomMod(BeginRange, CenterRange, EndRange: Integer): Integer;
+function CauchyRandom(BeginRange, CenterRange, EndRange: Integer): Integer;
 var MaxRange, MinRange: Integer;
 begin
   repeat
@@ -81,5 +81,6 @@ begin
   SetLength(DynArr, 0);
 end;
 
-
+initialization
+  RandomVariable := 1;
 end.

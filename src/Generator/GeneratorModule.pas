@@ -20,6 +20,7 @@ type
     procedure CreateFuncBody(Node: PNode; Level: Integer);
     function NewRandomNode(Node: PNode): PNode;
     function NewRandomType: String;
+    function Generate: PNode;
   end;
 
 const
@@ -38,10 +39,14 @@ const
   FunctionCount = 3;
   FunctionParamsCount = 1;
   FunctionSequenceCount = 10;
-  FunctionLevel = 1;
+  FunctionLevel = 0;
   IfCount = 2;
 
-  IfWhileElseFrequency: Array[0..3] of Integer = (1{null}, 1000000{If}, 0{While}, 0{else});
+  IfWhileElseFrequency: Array[0..3] of Integer = (0{null}, 0{If}, 0{While}, 1{else});
+
+var
+  GFocus: TGFocus;
+  
 implementation
 
 
@@ -49,7 +54,7 @@ procedure TGFocus.CreateNode(Node: PNode);
 var i: Integer;
 begin
   for i:=0 to LocalCount do
-    AddLocal(Node, NewNode(NextId));
+    AddLocal(Node, NewNode(NextID));
 end;
 
 procedure TGFocus.CreateData(Node: PNode);
@@ -57,11 +62,11 @@ var i: Integer;
 begin
   for i:=0 to Data4Count do
     AddLocal(Node, NewNode(
-      IntToStr(CauchyRandomMod(IntBeginRange, IntCenterRange, IntEndRange))));
+      IntToStr(CauchyRandom(IntBeginRange, IntCenterRange, IntEndRange))));
   for i:=0 to Data8Count do
     AddLocal(Node, NewNode(
-      IntToStr(CauchyRandomMod(IntBeginRange, IntCenterRange, IntEndRange)) + ',' +
-      IntToStr(CauchyRandomMod(FracBeginRange, FracCenterRange, FracEndRange)) ));
+      IntToStr(CauchyRandom(IntBeginRange, IntCenterRange, IntEndRange)) + ',' +
+      IntToStr(CauchyRandom(FracBeginRange, FracCenterRange, FracEndRange)) ));
 end;
 
 procedure TGFocus.CreateLocalVar(Node: PNode);
@@ -102,10 +107,10 @@ var
   i, j: Integer;
   FuncNode: PNode;
 begin
-  if Level < 0 then Exit;
+  if Level <= 0 then Exit;
   for i:=0 to FunctionCount do
   begin
-    FuncNode := NewNode(NextId);
+    FuncNode := NewNode(NextID);
     AddLocal(Node, FuncNode);
     for j:=0 to FunctionParamsCount do
       AddParam(FuncNode, NewNode(NextID + ':' + NewRandomType), j);
@@ -161,6 +166,8 @@ var
   ElseNode: PNode;
   Node: PNode;
 begin
+  FuncNode := FuncNode.Next;
+
   i := 0;
   Node := FuncNode;
   while Node.Next <> nil do
@@ -195,7 +202,7 @@ begin
   begin
     NewNode(GetIndex(FirstNode) + '#|' + GetIndex(SecondNode));
     ElseNode := NewNode('1#' + GetIndex(FirstNode) + '|');
-    NextNode(SecondNode.Prev, ElseNode);
+    NextNode(SecondNode, ElseNode);
     NextNode(ElseNode, SecondNode);
   end;
 
@@ -203,11 +210,12 @@ begin
   begin
     NewNode(GetIndex(FirstNode) + '#|' + GetIndex(SecondNode));
     ElseNode := NewNode('1#' + GetIndex(ThirdNode) + '|');
-    NextNode(SecondNode.Prev, ElseNode);
+    Node := SecondNode.Prev;
+    NextNode(Node, ElseNode);
     NextNode(ElseNode, SecondNode);
   end;
 end;
-    
+
 procedure TGFocus.CreateFunc(Node: PNode; Level: Integer);
 begin
   CreateNode(Node);
@@ -217,6 +225,13 @@ begin
   CreateSequence(Node);
   CreateIfElseWhile(Node);
   CreateFuncBody(Node, Level);
+end;
+
+function TGFocus.Generate: PNode;
+begin
+  Result := NewNode(NextID + '#' + NextID);
+  CreateFunc(Result, FunctionLevel);
+  Run(Result);
 end;
 
 end.

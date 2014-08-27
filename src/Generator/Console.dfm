@@ -6,16 +6,16 @@ object GG: TGG
   Color = clBtnFace
   Font.Charset = RUSSIAN_CHARSET
   Font.Color = clWindowText
-  Font.Height = -19
-  Font.Name = 'Arial Narrow'
+  Font.Height = -15
+  Font.Name = 'Courier New'
   Font.Style = []
   OldCreateOrder = False
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 23
+  TextHeight = 17
   object Splitter1: TSplitter
     Left = 0
-    Top = 401
+    Top = 34
     Width = 570
     Height = 3
     Cursor = crVSplit
@@ -25,10 +25,10 @@ object GG: TGG
     Left = 0
     Top = 33
     Width = 570
-    Height = 368
+    Height = 1
     Align = alTop
     BorderStyle = bsNone
-    ItemHeight = 23
+    ItemHeight = 17
     TabOrder = 0
     OnDblClick = ListBoxDblClick
   end
@@ -40,26 +40,27 @@ object GG: TGG
     Align = alTop
     BevelInner = bvLowered
     BiDiMode = bdLeftToRight
+    BorderStyle = bsNone
     Ctl3D = False
-    Font.Charset = RUSSIAN_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -19
-    Font.Name = 'Arial Narrow'
-    Font.Style = []
     ParentBiDiMode = False
     ParentCtl3D = False
-    ParentFont = False
     TabOrder = 1
     OnKeyDown = AddressKeyDown
   end
   object SeqBox: TListBox
     Left = 0
-    Top = 404
+    Top = 37
     Width = 570
-    Height = 378
+    Height = 745
     Align = alClient
     BorderStyle = bsNone
-    ItemHeight = 23
+    ItemHeight = 17
     TabOrder = 2
+  end
+  object Timer: TTimer
+    Interval = 500
+    OnTimer = TimerTimer
+    Left = 8
+    Top = 40
   end
 end
