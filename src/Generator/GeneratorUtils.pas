@@ -24,7 +24,10 @@ implementation
 function Random(Range: Integer): Integer; overload;
 begin
   Inc(RandomVariable);
-  Result := RandomVariable mod Range;
+  if Range = 0 then
+    Result := 0
+  else
+    Result := RandomVariable mod Range;
 end;
 
 function Random(Arr: TIntegerDynArray; var InnerIndex: Integer): Integer;  overload;

@@ -132,14 +132,6 @@ $transaction=992402
 
 
 
-
-
-
-
-
-
-
-
 [if while for]
 
 //if (i<10)
@@ -167,11 +159,6 @@ else
 exit
 
 
-
-
-
-
-
 //for (int i=0; i<10; i++)
 for
 init i=0
@@ -182,5 +169,14 @@ equal^jump
 exit
 
 
+
+
+
+
+naDLLNode read/not write
+
+
+Garbage collector
+compare result 
 
 

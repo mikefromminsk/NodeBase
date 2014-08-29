@@ -122,11 +122,11 @@ const
   naWord = 1;
   naLink = 2;
   naData = 3;
-  naFile = 4;
+  naModule = 4;          //external module
   naDLLFunc = 5;          //naStdFunc = $51; naFastCallFunc = $52;
-  naInt = 6;
-  naFloat = 7;
-  naRoot = 8;
+  naInt = 7;
+  naFloat = 8;
+  naRoot = 9;
   //nt - NameType
   ntInt = 'int';
   ntFloat = 'float';
@@ -404,7 +404,7 @@ begin
   while Result.Source <> nil do
   begin
     Result := Result.Source;
-    if Result.Value <> nil then  Exit;
+    if Result.Value <> nil then  Exit;   //??
   end;
 end;
 
@@ -586,7 +586,7 @@ begin
       Local := Node.Local[i];
       while Local.ParentField <> nil do
         Local := Local.ParentField;
-      if Local.Attr = naFile then
+      if Local.Attr = naModule then
       begin
         Result := FindInNode(Local, Index);
         if Result <> nil then Exit;
@@ -645,7 +645,7 @@ begin
   case Line.Name[1] of
     '!' : Result.Attr := naData;
     '@' : Result.Attr := naLink;
-    '/' : Result.Attr := naFile;
+    '/' : Result.Attr := naModule;
     '0'..'9', '-':
         if Pos(',', Line.Name) = 0
         then Result.Attr := naInt
@@ -731,7 +731,7 @@ begin
   if ExceptionFlag1 = True then      //exit in top
     Exit;
 
-  if Node.Attr = naFile then
+  if Node.Attr = naModule then
     NewModule(Node);
   for i:=0 to High(Node.Params) do  //run params
     Run(Node.Params[i]);
