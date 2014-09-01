@@ -43,9 +43,6 @@ const
   IfWhileElseFrequency: Array[0..3] of Integer = (0{null}, 1{If}, 1{While}, 1{else});
   IfWhileElseCount = 1;
 
-var
-  GFocus: TGFocus;
-
 implementation
 
 

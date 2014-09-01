@@ -121,6 +121,7 @@ object GG: TGG
     OnKeyUp = InputBoxKeyUp
   end
   object Timer1: TTimer
+    OnTimer = Timer1Timer
     Left = 312
     Top = 8
   end

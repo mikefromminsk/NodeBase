@@ -128,45 +128,33 @@ $transaction=992402
 
 
 
-
-
-
-
-[if while for]
-
+[if while else]
 //if (i<10)
- 
 equal i<10
-
 else
-
 
 //while (i<10)
-
 equal i<10
-
 equal^jump
 else
-
 
 //if (i<10) else
- 
 equal i<10
-
 exit^jump
 else
-
 exit
 
 
-//for (int i=0; i<10; i++)
-for
-init i=0
-equal i<10
-code g++ 
-iter i++
-equal^jump
-exit
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -178,5 +166,29 @@ naDLLNode read/not write
 
 Garbage collector
 compare result 
+
+
+
+
+RunGarbageCollector Timer Auto set
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

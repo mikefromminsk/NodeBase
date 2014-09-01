@@ -55,11 +55,35 @@ object GG: TGG
     ItemHeight = 17
     TabOrder = 2
   end
+  object Button1: TButton
+    Left = 72
+    Top = 56
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 3
+    OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 160
+    Top = 56
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 4
+    OnClick = Button2Click
+  end
   object Timer: TTimer
     Enabled = False
-    Interval = 500
+    Interval = 10
     OnTimer = TimerTimer
     Left = 8
+    Top = 40
+  end
+  object GarbageCollectorTimer: TTimer
+    Enabled = False
+    OnTimer = GarbageCollectorTimerTimer
+    Left = 488
     Top = 40
   end
 end

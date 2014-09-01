@@ -183,8 +183,8 @@ end;
 
 procedure RunThread.Execute;
 begin
-  if Node <> nil then
-    Base.Run(Node);
+  //if Node <> nil then
+    //Run(Node);
 end;
 
 constructor RunThread.Create;

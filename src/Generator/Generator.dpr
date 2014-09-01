@@ -2,7 +2,7 @@ program Generator;
 
 uses
   Forms,
-  Console,
+  Console,  //SimpleTutor
   NodeBaseKernel in '..\NodeBase\NodeBaseKernel.pas',
   NodeUtils in '..\NodeBase\NodeUtils.pas',
   NodeLink in '..\NodeBase\NodeLink.pas',

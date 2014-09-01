@@ -13,9 +13,15 @@ type
     SeqBox: TListBox;
     Splitter: TSplitter;
     Timer: TTimer;
+    GarbageCollectorTimer: TTimer;
+    Button1: TButton;
+    Button2: TButton;
     procedure TimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure AddressChange(Sender: TObject);
+    procedure GarbageCollectorTimerTimer(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   public
     procedure ShowNode(Node: PNode);
     procedure ShowPascalCode(Node: PNode);
@@ -24,7 +30,8 @@ type
 var
   GG: TGG;
   FocusNode: PNode;
-
+  GFocus: TGFocus;
+  
 implementation
 
 {$R *.dfm}
@@ -128,6 +135,27 @@ end;
 procedure TGG.AddressChange(Sender: TObject);
 begin
   ShowNode(GFocus.NewNode(Address.Text));
+end;
+
+procedure TGG.GarbageCollectorTimerTimer(Sender: TObject);
+var count: Integer;
+begin
+  Count := GFocus.NodesCount;
+  GFocus.GarbageCollector;
+  ShowMessage(IntToStr(GFocus.NodesCount - Count));
+end;
+
+procedure TGG.Button1Click(Sender: TObject);
+begin
+  Timer.Enabled := not Timer.Enabled;
+end;
+
+procedure TGG.Button2Click(Sender: TObject);
+var count: Integer;
+begin
+  Count := GFocus.NodesCount;
+  GFocus.GarbageCollector;
+  ShowMessage(IntToStr(GFocus.NodesCount - Count));
 end;
 
 end.

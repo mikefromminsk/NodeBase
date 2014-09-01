@@ -6,7 +6,8 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, ScktComp, AppEvnts, ShellApi,
   IdBaseComponent, IdComponent, IdTCPServer, IdCustomHTTPServer,
-  IdHTTPServer, IdTCPConnection, IdTCPClient, IdHTTP, Menus;
+  IdHTTPServer, IdTCPConnection, IdTCPClient, IdHTTP, Menus,
+  NodeBaseKernel, NodeUtils, NodeLink, IdHTTPHeaderInfo;
 
 type
   TGG = class(TForm)
@@ -38,6 +39,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure ExitClick(Sender: TObject);
     procedure ConsoleClick(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     procedure ControlWindow(var Msg: TMessage); message WM_SYSCOMMAND;
     procedure IconMouse(var Msg: TMessage); message WM_USER + 1;
@@ -46,15 +48,13 @@ type
 
 var
   GG: TGG;
+  Base: TFocus;
 
 const
   OptionsFileName = 'config.ini';
   ConsoleFileName = 'Console.html';
 
 implementation
-
-uses
-  NodeBaseKernel, NodeUtils, NodeLink, IdHTTPHeaderInfo;
 
 {$R *.dfm}
 
@@ -134,7 +134,6 @@ begin
   end;
   for i:=0 to InputBox.Lines.Count - 1 do
     ConsoleExec(InputBox.Lines[i]);
-  IconMode(1, Application.Icon);
 end;
 
 procedure TGG.FormShow(Sender: TObject);
@@ -170,6 +169,7 @@ begin
   begin
     ShowWindow(Handle, SW_HIDE);
     ShowWindow(Application.Handle, SW_HIDE);
+    IconMode(1, Application.Icon);
   end
   else
     inherited;
@@ -281,6 +281,11 @@ end;
 procedure TGG.ConsoleClick(Sender: TObject);
 begin
   ShellExecute(Handle, 'open', PChar('http://localhost:' + IntToStr(IdHTTPServer1.DefaultPort)), nil, nil, SW_SHOW);
+end;
+
+procedure TGG.Timer1Timer(Sender: TObject);
+begin
+  Base.GarbageCollector(Timer1.Interval);
 end;
 
 end.
