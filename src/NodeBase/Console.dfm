@@ -1,7 +1,7 @@
 object GG: TGG
   Left = 204
   Top = 115
-  Width = 759
+  Width = 533
   Height = 510
   BorderIcons = [biSystemMenu]
   Caption = 'NodeBase'
@@ -20,7 +20,7 @@ object GG: TGG
   object Splitter: TSplitter
     Left = 0
     Top = 414
-    Width = 751
+    Width = 525
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -30,7 +30,7 @@ object GG: TGG
     ResizeStyle = rsLine
   end
   object Splitter1: TSplitter
-    Left = 292
+    Left = 236
     Top = 0
     Width = 4
     Height = 414
@@ -42,7 +42,7 @@ object GG: TGG
   object OutputBox: TRichEdit
     Left = 0
     Top = 418
-    Width = 751
+    Width = 525
     Height = 58
     Align = alBottom
     BevelInner = bvNone
@@ -60,9 +60,9 @@ object GG: TGG
     WordWrap = False
   end
   object QueryBox: TRichEdit
-    Left = 296
+    Left = 240
     Top = 0
-    Width = 455
+    Width = 285
     Height = 414
     Align = alRight
     BevelInner = bvNone
@@ -84,7 +84,7 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 292
+    Width = 236
     Height = 414
     Align = alClient
     BevelInner = bvNone

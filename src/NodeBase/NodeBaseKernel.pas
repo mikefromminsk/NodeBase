@@ -3,34 +3,20 @@ unit NodeBaseKernel;
 interface
 
 uses
-  Types{TIntegerDynArray},  Math{SumInt}, SysUtils{AllocMem, Now},
-  Classes{TStrings}, NodeLink, Windows{SetTimer}, NodeUtils, Dialogs;
+  Math{SumInt}, SysUtils{AllocMem, Now}, Classes{TStrings}, NodeLink, NodeUtils,
+  Dialogs{test};
 
 type
-  TimerProc = procedure (wnd: HWND; uMsg, idEvent: UINT; dwTime: DWORD) of object; stdcall;
 
   PNode = ^TNode;
-
   ANode = array of PNode;
 
-
-  PEvent = ^TEvent;   //replace to interval
-
-  TEvent = record
-    FBegin: Double;
-    FEnd  : Double;
-    Nodes : ANode;
-    Next  : PEvent;
-  end;
-
-
+  
   TNode = record
 
-    Path  : String;          //test variable
-    ID    : Integer;
-    //LocalName: String;
+    Path  : String;          //test
 
-    Name          : String;     //pointers
+    Name          : String;     
     Index         : ANode;
     ParentName    : PNode;
     ParentIndex   : PNode;
@@ -38,7 +24,6 @@ type
     ParentLocal   : PNode;
     Value         : PNode;
     ParentField   : PNode;
-    Fields        : ANode;
     Source        : PNode;
     FType         : PNode;
     FTrue         : PNode;
@@ -47,107 +32,96 @@ type
     Params        : ANode;
     Prev          : PNode;
     Next          : PNode;
-
-    ControlsName  : array of String;
-    ControlsValues: array of String;
-
-    Attr        : Integer;    //public system params
+  //public
+    Attr        : Integer;
     Count       : Integer;
     Time        : Double;
-    //Exception   : Integer;
     RunCount    : Integer;
     Activate    : Integer;
-
-    Handle      : Integer;    //private system params
+  //private
+    Handle      : Integer;
     SaveTime    : Double;
     RefCount    : Integer;
   end;
 
-  TInterest = record
-    step : Double;
-    max  : Double;
-    min  : Double;
-    count: Double;
-    now  : Double;
-    into : Double;
-    from : Double;
+  PEvent = ^TEvent;
+  TEvent = record
+    FBegin: Double;
+    FEnd  : Double;
+    Nodes : ANode;
+    Next  : PEvent;
   end;
 
   TFocus = class
   public
-    ID: Integer;
-    Root: PNode;
-    Prev: PNode;
-    Module: PNode;  //now focus, session state
-    TimeLine: PEvent;
-    GarbageInterval: Double;
-    GarbageLastRun: Double;
-    NodesCount: Integer;
-    Interest: TInterest;
+    ID        : Integer;
+    Root      : PNode;
+    Prev      : PNode;
+    Module    : PNode;
+    NodesCount: Integer;    //test
 
-    ExceptionFlag1: Boolean;
+    TimeManager    : PEvent;
+    GarbageInterval: Double;
+    GarbageLastRun : Double;
 
     constructor Create;
     function NextID: String;
     function AddSubNode(var Arr: ANode): PNode;
     function AddIndex(Node: PNode; Name: Char): PNode;
-    function NewIndex(Name: String): PNode;
-    function AddLocal(Node: PNode): PNode; overload;
     function AddLocal(Node: PNode; Local: PNode): PNode; overload;
+    function AddLocal(Node: PNode): PNode; overload;
     function AddValue(Node: PNode; Value: String): PNode;
-    function AddField(Node: PNode; Field: PNode): PNode;
     function AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
     function GetIndex(Node: PNode): String;
-    function SetValue(Node: PNode; Value: String): PNode;  overload;
-    function SetValue(Node: PNode; Value: PNode): PNode;  overload;
+    function SetValue(Node: PNode; Value: String): PNode; overload;
+    function SetValue(Node: PNode; Value: PNode): PNode; overload;
     function GetValue(Node: PNode): PNode;
     function GetParam(Node: PNode): PNode;
     function GetData(Node: PNode): PNode;
-    function GetType(Node: PNode): PNode;
     function GetSource(Node: PNode): PNode;
-    procedure NewModule(Node: PNode);
+    function GetType(Node: PNode): PNode;
+    function NewIndex(Name: String): PNode;
+    procedure LoadModule(Node: PNode);
     procedure CallFunc(Node: PNode);
     function FindNode(Index: PNode): PNode;
     function NewNode(Line: String): PNode; overload;
     function NewNode(Line: TLink): PNode; overload;
-    procedure Run(Node: PNode);
-    procedure NextNode(var PrevNode: PNode; NextNode: PNode);
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
-    function Execute(Line: String): PNode; virtual;  //Create GetMethod
-    function GetNodeBody(Node: PNode): String;
     procedure GarbageCollector;
+    function GetNodeBody(Node: PNode): String;
+    procedure Run(Node: PNode);
+    procedure NextNode(var PrevNode: PNode; NextNode: PNode);
+    function Execute(Line: String): PNode; virtual;
+
   end;
 
 const
-  //na - NodeAttribyte
+
+//NodeAttribyte
   naIndex = 0;            //sort
   naWord = 1;
   naNode = 2;
   naData = 3;
-  naModule = 4;          //external module
+  naModule = 4;       
   naDLLFunc = 5;          //naStdFunc = $51; naFastCallFunc = $52;
   naInt = 7;
   naFloat = 8;
   naRoot = 9;
 
-  //nt - NameType
+//NameType
   ntInt = 'int';
   ntFloat = 'float';
 
-  msec = 86400000;
-  RootPath = 'data'; //to options
-
-  ForbiddenCharacters = [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|'];
 implementation
+
 
 constructor TFocus.Create;
 begin
-  
   NodesCount := 0;
-
   Root := AllocMem(SizeOf(TNode));
   Root.Attr := naRoot;
+  Root.Name := 'c:\data';
   Module := NewNode('root');
 end;
 
@@ -155,20 +129,11 @@ procedure SetControl(Node: PNode; Param, Value: String);
 begin
   Param := AnsiUpperCase(Param);
   Value := AnsiUpperCase(Value);
-  if Param = 'ATTR' then
-    Node.Attr := StrToIntDef(Value, 0)
-  else
-  if Param = 'TIME' then
-    Node.Time := StrToFloatDef(Value, Now)
-  else
-  if Param = 'COUNT' then
-    Node.Count := StrToIntDef(Value, 0)
-  else
-  if Param = 'RUN' then
-    Node.RunCount := StrToIntDef(Value, 1)
-  else
-  if Param = 'ACTIVATE' then
-    Node.Activate := StrToIntDef(Value, 1);
+  if Param = 'ATTR'  then Node.Attr := StrToIntDef(Value, 0);
+  if Param = 'TIME'  then Node.Time := StrToFloatDef(Value, Now);
+  if Param = 'COUNT' then Node.Count := StrToIntDef(Value, 0);
+  if Param = 'RUN'   then Node.RunCount := StrToIntDef(Value, 1);
+  if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1);
 end;
 
 function GetControls(Node: PNode): String;
@@ -176,7 +141,7 @@ begin
   Result := '';
   if Node = nil then Exit;
   if Node.Attr <> 0 then
-    Result := Result + '&' + 'ATTR' + '=' + IntToStr(Node.Attr); //merge strings
+    Result := Result + '&' + 'ATTR' + '=' + IntToStr(Node.Attr);
   if Node.Time <> 0 then
     Result := Result + '&' + 'TIME' + '=' + FloatToStr(Node.Time);
   if Node.Count <> 0 then
@@ -185,7 +150,7 @@ begin
     Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
   if Node.Activate <> 0 then
     Result := Result + '&' + 'ACTIVATE' + '=' + FloatToStr(Node.Activate);
-  Delete(Result, 1, 1); //del in first if symbol &
+  Delete(Result, 1, 1); //del &
 end;
 
 function TFocus.NextID: String;
@@ -227,12 +192,6 @@ begin
   else Local.ParentLocal := Node;
   Node.Local[High(Node.Local)] := Local;
   Result := Local;
-
-  {while Node <> nil do    //test
-  begin
-    Result.LocalName := Node.Name + Result.LocalName;
-    Node := Node.ParentIndex;
-  end;}
 end;
 
 function TFocus.AddLocal(Node: PNode): PNode;
@@ -246,26 +205,6 @@ begin
   Result.Name := Value;
   Result.Attr := naData;
   Node.Value := Result;
-end;
-
-function TFocus.AddField(Node: PNode; Field: PNode): PNode; //not workt
-var i: Integer;
-begin
-  Result := nil;
-  Field.Source := nil;
-  if Node.Source <> nil then
-    Node := Node.Source;
-  for i:=0 to High(Node.Fields) do
-    if Node.Fields[i].ParentName = Field.ParentName then
-    begin
-      Result := Node.Fields[i];
-      Exit;
-    end;
-  AddSubNode(Node.Fields);
-  Field.ParentField := Node;
-  Field.Value := nil;
-  Node.Fields[High(Node.Fields)] := Field;
-  Result := Field;
 end;
 
 function TFocus.AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
@@ -427,7 +366,7 @@ begin
   else Result := nil;
 end;
 
-procedure TFocus.NewModule(Node: PNode);  //change name to LoadFile
+procedure TFocus.LoadModule(Node: PNode);
 var
   i: Integer;
   Func, PrevModule: PNode;
@@ -608,34 +547,32 @@ begin
   end;
 end;
 
-function  TFocus.NewNode(Line: String): PNode;      //fastload
-begin Result := NewNode(TLink.Create(Line)); end;
+function TFocus.NewNode(Line: String): PNode;
+var Link: TLink;
+begin
+  Link := TLink.Create(Line); //fastload
+  Result := NewNode(Link);
+  Link.Destroy;
+end;
 
 function TFocus.NewNode(Line: TLink): PNode;
 var
   i: Integer;
   Node: PNode;
-  IsPointer: Boolean;
 begin
-  IsPointer := False;
-  if (Length(Line.Name) <> 0) and (Line.Name[1] = '*') then
-  begin
-    Delete(Line.Name, 1, 1);
-    IsPointer := True;
-  end;
-  if (Line.Name = '') and (High(Line.Names) <> -1) then
-    Line.Name := NextID;
-  Result := NewIndex(Line.Name);
+  if (Line.ID = '') and (High(Line.Names) <> -1) then
+    Line.ID := NextID;
+  Result := NewIndex(Line.ID);
   if Result = nil then Exit;
-  if Line.Name[1] <> '@' then
+  if Line.ID[1] <> '@' then
     Result := AddLocal(Result);
 
-  case Line.Name[1] of
+  case Line.ID[1] of
     '!' : Result.Attr := naData;
     '@' : Result.Attr := naNode;
     '/' : Result.Attr := naModule;
     '0'..'9', '-':
-        if Pos(',', Line.Name) = 0
+        if Pos(',', Line.ID) = 0
         then Result.Attr := naInt
         else Result.Attr := naFloat;
     else  Result.Attr := naWord;
@@ -648,8 +585,6 @@ begin
   begin
     if Line.FType = nil then
       Result.Source := FindNode(Result.ParentName);
-    for i:=1 to High(Line.Path) do
-      Result := AddField(Result, NewNode(Line.Path[i]));
   end;
 
   if Line.Source <> '' then
@@ -664,17 +599,17 @@ begin
     AddParam(Result, NewNode(Line.Params[i]), i);
   if Result.Attr = naData then
   begin
-    AddValue(Result, DecodeName(Copy(Line.Name, 2, MaxInt)));
+    AddValue(Result, DecodeName(Copy(Line.ID, 2, MaxInt)));
     Result.Value.Attr := naData;
   end;
   if Result.Attr = naInt then
   begin
-    Result.Value := NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Line.Name))));
+    Result.Value := NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Line.ID))));
     Result.FType := NewNode('!' + ntInt);
   end;
   if Result.Attr = naFloat then
   begin
-    Result.Value := NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Line.Name))));
+    Result.Value := NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Line.ID))));
     Result.FType := NewNode('!' + ntFloat);
   end;
   if Line.FElse <> nil then
@@ -692,6 +627,205 @@ begin
   if Result.Source <> nil then
     Inc(Result.Source.RefCount);
   AddEvent(Result);
+end;
+
+procedure TFocus.AddEvent(Node: PNode);
+var Event, NewEvent: PEvent;
+begin
+  Node.SaveTime := Now + GarbageInterval;  
+
+  Event := TimeManager;
+  while True do
+  begin
+    if Event = nil then
+    begin
+      Event := AllocMem(SizeOf(TEvent));
+      Event.FBegin:= Node.SaveTime;
+      Event.FEnd  := Node.SaveTime + GarbageInterval;
+      SetLength(Event.Nodes, High(Event.Nodes) + 2);
+      Event.Nodes[High(Event.Nodes)] := Node;
+      if TimeManager = nil then
+        TimeManager := Event;
+      Break;
+    end
+    else
+    if (Node.SaveTime >= Event.FBegin) and (Node.SaveTime <= Event.FEnd) then
+    begin
+      SetLength(Event.Nodes, High(Event.Nodes) + 2);
+      Event.Nodes[High(Event.Nodes)] := Node;
+      Break;
+    end
+    else
+    if (Event.Next = nil) or (Node.SaveTime < Event.Next.FBegin) then
+    begin
+      NewEvent := AllocMem(SizeOf(TEvent));
+      NewEvent.FBegin:= Node.SaveTime;
+      NewEvent.FEnd  := Node.SaveTime + GarbageInterval;
+      SetLength(NewEvent.Nodes, High(NewEvent.Nodes) + 2);
+      NewEvent.Nodes[High(NewEvent.Nodes)] := Node;
+      Event.Next := NewEvent;
+      Break;
+    end;
+    Event := Event.Next;
+  end;
+end;
+
+
+//NodeUtils
+function ToFileSystemName(var Indexes: array of String): String;
+var
+  i, j: Integer;
+  Index: String;
+const
+  IllegalCharacters = [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|'];
+  IllegalFileNames: array[0..0] of String = ('con') ;
+begin
+  Result := '';
+  for i:=0 to High(Indexes) - 1{Root} do
+  begin
+    Index := Indexes[i];
+    if Length(Index) = 1 then
+    begin
+      if Index[1] in IllegalCharacters then
+        Index := IntToHex(Ord(Index[1]), 2);
+    end
+    else
+    begin
+      for j:=0 to High(IllegalFileNames) do
+        if Index = IllegalFileNames[i] then
+          Indexes[i] := Indexes[i] + '1';
+    end;
+  end;
+end;
+
+function CreateIndexesDirTree(Indexes: array of String): String;
+var
+  i: Integer;
+begin
+
+end;
+
+procedure TFocus.SaveNode(Node: PNode);
+var
+  ParentIndex, BufNode: PNode;
+  Indexes: array of String;
+  procedure DeleteArrayValue(var Arr: ANode; Value: Pointer);
+  var i: Integer;
+  begin
+    for i:=0 to High(Arr) do
+      if Arr[i] = Value then
+      begin
+        Arr[i] := Arr[High(Arr)];
+        SetLength(Arr, High(Arr));
+        Exit;
+      end;
+  end;
+begin
+  if Node = nil then Exit;
+  while (Node.SaveTime = 0) and (High(Node.Local) = -1) and (Node.RefCount = 0) and (High(Node.Index) = -1)  do
+  begin
+    if Node.ParentName <> nil then
+    begin
+      DeleteArrayValue(Node.ParentName.Local, Node);
+      SaveNode(Node.ParentName);
+    end;
+    if Node.ParentLocal <> nil then
+    begin
+      DeleteArrayValue(Node.ParentLocal.Local, Node);
+      SaveNode(Node.ParentLocal);
+    end;
+    if Node.Source <> nil then
+    begin
+      Dec(Node.Source.RefCount);
+      SaveNode(Node.Source);
+    end;
+
+    BufNode := Node;
+    while BufNode <> nil do
+    begin
+      SetLength(Indexes, Length(Indexes) + 1);
+      Indexes[High(Indexes)] := BufNode.Name;
+      BufNode := BufNode.ParentIndex;
+    end;
+    ToFileSystemName(Indexes);
+    CreateIndexesDirTree(Indexes);
+
+    ParentIndex := Node.ParentIndex;
+    DeleteArrayValue(ParentIndex.Index, Node);
+
+    Dispose(Node);
+    Dec(NodesCount);
+    Node := ParentIndex;
+  end;
+end;
+
+
+procedure TFocus.GarbageCollector;
+var
+  i: Integer;
+  DeleteEvent: PEvent; //del
+begin
+  GarbageInterval := Now - GarbageLastRun;
+  GarbageLastRun := Now;
+  while (TimeManager <> nil) and (Now >= TimeManager.FEnd) do
+  begin
+    for i:=0 to High(TimeManager.Nodes) do
+      if (TimeManager.Nodes[i].SaveTime >= TimeManager.FBegin) and
+         (TimeManager.Nodes[i].SaveTime <= TimeManager.FEnd) then
+      begin
+        TimeManager.Nodes[i].SaveTime := 0;
+        SaveNode(TimeManager.Nodes[i]);
+      end;
+    TimeManager.Nodes := nil;
+    DeleteEvent := TimeManager;
+    TimeManager := TimeManager.Next;
+    Dispose(DeleteEvent);
+  end;
+end;
+
+function TFocus.GetNodeBody(Node: PNode): String;
+var
+  Str, Controls: String;
+  i: Integer;
+begin
+  Result := '';
+  if Node = nil then Exit;
+  if Node.Source <> nil then
+    Result := Result + GetIndex(Node.Source) + '^';
+  if Node.ParentName <> nil then
+    Result := Result + {EncodeName}(GetIndex(Node.ParentName){, 2});
+  Result := Result + GetIndex(Node);
+  Result := Result + '$' + GetControls(Node);
+  if Node.FType <> nil then
+    Result := Result + ':' + GetIndex(Node.FType);
+  Str := '';
+  for i:=0 to High(Node.Params) do
+    Str := Str + GetIndex(Node.Params[i]) + '&';
+  if Str <> '' then
+  begin
+    Delete(Str, Length(Str), 1);
+    Result := Result + '?' + Str {+ ';'};
+  end;
+  if (Node.FTrue <> nil) or (Node.FElse <> nil) then
+  begin
+    if Node.FTrue <> nil then
+      Result := Result + '#' + GetIndex(Node.FTrue);
+    Result := Result + '|';
+    if Node.FElse <> nil then
+      Result := Result + GetIndex(Node.FElse);
+  end
+  else
+  if Node.Value <> nil then
+  begin
+    if Node.Value.Attr = naData then
+      Result := Result + '#' + EncodeName(Node.Value.Name)
+    else
+      Result := Result + '#' + GetIndex(Node.Value);
+  end;
+  if Node.Next <> nil then
+    Result := Result + #10 + GetIndex(Node.Next);
+  for i:=0 to High(Node.Local) do
+    Result := Result + #10#10 + GetIndex(Node.Local[i]);
 end;
 
 function CompareWithZero(Node: PNode): Integer;
@@ -713,14 +847,8 @@ begin
   NextNode:
   if Node = nil then Exit;
 
-  {if Node.Exception = 1 then
-    ExceptionFlag1 := True;
-
-  if ExceptionFlag1 = True then      //exit in top
-    Exit;}
-
   if Node.Attr = naModule then
-    NewModule(Node);
+    LoadModule(Node);
   for i:=0 to High(Node.Params) do  //run params
     Run(Node.Params[i]);
   if (Node.Source <> nil) and (((Node.Source.ParentLocal = Module) and (Node.Source.Next <> nil))
@@ -777,113 +905,6 @@ begin
   PrevNode := NextNode;
 end;
 
-procedure TFocus.SaveNode(Node: PNode);
-var ParentIndex: PNode;
-  procedure DeleteArrayValue(var Arr: ANode; Value: Pointer);
-  var i: Integer;
-  begin
-    for i:=0 to High(Arr) do
-      if Arr[i] = Value then
-      begin
-        Arr[i] := Arr[High(Arr)];
-        SetLength(Arr, High(Arr));
-        Exit;
-      end;
-  end;
-begin
-  if Node = nil then Exit;
-  while (Node.SaveTime = 0) and (High(Node.Local) = -1) and (Node.RefCount = 0) and (High(Node.Index) = -1)  do
-  begin
-    if Node.ParentName <> nil then
-    begin
-      DeleteArrayValue(Node.ParentName.Local, Node);
-      SaveNode(Node.ParentName);
-    end;
-    if Node.ParentLocal <> nil then
-    begin
-      DeleteArrayValue(Node.ParentLocal.Local, Node);
-      SaveNode(Node.ParentLocal);
-    end;
-
-    if Node.Source <> nil then
-    begin
-      Dec(Node.Source.RefCount);
-      SaveNode(Node.Source);
-    end;
-
-    ParentIndex := Node.ParentIndex;
-    DeleteArrayValue(ParentIndex.Index, Node);
-
-    Dispose(Node);
-    Dec(NodesCount);
-    Node := ParentIndex;
-  end;
-end;
-
-procedure TFocus.AddEvent(Node: PNode);
-var Event, NewEvent: PEvent;
-begin
-  Node.SaveTime := Now + GarbageInterval;     //formula
-
-  Event := TimeLine;
-  while True do
-  begin
-    if Event = nil then
-    begin
-      Event := AllocMem(SizeOf(TEvent));
-      Event.FBegin:= Node.SaveTime;
-      Event.FEnd  := Node.SaveTime + GarbageInterval;
-      SetLength(Event.Nodes, High(Event.Nodes) + 2);
-      Event.Nodes[High(Event.Nodes)] := Node;
-      if TimeLine = nil then
-        TimeLine := Event;
-      Break;
-    end
-    else
-    if (Node.SaveTime >= Event.FBegin) and (Node.SaveTime <= Event.FEnd) then
-    begin
-      SetLength(Event.Nodes, High(Event.Nodes) + 2);
-      Event.Nodes[High(Event.Nodes)] := Node;
-      Break;
-    end
-    else
-    if (Event.Next = nil) or (Node.SaveTime < Event.Next.FBegin) then
-    begin
-      NewEvent := AllocMem(SizeOf(TEvent));
-      NewEvent.FBegin:= Node.SaveTime;
-      NewEvent.FEnd  := Node.SaveTime + GarbageInterval;
-      SetLength(NewEvent.Nodes, High(NewEvent.Nodes) + 2);
-      NewEvent.Nodes[High(NewEvent.Nodes)] := Node;
-      Event.Next := NewEvent;
-      Break;
-    end;
-    Event := Event.Next;
-  end;
-end;
-
-procedure TFocus.GarbageCollector;
-var
-  i: Integer;
-  DeleteEvent: PEvent; //del
-begin
-  GarbageInterval := Now - GarbageLastRun;
-  GarbageLastRun := Now;
-  while (TimeLine <> nil) and (Now >= TimeLine.FEnd) do
-  begin
-    for i:=0 to High(TimeLine.Nodes) do
-      if (TimeLine.Nodes[i].SaveTime >= TimeLine.FBegin) and
-         (TimeLine.Nodes[i].SaveTime <= TimeLine.FEnd) then
-      begin
-        TimeLine.Nodes[i].SaveTime := 0;
-        SaveNode(TimeLine.Nodes[i]);
-      end;
-    TimeLine.Nodes := nil;
-    DeleteEvent := TimeLine;
-    TimeLine := TimeLine.Next;
-    Dispose(DeleteEvent);
-  end;
-end;
-
 function TFocus.Execute(Line: String): PNode;
 var
   Data: String;
@@ -897,132 +918,11 @@ begin
     begin
       if Result.RunCount = 0 then
         Result.RunCount := 1;
+      //for i:=1 to Result.RunCount do //del
       Run(Result);
       Result.Activate := 0;
     end;
-    {for i:=1 to Result.RunCount do //del
-    begin
-      Run(Result);
-      if ExceptionFlag1 = True then //except
-        Break;
-    end; }
   end;
 end;
 
-
-
-function TFocus.GetNodeBody(Node: PNode): String;
-var
-  Str, Controls: String;
-  i: Integer;
-begin
-  Result := '';
-  if Node = nil then Exit;
-  if Node.Source <> nil then
-    Result := Result + GetIndex(Node.Source) + '^';
-  if Node.ParentName <> nil then
-    Result := Result + {EncodeName}(GetIndex(Node.ParentName){, 2});
-  Result := Result + GetIndex(Node);
-  Result := Result + '$' + GetControls(Node);
-  if Node.FType <> nil then
-    Result := Result + ':' + GetIndex(Node.FType);
-  Str := '';
-  for i:=0 to High(Node.Params) do
-    Str := Str + GetIndex(Node.Params[i]) + '&';
-  if Str <> '' then
-  begin
-    Delete(Str, Length(Str), 1);
-    Result := Result + '?' + Str {+ ';'};
-  end;
-  if (Node.FTrue <> nil) or (Node.FElse <> nil) then
-  begin
-    if Node.FTrue <> nil then
-      Result := Result + '#' + GetIndex(Node.FTrue);
-    Result := Result + '|';
-    if Node.FElse <> nil then
-      Result := Result + GetIndex(Node.FElse);
-  end
-  else
-  if Node.Value <> nil then
-  begin
-    if Node.Value.Attr = naData then
-      Result := Result + '#' + EncodeName(Node.Value.Name)
-    else
-      Result := Result + '#' + GetIndex(Node.Value);
-  end;
-  if Node.Next <> nil then
-    Result := Result + #10 + GetIndex(Node.Next);
-  for i:=0 to High(Node.Local) do
-    Result := Result + #10#10 + GetIndex(Node.Local[i]);
-end;
-
-
-{
-constructor TLink.CreateName(SourceNode, NameNode, IdNode, ControlsNode: String);
-begin
-  inherited Create;
-  if IdNode = '' then Exit;
-  if SourceNode <> '' then
-    Source := SourceNode;
-  if NameNode <> '' then
-    Name := Name + NameNode;
-  Name := Name + IdNode;
-  if ControlsNode <> '' then
-    Name := Name + '$' + ControlsNode;
-end;
-
-procedure TFocus.SaveNode(Node: PNode);
-var
-  Line: TLink;
-  List: TStringList;
-  IndexNode, IndexWin: String;
-  i: Integer;
-  Parent, BufNode: PNode;
-
-function SaveName(Node: PNode): String;
-begin
-  Result := '';
-  if Node = nil then Exit;
-  if (Node.Attr = naData) or (Node.Attr = naFile) or (Node.Attr = naNode)
-  then Result := EncodeName(GetIndex(Node), 2)
-  else Result := EncodeName(GetIndex(Node), 1);
-end;
-
-begin
-  if Node = nil then Exit;
-  CreateDir(RootPath);
-
-  //with TLink.CreateName(SaveName(Node.Source), SaveName(Node.ParentName), SaveName(Node), '') of
-  //begin
-  List := TStringList.Create;
-  Line :=
-
-  if Node.Attr <> naIndex then
-  begin
-    List.Text := Line.GetLine;
-    if Node.Next <> nil then
-      List.Add(SaveName(Node.Next));
-    for i:=0 to High(Node.Local) do
-      List.Add(#10 + SaveName(Node.Local[i]));
-
-    IndexNode := GetIndex(Node);
-    IndexWin  := RootPath;
-    for i:=1 to Length(IndexNode) do
-    begin
-      if IndexNode[i] in ForbiddenCharacters
-      then IndexWin := IndexWin + '\' + IntToHex(Ord(IndexNode[i]), 2)
-      else IndexWin := IndexWin + '\' + IndexNode[i];
-        CreateDir(IndexWin);
-    end;
-    List.SaveToFile(IndexWin + '\Node.node');
-    if Node.Source <> nil then
-      Dec(Node.Source.RefCount);
-  end;
-  Line.Free;
-  List.Free;
-  end;
-end;        }
-
-initialization
-  //Base := TFocus.Create;
 end.

@@ -1,17 +1,7 @@
 unit NodeLink;
-// *
-// * NodeLink ver 1.0
-// * source^name@id$vars:type?params#values|else
-// *
-{
 
+  // ver 1.0
 
-  Link: TLink;
-begin
-  Link := TLink.Create('name$run');
-  ShowMessage(Link.ControlsValues[0]);
-  Exit;
-  }
 
 interface
 
@@ -25,19 +15,19 @@ type
 
   TLink = class
   public
-    Name: string;
-    Path: array of string;
-    ParentLocal: string;
-    Source: string;
-    Names: array of String;       //to ControlNames
-    Values: array of String;       //property Controls[Index: Integer]: string read Get write Put;
-    FType: TLink;
-    Local: array of TLink;
-    Params: array of TLink;
-    Value: TLink;
-    FElse: TLink;
-    constructor Script(var LURI: String; FirstRun: Boolean = False);
-    constructor Create(LURI: string);
+    ID        : String;
+    Path        : Array of String;
+    Name : String;
+    Source      : String;
+    Names       : Array of String;      //Controls | vars
+    Values      : Array of String;
+    FType       : TLink;                //TLink_or_String?
+    Local       : Array of TLink;
+    Params      : Array of TLink;
+    Value       : TLink;
+    FElse       : TLink;
+    constructor Create(LURI: String);
+    constructor RecParse(var LURI: String; FirstRun: Boolean = False);
     destructor Destroy;
   end;
 
@@ -49,18 +39,18 @@ implementation
 
 constructor TLink.Create(LURI: string);
 begin
-  Script(LURI, True);
+  RecParse(LURI, True);
 end;
-                                                         
+
                                                          //потокова€ обработка ссылок
-constructor TLink.Script(var LURI: String; FirstRun: Boolean = False);   //более сложную дл€ пользовател€
+constructor TLink.RecParse(var LURI: String; FirstRun: Boolean = False);   //более сложную дл€ пользовател€
+//Source^Name@ID$Names=Values:FType?Params#Value|FElse
 var
   s, LS, Str: string;
-  Index, i, LocalIndex: Integer;         //нету загрузки local как @1\n\n@2\n\n@3\n\n
-  List: TStringList;
+  Index, i: Integer;         //нету загрузки local как @1\n\n@2\n\n@3\n\n
 begin
   if length(LURI) = 0 then Exit;                               //выход если пусто
-  Name := '';
+  ID := '';
   s := ''; LS := ''; Str := '';
 
   Index := NextIndex(0, [' '], LURI);
@@ -75,7 +65,7 @@ begin
     Index := NextIndex(0, [' '], LS);
     s := Copy(LS, 1, Index-1);
     SetLength(Local, High(Local)+2);                                //Local
-    Local[High(Local)] := TLink.Script(s);
+    Local[High(Local)] := TLink.RecParse(s);
     Delete(LS, 1, Index);
   end;
 
@@ -84,29 +74,29 @@ begin
 
   if Index > 1 then
   begin
-    Name := Copy(LURI, 1, Index - 1);    //Name
-    Source := Copy(Name, 1, Pos('^', Name) - 1);                      //Source
-    Delete(Name, 1, Pos('^', Name));
-    if Length(Name) > 0 then
+    ID := Copy(LURI, 1, Index - 1);    //ID
+    Source := Copy(ID, 1, Pos('^', ID) - 1);                      //Source
+    Delete(ID, 1, Pos('^', ID));
+    if Length(ID) > 0 then
     begin
-      ParentLocal := Copy(Name, 1, Pos('@', Name) - 1);               //ParentLocal
-      Delete(Name, 1, Pos('@', Name)-1);
+      Name := Copy(ID, 1, Pos('@', ID) - 1);               //Name
+      Delete(ID, 1, Pos('@', ID)-1);
     end;
     Delete(LURI, 1, Index-1);
-    if NextIndex(0, ['\', '/'], Name) <> MaxInt then               //обработка до функции
+    if NextIndex(0, ['\', '/'], ID) <> MaxInt then               //обработка до функции
     begin
-      for i:=0 to Length(Name) do
-        if Name[i] = '\' then
-          Name[i] := '/';
-      if not (Name[1] in ['\', '/']) then
-        Name := '/' + Name;
+      for i:=0 to Length(ID) do
+        if ID[i] = '\' then
+          ID[i] := '/';
+      if not (ID[1] in ['\', '/']) then
+        ID := '/' + ID;
       SetLength(Path, 1);
-      Path[0] := Name;                                              //Path
+      Path[0] := ID;                                              //Path
     end;
-    if Name[1] = '!' then
+    if ID[1] = '!' then
     begin                                                          //?
       SetLength(Path, 1);
-      Path[0] := Name;
+      Path[0] := ID;
     end;
 
     if Length(LURI) = 0 then Exit;                                //?
@@ -172,21 +162,21 @@ begin
 
     if Index = MaxInt then                     //нету управл€ющих символов
     begin
-      FType := TLink.Script(LURI);
+      FType := TLink.RecParse(LURI);
       Delete(LURI, 1, Length(LURI));
     end
     else
     if LURI[Index] = '=' then
     begin
       s := Copy(LURI, 1, Index-1);
-      FType := TLink.Script(s);
+      FType := TLink.RecParse(s);
       Delete(LURI, 1, Index);
-      Value := TLink.Script(LURI);          //следующее значение
+      Value := TLink.RecParse(LURI);          //следующее значение
     end
     else
     begin
       if Length(LURI) > 0 then                 //дальше функци€
-        FType := TLink.Script(LURI);
+        FType := TLink.RecParse(LURI);
     end;
     Exit;
   end;
@@ -197,7 +187,7 @@ begin
     {Index := NextIndex(0, ['&', '#'], LURI);
     s := Copy(LURI, 1, Index-1);
     Delete(LURI, 1, Index-1);}
-    Value := TLink.Script(LURI);
+    Value := TLink.RecParse(LURI);
     Exit;
   end;
 
@@ -221,7 +211,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLink.Script(s);
+          Params[High(Params)] := TLink.RecParse(s);
         end
         else
           Break;
@@ -231,7 +221,7 @@ begin
       if LURI[Index] in [':', '='] then
       begin
         SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TLink.Script(LURI);
+        Params[High(Params)] := TLink.RecParse(LURI);
         Continue;
       end;
 
@@ -242,7 +232,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLink.Script(s);
+          Params[High(Params)] := TLink.RecParse(s);
         end;
         Continue;
       end;
@@ -254,7 +244,7 @@ begin
         if Length(s) > 0 then
         begin
           SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLink.Script(s);
+          Params[High(Params)] := TLink.RecParse(s);
         end;
         Break;
       end;
@@ -262,7 +252,7 @@ begin
       if LURI[Index] = '?' then
       begin
         SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TLink.Script(LURI);
+        Params[High(Params)] := TLink.RecParse(LURI);
       end;
 
     until False;
@@ -271,33 +261,26 @@ begin
   if (Length(LURI) > 0) and (LURI[1] = '#') and (FirstRun = True) then
   begin
     Delete(LURI, 1, 1);
-    Value := TLink.Script(LURI);
+    Value := TLink.RecParse(LURI);
   end;
 
   if (Length(LURI) > 0) and (LURI[1] = '|') then
   begin
     Delete(LURI, 1, 1);
-    FElse := TLink.Script(LURI);
+    FElse := TLink.RecParse(LURI);
   end;
-
 end;
 
 
-
-
-
-procedure FastParseNodeBaseLink(var Str: String);  //более простую дл€ базы
-// подразумеваетс€ что в строке есть символ @
-// если его нету то записываетс€ в ID
-//пример строки parent^name@id$controls?params#value|else
+procedure FastParse(var Str: String);  //более простую дл€ базы
+//Source^Name@Id$controls[not Ftype]?Params#Value|FElse
 var
-  i, Str_Length, Index_Parent, Index_ID, Index_Controls, Index_Params, Index_Value, Index_Felse: Integer;
-  Parent, Name, ID, Controls, Params, Value, Felse: String;
+  i, Index_Source, Index_ID, Index_Controls, Index_Params, Index_Value, Index_Felse: Integer;
+  SourceStr, NameStr, IdStr, Controls, ParamsStr, ValueStr, FElseStr: String;
   Chr: Char;
 begin
 
-
-  Index_Parent   := 0;
+  Index_Source   := 0;
   //Index_ID       := 0;
   Index_Controls := 0;
   Index_Params   := 0;
@@ -312,7 +295,7 @@ begin
       Index_ID := i
     else
       if Chr = '^' then     //последовательность ифов по веро€тности встречаемости
-        Index_Parent := i
+        Index_Source := i
       else
         if Chr = '$' then
           Index_Controls := i
@@ -334,14 +317,14 @@ begin
   //реализаци€ быстрой записи в переменные
   //перечислим все возможные ситуации не использу€ математические операции
   // ѕарсим с начала  parent^name@
-  if Index_Parent <> 0 then
+  if Index_Source <> 0 then
   begin
-    Parent := Copy(Str, 1, Index_Parent - 1);
-    Name := Copy(Str, Index_Parent - 1, Index_ID - Index_Parent - 1);
+    SourceStr := Copy(Str, 1, Index_Source - 1);
+    NameStr := Copy(Str, Index_Source - 1, Index_ID - Index_Source - 1);
   end
   else
   begin
-    Name := Copy(Str, 1, Index_ID - 1);
+    NameStr := Copy(Str, 1, Index_ID - 1);
   end;
 
   // ѕарсим с конца  @id$controls?params#value|else
@@ -349,140 +332,153 @@ begin
 
   if Index_Felse <> 0 then
   begin
-    Felse := Copy(Str, Index_Felse + 1, MaxInt);
+    FElseStr := Copy(Str, Index_Felse + 1, MaxInt);
     if Index_Value <> 0 then
     begin
-      Value := Copy(Str, Index_Value + 1, Index_Felse - Index_Value - 1);
+      ValueStr := Copy(Str, Index_Value + 1, Index_Felse - Index_Value - 1);
       if Index_Params <> 0 then
       begin
-        Params := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
+        ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
         if Index_Controls <> 0 then
         begin
           Controls := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
         end
         else
         begin
           Controls := '';
-          ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
         end;
       end
       else
       begin
-        Params := '';
+        ParamsStr := '';
         if Index_Controls <> 0 then
         begin
           Controls := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
         end
         else
         begin
           Controls := '';
-          ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
         end;
       end;
     end
     else
     begin
-      Value := '';
+      ValueStr := '';
       if Index_Params <> 0 then
       begin
-        Params := Copy(Str, Index_Params + 1, Index_Felse - Index_Params - 1);
+        ParamsStr := Copy(Str, Index_Params + 1, Index_Felse - Index_Params - 1);
         if Index_Controls <> 0 then
         begin
           Controls := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
         end
         else
         begin
           Controls := '';
-          ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
         end;
       end
       else
       begin
-        Params := '';
+        ParamsStr := '';
         if Index_Controls <> 0 then
         begin
           Controls := Copy(Str, Index_Controls + 1, Index_Felse - Index_Controls - 1);
-          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
         end
         else
         begin
           Controls := '';
-          ID := Copy(Str, Index_ID + 1, Index_Felse - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Felse - Index_ID - 1);
         end;
       end;
     end;
   end
   else
   begin
-    Felse := '';
+    FElseStr := '';
     if Index_Value <> 0 then
     begin
-      Value := Copy(Str, Index_Value + 1, MaxInt - Index_Value - 1);
+      ValueStr := Copy(Str, Index_Value + 1, MaxInt - Index_Value - 1);
       if Index_Params <> 0 then
       begin
-        Params := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
+        ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
         if Index_Controls <> 0 then
         begin
           Controls := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
         end
         else
         begin
           Controls := '';
-          ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
         end;
       end
       else
       begin
-        Params := '';
+        ParamsStr := '';
         if Index_Controls <> 0 then
         begin
           Controls := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
         end
         else
         begin
           Controls := '';
-          ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
         end;
       end;
     end
     else
     begin
-      Value := '';
+      ValueStr := '';
       if Index_Params <> 0 then
       begin
-        Params := Copy(Str, Index_Params + 1, MaxInt - Index_Params - 1);
+        ParamsStr := Copy(Str, Index_Params + 1, MaxInt - Index_Params - 1);
         if Index_Controls <> 0 then
         begin
           Controls := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
         end
         else
         begin
           Controls := '';
-          ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
         end;
       end
       else
       begin
-        Params := '';
+        ParamsStr := '';
         if Index_Controls <> 0 then
         begin
           Controls := Copy(Str, Index_Controls + 1, MaxInt - Index_Controls - 1);
-          ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
         end
         else
         begin
           Controls := '';
-          ID := Copy(Str, Index_ID + 1, MaxInt - Index_ID - 1);
+          IdStr := Copy(Str, Index_ID + 1, MaxInt - Index_ID - 1);
         end;
       end;
     end;
   end;
+
+
+  {ID := IdStr;
+  //Path
+  Name := NameStr;
+  Source := SourceStr;
+    Names       : Array of String;      //Controls | vars
+    Values      : Array of String;
+  //FType := TLink.Create(FTypeStr);
+    Local       : Array of TLink;
+    Params      : Array of TLink;
+  Value := TLink.Create(ValueStr);
+  FElse := TLink.Create(FElseStr);}
 end;
 
 
@@ -503,6 +499,9 @@ begin
       Local[i].Destroy;
   inherited Destroy;
 end;
+
+
+
 
 
 

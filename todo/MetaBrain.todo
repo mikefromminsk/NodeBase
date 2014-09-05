@@ -170,19 +170,23 @@ compare result
 
 
 
-RunGarbageCollector Timer Auto set
+[GarbageCollector]
+
+if Node.SaveTime = -1 then not Dispose //?
+
+controls Array of Double on frequesncy
+{ControlsName  : array of String;
+ControlsValues: array of String;}
 
 
+fastload
+
+RootPath = 'data'; //to options
+ 
+merge strings in GetControls
 
 
-
-
-
-
-
-
-
-
+for i:=0 to High( -> for i:=Low() to High(
 
 
 

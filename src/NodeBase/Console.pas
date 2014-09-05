@@ -284,8 +284,12 @@ begin
 end;
 
 procedure TGG.Timer1Timer(Sender: TObject);
+var
+  Count: Integer;
 begin
-  Base.GarbageCollector(Timer1.Interval);
+  count := Base.NodesCount;
+  Base.GarbageCollector;
+  ShowMessage(IntToStr(count - Base.NodesCount));
 end;
 
 end.
