@@ -5,7 +5,7 @@ uses
 
 {$R *.res}
 
-var i: Integer;
+//var i: Integer;
 
 begin
   Application.Initialize;

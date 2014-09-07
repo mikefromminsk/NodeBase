@@ -182,6 +182,7 @@ ControlsValues: array of String;}
 fastload
 
 RootPath = 'data'; //to options
+options in root vars
  
 merge strings in GetControls
 
@@ -189,7 +190,8 @@ merge strings in GetControls
 for i:=0 to High( -> for i:=Low() to High(
 
 
-
+all parent**** change to refcount
+when dispose
 
 
 

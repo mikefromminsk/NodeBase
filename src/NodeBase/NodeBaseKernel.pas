@@ -18,18 +18,20 @@ type
 
     Name          : String;     
     Index         : ANode;
-    ParentName    : PNode;
     ParentIndex   : PNode;
+    Source        : PNode;
+    ParentName    : PNode;
+    FType         : PNode;
+    Params        : ANode;
+    ParentParams  : PNode;
     Local         : ANode;
     ParentLocal   : PNode;
     Value         : PNode;
-    ParentField   : PNode;
-    Source        : PNode;
-    FType         : PNode;
+    ParentValue   : PNode;
     FTrue         : PNode;
+    ParentFTrue   : PNode;
     FElse         : PNode;
-    ParentParams  : PNode;
-    Params        : ANode;
+    ParentFElse   : PNode;
     Prev          : PNode;
     Next          : PNode;
   //public
@@ -99,7 +101,7 @@ type
 const
 
 //NodeAttribyte
-  naIndex = 0;            //sort
+  naEmpty = 0;            //sort
   naWord = 1;
   naNode = 2;
   naData = 3;
@@ -169,7 +171,7 @@ end;
 function TFocus.AddIndex(Node: PNode; Name: Char): PNode;
 begin
   Result := AddSubNode(Node.Index);
-  Result.Attr := naIndex;
+  Result.Attr := naEmpty;
   Result.Name := Name;
   Result.ParentIndex := Node;
   Result := Node.Index[High(Node.Index)];
@@ -187,7 +189,7 @@ end;
 function TFocus.AddLocal(Node: PNode; Local: PNode): PNode;
 begin
   AddSubNode(Node.Local);
-  if Node.Attr = naIndex
+  if Node.Attr = naEmpty
   then Local.ParentName  := Node
   else Local.ParentLocal := Node;
   Node.Local[High(Node.Local)] := Local;
@@ -204,6 +206,7 @@ begin
   Result := AllocMem(SizeOf(TNode));
   Result.Name := Value;
   Result.Attr := naData;
+  Result.ParentValue := Node;
   Node.Value := Result;
 end;
 
@@ -231,6 +234,7 @@ begin
     if Index <= High(Node.Params) then
     begin
       Result := Node.Params[Index];
+      Param.ParentParams := Node;
       if Result <> Param then
         Result.Value := Param;
     end;
@@ -252,11 +256,19 @@ function TFocus.SetValue(Node: PNode; Value: String): PNode;
 begin
   Result := AddValue(Node, Value);
   if Node.Source <> nil then
+  begin
+    {if Node.Source.Value <> nil then
+      Node.Source.Value.ParentValue := nil; }
     Node.Source.Value := Result;
+  end;
 end;
 
 function TFocus.SetValue(Node: PNode; Value: PNode): PNode;
 begin
+{  if Node.Value <> nil then
+    Node.Value.ParentValue := nil;}
+  if Value <> nil then
+    Value.ParentValue := Node;
   Node.Value := Value;
 end;
 
@@ -511,8 +523,6 @@ begin
     for i:=0 to High(Node.Local) do
     begin
       Local := Node.Local[i];
-      while Local.ParentField <> nil do
-        Local := Local.ParentField;
       if Local.Attr = naModule then
       begin
         Result := FindInNode(Local, Index);
@@ -600,26 +610,30 @@ begin
   if Result.Attr = naData then
   begin
     AddValue(Result, DecodeName(Copy(Line.ID, 2, MaxInt)));
-    Result.Value.Attr := naData;
   end;
   if Result.Attr = naInt then
   begin
-    Result.Value := NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Line.ID))));
+    SetValue(Result, NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Line.ID)))));
     Result.FType := NewNode('!' + ntInt);
   end;
   if Result.Attr = naFloat then
   begin
-    Result.Value := NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Line.ID))));
+    SetValue(Result, NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Line.ID)))));
     Result.FType := NewNode('!' + ntFloat);
   end;
   if Line.FElse <> nil then
   begin
     Result.FTrue := NewNode(Line.Value);
-    Result.FElse := NewNode(Line.FElse);
+    Result.FTrue.ParentFTrue := Result;
+    if Line.FElse.Name <> '' then
+    begin
+      Result.FElse := NewNode(Line.FElse);
+      Result.FElse.ParentFElse := Result;
+    end;
   end
   else
   if Line.Value <> nil then
-    Result.Value := NewNode(Line.Value);
+    SetValue(Result, NewNode(Line.Value));
   if Line.FType <> nil then
     Result.FType := NewNode(Line.FType);
   for i:=0 to High(Line.Local) do
@@ -699,16 +713,32 @@ begin
 end;
 
 function CreateIndexesDirTree(Indexes: array of String): String;
-var
-  i: Integer;
+var i: Integer;  //c:\data\@\1\
 begin
+  Result := '';
+  for i:=High(Indexes) downto 0 do
+  begin
+    Result := Result + Indexes[i];
+    CreateDir(Result);
+    Result := Result + '\';
+  end;
+end;
 
+function SaveToFile(FileName: String; Data: String): Integer;
+var List: TStringList;
+begin
+  Result := 1; //Unable error
+  List := TStringList.Create;
+  List.Text := Data;
+  List.SaveToFile(FileName);
+  Result := 0; //Successful
 end;
 
 procedure TFocus.SaveNode(Node: PNode);
 var
   ParentIndex, BufNode: PNode;
   Indexes: array of String;
+  IndexesPath: String;
   procedure DeleteArrayValue(var Arr: ANode; Value: Pointer);
   var i: Integer;
   begin
@@ -722,8 +752,25 @@ var
   end;
 begin
   if Node = nil then Exit;
-  while (Node.SaveTime = 0) and (High(Node.Local) = -1) and (Node.RefCount = 0) and (High(Node.Index) = -1)  do
+  while (Node.SaveTime = 0) and (High(Node.Local) = -1) and (Node.RefCount = 0)
+    and (High(Node.Index) = -1) and (Node.ParentValue = nil) do
   begin
+
+    if Node.Attr <> naEmpty then
+    begin
+      SetLength(Indexes, 0);
+      BufNode := Node;
+      while BufNode <> nil do
+      begin
+        SetLength(Indexes, Length(Indexes) + 1);
+        Indexes[High(Indexes)] := BufNode.Name;
+        BufNode := BufNode.ParentIndex;
+      end;
+      ToFileSystemName(Indexes);
+      IndexesPath := CreateIndexesDirTree(Indexes);
+      SaveToFile(IndexesPath + 'Node.txt', GetNodeBody(Node));
+    end;
+
     if Node.ParentName <> nil then
     begin
       DeleteArrayValue(Node.ParentName.Local, Node);
@@ -734,25 +781,36 @@ begin
       DeleteArrayValue(Node.ParentLocal.Local, Node);
       SaveNode(Node.ParentLocal);
     end;
+    if Node.ParentParams <> nil then
+    begin
+      DeleteArrayValue(Node.ParentParams.Params, Node);
+      SaveNode(Node.ParentParams);
+    end;
     if Node.Source <> nil then
     begin
       Dec(Node.Source.RefCount);
       SaveNode(Node.Source);
     end;
-
-    BufNode := Node;
-    while BufNode <> nil do
+    if Node.Value <> nil then
     begin
-      SetLength(Indexes, Length(Indexes) + 1);
-      Indexes[High(Indexes)] := BufNode.Name;
-      BufNode := BufNode.ParentIndex;
+      if Node.Value.Attr = naData then
+      begin
+        Node.Attr := -1;
+        Dispose(Node.Value);
+      end
+      else
+        SaveNode(Node.ParentValue);
+    end; 
+    if Node.ParentFTrue <> nil then
+    begin
+      DeleteArrayValue(Node.ParentParams.Params, Node);
+      SaveNode(Node.ParentParams);
     end;
-    ToFileSystemName(Indexes);
-    CreateIndexesDirTree(Indexes);
 
     ParentIndex := Node.ParentIndex;
     DeleteArrayValue(ParentIndex.Index, Node);
 
+    Node.Attr := -1;
     Dispose(Node);
     Dec(NodesCount);
     Node := ParentIndex;
@@ -792,12 +850,12 @@ begin
   if Node = nil then Exit;
   if Node.Source <> nil then
     Result := Result + GetIndex(Node.Source) + '^';
-  if Node.ParentName <> nil then
-    Result := Result + {EncodeName}(GetIndex(Node.ParentName){, 2});
+  (*if Node.ParentName <> nil then
+    Result := Result + {EncodeName}(GetIndex(Node.ParentName){, 2});*)
   Result := Result + GetIndex(Node);
   Result := Result + '$' + GetControls(Node);
-  if Node.FType <> nil then
-    Result := Result + ':' + GetIndex(Node.FType);
+  {if Node.FType <> nil then
+    Result := Result + ':' + GetIndex(Node.FType);}
   Str := '';
   for i:=0 to High(Node.Params) do
     Str := Str + GetIndex(Node.Params[i]) + '&';
