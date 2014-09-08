@@ -10,7 +10,7 @@ type
 
   PNode = ^TNode;
   ANode = array of PNode;
-
+  AString = array of String;
   
   TNode = record
 
@@ -85,12 +85,16 @@ type
     function NewIndex(Name: String): PNode;
     procedure LoadModule(Node: PNode);
     procedure CallFunc(Node: PNode);
+    function LoadNode(Node: PNode): PNode;
     function FindNode(Index: PNode): PNode;
     function NewNode(Line: String): PNode; overload;
     function NewNode(Line: TLink): PNode; overload;
     procedure AddEvent(Node: PNode);
     procedure SaveNode(Node: PNode);
     procedure GarbageCollector;
+    procedure RecursiveSave(Node: PNode);
+    procedure RecursiveDispose(Node: PNode);
+    procedure Clear;
     function GetNodeBody(Node: PNode): String;
     procedure Run(Node: PNode);
     procedure NextNode(var PrevNode: PNode; NextNode: PNode);
@@ -110,10 +114,13 @@ const
   naInt = 7;
   naFloat = 8;
   naRoot = 9;
+  naLoad = 10;
 
 //NameType
   ntInt = 'int';
   ntFloat = 'float';
+
+  NodeFileName = 'Node.txt';
 
 implementation
 
@@ -123,7 +130,7 @@ begin
   NodesCount := 0;
   Root := AllocMem(SizeOf(TNode));
   Root.Attr := naRoot;
-  Root.Name := 'c:\data';
+  Root.Name := 'data';
   Module := NewNode('root');
 end;
 
@@ -378,128 +385,6 @@ begin
   else Result := nil;
 end;
 
-procedure TFocus.LoadModule(Node: PNode);
-var
-  i: Integer;
-  Func, PrevModule: PNode;
-  List: TStrings;
-  FileName, FileExt: String;
-begin
-  FileName := Copy(GetIndex(Node.ParentName), 2, MaxInt);
-  if not FileExists(FileName) then Exit;
-  List := TStringList.Create;
-  FileExt := LowerCase(ExtractFileExt(FileName));
-  if (FileExt = '.dll') then
-  begin
-    if Node.Handle = 0 then
-    begin
-      Node.Handle := GetImageFunctionList(FileName, List);
-      for i:=0 to List.Count-1 do
-      begin
-        Func := NewNode(List.Strings[i]);
-        Func.Attr := naDLLFunc;
-        Func.Handle := GetProcAddress(Node.Handle, List.Strings[i]);
-        AddLocal(Node, Func);
-      end;
-    end;
-  end
-  else
-  if FileExt = '.node' then
-  begin
-    PrevModule := Module;
-    Module := Node;
-    List.LoadFromFile(FileName);
-    for i:=0 to List.Count-1 do
-      Execute(List.Strings[i]);
-    Module := PrevModule;
-  end;
-  List.Free;
-end;
-
-procedure TFocus.CallFunc(Node: PNode);
-var
-  Value: PNode;
-  Params, Param: String;
-  Stack: array of Integer;
-  Func, FourByte, i, BVal, ParamCount,
-  EAXParam, EDXParam, ECXParam, RegParamCount: Integer;
-  DBVal: Double;
-  IfFloat: Integer;
-begin
-  BVal := BVal + 1;
-  Func := Node.Handle;
-  if (Func = 0) then Exit;
-  EAXParam := 0; EDXParam := 0; ECXParam := 0; RegParamCount := 0;
-  
-
-  for i:=0 to High(Node.Params) do
-  begin
-    Value := GetData(Node.Params[i]);
-    if Value = nil then Exit
-    else
-    begin
-      Param := Value.Name;
-
-      if Length(Param) > 4 then
-        Params := StringOfChar(#0, Length(Param) mod 4) + Param + Params;
-
-      if Length(Param) < 4 then
-        Params := StringOfChar(#0, 4 - Length(Param)) + Param + Params;
-
-      if Length(Param) = 4 then
-      begin
-        case RegParamCount of
-          0: EAXParam := StrToInt4(Param);
-          1: EDXParam := StrToInt4(Param);
-          2: ECXParam := StrToInt4(Param);
-        else
-          Params := Param + Params;
-        end;
-        Inc(RegParamCount);
-      end;
-    end;
-  end;
-
-  while Params <> '' do
-  begin
-    SetLength(Stack, High(Stack) + 2);
-    Stack[High(Stack)] := StrToInt4(Copy(Params, 1, 4));
-    Delete(Params, 1, 4);
-  end;
-
-  for i:=High(Stack) downto 0 do
-  begin
-    FourByte := Stack[i];
-    asm push FourByte end;
-  end;
-
-  if RegParamCount >= 3 then
-    asm mov ecx, ECXParam end;
-
-  if RegParamCount >= 2 then
-    asm mov edx, EDXParam end;
-
-  if RegParamCount >= 1 then
-    asm mov eax, EAXParam end;
-
-  asm
-    CLC
-    CALL Func
-    JC @1
-    MOV BVal, EAX                //get int value
-    MOV IfFloat, 0
-    JMP @2
-    @1:
-    FSTP QWORD PTR [DBVal]       //get float value
-    MOV IfFloat, 1
-    @2:
-  end;
-
-  if IfFloat = 0
-  then SetValue(Node, IntToStr4(BVal))
-  else SetValue(Node, FloatToStr8(DBVal));
-
-end;
 
 function FindInNode(Node: PNode; Index: PNode): PNode;
 var
@@ -557,6 +442,96 @@ begin
   end;
 end;
 
+function CreateIndexes(Node: PNode): AString;
+begin
+  SetLength(Result, 0);
+  while Node <> nil do
+  begin
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Node.Name;
+    Node := Node.ParentIndex;
+  end;
+end;
+
+//NodeUtils
+function ToFileSystemName(var Indexes: AString): String;
+var          //c:\data\@\1\
+  i, j: Integer;
+  Index: String;
+const
+  IllegalCharacters = [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|'];
+  IllegalFileNames: array[0..0] of String = ('con') ;
+begin
+  Result := '';
+  for i:=0 to High(Indexes) do
+  begin
+    Index := Indexes[i];
+    if Length(Index) = 1 then
+    begin
+      if Index[1] in IllegalCharacters then
+        Indexes[i] := IntToHex(Ord(Index[1]), 2);
+    end
+    else
+    begin
+      for j:=0 to High(IllegalFileNames) do
+        if Index = IllegalFileNames[i] then
+          Indexes[i] := Indexes[i] + '1';
+    end;
+    Result := Indexes[i] + '\' + Result;
+  end;
+end;
+
+function CreateIndexesDirTree(Indexes: AString): String;
+var i: Integer;  //c:\data\@\1\
+begin
+  Result := '';
+  for i:=High(Indexes) downto 0 do
+  begin
+    Result := Result + Indexes[i];
+    CreateDir(Result);
+    Result := Result + '\';
+  end;
+end;
+
+function SaveToFile(FileName: String; Data: String): Integer;
+var List: TStringList;
+begin
+  Result := 1;
+  List := TStringList.Create;
+  List.Text := Data;
+  List.SaveToFile(FileName);
+  List.Free;
+  Result := 0;
+end;
+
+function LoadFromFile(FileName: String): String;
+var List: TStringList;
+begin
+  Result := '';
+  List := TStringList.Create;
+  if FileExists(FileName) then
+    List.LoadFromFile(FileName);
+  Result := List.Text;
+  List.Free;
+end;
+
+function TFocus.LoadNode(Node: PNode): PNode;
+var
+  Indexes: AString;
+  Body: String;
+begin
+  Result := Node;
+  Indexes := CreateIndexes(Node);
+  Body := LoadFromFile(ToFileSystemName(Indexes) + NodeFileName);
+  SetLength(Indexes, 0);
+  if Body <> '' then
+  begin
+    Node.Attr := naLoad;
+    Result := NewNode(Body);
+    Result.Attr := naLoad;
+  end;
+end;
+
 function TFocus.NewNode(Line: String): PNode;
 var Link: TLink;
 begin
@@ -574,7 +549,11 @@ begin
     Line.ID := NextID;
   Result := NewIndex(Line.ID);
   if Result = nil then Exit;
-  if Line.ID[1] <> '@' then
+
+  if (Result.Attr = naEmpty) and (Line.ID[1] <> '/') then
+    Result := LoadNode(Result);
+
+  if (Line.ID[1] <> '@') and (Result.Attr <> naLoad) then
     Result := AddLocal(Result);
 
   case Line.ID[1] of
@@ -685,59 +664,42 @@ begin
 end;
 
 
-//NodeUtils
-function ToFileSystemName(var Indexes: array of String): String;
+
+
+
+procedure TFocus.RecursiveSave(Node: PNode);
 var
-  i, j: Integer;
-  Index: String;
-const
-  IllegalCharacters = [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|'];
-  IllegalFileNames: array[0..0] of String = ('con') ;
+  i: Integer;
+  Indexes: AString;
 begin
-  Result := '';
-  for i:=0 to High(Indexes) - 1{Root} do
-  begin
-    Index := Indexes[i];
-    if Length(Index) = 1 then
-    begin
-      if Index[1] in IllegalCharacters then
-        Index := IntToHex(Ord(Index[1]), 2);
-    end
-    else
-    begin
-      for j:=0 to High(IllegalFileNames) do
-        if Index = IllegalFileNames[i] then
-          Indexes[i] := Indexes[i] + '1';
-    end;
-  end;
+  Indexes := CreateIndexes(Node);
+  ToFileSystemName(Indexes);
+  SaveToFile(CreateIndexesDirTree(Indexes) + NodeFileName, GetNodeBody(Node));
+  for i:=0 to High(Node.Index) do
+    RecursiveSave(Node.Index[i]);
 end;
 
-function CreateIndexesDirTree(Indexes: array of String): String;
-var i: Integer;  //c:\data\@\1\
+procedure TFocus.RecursiveDispose(Node: PNode);
+var i: Integer;
 begin
-  Result := '';
-  for i:=High(Indexes) downto 0 do
-  begin
-    Result := Result + Indexes[i];
-    CreateDir(Result);
-    Result := Result + '\';
-  end;
+  for i:=0 to High(Node.Index) do
+    RecursiveDispose(Node.Index[i]);
+  if Node <> Root then
+    Dispose(Node)
+  else
+    SetLength(Root.Index, 0);
 end;
 
-function SaveToFile(FileName: String; Data: String): Integer;
-var List: TStringList;
+procedure TFocus.Clear;
 begin
-  Result := 1; //Unable error
-  List := TStringList.Create;
-  List.Text := Data;
-  List.SaveToFile(FileName);
-  Result := 0; //Successful
+  RecursiveSave(Root);
+  RecursiveDispose(Root);
 end;
 
 procedure TFocus.SaveNode(Node: PNode);
 var
-  ParentIndex, BufNode: PNode;
-  Indexes: array of String;
+  ParentIndex: PNode;
+  Indexes: AString;
   IndexesPath: String;
   procedure DeleteArrayValue(var Arr: ANode; Value: Pointer);
   var i: Integer;
@@ -758,14 +720,7 @@ begin
 
     if Node.Attr <> naEmpty then
     begin
-      SetLength(Indexes, 0);
-      BufNode := Node;
-      while BufNode <> nil do
-      begin
-        SetLength(Indexes, Length(Indexes) + 1);
-        Indexes[High(Indexes)] := BufNode.Name;
-        BufNode := BufNode.ParentIndex;
-      end;
+      Indexes := CreateIndexes(Node);
       ToFileSystemName(Indexes);
       IndexesPath := CreateIndexesDirTree(Indexes);
       SaveToFile(IndexesPath + 'Node.txt', GetNodeBody(Node));
@@ -896,6 +851,130 @@ begin
     for i:=0 to Length(Node.Name) do
       Inc(Result, Ord(Node.Name[i]));
   end;
+end;
+
+
+procedure TFocus.LoadModule(Node: PNode);
+var
+  i: Integer;
+  Func, PrevModule: PNode;
+  List: TStrings;
+  FileName, FileExt: String;
+begin
+  FileName := Copy(GetIndex(Node.ParentName), 2, MaxInt);
+  if not FileExists(FileName) then Exit;
+  List := TStringList.Create;
+  FileExt := LowerCase(ExtractFileExt(FileName));
+  if (FileExt = '.dll') then
+  begin
+    if Node.Handle = 0 then
+    begin
+      Node.Handle := GetImageFunctionList(FileName, List);
+      for i:=0 to List.Count-1 do
+      begin
+        Func := NewNode(List.Strings[i]);
+        Func.Attr := naDLLFunc;
+        Func.Handle := GetProcAddress(Node.Handle, List.Strings[i]);
+        AddLocal(Node, Func);
+      end;
+    end;
+  end
+  else
+  if FileExt = '.node' then
+  begin
+    PrevModule := Module;
+    Module := Node;
+    List.LoadFromFile(FileName);
+    for i:=0 to List.Count-1 do
+      Execute(List.Strings[i]);
+    Module := PrevModule;
+  end;
+  List.Free;
+end;
+
+procedure TFocus.CallFunc(Node: PNode);
+var
+  Value: PNode;
+  Params, Param: String;
+  Stack: array of Integer;
+  Func, FourByte, i, BVal, ParamCount,
+  EAXParam, EDXParam, ECXParam, RegParamCount: Integer;
+  DBVal: Double;
+  IfFloat: Integer;
+begin
+  BVal := BVal + 1;
+  Func := Node.Handle;
+  if (Func = 0) then Exit;
+  EAXParam := 0; EDXParam := 0; ECXParam := 0; RegParamCount := 0;
+  
+
+  for i:=0 to High(Node.Params) do
+  begin
+    Value := GetData(Node.Params[i]);
+    if Value = nil then Exit
+    else
+    begin
+      Param := Value.Name;
+
+      if Length(Param) > 4 then
+        Params := StringOfChar(#0, Length(Param) mod 4) + Param + Params;
+
+      if Length(Param) < 4 then
+        Params := StringOfChar(#0, 4 - Length(Param)) + Param + Params;
+
+      if Length(Param) = 4 then
+      begin
+        case RegParamCount of
+          0: EAXParam := StrToInt4(Param);
+          1: EDXParam := StrToInt4(Param);
+          2: ECXParam := StrToInt4(Param);
+        else
+          Params := Param + Params;
+        end;
+        Inc(RegParamCount);
+      end;
+    end;
+  end;
+
+  while Params <> '' do
+  begin
+    SetLength(Stack, High(Stack) + 2);
+    Stack[High(Stack)] := StrToInt4(Copy(Params, 1, 4));
+    Delete(Params, 1, 4);
+  end;
+
+  for i:=High(Stack) downto 0 do
+  begin
+    FourByte := Stack[i];
+    asm push FourByte end;
+  end;
+
+  if RegParamCount >= 3 then
+    asm mov ecx, ECXParam end;
+
+  if RegParamCount >= 2 then
+    asm mov edx, EDXParam end;
+
+  if RegParamCount >= 1 then
+    asm mov eax, EAXParam end;
+
+  asm
+    CLC
+    CALL Func
+    JC @1
+    MOV BVal, EAX                //get int value
+    MOV IfFloat, 0
+    JMP @2
+    @1:
+    FSTP QWORD PTR [DBVal]       //get float value
+    MOV IfFloat, 1
+    @2:
+  end;
+
+  if IfFloat = 0
+  then SetValue(Node, IntToStr4(BVal))
+  else SetValue(Node, FloatToStr8(DBVal));
+
 end;
 
 procedure TFocus.Run(Node: PNode);

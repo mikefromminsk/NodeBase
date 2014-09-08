@@ -123,6 +123,8 @@ begin
     Options := TStringList.Create;
     Options.LoadFromFile(OptionsFileName);
     IdHTTPServer1.DefaultPort := StrToIntDef(Options.Values['ServerPort'], 80);
+    Base.NodesCount := StrToIntDef(Options.Values['NodesCount'], 0);
+    Base.Root.Name := Options.Values['RootName'];
     Options.Free;
   end;
   try
@@ -287,9 +289,12 @@ procedure TGG.Timer1Timer(Sender: TObject);
 var
   Count: Integer;
 begin
+  //ShowMessage(IntToStr(Round(AllocMemSize /1024/1024)) );
+
   count := Base.NodesCount;
-  Base.GarbageCollector;
-  ShowMessage(IntToStr(count - Base.NodesCount));
+  Base.Clear;
+  //ShowMessage(IntToStr(count - Base.NodesCount));
+  //Timer1.Enabled := False;
 end;
 
 end.
