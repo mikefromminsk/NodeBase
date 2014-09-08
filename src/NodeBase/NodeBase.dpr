@@ -11,7 +11,7 @@ begin
   Application.Initialize;
   Base := TFocus.Create;
   Application.CreateForm(TGG, GG);
-
+  
   {for i:=0 to 1000 do
     Base.NewNode(Base.NextID);}
   try

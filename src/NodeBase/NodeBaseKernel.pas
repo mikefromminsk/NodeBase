@@ -494,25 +494,28 @@ begin
 end;
 
 function SaveToFile(FileName: String; Data: String): Integer;
-var List: TStringList;
+var OutFile: TextFile;
 begin
-  Result := 1;
-  List := TStringList.Create;
-  List.Text := Data;
-  List.SaveToFile(FileName);
-  List.Free;
-  Result := 0;
+  AssignFile(OutFile, FileName);
+  Rewrite(OutFile);
+  WriteLn(OutFile, Data);
+  CloseFile(OutFile);
 end;
 
 function LoadFromFile(FileName: String): String;
-var List: TStringList;
+var
+  InFile: TextFile;
+  Buf: String;
 begin
   Result := '';
-  List := TStringList.Create;
-  if FileExists(FileName) then
-    List.LoadFromFile(FileName);
-  Result := List.Text;
-  List.Free;
+  AssignFile(InFile, FileName);
+  Reset(InFile);
+  while not Eof(InFile) do
+  begin
+    Readln(InFile, Buf);
+    Result := Result + Buf + #10;
+  end;
+  CloseFile(InFile);
 end;
 
 function TFocus.LoadNode(Node: PNode): PNode;
@@ -526,9 +529,8 @@ begin
   SetLength(Indexes, 0);
   if Body <> '' then
   begin
-    Node.Attr := naLoad;
-    Result := NewNode(Body);
     Result.Attr := naLoad;
+    Result := NewNode(Body);
   end;
 end;
 
@@ -550,11 +552,12 @@ begin
   Result := NewIndex(Line.ID);
   if Result = nil then Exit;
 
-  if (Result.Attr = naEmpty) and (Line.ID[1] <> '/') then
+  if Line.ID[1] <> '@' then
+    Result := AddLocal(Result)
+  else
+  if Result.Attr = naEmpty then
     Result := LoadNode(Result);
 
-  if (Line.ID[1] <> '@') and (Result.Attr <> naLoad) then
-    Result := AddLocal(Result);
 
   case Line.ID[1] of
     '!' : Result.Attr := naData;
@@ -619,7 +622,7 @@ begin
     AddLocal(Result, NewNode(Line.Local[i]));
   if Result.Source <> nil then
     Inc(Result.Source.RefCount);
-  AddEvent(Result);
+  //AddEvent(Result);
 end;
 
 procedure TFocus.AddEvent(Node: PNode);

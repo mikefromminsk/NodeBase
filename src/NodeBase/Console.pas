@@ -292,7 +292,9 @@ begin
   //ShowMessage(IntToStr(Round(AllocMemSize /1024/1024)) );
 
   count := Base.NodesCount;
+
   Base.Clear;
+  Base.NewNode('@2');
   //ShowMessage(IntToStr(count - Base.NodesCount));
   //Timer1.Enabled := False;
 end;
