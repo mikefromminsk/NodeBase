@@ -7,6 +7,7 @@ uses
   Messages;
 
 type
+
   RunThread = class(TThread)
   public
     Node: Pointer;
@@ -39,6 +40,10 @@ function PosMem(Index: Integer; SubStr, S: String): Integer;
 function CutString(var Str: String; Mask: String): String;
 procedure WaitThread(Handle: Integer; Time: Cardinal);
 procedure RunInThread(Node: Pointer);
+function ToFileSystemName(var Indexes: array of String): String;
+function LoadFromFile(FileName: String): String;
+function SaveToFile(FileName: String; var Data: String): Integer;
+function CreateDir(Indexes: array of String): String;
 
 var
   TimerList: MTimerList;
@@ -313,6 +318,85 @@ begin
     Dec(PosRTag, Length(RTag));
   Result := CopyMem(Result, Max(Index, PosLTag), Min(Count, PosRTag));
 end;
+
+
+//NodeUtils
+function ToFileSystemName(var Indexes: array of String): String;
+var          //c:\data\@\1\
+  i, j: Integer;
+  Index: String;
+const
+  IllegalCharacters = [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|'];
+  IllegalFileNames: array[0..0] of String = ('con') ;
+begin
+  Result := '';
+  for i:=0 to High(Indexes) do
+  begin
+    Index := Indexes[i];
+    if Length(Index) = 1 then
+    begin
+      if Index[1] in IllegalCharacters then
+        Indexes[i] := IntToHex(Ord(Index[1]), 2);
+    end
+    else
+    begin
+      for j:=0 to High(IllegalFileNames) do
+        if Index = IllegalFileNames[i] then
+          Indexes[i] := Indexes[i] + '1';
+    end;
+    Result := Indexes[i] + '\' + Result;
+  end;
+end;
+
+
+function CreateDir(Indexes: array of String): String;
+var i: Integer;  //c:\data\@\1\
+begin
+  Result := '';
+  for i:=High(Indexes) downto 0 do
+  begin
+    Result := Result + Indexes[i];
+    SysUtils.CreateDir(Result);
+    Result := Result + '\';
+  end;
+end;
+
+function SaveToFile(FileName: String; var Data: String): Integer;
+var OutFile: TextFile;
+begin
+  Result := 0;
+  try
+    AssignFile(OutFile, FileName);
+    Rewrite(OutFile);
+    WriteLn(OutFile, Data);
+    CloseFile(OutFile);
+  except
+    on E: Exception do
+      Result := 1;
+  end;
+end;
+
+function LoadFromFile(FileName: String): String;
+var
+  InFile: TextFile;
+  Buf: String;
+begin
+  Result := '';
+  try
+    AssignFile(InFile, FileName);
+    Reset(InFile);
+    while not Eof(InFile) do
+    begin
+      Readln(InFile, Buf);
+      Result := Result + Buf + #10;
+    end;
+    CloseFile(InFile);
+  except
+    on E: Exception do
+      Result := '';
+  end;
+end;
+
 
 initialization
   TimerList := MTimerList.Create;

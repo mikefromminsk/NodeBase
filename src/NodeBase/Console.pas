@@ -239,8 +239,6 @@ begin
         Prev := nil;
         Execute(Document);
         SetLength(Module.Local, 0);
-        Module.SaveTime := 0;
-        SaveNode(Module);
         Module := nil;
         Prev := nil;
         for i:=0 to Node.Count - 1 do
@@ -288,13 +286,15 @@ end;
 procedure TGG.Timer1Timer(Sender: TObject);
 var
   Count: Integer;
+  Node: Pnode;
 begin
   //ShowMessage(IntToStr(Round(AllocMemSize /1024/1024)) );
 
   count := Base.NodesCount;
 
   Base.Clear;
-  Base.NewNode('@2');
+  Base.NewNode('@148');
+  Node := Base.Execute('@148?100');
   //ShowMessage(IntToStr(count - Base.NodesCount));
   //Timer1.Enabled := False;
 end;

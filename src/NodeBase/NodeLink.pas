@@ -22,10 +22,11 @@ type
     Names       : Array of String;      //Controls | vars
     Values      : Array of String;
     FType       : TLink;                //TLink_or_String?
-    Local       : Array of TLink;
+    Local       : Array of String;      //todo to TLink
     Params      : Array of TLink;
     Value       : TLink;
     FElse       : TLink;
+    Next        : String;
     constructor Create(LURI: String);
     constructor RecParse(var LURI: String; FirstRun: Boolean = False);
     destructor Destroy;
@@ -33,6 +34,8 @@ type
 
 
 implementation
+
+uses Math;
 
 
 
@@ -43,30 +46,47 @@ begin
 end;
 
                                                          //потоковая обработка ссылок
-constructor TLink.RecParse(var LURI: String; FirstRun: Boolean = False);   //более сложную для пользователя
+constructor TLink.RecParse(var LURI: String; FirstRun: Boolean = False);   //рекурсивную для пользователя
 //Source^Name@ID$Names=Values:FType?Params#Value|FElse
+//Next
+//
+//Local
+
+//Error Value !%12 dont load
 var
   s, LS, Str: string;
-  Index, i: Integer;         //нету загрузки local как @1\n\n@2\n\n@3\n\n
+  Index, i: Integer;
 begin
-  if length(LURI) = 0 then Exit;                               //выход если пусто
+  if Length(LURI) = 0 then Exit;                               //выход если пусто
   ID := '';
   s := ''; LS := ''; Str := '';
 
-  Index := NextIndex(0, [' '], LURI);
+  while LURI[Length(LURI)] = #10 do
+    Delete(LURI, Length(LURI), 1);
+
+  Index := NextIndex(0, [#10#10], LURI);    //Local
   if Index <> MaxInt then
   begin
-    LS := Copy(LURI, Index + 1, MaxInt);                     //список Local
+    LS := Copy(LURI, Index + 2, MaxInt);
     Delete(LURI, Index, MaxInt);
   end;
-
   while Length(LS) > 0 do
   begin
-    Index := NextIndex(0, [' '], LS);
+    Index := NextIndex(0, [#10#10], LS);
     s := Copy(LS, 1, Index-1);
-    SetLength(Local, High(Local)+2);                                //Local
-    Local[High(Local)] := TLink.RecParse(s);
-    Delete(LS, 1, Index);
+    SetLength(Local, Length(Local) + 1);
+    Local[High(Local)] := s;
+    if Index = MaxInt then
+      LS := '';    
+    Delete(LS, 1, Index + 1);
+  end;
+
+
+  Index := NextIndex(0, [#10], LURI);
+  if (Index <> MaxInt) and (Index <> Length(LURI)) then
+  begin
+    Next := Copy(LURI, Index + 1, MaxInt);  //Next
+    Delete(LURI, Index, MaxInt);
   end;
 
   Index := NextIndex(0, ['$', '?', ':', '=', '&', ';', '#', '|'], LURI);     //в порядке вероятности
@@ -494,9 +514,6 @@ begin
     Value.Destroy;
   if FElse <> nil then
     FElse.Destroy;
-  for i:=0 to High(Local) do
-    if Local[i] <> nil then
-      Local[i].Destroy;
   inherited Destroy;
 end;
 

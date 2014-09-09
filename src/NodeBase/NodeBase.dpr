@@ -18,6 +18,6 @@ begin
     Application.Run;
   except
     on E: Exception do
-      ShowMessage(e.Message);
+      //ShowMessage(e.Message);
   end;
 end.
