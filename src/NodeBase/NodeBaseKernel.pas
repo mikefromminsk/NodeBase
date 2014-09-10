@@ -104,9 +104,10 @@ const
   naEmpty = 0;            //sort
   naWord = 1;
   naNode = 2;
+  naMeta = 11;
   naData = 3;
   naModule = 4;
-  naDLLFunc = 5;          //naStdFunc = $51; naFastCallFunc = $52;
+  naDLLFunc = 5;          //naStdFunc = $51; naFastFunc = $52;
   naInt = 7;
   naFloat = 8;
   naRoot = 9;
@@ -195,8 +196,8 @@ begin
   else
   if Node.Value <> nil then
   begin
-    if Node.Value.Attr = naData then
-      Result := Result + '#' + EncodeName(Node.Value.Name)
+    if Node.Value.Attr = naMeta then
+      Result := Result + '#!' + EncodeName(Node.Value.Name)
     else
       Result := Result + '#' + GetIndex(Node.Value);
   end;
@@ -392,10 +393,7 @@ begin
   Result := Node;
   if Node = nil then Exit;
   while Result.Source <> nil do
-  begin
     Result := Result.Source;
-    if Result.Value <> nil then  Exit;   //??
-  end;
 end;
 
 function TFocus.GetType(Node: PNode): PNode;
@@ -517,7 +515,7 @@ begin
   begin
 
   case Line.ID[1] of
-    '!' : Result.Attr := naData;
+    '!' : Result.Attr := naMeta;
     '@' : Result.Attr := naNode;
     '/' : Result.Attr := naModule;
     '0'..'9', '-':
@@ -559,10 +557,9 @@ begin
 
   for i:=0 to High(Line.Params) do
     AddParam(Result, NewNode(Line.Params[i]), i);
-  if Result.Attr = naData then
-  begin
+    
+  if Result.Attr = naMeta then
     AddValue(Result, DecodeName(Copy(Line.ID, 2, MaxInt)));
-  end;
 
   if Line.FElse <> nil then
   begin

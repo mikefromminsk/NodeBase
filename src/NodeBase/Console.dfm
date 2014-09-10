@@ -111,7 +111,7 @@ object GG: TGG
       'here^exit'
       'res=fsqrt?fmul?res&6,0'
       ''
-      'func$activate;?750,0')
+      'func$activate?750,0')
     ParentColor = True
     ParentFont = False
     ScrollBars = ssVertical

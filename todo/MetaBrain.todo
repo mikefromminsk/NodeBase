@@ -126,75 +126,37 @@ active_kernel = 2
 
 $transaction=992402
 
-
-
-[if while else]
-//if (i<10)
-equal i<10
-else
-
-//while (i<10)
-equal i<10
-equal^jump
-else
-
-//if (i<10) else
-equal i<10
-exit^jump
-else
-exit
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-naDLLNode read/not write
-
-
-Garbage collector
-compare result 
-
-
-
-
-[GarbageCollector]
-
-if Node.SaveTime = -1 then not Dispose //?
-
-controls Array of Double on frequesncy
-{ControlsName  : array of String;
-ControlsValues: array of String;}
+controls: Array of Double; on frequesncy
 
 
 fastload
 
-RootPath = 'data'; //to options
-options in root vars
- 
-merge strings in GetControls
-
-
-for i:=0 to High( -> for i:=Low() to High(
-
-
-all parent**** change to refcount
-when dispose
 
 
 
-Load And Save All Node and Links togeser
+
+
+
+
+
+GarbageCollector
+compare result
+
+
+
+
+testing execute func750 into the paper
+
+
+
+
+
+
+
+
+
+
+
+
 
 

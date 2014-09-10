@@ -294,7 +294,7 @@ begin
 
   Base.Clear;
   Base.NewNode('@148');
-  Node := Base.Execute('@148?100');
+  Node := Base.Execute('@148^func?100,0');
   //ShowMessage(IntToStr(count - Base.NodesCount));
   //Timer1.Enabled := False;
 end;

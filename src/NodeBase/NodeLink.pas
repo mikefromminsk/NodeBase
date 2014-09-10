@@ -12,6 +12,7 @@ type
 
   //Set of illegal characters
   //Set of filename reserved characters
+  AString = array of String;
 
   TLink = class
   public
@@ -37,7 +38,25 @@ implementation
 
 uses Math;
 
-
+function slice(Text: String; Delimeter: String): AString;
+var
+  Index: Integer;
+begin
+  SetLength(Result, 0);
+  Index := Pos(Delimeter, Text);
+  while Index <> 0 do
+  begin
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Copy(Text, 1, Index - 1);
+    Delete(Text, 1, Index + Length(Delimeter) - 1);
+    Index := Pos(Delimeter, Text);
+  end;
+  if Text <> '' then
+  begin
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Text;
+  end;
+end;
 
 
 constructor TLink.Create(LURI: string);
@@ -56,6 +75,7 @@ constructor TLink.RecParse(var LURI: String; FirstRun: Boolean = False);   //рек
 var
   s, LS, Str: string;
   Index, i: Integer;
+  Arr: AString;
 begin
   if Length(LURI) = 0 then Exit;                               //выход если пусто
   ID := '';
@@ -105,7 +125,7 @@ begin
     Delete(LURI, 1, Index-1);
     if NextIndex(0, ['\', '/'], ID) <> MaxInt then               //обработка до функции
     begin
-      for i:=0 to Length(ID) do
+      for i:=0 to Length(ID) do                                  //del
         if ID[i] = '\' then
           ID[i] := '/';
       if not (ID[1] in ['\', '/']) then
@@ -127,49 +147,24 @@ begin
     Exit;
   end;
 
-  if LURI[1] = '$' then
+  if LURI[1] = '$' then                                  //vars
   begin
     Delete(LURI, 1, 1);
-    repeat
 
-      Index := NextIndex(0, ['?', ':', '&', ';', '#'], LURI);
+    Index := NextIndex(0, [':', '?', '#'], LURI);
+    s := Copy(LURI, 1, Index - 1);
+    Delete(LURI, 1, Index -1);
+    Arr := slice(s, '&');
+    for i:=0 to High(Arr) do
+    begin
+      SetLength(Names, Length(Names) + 1);
+      SetLength(Values, Length(Values) + 1);
+      Index := NextIndex(0, ['='], Arr[i]);
+      Names[High(Names)] := Copy(Arr[i], 1, Index -1);
+      if Index <> MaxInt then
+        Values[High(Values)] := Copy(Arr[i], Index +1, MaxInt);
+    end;
 
-      if (Index = MaxInt) or (LURI[Index] = ';') then
-      begin
-        s := Copy(LURI, 1, Index-1);
-        Delete(LURI, 1, Index);
-        if Length(s) > 0 then
-        begin
-          SetLength(Names, High(Names)+2);
-          SetLength(Values, High(Values)+2);
-          Names[High(Names)] := Copy(s, 1, Pos('=', s) -1);
-          if Names[High(Names)] = ''
-          then Names[High(Names)] := s
-          else Values[High(Names)] := Copy(s, Pos('=', s) + 1, MaxInt);
-          Names[High(Names)] := AnsiUpperCase(Names[High(Names)]);
-        end;
-        Break;
-      end;
-
-      if LURI[Index] = '&' then
-      begin
-        s := Copy(LURI, 1, Index-1);
-        Delete(LURI, 1, Index);
-        if Length(s) > 0 then
-        begin
-          SetLength(Names, High(Names)+2);
-          SetLength(Values, High(Values)+2);
-          Names[High(Names)] := Copy(s, 1, Pos('=', s) -1);
-          if Names[High(Names)] = ''
-          then Names[High(Names)] := s
-          else Values[High(Names)] := Copy(s, Pos('=', s) + 1, MaxInt);
-          Names[High(Names)] := AnsiUpperCase(Names[High(Names)]);
-        end;
-        Continue;
-      end;
-
-      Break;
-    until False;
     Index := NextIndex(0, ['?', ':', '=', '&', ';', '#', '|'], LURI);
     if (Index = MaxInt) then
       Exit;
