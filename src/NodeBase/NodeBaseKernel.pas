@@ -113,10 +113,6 @@ const
   naRoot = 9;
   naLoad = 10;
 
-//NameType
-  ntInt = 'int';
-  ntFloat = 'float';
-
   NodeFileName = 'Node.txt';
 
 implementation
@@ -140,7 +136,7 @@ begin
   if Param = 'COUNT' then Node.Count := StrToIntDef(Value, 0);
   if Param = 'RUN'   then Node.RunCount := StrToIntDef(Value, 1);
   if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1);
-  //if Param = 'HANDLE' then Node.Activate := StrToIntDef(Value, 0);
+  if Param = 'HANDLE' then Node.Activate := StrToIntDef(Value, 0);
 end;
 
 function GetControls(Node: PNode): String;
@@ -157,8 +153,8 @@ begin
     Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
   if Node.Activate <> 0 then
     Result := Result + '&' + 'ACTIVATE' + '=' + FloatToStr(Node.Activate);
-  {if Node.Handle <> 0 then
-    Result := Result + '&' + 'HANDLE' + '=' + FloatToStr(Node.Handle);}
+  if Node.Handle <> 0 then
+    Result := Result + '&' + 'HANDLE' + '=' + FloatToStr(Node.Handle);
   Delete(Result, 1, 1); //del &
 end;
 
@@ -196,7 +192,7 @@ begin
   else
   if Node.Value <> nil then
   begin
-    if Node.Value.Attr = naMeta then
+    if Node.Value.Attr = naData then
       Result := Result + '#!' + EncodeName(Node.Value.Name)
     else
       Result := Result + '#' + GetIndex(Node.Value);
@@ -229,13 +225,7 @@ begin
   Result := Node.Index[High(Node.Index)];
   Inc(NodesCount);
 
-  Node := Result;         //test
-  while Node <> nil do
-  begin
-    Result.Path := Node.Name + Result.Path;
-    Node := Node.ParentIndex;
-  end;
-
+  Result.Path := GetIndex(Result); //test
 end;
 
 function TFocus.AddLocal(Node: PNode; Local: PNode): PNode;
@@ -540,15 +530,10 @@ begin
   end;
 
   if Result.Attr = naInt then
-  begin
     SetValue(Result, NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Line.ID)))));
-    Result.FType := NewNode('!' + ntInt);
-  end;
+
   if Result.Attr = naFloat then
-  begin
     SetValue(Result, NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Line.ID)))));
-    Result.FType := NewNode('!' + ntFloat);
-  end;
 
   end;
 
@@ -776,6 +761,7 @@ procedure TFocus.Run(Node: PNode);
 label NextNode; 
 var
   FuncResult, i, n: Integer;
+  Str: String;
   function CompareWithZero(Node: PNode): Integer;
   var i: Integer;
   begin
@@ -787,6 +773,7 @@ var
         Inc(Result, Ord(Node.Name[i]));
     end;
   end;
+
 begin
   NextNode:
   if Node = nil then Exit;
@@ -801,7 +788,7 @@ begin
     for i:=0 to High(Node.Params) do
       AddParam(GetSource(Node), GetValue(Node.Params[i]), i);
     Run(Node.Source);                   //run source
-    Node.Value := GetData(Node.Source);
+    //Node.Value := GetData(Node.Source);
   end;
   if Node.Attr = naDLLFunc then     //call dll func
     CallFunc(Node);
@@ -822,7 +809,7 @@ begin
   else
   if (Node.Value <> nil) and (Node.Source <> nil) then   //run value
   begin
-    Run(Node.Value);
+    Run(Node.Value);                                //!!!! func?750 write to @148.val
     Node.Source.Value := GetValue(Node.Value);
   end;
 

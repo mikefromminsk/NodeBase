@@ -62,7 +62,7 @@ function TGG.ConsoleExec(Line: String; WriteToConsole: Boolean = False): String;
 var
   Node, Data: PNode;
 begin
-  Node := Base.Execute(Line);
+   Node := Base.Execute(Line);
   if Node <> nil then
   begin
     Data := Base.GetData(Node);
@@ -288,15 +288,11 @@ var
   Count: Integer;
   Node: Pnode;
 begin
-  //ShowMessage(IntToStr(Round(AllocMemSize /1024/1024)) );
-
-  count := Base.NodesCount;
 
   Base.Clear;
   Base.NewNode('@148');
-  Node := Base.Execute('@148^func?100,0');
-  //ShowMessage(IntToStr(count - Base.NodesCount));
-  //Timer1.Enabled := False;
+  Node := Base.Execute('@148$activate?33,3');
+
 end;
 
 end.
