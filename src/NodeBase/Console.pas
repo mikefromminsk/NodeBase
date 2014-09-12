@@ -75,7 +75,7 @@ begin
         if Length(Result) = 8 then
           Result := FloatToStr(StrToFloat8(Result))
         else
-          Result := EncodeName(Result);
+          Result := EncodeStr(Result);
     end;
   end;
   if Result = '' then
@@ -288,11 +288,8 @@ var
   Count: Integer;
   Node: Pnode;
 begin
-
   Base.Clear;
-  Base.NewNode('@148');
-  Node := Base.Execute('@148$activate?33,3');
-
+  Node := Base.NewNode('@145');
 end;
 
 end.

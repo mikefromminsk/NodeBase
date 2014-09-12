@@ -29,8 +29,8 @@ function IntToStr4(Num: Integer): String;
 function StrToInt4(Str: String): Integer;
 function FloatToStr8(Num: Double): String;
 function StrToFloat8(Str: String): Double;
-function EncodeName(Str: String; Position: Integer = 1): String;
-function DecodeName(Str: String): String;
+function EncodeStr(Str: String; Position: Integer = 1): String;
+function DecodeStr(Str: String): String;
 function PosI(Index: Integer; Substr: String; S: String): Integer;
 function NextIndex(Index: Integer; const Substr: array of string; S: String): Integer;
 function GetImageFunctionList(const FileName: string; Strings: TStrings): Integer;
@@ -118,7 +118,7 @@ begin
   end;
 end;
 
-function EncodeName(Str: String; Position: Integer = 1): String;
+function EncodeStr(Str: String; Position: Integer = 1): String;
 var i: Integer;
 begin
   Result := Copy(Str, 1, Position - 1);
@@ -128,7 +128,7 @@ begin
     else Result := Result + '%' + IntToHex(Ord(Str[i]), 2);
 end;
 
-function DecodeName(Str: String): String;
+function DecodeStr(Str: String): String;
 var
   i: integer;
   ESC: string[2];

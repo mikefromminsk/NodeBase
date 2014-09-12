@@ -108,8 +108,7 @@ const
   naData = 3;
   naModule = 4;
   naDLLFunc = 5;          //naStdFunc = $51; naFastFunc = $52;
-  naInt = 7;
-  naFloat = 8;
+  naNumber = 12;
   naRoot = 9;
   naLoad = 10;
 
@@ -167,8 +166,8 @@ begin
   if Node = nil then Exit;
   if Node.Source <> nil then
     Result := Result + GetIndex(Node.Source) + '^';
-  (*if Node.ParentName <> nil then
-    Result := Result + {EncodeName}(GetIndex(Node.ParentName){, 2});*)
+  if Node.ParentName <> nil then
+    Result := Result + GetIndex(Node.ParentName);
   Result := Result + GetIndex(Node);
   Result := Result + '$' + GetControls(Node);
   {if Node.FType <> nil then
@@ -192,10 +191,9 @@ begin
   else
   if Node.Value <> nil then
   begin
-    if Node.Value.Attr = naData then
-      Result := Result + '#!' + EncodeName(Node.Value.Name)
-    else
-      Result := Result + '#' + GetIndex(Node.Value);
+    if Node.Value.Attr = naData
+    then Result := Result + '#!' + EncodeStr(Node.Value.Name)
+    else Result := Result + '#' + GetIndex(Node.Value);
   end;
   if Node.Next <> nil then
     Result := Result + #10 + GetIndex(Node.Next);
@@ -475,97 +473,6 @@ begin
   end;
 end;
 
-
-
-function TFocus.NewNode(Line: String): PNode;
-var Link: TLink;
-begin
-  Link := TLink.Create(Line); //fastload
-  Result := NewNode(Link);
-  Link.Destroy;
-end;
-
-function TFocus.NewNode(Line: TLink): PNode;
-var
-  i: Integer;
-  Node: PNode;
-begin
-  if (Line.ID = '') and (High(Line.Names) <> -1) then
-    Line.ID := NextID;
-  Result := NewIndex(Line.ID);
-  if Result = nil then Exit;
-
-  if Line.ID[1] <> '@' then
-    Result := AddLocal(Result)
-  else
-  if Result.Attr = naEmpty then
-    Result := LoadNode(Result);
-
-  if Result.Attr <> naLoad then
-  begin
-
-  case Line.ID[1] of
-    '!' : Result.Attr := naMeta;
-    '@' : Result.Attr := naNode;
-    '/' : Result.Attr := naModule;
-    '0'..'9', '-':
-        if Pos(',', Line.ID) = 0
-        then Result.Attr := naInt
-        else Result.Attr := naFloat;
-    else  Result.Attr := naWord;
-  end;
-
-  if Result.Attr = naWord then
-  begin
-    if Line.FType = nil then
-      Result.Source := FindNode(Result.ParentName);
-  end;
-
-  if Line.Source <> '' then
-  begin
-    Node := GetSource(Result);
-    Node.Source := NewNode(Line.Source);
-    if Result.Attr = naWord then
-      Result := Node.Source;
-  end;
-
-  if Result.Attr = naInt then
-    SetValue(Result, NewNode('!' + EncodeName(  IntToStr4(  StrToInt(Line.ID)))));
-
-  if Result.Attr = naFloat then
-    SetValue(Result, NewNode('!' + EncodeName(FloatToStr8(StrToFloat(Line.ID)))));
-
-  end;
-
-  for i:=0 to High(Line.Names) do
-    SetControl(Result, Line.Names[i], Line.Values[i]);
-
-  for i:=0 to High(Line.Params) do
-    AddParam(Result, NewNode(Line.Params[i]), i);
-    
-  if Result.Attr = naMeta then
-    AddValue(Result, DecodeName(Copy(Line.ID, 2, MaxInt)));
-
-  if Line.FElse <> nil then
-  begin
-    Result.FTrue := NewNode(Line.Value);
-    if Line.FElse.Name <> '' then
-      Result.FElse := NewNode(Line.FElse);
-  end
-  else
-  if Line.Value <> nil then
-    SetValue(Result, NewNode(Line.Value));
-  if Line.FType <> nil then
-    Result.FType := NewNode(Line.FType);
-  for i:=0 to High(Line.Local) do
-    AddLocal(Result, NewNode(Line.Local[i]));
-  if Line.Next <> '' then
-  begin
-    Result.Next := NewNode(Line.Next);
-    Result.Next.Prev := Result;
-  end;
-end;
-
 function TFocus.LoadNode(Node: PNode): PNode;
 var
   Indexes: AString;
@@ -587,7 +494,102 @@ begin
   if Body <> '' then
   begin
     Result.Attr := naLoad;
-    Result := NewNode(Body);
+    Result := NewNode(Body); //fastload
+  end;
+end;
+
+
+function TFocus.NewNode(Line: String): PNode;
+var Link: TLink;
+begin
+  Link := TLink.Create(Line);
+  Result := NewNode(Link);
+  Link.Destroy;
+end;
+
+function TFocus.NewNode(Line: TLink): PNode;
+var
+  i: Integer;
+  Node: PNode; // for Source
+begin
+
+  Result := NewIndex(Line.ID);
+  if Result = nil then Exit;
+
+  if Line.ID = '@148' then
+    Line.ID := '@148';
+
+  if Line.ID[1] <> '@' then
+    Result := AddLocal(Result)
+  else
+  if Result.Attr = naEmpty then
+    Result := LoadNode(Result);
+
+  if Result.Attr <> naLoad then   //Initialization
+  begin
+
+  case Line.ID[1] of
+    '!' : Result.Attr := naMeta;
+    '@' : Result.Attr := naNode;
+    '/' : Result.Attr := naModule;
+    '0'..'9', '-': Result.Attr := naNumber;
+    else  Result.Attr := naWord;
+  end;
+
+  if Result.Attr = naWord then
+  begin
+    if Line.FType = nil then
+      Result.Source := FindNode(Result.ParentName);
+  end;
+
+  if Line.Source <> '' then
+  begin
+    Node := GetSource(Result);
+    Node.Source := NewNode(Line.Source);
+    if Result.Attr = naWord then
+      Result := Node.Source;
+  end;
+
+  end;
+
+  for i:=0 to High(Line.Names) do
+    SetControl(Result, Line.Names[i], Line.Values[i]);
+
+  for i:=0 to High(Line.Params) do
+    AddParam(Result, NewNode(Line.Params[i]), i);
+
+  if Result.Attr = naMeta then
+    AddValue(Result, DecodeStr(Copy(Line.ID, 2, MaxInt)))
+  else
+  if Result.Attr = naNumber then
+  begin
+    if Pos(',', Line.ID) = 0
+    then AddValue(Result,   IntToStr4(  StrToInt(Line.ID)))
+    else AddValue(Result, FloatToStr8(StrToFloat(Line.ID)));
+    Result.Attr := naMeta;
+  end;
+
+  if Line.FElse <> nil then
+  begin
+    Result.FTrue := NewNode(Line.Value);
+    if Line.FElse.Name <> '' then
+      Result.FElse := NewNode(Line.FElse);
+  end
+  else
+  if Line.Value <> nil then
+  begin
+    if Line.Value.ID[1] = '!'
+    then SetValue(Result, DecodeStr(Copy(Line.Value.ID, 2, MaxInt)))
+    else SetValue(Result, NewNode(Line.Value));
+  end;
+  if Line.FType <> nil then
+    Result.FType := NewNode(Line.FType);
+  for i:=0 to High(Line.Local) do
+    AddLocal(Result, NewNode(Line.Local[i]));
+  if Line.Next <> '' then
+  begin
+    Result.Next := NewNode(Line.Next);
+    Result.Next.Prev := Result;
   end;
 end;
 
@@ -788,7 +790,6 @@ begin
     for i:=0 to High(Node.Params) do
       AddParam(GetSource(Node), GetValue(Node.Params[i]), i);
     Run(Node.Source);                   //run source
-    //Node.Value := GetData(Node.Source);
   end;
   if Node.Attr = naDLLFunc then     //call dll func
     CallFunc(Node);
@@ -849,7 +850,6 @@ begin
     begin
       if Result.RunCount = 0 then
         Result.RunCount := 1;
-      //for i:=1 to Result.RunCount do //del
       Run(Result);
       Result.Activate := 0;
     end;
