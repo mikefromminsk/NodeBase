@@ -27,11 +27,8 @@ type
     Local         : ANode;
     ParentLocal   : PNode;
     Value         : PNode;
-    ParentValue   : PNode;
     FTrue         : PNode;
-    ParentFTrue   : PNode;
     FElse         : PNode;
-    ParentFElse   : PNode;
     Prev          : PNode;
     Next          : PNode;
   //public
@@ -66,33 +63,50 @@ type
     GarbageLastRun : Double;
 
     constructor Create;
+    
     function NextID: String;
-    function AddSubNode(var Arr: ANode): PNode;
-    function AddIndex(Node: PNode; Name: Char): PNode;
-    function AddLocal(Node: PNode; Local: PNode): PNode; overload;
-    function AddLocal(Node: PNode): PNode; overload;
-    function AddValue(Node: PNode; Value: String): PNode;
-    function AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
-    function GetIndex(Node: PNode): String;
-    function SetValue(Node: PNode; Value: String): PNode; overload;
-    function SetValue(Node: PNode; Value: PNode): PNode; overload;
+	
+	  function NewIndex(Name: String): PNode;
+
+	  procedure SetSource(Node: PNode; Source: PNode);
+	  function GetSource(Node: PNode): PNode;
+
+	  function FindName(Index: PNode): PNode;
+
+    procedure SetFType(Node: PNode; FType: PNode);
+
+	  function SetParam(Node: PNode; Param: PNode; Index: Integer): PNode;
+
+    function SetValue(Node: PNode; Value: PNode): PNode;
     function GetValue(Node: PNode): PNode;
-    function GetParam(Node: PNode): PNode;
+
+	  function SetData(Node: PNode; Value: String): PNode;
     function GetData(Node: PNode): PNode;
-    function GetSource(Node: PNode): PNode;
-    function GetType(Node: PNode): PNode;
-    function NewIndex(Name: String): PNode;
-    procedure LoadModule(Node: PNode);
-    procedure CallFunc(Node: PNode);
-    function LoadNode(Node: PNode): PNode;
-    function FindNode(Index: PNode): PNode;
+
+    procedure SetFTrue(Node: PNode; FTrue: PNode);
+    procedure SetFElse(Node: PNode; FElse: PNode);
+
+	  procedure SetNext(Node: PNode; Next: PNode);
+
+    function SetLocal(Node: PNode; Local: PNode): PNode;
+    function NewLocal(Node: PNode): PNode;
+
     function NewNode(Line: String): PNode; overload;
     function NewNode(Line: TLink): PNode; overload;
+
+	  function LoadNode(Node: PNode): PNode;
+	  procedure LoadModule(Node: PNode);
+
+    procedure CallFunc(Node: PNode);
+    procedure Run(Node: PNode);
+	
     procedure RecursiveSave(Node: PNode);
     procedure RecursiveDispose(Node: PNode);
     procedure Clear;
+	
+	  function GetIndex(Node: PNode): String;
     function GetNodeBody(Node: PNode): String;
-    procedure Run(Node: PNode);
+    
     procedure NextNode(var PrevNode: PNode; NextNode: PNode);
     function Execute(Line: String): PNode; virtual;
 
@@ -102,15 +116,15 @@ const
 
 //NodeAttribyte
   naEmpty = 0;            //sort
-  naWord = 1;
-  naNode = 2;
-  naMeta = 11;
+  naNode = 1;
+  naMeta = 2;
   naData = 3;
-  naModule = 4;
-  naDLLFunc = 5;          //naStdFunc = $51; naFastFunc = $52;
-  naNumber = 12;
+  naWord = 4;
+  naModule = 5;
+  naDLLFunc = 6;
+  naNumber = 7;
+  naLoad = 8;
   naRoot = 9;
-  naLoad = 10;
 
   NodeFileName = 'Node.txt';
 
@@ -126,7 +140,7 @@ begin
   Module := NewNode('root');
 end;
 
-procedure SetControl(Node: PNode; Param, Value: String);
+procedure SetVars(Node: PNode; Param, Value: String);
 begin
   Param := AnsiUpperCase(Param);
   Value := AnsiUpperCase(Value);
@@ -138,7 +152,7 @@ begin
   if Param = 'HANDLE' then Node.Activate := StrToIntDef(Value, 0);
 end;
 
-function GetControls(Node: PNode): String;
+function GetVars(Node: PNode): String;
 begin
   Result := '';
   if Node = nil then Exit;
@@ -154,7 +168,7 @@ begin
     Result := Result + '&' + 'ACTIVATE' + '=' + FloatToStr(Node.Activate);
   if Node.Handle <> 0 then
     Result := Result + '&' + 'HANDLE' + '=' + FloatToStr(Node.Handle);
-  Delete(Result, 1, 1); //del &
+  Delete(Result, 1, 1);
 end;
 
 function TFocus.GetNodeBody(Node: PNode): String;
@@ -169,7 +183,7 @@ begin
   if Node.ParentName <> nil then
     Result := Result + GetIndex(Node.ParentName);
   Result := Result + GetIndex(Node);
-  Result := Result + '$' + GetControls(Node);
+  Result := Result + '$' + GetVars(Node);
   {if Node.FType <> nil then
     Result := Result + ':' + GetIndex(Node.FType);}
   Str := '';
@@ -207,28 +221,16 @@ begin
   Result := '@' + IntToStr(ID);
 end;
 
-function TFocus.AddSubNode(var Arr: ANode): PNode;
+function NewSubNode(var Arr: ANode): PNode;
 begin
-  SetLength(Arr, High(Arr) + 2);
+  SetLength(Arr, Length(Arr) + 1);
   Result := AllocMem(SizeOf(TNode));
   Arr[High(Arr)] := Result;
 end;
 
-function TFocus.AddIndex(Node: PNode; Name: Char): PNode;
+function TFocus.SetLocal(Node: PNode; Local: PNode): PNode;
 begin
-  Result := AddSubNode(Node.Index);
-  Result.Attr := naEmpty;
-  Result.Name := Name;
-  Result.ParentIndex := Node;
-  Result := Node.Index[High(Node.Index)];
-  Inc(NodesCount);
-
-  Result.Path := GetIndex(Result); //test
-end;
-
-function TFocus.AddLocal(Node: PNode; Local: PNode): PNode;
-begin
-  AddSubNode(Node.Local);
+  SetLength(Node.Local, Length(Node.Local) + 1);
   if Node.Attr = naEmpty
   then Local.ParentName  := Node
   else Local.ParentLocal := Node;
@@ -236,27 +238,26 @@ begin
   Result := Local;
 end;
 
-function TFocus.AddLocal(Node: PNode): PNode;
+function TFocus.NewLocal(Node: PNode): PNode;
 begin
-  Result := AddLocal(Node, NewIndex(NextID));
+  Result := SetLocal(Node, NewIndex(NextID));
 end;
 
-function TFocus.AddValue(Node: PNode; Value: String): PNode;
+function TFocus.SetData(Node: PNode; Value: String): PNode;
 begin
   Result := AllocMem(SizeOf(TNode));
   Result.Name := Value;
   Result.Attr := naData;
-  Result.ParentValue := Node;
   Node.Value := Result;
 end;
 
-function TFocus.AddParam(Node: PNode; Param: PNode; Index: Integer): PNode;
+function TFocus.SetParam(Node: PNode; Param: PNode; Index: Integer): PNode;
 begin
   Result := nil;
   if Param.FType <> nil then
   begin
     Param.Source := nil;
-    AddSubNode(Node.Params);
+    SetLength(Node.Params, Length(Node.Params) + 1);
     Node.Params[High(Node.Params)] := Param;
     Param.ParentParams := Node;
     Result := Param;
@@ -265,7 +266,7 @@ begin
   begin
     if Index = High(Node.Params) + 1 then
     begin
-      AddSubNode(Node.Params);
+      SetLength(Node.Params, Length(Node.Params) + 1);
       Node.Params[Index] := Param;
       Param.ParentParams := Node;
       Result := Node.Params[Index];
@@ -292,23 +293,8 @@ begin
     end;
 end;
 
-function TFocus.SetValue(Node: PNode; Value: String): PNode;
-begin
-  Result := AddValue(Node, Value);
-  if Node.Source <> nil then
-  begin
-    {if Node.Source.Value <> nil then
-      Node.Source.Value.ParentValue := nil; }
-    Node.Source.Value := Result;
-  end;
-end;
-
 function TFocus.SetValue(Node: PNode; Value: PNode): PNode;
 begin
-{  if Node.Value <> nil then
-    Node.Value.ParentValue := nil;}
-  if Value <> nil then
-    Value.ParentValue := Node;
   Node.Value := Value;
 end;
 
@@ -330,7 +316,7 @@ begin
   Result := nil;
   while Node <> nil do
   begin
-    SetLength(ValueStack, High(ValueStack) + 2);
+    SetLength(ValueStack, Length(ValueStack) + 1);
     ValueStack[High(ValueStack)] := Node;
     if Node.Source <> nil then
       Node := Node.Source
@@ -345,35 +331,11 @@ begin
   SetLength(ValueStack, 0);
 end;
 
-function TFocus.GetParam(Node: PNode): PNode;
-begin
-  Result := nil;
-  while Node <> nil do
-  begin
-    Result := Node;
-    Node := Node.Value;
-  end;
-end;
-
 function TFocus.GetData(Node: PNode): PNode;
-var ValueStack: ANode;
 begin
-  Result := nil;
-  while Node <> nil do
-  begin
-    SetLength(ValueStack, High(ValueStack) + 2);
-    ValueStack[High(ValueStack)] := Node;
-    if Node.Source <> nil then
-      Node := Node.Source
-    else
-    begin
-      if Node.Attr = naData then
-        Result := Node;
-      if FindValue(ValueStack, Node.Value) then Break;
-      Node := Node.Value;
-    end;
-  end;
-  SetLength(ValueStack, 0);
+  Result := GetValue(Node);
+  if (Result <> nil) and (Result.Attr <> naData) then
+    Result := nil;
 end;
 
 function TFocus.GetSource(Node: PNode): PNode;
@@ -384,17 +346,20 @@ begin
     Result := Result.Source;
 end;
 
-function TFocus.GetType(Node: PNode): PNode;
-begin
-  Result := nil;
-  if Node = nil then Exit;
-  if Node.Source <> nil
-  then Result := GetType(Node.Source)
-  else Result := GetData(Node.FType);
-end;
+function TFocus.NewIndex(Name: String): PNode;          //SetIndex
+var
+  i, j, Index: Integer;
+  function AddIndex(Node: PNode; Name: Char): PNode;
+  begin
+    Result := NewSubNode(Node.Index);
+    Result.Attr := naEmpty;
+    Result.Name := Name;
+    Result.ParentIndex := Node;
+    Result := Node.Index[High(Node.Index)];
+    Inc(NodesCount);
 
-function TFocus.NewIndex(Name: String): PNode;
-var i, j, Index: Integer;
+    Result.Path := GetIndex(Result); //test
+  end;
 begin
   Result := Root;
   for i:=1 to Length(Name) do
@@ -416,7 +381,7 @@ begin
 end;
 
 
-function FindInNode(Node: PNode; Index: PNode): PNode;
+function FindNameInNode(Node: PNode; Index: PNode): PNode;
 var
   i: Integer;
   Local: PNode;
@@ -440,7 +405,7 @@ begin
       Local := Node.Local[i];
       if Local.Attr = naModule then
       begin
-        Result := FindInNode(Local, Index);
+        Result := FindNameInNode(Local, Index);
         if Result <> nil then Exit;
       end;
       if Local.ParentName = Index then
@@ -451,7 +416,7 @@ begin
     end;
 end;
 
-function TFocus.FindNode(Index: PNode): PNode;
+function TFocus.FindName(Index: PNode): PNode;
 var Node, Find: PNode;
 begin
   Result := nil;
@@ -461,7 +426,7 @@ begin
   else Node := Prev;
   while Node <> nil do
   begin
-    Find := FindInNode(Node, Index);
+    Find := FindNameInNode(Node, Index);
     if Find <> nil then
     begin
       Result := Find;
@@ -507,20 +472,41 @@ begin
   Link.Destroy;
 end;
 
+procedure TFocus.SetNext(Node: PNode; Next: PNode);
+begin
+  Node.Next := Next;
+  Node.Next.Prev := Node;
+end;
+
+procedure TFocus.SetFType(Node: PNode; FType: PNode);
+begin
+  Node.FType := FType;
+end;
+
+procedure TFocus.SetFTrue(Node: PNode; FTrue: PNode);
+begin
+  Node.FTrue := FTrue;
+end;
+
+procedure TFocus.SetFElse(Node: PNode; FElse: PNode);
+begin
+  Node.FElse := FElse;
+end;
+
+procedure TFocus.SetSource(Node: PNode; Source: PNode);
+begin
+  Node.Source := Source;
+end;
+
 function TFocus.NewNode(Line: TLink): PNode;
 var
   i: Integer;
-  Node: PNode; // for Source
 begin
-
   Result := NewIndex(Line.ID);
   if Result = nil then Exit;
 
-  if Line.ID = '@148' then
-    Line.ID := '@148';
-
   if Line.ID[1] <> '@' then
-    Result := AddLocal(Result)
+    Result := NewLocal(Result)
   else
   if Result.Attr = naEmpty then
     Result := LoadNode(Result);
@@ -528,46 +514,42 @@ begin
   if Result.Attr <> naLoad then   //Initialization
   begin
 
-  case Line.ID[1] of
-    '!' : Result.Attr := naMeta;
-    '@' : Result.Attr := naNode;
-    '/' : Result.Attr := naModule;
-    '0'..'9', '-': Result.Attr := naNumber;
-    else  Result.Attr := naWord;
-  end;
+    case Line.ID[1] of
+      '@' : Result.Attr := naNode;
+      '/' : Result.Attr := naModule;
+      '!' : Result.Attr := naMeta;
+      '0'..'9', '-': Result.Attr := naNumber;
+      else  Result.Attr := naWord;
+    end;
 
-  if Result.Attr = naWord then
-  begin
-    if Line.FType = nil then
-      Result.Source := FindNode(Result.ParentName);
-  end;
-
-  if Line.Source <> '' then
-  begin
-    Node := GetSource(Result);
-    Node.Source := NewNode(Line.Source);
     if Result.Attr = naWord then
-      Result := Node.Source;
-  end;
+        Result.Source := FindName(Result.ParentName);
+
+    if Line.Source <> '' then          //recode 1
+    begin
+      SetSource(GetSource(Result), NewNode(Line.Source));
+      if Result.Attr = naWord then
+        Result := GetSource(Result);
+    end;
 
   end;
 
   for i:=0 to High(Line.Names) do
-    SetControl(Result, Line.Names[i], Line.Values[i]);
+    SetVars(Result, Line.Names[i], Line.Values[i]);
 
   for i:=0 to High(Line.Params) do
-    AddParam(Result, NewNode(Line.Params[i]), i);
+    SetParam(Result, NewNode(Line.Params[i]), i);
 
-  if Result.Attr = naMeta then
-    AddValue(Result, DecodeStr(Copy(Line.ID, 2, MaxInt)))
-  else
   if Result.Attr = naNumber then
   begin
     if Pos(',', Line.ID) = 0
-    then AddValue(Result,   IntToStr4(  StrToInt(Line.ID)))
-    else AddValue(Result, FloatToStr8(StrToFloat(Line.ID)));
+    then Line.ID := '!' + IntToStr4(    StrToInt(Line.ID))
+    else Line.ID := '!' + FloatToStr8(StrToFloat(Line.ID));
     Result.Attr := naMeta;
   end;
+
+  if Result.Attr = naMeta then
+    SetData(Result, DecodeStr(Copy(Line.ID, 2, MaxInt)));
 
   if Line.FElse <> nil then
   begin
@@ -579,18 +561,16 @@ begin
   if Line.Value <> nil then
   begin
     if Line.Value.ID[1] = '!'
-    then SetValue(Result, DecodeStr(Copy(Line.Value.ID, 2, MaxInt)))
+    then SetData(Result, DecodeStr(Copy(Line.Value.ID, 2, MaxInt)))
     else SetValue(Result, NewNode(Line.Value));
   end;
+
   if Line.FType <> nil then
-    Result.FType := NewNode(Line.FType);
+    SetFType(Result, NewNode(Line.FType));
   for i:=0 to High(Line.Local) do
-    AddLocal(Result, NewNode(Line.Local[i]));
+    SetLocal(Result, NewNode(Line.Local[i]));
   if Line.Next <> '' then
-  begin
-    Result.Next := NewNode(Line.Next);
-    Result.Next.Prev := Result;
-  end;
+    SetNext(Result, NewNode(Line.Next));
 end;
 
 procedure TFocus.RecursiveSave(Node: PNode);
@@ -620,10 +600,9 @@ var i: Integer;
 begin
   for i:=0 to High(Node.Index) do
     RecursiveDispose(Node.Index[i]);
-  if Node <> Root then
-    Dispose(Node)
-  else
-    SetLength(Root.Index, 0);
+  if Node <> Root
+  then Dispose(Node)
+  else SetLength(Root.Index, 0);
 end;
 
 procedure TFocus.Clear;
@@ -657,7 +636,7 @@ begin
         Func := NewNode(List.Strings[i]);
         Func.Attr := naDLLFunc;
         Func.Handle := GetProcAddress(Node.Handle, List.Strings[i]);
-        AddLocal(Node, Func);
+        SetLocal(Node, Func);
       end;
     end;
   end
@@ -720,7 +699,7 @@ begin
 
   while Params <> '' do
   begin
-    SetLength(Stack, High(Stack) + 2);
+    SetLength(Stack, Length(Stack) + 1);
     Stack[High(Stack)] := StrToInt4(Copy(Params, 1, 4));
     Delete(Params, 1, 4);
   end;
@@ -754,8 +733,8 @@ begin
   end;
 
   if IfFloat = 0
-  then SetValue(Node, IntToStr4(BVal))
-  else SetValue(Node, FloatToStr8(DBVal));
+  then SetData(Node, IntToStr4(BVal))
+  else SetData(Node, FloatToStr8(DBVal));
 
 end;
 
@@ -784,11 +763,11 @@ begin
     LoadModule(Node);
   for i:=0 to High(Node.Params) do  //run params
     Run(Node.Params[i]);
-  if (Node.Source <> nil) and (((Node.Source.ParentLocal = Module) and (Node.Source.Next <> nil))
+  if (Node.Source <> nil) and (((Node.Source.ParentLocal = Module) and (Node.Source.Next <> nil))   //recode  2
     or (Node.Source.Attr = naDLLFunc)) then   // run dll func
   begin
     for i:=0 to High(Node.Params) do
-      AddParam(GetSource(Node), GetValue(Node.Params[i]), i);
+      SetParam(GetSource(Node), GetValue(Node.Params[i]), i);
     Run(Node.Source);                   //run source
   end;
   if Node.Attr = naDLLFunc then     //call dll func
@@ -810,8 +789,8 @@ begin
   else
   if (Node.Value <> nil) and (Node.Source <> nil) then   //run value
   begin
-    Run(Node.Value);                                //!!!! func?750 write to @148.val
-    Node.Source.Value := GetValue(Node.Value);
+    Run(Node.Value);                                //!!!! func?750 write to @148.val       recode 3
+    Node.Source.Value := Node.Value;
   end;
 
   Node := Node.Next;
@@ -832,7 +811,7 @@ begin
       if Module = nil then
         Module := NextNode
       else
-        AddLocal(Module, NextNode);
+        SetLocal(Module, NextNode);
     end;
   PrevNode := NextNode;
 end;
