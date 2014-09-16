@@ -36,6 +36,7 @@ type
     RunCount    : Integer;
     Activate    : Integer;
     Handle      : Integer;
+    Data        : String;
   end;
 
   PEvent = ^TEvent;
@@ -80,7 +81,6 @@ type
     function GetValue(Node: PNode): PNode;
 
 	  function SetData(Node: PNode; Value: String): PNode;
-    function GetData(Node: PNode): PNode;
 
     procedure SetFTrue(Node: PNode; FTrue: PNode);
     procedure SetFElse(Node: PNode; FElse: PNode);
@@ -115,7 +115,7 @@ const
 //NodeAttribyte
   naEmpty = 0;           
   naNode = 1;
-  naMeta = 2;
+  //naMeta = 2;
   naData = 3;
   naWord = 4;
   naModule = 5;
@@ -363,18 +363,7 @@ end;
 
 function TFocus.SetData(Node: PNode; Value: String): PNode;
 begin
-  Result := AllocMem(SizeOf(TNode));
-  Result.Name := Value;
-  Result.Attr := naData;
-  Node.Value := Result;
-end;
-
-
-function TFocus.GetData(Node: PNode): PNode;
-begin
-  Result := GetValue(Node);
-  if (Result <> nil) and (Result.Attr <> naData) then
-    Result := nil;
+  Node.Data := Value;
 end;
 
 
@@ -462,7 +451,7 @@ begin
     case Line.ID[1] of
       '@' : Result.Attr := naNode;
       '/' : Result.Attr := naModule;
-      '!' : Result.Attr := naMeta;
+      '!' : Result.Attr := naData;
       '0'..'9', '-': Result.Attr := naNumber;
       else  Result.Attr := naWord;
     end;
@@ -490,10 +479,10 @@ begin
     if Pos(',', Line.ID) = 0
     then Line.ID := '!' + IntToStr4(    StrToIntDef(Line.ID, 0))
     else Line.ID := '!' + FloatToStr8(StrToFloatDef(Line.ID, 0));
-    Result.Attr := naMeta;
+    Result.Attr := naData;
   end;
 
-  if Result.Attr = naMeta then
+  if Result.Attr = naData then
     SetData(Result, DecodeStr(Copy(Line.ID, 2, MaxInt)));
 
   if Line.FElse <> nil then
@@ -602,11 +591,11 @@ begin
 
   for i:=0 to High(Node.Params) do
   begin
-    Value := GetData(Node.Params[i]);
+    Value := GetValue(Node.Params[i]);
     if Value = nil then Exit
     else
     begin
-      Param := Value.Name;
+      Param := Value.Data;
 
       if Length(Param) > 4 then
         Params := StringOfChar(#0, Length(Param) mod 4) + Param + Params;
@@ -682,8 +671,8 @@ var
     if Node <> nil then
     begin
       Result := 0;
-      for i:=0 to Length(Node.Name) do
-        Inc(Result, Ord(Node.Name[i]));
+      for i:=0 to Length(Node.Data) do
+        Inc(Result, Ord(Node.Data[i]));
     end;
   end;
 begin
@@ -705,7 +694,7 @@ begin
     CallFunc(Node);
   if (Node.FTrue <> nil) or (Node.FElse <> nil) then     //node is if
   begin
-    FuncResult := CompareWithZero(GetData(Node));   //del funcresult
+    FuncResult := CompareWithZero(GetValue(Node));   //del funcresult
     if (FuncResult = 1) and (Node.FTrue <> nil) then   //true
     begin
       Node := GetSource(Node.FTrue);

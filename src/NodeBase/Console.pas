@@ -65,10 +65,10 @@ begin
    Node := Base.Execute(Line);
   if Node <> nil then
   begin
-    Data := Base.GetData(Node);
+    Data := Base.GetValue(Node);
     if Data <> nil then
     begin
-      Result := Data.Name;
+      Result := Data.Data;
       if Length(Result) = 4 then
         Result := IntToStr(StrToInt4(Result))
       else
