@@ -80,7 +80,7 @@ type
     function SetValue(Node: PNode; Value: PNode): PNode;
     function GetValue(Node: PNode): PNode;
 
-	  function SetData(Node: PNode; Value: String): PNode;
+	  procedure SetData(Node: PNode; Value: String);
 
     procedure SetFTrue(Node: PNode; FTrue: PNode);
     procedure SetFElse(Node: PNode; FElse: PNode);
@@ -115,14 +115,13 @@ const
 //NodeAttribyte
   naEmpty = 0;           
   naNode = 1;
-  //naMeta = 2;
-  naData = 3;
-  naWord = 4;
-  naModule = 5;
-  naDLLFunc = 6;
-  naNumber = 7;
-  naLoad = 8;
-  naRoot = 9;
+  naData = 2;
+  naWord = 3;
+  naModule = 4;
+  naDLLFunc = 5;
+  naNumber = 6;
+  naLoad = 7;
+  naRoot = 8;
 
   NodeFileName = 'Node.txt';
 
@@ -192,7 +191,6 @@ var
     Result.ParentIndex := Node;
     Result := Node.Index[High(Node.Index)];
     Inc(NodesCount);
-
     Result.Path := GetIndex(Result); //test
   end;
 begin
@@ -314,7 +312,8 @@ begin
     else
     if Index <= High(Node.Params) then
     begin
-      Node.Params[Index].Value := Param;
+      if Node.Params[Index] <> Param then
+        Node.Params[Index].Value := Param;
     end;
   end;
 end;
@@ -361,7 +360,7 @@ begin
 end;
 
 
-function TFocus.SetData(Node: PNode; Value: String): PNode;
+procedure TFocus.SetData(Node: PNode; Value: String);
 begin
   Node.Data := Value;
 end;
@@ -733,6 +732,7 @@ begin
     Indexes[High(Indexes)] := Buf.Name;
     Buf := Buf.ParentIndex;
   end;
+  if (Length(Indexes) > 1) and (Indexes[High(Indexes) - 1] <> '@') then Exit;
   ToFileSystemName(Indexes);
   Body := GetNodeBody(Node);
   SaveToFile(CreateDir(Indexes) + NodeFileName, Body);
