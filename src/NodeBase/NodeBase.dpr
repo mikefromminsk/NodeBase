@@ -7,11 +7,17 @@ uses
 
 var i: Integer;
 
+  Link: TLink;
+  Str: String;
 begin
+
+  Str := 'Source^Name@Id$controls:Ftype?Params#Value|FElse'#10#10'Next'#10#10'Local';
+  Link := TLink.Create(Str, False);
+  Link.ID := '123';
   Application.Initialize;
   Base := TFocus.Create;
   Application.CreateForm(TGG, GG);
-  
+
   {for i:=0 to 1000 do
     Base.NewNode(Base.NextID);}
   try

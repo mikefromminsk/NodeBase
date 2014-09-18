@@ -289,7 +289,9 @@ var
   Node: Pnode;
 begin
   Base.Clear;
-  Node := Base.NewNode('@145');
+  Base.Module := Base.NewNode('@1');
+  Node := Base.Execute('func$activate?750,0');
+  Node := Base.NewNode('@1');
 end;
 
 end.

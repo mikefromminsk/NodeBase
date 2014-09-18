@@ -39,24 +39,12 @@ type
     Data        : String;
   end;
 
-  PEvent = ^TEvent;
-  TEvent = record
-    FBegin: Double;
-    FEnd  : Double;
-    Nodes : ANode;
-    Next  : PEvent;
-  end;
-
   TFocus = class
     ID        : Integer;
     Root      : PNode;
     Prev      : PNode;
     Module    : PNode;
     NodesCount: Integer;    //test
-
-    TimeManager    : PEvent;
-    GarbageInterval: Double;
-    GarbageLastRun : Double;
 
     constructor Create;
 
@@ -147,7 +135,7 @@ begin
   if Param = 'COUNT' then Node.Count := StrToIntDef(Value, 0);
   if Param = 'RUN'   then Node.RunCount := StrToIntDef(Value, 1);
   if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1);
-  if Param = 'HANDLE' then Node.Activate := StrToIntDef(Value, 0);
+  if Param = 'HANDLE' then Node.Handle := StrToIntDef(Value, 0);
 end;
 
 
@@ -312,8 +300,15 @@ begin
     else
     if Index <= High(Node.Params) then
     begin
+      {if Node.Attr = naDLLFunc then
+      begin
+        if Node.Params[Index] <> Param then
+          Node.Params[Index] := Param;
+      end
+      else}
       if Node.Params[Index] <> Param then
         Node.Params[Index].Value := Param;
+
     end;
   end;
 end;
@@ -438,15 +433,17 @@ begin
   Result := NewIndex(Line.ID);
   if Result = nil then Exit;
 
+  if Line.ID = '@146' then
+    Line.ID := '@146';
+
   if Line.ID[1] <> '@' then
     Result := NewLocal(Result)
   else
   if Result.Attr = naEmpty then
-    Result := LoadNode(Result);
+    LoadNode(Result);
 
   if Result.Attr <> naLoad then   //Initialization
   begin
-
     case Line.ID[1] of
       '@' : Result.Attr := naNode;
       '/' : Result.Attr := naModule;
@@ -457,15 +454,21 @@ begin
 
     if Result.Attr = naWord then
         Result.Source := FindName(Result.ParentName);
-
-    if Line.Source <> '' then          //recode 1
-    begin
-      SetSource(GetSource(Result), NewNode(Line.Source));
-      if Result.Attr = naWord then
-        Result := GetSource(Result);
-    end;
-
   end;
+
+  if Line.Source <> '' then
+  begin
+    if (Result.Attr = naWord) and (Result.Attr <> naLoad) then
+    begin  //hardcode
+      SetSource(GetSource(Result), NewNode(Line.Source));
+      Result := GetSource(Result)
+    end
+    else
+      SetSource(Result, NewNode(Line.Source));
+  end;
+
+  if Line.Name <> '' then
+    Result.ParentName := NewIndex(Line.Name);
 
   for i:=0 to High(Line.Names) do
     SetVars(Result, Line.Names[i], Line.Values[i]);
@@ -511,25 +514,23 @@ function TFocus.LoadNode(Node: PNode): PNode;
 var
   Indexes: AString;
   Body, Path: String;
-  Buf: PNode;
 begin
-  Result := Node;
-  Buf := Node;
+  if Node = nil then Exit;
+  Node.Attr := naLoad;
+
   SetLength(Indexes, 0);
-  while Buf <> nil do
+  while Node <> nil do
   begin
     SetLength(Indexes, Length(Indexes) + 1);
-    Indexes[High(Indexes)] := Buf.Name;
-    Buf := Buf.ParentIndex;
+    Indexes[High(Indexes)] := Node.Name;
+    Node := Node.ParentIndex;
   end;
   Path := ToFileSystemName(Indexes) + NodeFileName;
   Body := LoadFromFile(Path);
   SetLength(Indexes, 0);
+
   if Body <> '' then
-  begin
-    Result.Attr := naLoad;
-    Result := NewNode(Body); //fastload
-  end;
+    NewNode(Body); //fastload
 end;
 
 
@@ -548,7 +549,7 @@ begin
   begin
     if Node.Handle = 0 then
     begin
-      Node.Handle := GetImageFunctionList(FileName, List);
+      Node.Handle := GetFunctionList(FileName, List);
       for i:=0 to List.Count-1 do
       begin
         Func := NewNode(List.Strings[i]);
@@ -591,7 +592,7 @@ begin
   for i:=0 to High(Node.Params) do
   begin
     Value := GetValue(Node.Params[i]);
-    if Value = nil then Exit
+    if (Value = nil) or (Value.Data = '') then Exit
     else
     begin
       Param := Value.Data;
@@ -680,35 +681,35 @@ begin
 
   if Node.Attr = naModule then
     LoadModule(Node);
-  for i:=0 to High(Node.Params) do  //run params
+  for i:=0 to High(Node.Params) do 
     Run(Node.Params[i]);
   if (Node.Source <> nil) and (((Node.Source.ParentLocal = Module) and (Node.Source.Next <> nil))   //recode  2
-    or (Node.Source.Attr = naDLLFunc)) then   // run dll func
+    or (Node.Source.Attr = naDLLFunc)) then
   begin
     for i:=0 to High(Node.Params) do
       SetParam(GetSource(Node), GetValue(Node.Params[i]), i);
-    Run(Node.Source);                   //run source
+    Run(Node.Source);
   end;
-  if Node.Attr = naDLLFunc then     //call dll func
+  if Node.Attr = naDLLFunc then
     CallFunc(Node);
-  if (Node.FTrue <> nil) or (Node.FElse <> nil) then     //node is if
+  if (Node.FTrue <> nil) or (Node.FElse <> nil) then
   begin
-    FuncResult := CompareWithZero(GetValue(Node));   //del funcresult
-    if (FuncResult = 1) and (Node.FTrue <> nil) then   //true
+    FuncResult := CompareWithZero(GetValue(Node));
+    if (FuncResult = 1) and (Node.FTrue <> nil) then
     begin
       Node := GetSource(Node.FTrue);
       Goto NextNode;
     end;
-    if (FuncResult = 0) and (Node.FElse <> nil) then   //false
+    if (FuncResult = 0) and (Node.FElse <> nil) then
     begin
       Node := GetSource(Node.FElse);
       Goto NextNode;
     end;
   end
   else
-  if (Node.Source <> nil) and (Node.Value <> nil) then   //run value
+  if (Node.Source <> nil) and (Node.Value <> nil) then
   begin
-    Run(Node.Value);                                //!!!! func?750 write to @148.val       recode 3
+    Run(Node.Value);
     Node.Source.Value := GetValue(Node.Value);
   end;
 
@@ -805,12 +806,12 @@ begin
       Result := Result + GetIndex(Node.FElse);
   end
   else
-  if Node.Value <> nil then
-  begin
-    if Node.Value.Attr = naData
-    then Result := Result + '#!' + EncodeStr(Node.Value.Name)
-    else Result := Result + '#' + GetIndex(Node.Value);
-  end;
+    if Node.Attr = naData then
+      Result := Result + '#!' + EncodeStr(Node.Data)
+    else
+    if Node.Value <> nil then
+      Result := Result + '#' + GetIndex(Node.Value);
+
   if Node.Next <> nil then
     Result := Result + #10 + GetIndex(Node.Next);
   for i:=0 to High(Node.Local) do
@@ -823,6 +824,7 @@ var
   Data: String;
   i: Integer;
 begin
+  //Line
   Result := NewNode(Line);
   NextNode(Prev, Result);
   if Result <> nil then
