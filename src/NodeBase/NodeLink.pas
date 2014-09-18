@@ -1515,6 +1515,20 @@ begin
   end;
 
 
+
+  Index_Local := 1;
+  for i:=3 to Length(LocalStr) - 4 do
+    if (LocalStr[i] = #10) and (LocalStr[i + 1] = #10) then
+    begin
+      SetLength(Local, Length(Local) + 1);
+      Local[High(Local)] := Copy(LocalStr, Index_Local,  i - Index_Local);
+      Index_Local := i + 2;
+    end;
+  if Index_Local <> Length(LocalStr) then
+  begin
+    SetLength(Local, Length(Local) + 1);
+    Local[High(Local)] := Copy(LocalStr, Index_Local,  MaxInt);
+  end;
   ShowMessage(
   SourceStr + ',' +
   NameStr+ ',' +
@@ -1527,7 +1541,6 @@ begin
   NextStr+ ',' +
   LocalStr
   );
-
   {ID := IdStr;
   //Path
   Name := NameStr;

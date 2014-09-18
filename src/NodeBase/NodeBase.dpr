@@ -11,7 +11,7 @@ var i: Integer;
   Str: String;
 begin
 
-  Str := 'Source^Name@Id$controls:Ftype?Params#Value|FElse'#10#10'Next'#10#10'Local';
+  Str := 'Source^Name@Id$controls:Ftype?Params#Value|FElse'#10'Next'#10#10'Local1'#10#10'Local2'#10#10'Local3';
   Link := TLink.Create(Str, False);
   Link.ID := '123';
   Application.Initialize;
