@@ -6,8 +6,10 @@ uses
   Windows, ImageHlp, Classes, SysUtils, StrUtils, Math, Dialogs, ExtCtrls,
   Messages;
 
+type
+  AString = Array of String;
 
-
+function slice(Text: String; Delimeter: String): AString;
 function IntToStr4(Num: Integer): String;
 function StrToInt4(Str: String): Integer;
 function FloatToStr8(Num: Double): String;
@@ -18,10 +20,6 @@ function PosI(Index: Integer; Substr: String; S: String): Integer;
 function NextIndex(Index: Integer; const Substr: array of string; S: String): Integer;
 function GetFunctionList(const FileName: string; Strings: TStrings): Integer;
 function GetProcAddress(Handle: Integer; FuncName: String): Integer;
-
-
-
-
 function ToFileSystemName(var Indexes: array of String): String;
 function LoadFromFile(FileName: String): String;
 function SaveToFile(FileName: String; var Data: String): Integer;
@@ -31,7 +29,25 @@ function CreateDir(Indexes: array of String): String;
 implementation
 
 
-
+function slice(Text: String; Delimeter: String): AString;
+var
+  Index: Integer;
+begin
+  SetLength(Result, 0);
+  Index := Pos(Delimeter, Text);
+  while Index <> 0 do
+  begin
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Copy(Text, 1, Index - 1);
+    Delete(Text, 1, Index + Length(Delimeter) - 1);
+    Index := Pos(Delimeter, Text);
+  end;
+  if Text <> '' then
+  begin
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Text;
+  end;
+end;
 
 function GetProcAddress(Handle: Integer; FuncName: String): Integer;
 begin

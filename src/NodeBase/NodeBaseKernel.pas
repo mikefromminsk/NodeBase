@@ -10,7 +10,6 @@ type
 
   PNode = ^TNode;
   ANode = array of PNode;
-  AString = array of String;
   
   TNode = record
     Path          : String;          //test
@@ -420,7 +419,7 @@ end;
 function TFocus.NewNode(Line: String): PNode;
 var Link: TLink;
 begin
-  Link := TLink.Create(Line);
+  Link := TLink.Create(Line, nlKernelFastParse);
   Result := NewNode(Link);
   Link.Destroy;
 end;
@@ -432,9 +431,6 @@ var
 begin
   Result := NewIndex(Line.ID);
   if Result = nil then Exit;
-
-  if Line.ID = '@146' then
-    Line.ID := '@146';
 
   if Line.ID[1] <> '@' then
     Result := NewLocal(Result)
@@ -823,9 +819,10 @@ function TFocus.Execute(Line: String): PNode;
 var
   Data: String;
   i: Integer;
+  Link: TLink;
 begin
-  //Line
-  Result := NewNode(Line);
+  Link := TLink.Create(Line, nlRecursiveParse);
+  Result := NewNode(Link);
   NextNode(Prev, Result);
   if Result <> nil then
   begin
