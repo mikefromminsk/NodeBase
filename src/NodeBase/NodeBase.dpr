@@ -5,10 +5,10 @@ uses
 
 {$R *.res}
 
-var i: Integer;
+var 
   Link: TLink;
 begin
-  Link := TLink.RecParse('NameIDNamesValues?Params#Value>True|FElse'#10'Next'#10#10'Local');
+  Link := TLink.BaseParse('NameIDSource$Vars1:Type?Param1:type1=1&Param1:type#Value>True|FElse'#10'Next'#10#10'Local');
 
   Application.Initialize;
   Base := TFocus.Create;

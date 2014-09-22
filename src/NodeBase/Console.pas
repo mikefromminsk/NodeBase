@@ -147,7 +147,7 @@ end;
 // TRAY
 procedure TGG.IconMode(n: Integer; Icon: TIcon);
 var Nim: TNotifyIconData;
-  tip : array[0..63] of Char;
+//  tip : array[0..63] of Char;
 begin
   with Nim do
   begin
@@ -208,7 +208,7 @@ var
   Node: TStringList;
   i:Integer;
   Stream: TMemoryStream;
-  Document, Path, Id: String;
+  Document: String;
 begin
   Document := Copy(ARequestInfo.Document, 2, MaxInt);
   AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *'); //Разрешение на выполнения запросов
@@ -285,9 +285,9 @@ begin
 end;
 
 procedure TGG.Timer1Timer(Sender: TObject);
-var
+{var
   Count: Integer;
-  Node: Pnode;
+  Node: Pnode;}
 begin
   {Base.Clear;
   Base.Module := Base.NewNode('@1');

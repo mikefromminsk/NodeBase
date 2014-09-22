@@ -577,7 +577,7 @@ var
   Value: PNode;
   Params, Param: String;
   Stack: array of Integer;
-  Func, FourByte, i, BVal, ParamCount,
+  Func, FourByte, i, BVal,
   EAXParam, EDXParam, ECXParam, RegParamCount: Integer;
   DBVal: Double;
   IfFloat: Integer;
@@ -661,8 +661,7 @@ end;
 procedure TFocus.Run(Node: PNode);
 label NextNode;
 var
-  FuncResult, i, n: Integer;
-  Str: String;
+  FuncResult, i: Integer;
   function CompareWithZero(Node: PNode): Integer;
   var i: Integer;
   begin
@@ -775,7 +774,7 @@ end;
 
 function TFocus.GetNodeBody(Node: PNode): String;
 var
-  Str, Controls: String;
+  Str: String;
   i: Integer;
 begin
   Result := '';
@@ -820,8 +819,6 @@ end;
 
 function TFocus.Execute(Line: String): PNode;
 var
-  Data: String;
-  i: Integer;
   Link: TLink;
 begin
   Link := TLink.Create(Line);
