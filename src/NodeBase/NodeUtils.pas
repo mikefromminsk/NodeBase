@@ -17,7 +17,8 @@ function StrToFloat8(Str: String): Double;
 function EncodeStr(Str: String; Position: Integer = 1): String;
 function DecodeStr(Str: String): String;
 function PosI(Index: Integer; Substr: String; S: String): Integer;
-function NextIndex(Index: Integer; const Substr: array of string; S: String): Integer;
+function Index(const Substr: Array of String; Str: String): Integer;
+function NextIndex(Index: Integer; const Substr: Array of String; Str: String): Integer;
 function GetFunctionList(const FileName: string; Strings: TStrings): Integer;
 function GetProcAddress(Handle: Integer; FuncName: String): Integer;
 function ToFileSystemName(var Indexes: array of String): String;
@@ -99,14 +100,19 @@ begin
     Result := High(Integer);
 end;
 
-function NextIndex(Index: Integer; const Substr: array of string; S: String): Integer;
+function Index(const Substr: Array of String; Str: String): Integer;
+begin
+  Result := NextIndex(0, Substr, Str);
+end;
+
+function NextIndex(Index: Integer; const Substr: Array of String; Str: String): Integer;
 var
   I, PosIndex: Integer;
 begin
   Result := High(Integer);
   for I := Low(Substr) to High(Substr) do
   begin
-    PosIndex := PosI(Index, Substr[I], S);
+    PosIndex := PosI(Index, Substr[I], Str);
     if PosIndex < Result then
       Result := PosIndex;
   end;
@@ -223,16 +229,10 @@ end;
 function SaveToFile(FileName: String; var Data: String): Integer;
 var OutFile: TextFile;
 begin
-  Result := 0;
-  try
-    AssignFile(OutFile, FileName);
-    Rewrite(OutFile);
-    WriteLn(OutFile, Data);
-    CloseFile(OutFile);
-  except
-    on E: Exception do
-      Result := 1;
-  end;
+  AssignFile(OutFile, FileName);
+  Rewrite(OutFile);
+  WriteLn(OutFile, Data);
+  CloseFile(OutFile);
 end;
 
 function LoadFromFile(FileName: String): String;
@@ -241,7 +241,8 @@ var
   Buf: String;
 begin
   Result := '';
-  try
+  if FileExists(FileName) then
+  begin
     AssignFile(InFile, FileName);
     Reset(InFile);
     while not Eof(InFile) do
@@ -250,9 +251,6 @@ begin
       Result := Result + Buf + #10;
     end;
     CloseFile(InFile);
-  except
-    on E: Exception do
-      Result := '';
   end;
 end;
 

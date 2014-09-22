@@ -5,20 +5,13 @@ uses
 
 {$R *.res}
 
-//var i: Integer;
-
+var i: Integer;
+  Link: TLink;
 begin
+  Link := TLink.RecParse('NameIDNamesValues?Params#Value>True|FElse'#10'Next'#10#10'Local');
 
   Application.Initialize;
   Base := TFocus.Create;
   Application.CreateForm(TGG, GG);
-
-  {for i:=0 to 1000 do
-    Base.NewNode(Base.NextID);}
-  try
-    Application.Run;
-  except
-    on E: Exception do
-      //ShowMessage(e.Message);
-  end;
+  Application.Run;
 end.

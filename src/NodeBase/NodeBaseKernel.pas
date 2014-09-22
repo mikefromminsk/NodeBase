@@ -6,6 +6,22 @@ uses
   Math{SumInt}, SysUtils{AllocMem, Now}, Classes{TStrings}, NodeLink, NodeUtils,
   Dialogs{test};
 
+
+const
+
+//NodeAttribyte
+  naEmpty = 0;           
+  naNode = 1;
+  naData = 2;
+  naWord = 3;
+  naModule = 4;
+  naDLLFunc = 5;
+  naNumber = 6;
+  naLoad = 7;
+  naRoot = 8;
+
+  NodeFileName = 'Node.txt';
+
 type
 
   PNode = ^TNode;
@@ -97,21 +113,6 @@ type
     function Execute(Line: String): PNode; virtual;
   end;
 
-const
-
-//NodeAttribyte
-  naEmpty = 0;           
-  naNode = 1;
-  naData = 2;
-  naWord = 3;
-  naModule = 4;
-  naDLLFunc = 5;
-  naNumber = 6;
-  naLoad = 7;
-  naRoot = 8;
-
-  NodeFileName = 'Node.txt';
-
 implementation
 
 
@@ -127,8 +128,8 @@ end;
 
 procedure TFocus.SetVars(Node: PNode; Param, Value: String);
 begin
-  Param := AnsiUpperCase(Param);
-  Value := AnsiUpperCase(Value);
+  {Param := AnsiUpperCase(Param);
+  Value := AnsiUpperCase(Value);}
   if Param = 'ATTR'  then Node.Attr := StrToIntDef(Value, 0);
   if Param = 'TIME'  then Node.Time := StrToFloatDef(Value, Now);
   if Param = 'COUNT' then Node.Count := StrToIntDef(Value, 0);
@@ -419,7 +420,7 @@ end;
 function TFocus.NewNode(Line: String): PNode;
 var Link: TLink;
 begin
-  Link := TLink.Create(Line, nlKernelFastParse);
+  Link := TLink.Create(Line);
   Result := NewNode(Link);
   Link.Destroy;
 end;
@@ -452,7 +453,7 @@ begin
         Result.Source := FindName(Result.ParentName);
   end;
 
-  if Line.Source <> '' then
+  if Line.Source <> nil then
   begin
     if (Result.Attr = naWord) and (Result.Attr <> naLoad) then
     begin  //hardcode
@@ -501,7 +502,7 @@ begin
     SetFType(Result, NewNode(Line.FType));
   for i:=0 to High(Line.Local) do
     SetLocal(Result, NewNode(Line.Local[i]));
-  if Line.Next <> '' then
+  if Line.Next <> nil then
     SetNext(Result, NewNode(Line.Next));
 end;
 
@@ -521,7 +522,9 @@ begin
     Indexes[High(Indexes)] := Node.Name;
     Node := Node.ParentIndex;
   end;
+
   Path := ToFileSystemName(Indexes) + NodeFileName;
+
   Body := LoadFromFile(Path);
   SetLength(Indexes, 0);
 
@@ -751,7 +754,7 @@ end;
 
 procedure TFocus.Clear;
 begin
-  RecursiveSave(Root);
+  //RecursiveSave(Root);
   RecursiveDispose(Root);
   Prev := nil;
   Module := nil;
@@ -821,7 +824,7 @@ var
   i: Integer;
   Link: TLink;
 begin
-  Link := TLink.Create(Line, nlRecursiveParse);
+  Link := TLink.Create(Line);
   Result := NewNode(Link);
   NextNode(Prev, Result);
   if Result <> nil then

@@ -1,273 +1,101 @@
 unit NodeLink;
 
-// ver 2
+// ver 3
 
 
 interface
 
 uses
-  SysUtils, NodeUtils, Classes;
+  SysUtils, NodeUtils, Classes, Dialogs;
 
 const
-  nlRecursiveParse = 0;
-  nlKernelFastParse = 1;
-  nlSetID = 2;
+  sID = '@';
+  sSource = '^';
+  sVars = '$';
+  sType = ':';
+  sParams = '?';
+  sParamValue = '=';
+  sParamAnd = '&';
+  sParamEnd = ';';
+  sValue = '#';
+  sTrue = '>';
+  sFalse = '|';
+  sNext = #10;
+  sLocal = #10#10;
+
+  sFile = '/';
+  sData = '!';
+
 
 type
 
   TLink = class
   public
-    ID          : String;
+    Source      : TLink;
     Name        : String;
-    Source      : String;
+    ID          : String;
     Names       : Array of String;
     Values      : Array of String;
     FType       : TLink;
-    Local       : Array of String;    
     Params      : Array of TLink;
     Value       : TLink;
     FElse       : TLink;
-    Next        : String;
-    constructor Create(LURI: string; Mode: Integer = nlRecursiveParse);
-    constructor RecParse(var LURI: String; FirstRun: Boolean = False);  //рекурсивную для пользователя
-    procedure FastParse(var Str: String);  //более простую для базы
+    Next        : TLink;
+    Local       : Array of TLink;
+
+    constructor Create(Str: string);
+    constructor RecParse(Str: String);   //рекурсивную для пользователя
+    constructor FastParse(Str: String);  //более простую для базы
     destructor Destroy;
   end;
 
 implementation
 
-uses Math;
 
-constructor TLink.Create(LURI: string; Mode: Integer = nlRecursiveParse);
+
+constructor TLink.Create(Str: string);
 begin
-  case Mode of
-   nlRecursiveParse : RecParse(LURI, True);
-   nlKernelFastParse : FastParse(LURI);
-   nlSetID : ID := LURI;
-  end;
+  ID := Str;
 end;
 
-                                                         //потоковая обработка ссылок
-constructor TLink.RecParse(var LURI: String; FirstRun: Boolean = False);
-//Source^Name@ID$Names=Values:FType?Params#Value|FElse
+
+//Name@ID^Source$Names=Values:FType?Params#Value>FTrue|FElse
 //Next
 //
 //Local
-
-//Error Value !%12 dont load
+constructor TLink.RecParse(Str: String);
+const
+  Count = 10;
+  SysChars: array[1..Count] of String =
+    (sID, sSource, sVars, sType, sParams, sValue, sTrue, sFalse, sNext, sLocal);
 var
-  s, LS, Str: string;
-  Index, i: Integer;
-  Arr: AString;
+  i: Integer;
+  Indexes: array[1..Count + 1] of Integer;
+  Strings: array[0..Count] of String;
 begin
-  if Length(LURI) = 0 then Exit;                               //выход если пусто
-  ID := '';
-  s := ''; LS := ''; Str := '';
+  Indexes[High(Indexes)] := Length(Str) + 1;
 
-  while LURI[Length(LURI)] = #10 do
-    Delete(LURI, Length(LURI), 1);
+  for i:=1 to Count do
+    Indexes[i] := Pos(SysChars[i], Str);
 
-  Index := NextIndex(0, [#10#10], LURI);    //Local
-  if Index <> MaxInt then
-  begin
-    LS := Copy(LURI, Index + 2, MaxInt);
-    Delete(LURI, Index, MaxInt);
-  end;
-  while Length(LS) > 0 do
-  begin
-    Index := NextIndex(0, [#10#10], LS);
-    s := Copy(LS, 1, Index-1);
-    SetLength(Local, Length(Local) + 1);
-    Local[High(Local)] := s;
-    if Index = MaxInt then
-      LS := '';    
-    Delete(LS, 1, Index + 1);
-  end;
+  for i:=1 to Count do
+    if Indexes[i] = 0 then
+      Indexes[i] := Indexes[i + 1];
 
-
-  Index := NextIndex(0, [#10], LURI);
-  if (Index <> MaxInt) and (Index <> Length(LURI)) then
-  begin
-    Next := Copy(LURI, Index + 1, MaxInt);  //Next
-    Delete(LURI, Index, MaxInt);
-  end;
-
-  Index := NextIndex(0, ['$', '?', ':', '=', '&', ';', '#', '|'], LURI);     //в порядке вероятности
-
-
-  if Index > 1 then
-  begin
-    ID := Copy(LURI, 1, Index - 1);    //ID
-    Source := Copy(ID, 1, Pos('^', ID) - 1);                      //Source
-    Delete(ID, 1, Pos('^', ID));
-    if Length(ID) > 0 then
-    begin
-      Name := Copy(ID, 1, Pos('@', ID) - 1);               //Name
-      Delete(ID, 1, Pos('@', ID)-1);
-    end;
-    Delete(LURI, 1, Index-1);
-    if NextIndex(0, ['\', '/'], ID) <> MaxInt then               //обработка до функции
-    begin
-      for i:=0 to Length(ID) do                                  //del
-        if ID[i] = '\' then
-          ID[i] := '/';
-      if not (ID[1] in ['\', '/']) then
-        ID := '/' + ID;
-      {SetLength(Path, 1);
-      Path[0] := ID; }                                             //Path
-    end;
-    {if ID[1] = '!' then
-    begin                                                          //?
-      SetLength(Path, 1);
-      Path[0] := ID;
-    end;}
-
-    if Length(LURI) = 0 then Exit;                                //?
-  end;
-                                                  //отрезали всё до управляющего символа
-  if LURI[1] = '|' then                             //обработка else в верхней функции
-  begin
-    Exit;
-  end;
-
-  if LURI[1] = '$' then                                  //vars
-  begin
-    Delete(LURI, 1, 1);
-
-    Index := NextIndex(0, [':', '?', '#'], LURI);
-    s := Copy(LURI, 1, Index - 1);
-    Delete(LURI, 1, Index -1);
-    Arr := slice(s, '&');
-    for i:=0 to High(Arr) do
-    begin
-      SetLength(Names, Length(Names) + 1);
-      SetLength(Values, Length(Values) + 1);
-      Index := NextIndex(0, ['='], Arr[i]);
-      Names[High(Names)] := Copy(Arr[i], 1, Index -1);
-      if Index <> MaxInt then
-        Values[High(Values)] := Copy(Arr[i], Index +1, MaxInt);
-    end;
-
-    Index := NextIndex(0, ['?', ':', '=', '&', ';', '#', '|'], LURI);
-    if (Index = MaxInt) then
-      Exit;
-  end;
-
-  if LURI[1] = ':' then                         //FType
-  begin
-    Delete(LURI, 1, 1);
-    Index := NextIndex(0, ['?', ':', '=', '&', ';', '#'], LURI);
-
-    if Index = MaxInt then                      //нету управляющих символов
-    begin
-      FType := TLink.RecParse(LURI);
-      Delete(LURI, 1, Length(LURI));
-    end
-    else
-    if LURI[Index] = '=' then
-    begin
-      s := Copy(LURI, 1, Index-1);
-      FType := TLink.RecParse(s);
-      Delete(LURI, 1, Index);
-      Value := TLink.RecParse(LURI);            //следующее значение
-    end
-    else
-    begin
-      if Length(LURI) > 0 then                  //дальше функция
-        FType := TLink.RecParse(LURI);
-    end;
-    Exit;
-  end;
-
-  if LURI[1] = '=' then
-  begin
-    Delete(LURI, 1, 1);
-    Value := TLink.RecParse(LURI);
-    Exit;
-  end;
-
-  if LURI[1] = ';' then
-  begin
-    Delete(LURI, 1, 1);
-    Exit;
-  end;
-
-
-  if LURI[1] = '?' then
-  begin
-    Delete(LURI, 1, 1);
-    repeat
-      Index := NextIndex(0, ['?', ':', '=', '&', ';', '#'], LURI);
-
-      if (Index = MaxInt) or (LURI[Index] = ';') then
-      begin
-        s := Copy(LURI, 1, Index-1);
-        Delete(LURI, 1, Index);
-        if Length(s) > 0 then
-        begin
-          SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLink.RecParse(s);
-        end
-        else
-          Break;
-        Exit;
-      end;
-
-      if LURI[Index] in [':', '='] then
-      begin
-        SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TLink.RecParse(LURI);
-        Continue;
-      end;
-
-      if LURI[Index] = '&' then
-      begin
-        s := Copy(LURI, 1, Index-1);
-        Delete(LURI, 1, Index);
-        if Length(s) > 0 then
-        begin
-          SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLink.RecParse(s);
-        end;
-        Continue;
-      end;
-
-      if LURI[Index] = '#' then
-      begin
-        s := Copy(LURI, 1, Index-1);
-        Delete(LURI, 1, Index-1);
-        if Length(s) > 0 then
-        begin
-          SetLength(Params, High(Params)+2);
-          Params[High(Params)] := TLink.RecParse(s);
-        end;
-        Break;
-      end;
-
-      if LURI[Index] = '?' then
-      begin
-        SetLength(Params, High(Params)+2);
-        Params[High(Params)] := TLink.RecParse(LURI);
-      end;
-
-    until False;
-  end;
-
-  if (Length(LURI) > 0) and (LURI[1] = '#') and (FirstRun = True) then
-  begin
-    Delete(LURI, 1, 1);
-    Value := TLink.RecParse(LURI);
-  end;
-
-  if (Length(LURI) > 0) and (LURI[1] = '|') then
-  begin
-    Delete(LURI, 1, 1);
-    FElse := TLink.RecParse(LURI);
-  end;
+  Strings[0] := Copy(Str, 0, Indexes[1] - Length(SysChars[1]));
+  for i:=1 to Count do
+    Strings[i] := Copy(Str, Indexes[i] + Length(SysChars[i]), Indexes[i + 1] - (Indexes[i] + Length(SysChars[i])));
+  ShowMessage('1');
 end;
 
 
-procedure TLink.FastParse(var Str: String);
+
+
+
+
+
+
+constructor TLink.FastParse(Str: String);
 //Source^Name@ID$Names=Values:FType?Params#Value|FElse
 //Next
 //
@@ -275,7 +103,7 @@ procedure TLink.FastParse(var Str: String);
 var
   i, j, Index_Source, Index_ID, Index_Controls, Index_FType, Index_Params,
   Index_Value, Index_Felse, Index_Next, Index_Local: Integer;
-  ControlsStr, FTypeStr, ParamsStr, ValueStr, FElseStr, LocalStr: String;
+  ControlsStr, ParamsStr, ValueStr, FElseStr, LocalStr: String;
   Chr: Char;
 begin
 
@@ -288,13 +116,6 @@ begin
   Index_Felse    := 0;
   Index_Next     := 0;
   Index_Local    := 0;
-
-  ControlsStr := '';
-  FTypeStr := '';
-  ParamsStr := '';
-  ValueStr := '';
-  FElseStr := '';
-  LocalStr := '';
 
   //реализация быстрого поиска индексов
   for i:=1 to Length(Str) do
@@ -330,7 +151,7 @@ begin
 
   if Index_ID = 0 then  //Подразумевается что в первой строке есть символ @
   begin
-    RecParse(Str, True);
+    RecParse(Str);
     Exit;
   end;
 
@@ -348,7 +169,7 @@ begin
   // Парсим с начала  parent^name@
   if Index_Source <> 0 then
   begin
-    Source := Copy(Str, 1, Index_Source - 1);
+    Source := TLink.Create(Copy(Str, 1, Index_Source - 1));
     Name := Copy(Str, Index_Source + 1, Index_ID - Index_Source - 1);
   end
   else
@@ -360,7 +181,7 @@ begin
   //блоки аналогичные в блоках else нужно заменить переменную ифа на переменную верхнего ифа
 
 
-  if Index_Local <> 0 then
+  {if Index_Local <> 0 then
   begin
     LocalStr := Copy(Str, Index_Local + 2, MaxInt);
     if Index_Next <> 0 then
@@ -377,1133 +198,14 @@ begin
             ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
             if Index_Ftype <> 0 then
             begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
+              FType := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
               if Index_Controls <> 0 then
               begin
                 ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
                 ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
               end
               else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Value - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
-              end;
-            end;
-          end;
-        end
-        else
-        begin
-          ValueStr := '';
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_FElse - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_FElse - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_FElse - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FElse - Index_ID - 1);
-              end;
-            end;
-          end;
-        end;
-      end
-      else
-      begin
-        FElseStr := '';
-        if Index_Value <> 0 then
-        begin
-          ValueStr := Copy(Str, Index_Value + 1, Index_Next - Index_Value - 1);
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Value - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
-              end;
-            end;
-          end;
-        end
-        else
-        begin
-          ValueStr := '';
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Next - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Next - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Next - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Next - Index_ID - 1);
-              end;
-            end;
-          end;
-        end;
-      end;
-    end
-    else
-    begin
-      Next := '';
-      if Index_Felse <> 0 then
-      begin
-        FElseStr := Copy(Str, Index_Felse + 1, Index_Local - Index_Felse - 1);
-        if Index_Value <> 0 then
-        begin
-          ValueStr := Copy(Str, Index_Value + 1, Index_Felse - Index_Value - 1);
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Value - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
-              end;
-            end;
-          end;
-        end
-        else
-        begin
-          ValueStr := '';
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_FElse - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_FElse - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_FElse - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FElse - Index_ID - 1);
-              end;
-            end;
-          end;
-        end;
-      end
-      else
-      begin
-        FElseStr := '';
-        if Index_Value <> 0 then
-        begin
-          ValueStr := Copy(Str, Index_Value + 1, Index_Local - Index_Value - 1);
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Value - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
-              end;
-            end;
-          end;
-        end
-        else
-        begin
-          ValueStr := '';
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Local - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Local - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Local - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Local - Index_ID - 1);
-              end;
-            end;
-          end;
-        end;
-      end;
-    end;
-  end
-  else
-  begin
-    LocalStr := '';
-    if Index_Next <> 0 then
-    begin
-      Next := Copy(Str, Index_Next + 1, MaxInt - Index_Next - 1);
-      if Index_Felse <> 0 then
-      begin
-        FElseStr := Copy(Str, Index_Felse + 1, Index_Next - Index_Felse - 1);
-        if Index_Value <> 0 then
-        begin
-          ValueStr := Copy(Str, Index_Value + 1, Index_Felse - Index_Value - 1);
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Value - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
-              end;
-            end;
-          end;
-        end
-        else
-        begin
-          ValueStr := '';
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_FElse - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_FElse - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_FElse - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FElse - Index_ID - 1);
-              end;
-            end;
-          end;
-        end;
-      end
-      else
-      begin
-        FElseStr := '';
-        if Index_Value <> 0 then
-        begin
-          ValueStr := Copy(Str, Index_Value + 1, Index_Next - Index_Value - 1);
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Value - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
-              end;
-            end;
-          end;
-        end
-        else
-        begin
-          ValueStr := '';
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Next - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Next - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Next - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Next - Index_ID - 1);
-              end;
-            end;
-          end;
-        end;
-      end;
-    end
-    else
-    begin
-      Next := '';
-      if Index_Felse <> 0 then
-      begin
-        FElseStr := Copy(Str, Index_Felse + 1, MaxInt - Index_Felse - 1);
-        if Index_Value <> 0 then
-        begin
-          ValueStr := Copy(Str, Index_Value + 1, Index_Felse - Index_Value - 1);
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Value - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
-              end;
-            end;
-          end;
-        end
-        else
-        begin
-          ValueStr := '';
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_FElse - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_FElse - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_FElse - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FElse - Index_ID - 1);
-              end;
-            end;
-          end;
-        end;
-      end
-      else
-      begin
-        FElseStr := '';
-        if Index_Value <> 0 then
-        begin
-          ValueStr := Copy(Str, Index_Value + 1, MaxInt - Index_Value - 1);
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, Index_Value - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Value - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Value - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Value - Index_ID - 1);
-              end;
-            end;
-          end;
-        end
-        else
-        begin
-          ValueStr := '';
-          if Index_Params <> 0 then
-          begin
-            ParamsStr := Copy(Str, Index_Params + 1, MaxInt - Index_Params - 1);
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, Index_Params - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Params - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_Params - Index_ID - 1);
-              end;
-            end;
-          end
-          else
-          begin
-            ParamsStr := '';
-            if Index_Ftype <> 0 then
-            begin
-              FTypeStr := Copy(Str, Index_Ftype + 1, MaxInt - Index_Ftype - 1);
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, Index_Ftype - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, Index_FType - Index_ID - 1);
-              end;
-            end
-            else
-            begin
-              FTypeStr := '';
-              if Index_Controls <> 0 then
-              begin
-                ControlsStr := Copy(Str, Index_Controls + 1, MaxInt - Index_Controls - 1);
-                ID := Copy(Str, Index_ID + 1, Index_Controls - Index_ID - 1);
-              end
-              else
-              begin
-                ControlsStr := '';
-                ID := Copy(Str, Index_ID + 1, MaxInt - Index_ID - 1);
-              end;
-            end;
-          end;
-        end;
-      end;
-    end;
-  end;
+              }
 
   //Обрабатываем полученные строки
   
@@ -1544,11 +246,6 @@ begin
     end;
   end;
 
-
-  if FTypeStr <> '' then
-    FType := TLink.Create(FTypeStr, nlSetID);
-
-
   if ParamsStr <> '' then
   begin
     Index_Params := 1;
@@ -1556,21 +253,21 @@ begin
       if ParamsStr[i] = '&' then
       begin
         SetLength(Params, Length(Params) + 1);
-        Params[High(Params)] := TLink.Create(Copy(ParamsStr, Index_Params, i - Index_Params), nlSetID);
+        Params[High(Params)] := TLink.Create(Copy(ParamsStr, Index_Params, i - Index_Params));
         Index_Params := i + 1;
       end;
     if Index_Params <> Length(ParamsStr) then
     begin
       SetLength(Params, Length(Params) + 1);
-      Params[High(Params)] := TLink.Create(Copy(ParamsStr, Index_Params, MaxInt), nlSetID);
+      Params[High(Params)] := TLink.Create(Copy(ParamsStr, Index_Params, MaxInt));
     end;
   end;
 
   if ValueStr <> '' then
-    Value := TLink.Create(ValueStr, nlSetID);
+    Value := TLink.Create(ValueStr);
 
   if FElseStr <> '' then
-    FElse := TLink.Create(FElseStr, nlSetID);
+    FElse := TLink.Create(FElseStr);
 
   if LocalStr <> '' then
   begin
@@ -1579,13 +276,13 @@ begin
       if (LocalStr[i] = #10) and (LocalStr[i + 1] = #10) then
       begin
         SetLength(Local, Length(Local) + 1);
-        Local[High(Local)] := Copy(LocalStr, Index_Local,  i - Index_Local);
+        Local[High(Local)] := TLink.Create(Copy(LocalStr, Index_Local,  i - Index_Local));
         Index_Local := i + 2;
       end;
     if Index_Local <> Length(LocalStr) then
     begin
       SetLength(Local, Length(Local) + 1);
-      Local[High(Local)] := Copy(LocalStr, Index_Local,  MaxInt);
+      Local[High(Local)] := TLink.Create(Copy(LocalStr, Index_Local,  MaxInt));
     end;
   end;
 
@@ -1595,17 +292,15 @@ end;
 destructor TLink.Destroy;
 var i: Integer;
 begin
-  if FType <> nil then
-    FType.Destroy;
   for i:=0 to High(Params) do
     if Params[i] <> nil then
       Params[i].Destroy;
   if Value <> nil then
     Value.Destroy;
-  if FElse <> nil then
-    FElse.Destroy;
   inherited Destroy;
 end;
+
+
 
 
 

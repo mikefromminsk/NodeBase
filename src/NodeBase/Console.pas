@@ -28,7 +28,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure CreateParams(var Params: TCreateParams); override;
     procedure FormShow(Sender: TObject);
-    function ConsoleExec(Line: String; WriteToConsole: Boolean = False): String;
+    function ConsoleExec(Line: String; WriteToConsole: Boolean = False): PNode;
     procedure IdHTTPServer1CommandGet(AThread: TIdPeerThread;
       ARequestInfo: TIdHTTPRequestInfo;
       AResponseInfo: TIdHTTPResponseInfo);
@@ -58,29 +58,30 @@ implementation
 
 {$R *.dfm}
 
-function TGG.ConsoleExec(Line: String; WriteToConsole: Boolean = False): String;
+function TGG.ConsoleExec(Line: String; WriteToConsole: Boolean = False): PNode;
 var
-  Node, Data: PNode;
+  Value: PNode;
+  Str: String;
 begin
-   Node := Base.Execute(Line);
-  if Node <> nil then
+  Result := Base.Execute(Line);
+  if Result <> nil then
   begin
-    Data := Base.GetValue(Node);
-    if Data <> nil then
+    Value := Base.GetValue(Result);
+    if Value <> nil then
     begin
-      Result := Data.Data;
-      if Length(Result) = 4 then
-        Result := IntToStr(StrToInt4(Result))
+      Str := Value.Data;
+      if Length(Str) = 4 then
+        Str := IntToStr(StrToInt4(Str))
       else
-        if Length(Result) = 8 then
-          Result := FloatToStr(StrToFloat8(Result))
+        if Length(Str) = 8 then
+          Str := FloatToStr(StrToFloat8(Str))
         else
-          Result := EncodeStr(Result);
+          Str := EncodeStr(Str);
     end;
   end;
-  if Result = '' then
-    Result := 'NULL';
-  GG.OutputBox.Lines.Text := Result;
+  if Str = '' then
+    Str := 'NULL';
+  GG.OutputBox.Lines.Text := Str;
   if WriteToConsole then
     GG.InputBox.Lines.Add(Line);
 end;
@@ -288,10 +289,11 @@ var
   Count: Integer;
   Node: Pnode;
 begin
-  Base.Clear;
+  {Base.Clear;
   Base.Module := Base.NewNode('@1');
-  Node := Base.Execute('func$activate?750,0');
-  Node := Base.NewNode('@1');
+  Node := ConsoleExec('func$activate?750,0', True);
+  if Node <> nil then
+    Node := nil;   }
 end;
 
 end.
