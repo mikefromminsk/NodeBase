@@ -10,14 +10,13 @@ uses
 const
 
 //NodeAttribyte
-  naEmpty = 0;           
-  naNode = 1;
-  naData = 2;
-  naWord = 3;
-  naModule = 4;
-  naDLLFunc = 5;
-  naNumber = 6;
-  naLoad = 7;
+  naEmpty = 0;
+  naLoad = 1;
+  naData = 3;
+  naWord = 4;
+  naModule = 5;
+  naDLLFunc = 6;
+  naNumber = 7;
   naRoot = 8;
 
   NodeFileName = 'Node.txt';
@@ -64,14 +63,15 @@ type
     constructor Create;
 
     function NextID: String;
-	
-	  function NewIndex(Name: String): PNode;
+
+    procedure SetName(var Node: PNode; Name: String);
+	  function FindName(Index: PNode): PNode;
+    function FindNameInNode(Node: PNode; Index: PNode): PNode;
+
+    function NewIndex(Name: String): PNode;
 
 	  procedure SetSource(Node: PNode; Source: PNode);
 	  function GetSource(Node: PNode): PNode;
-
-	  function FindName(Index: PNode): PNode;
-    function FindNameInNode(Node: PNode; Index: PNode): PNode;
 
     procedure SetVars(Node: PNode; Param, Value: String);
     function GetVars(Node: PNode): String;
@@ -92,10 +92,9 @@ type
     procedure NextNode(var PrevNode: PNode; NextNode: PNode);
 
     function SetLocal(Node: PNode; Local: PNode): PNode;
-    function NewLocal(Node: PNode): PNode;
 
     function NewNode(Line: String): PNode; overload;
-    function NewNode(Line: TLink): PNode; overload;
+    function NewNode(Link: TLink): PNode; overload;
 
 	  function LoadNode(Node: PNode): PNode;
 	  procedure LoadModule(Node: PNode);
@@ -126,38 +125,6 @@ begin
 end;
 
 
-procedure TFocus.SetVars(Node: PNode; Param, Value: String);
-begin
-  {Param := AnsiUpperCase(Param);
-  Value := AnsiUpperCase(Value);}
-  if Param = 'ATTR'  then Node.Attr := StrToIntDef(Value, 0);
-  if Param = 'TIME'  then Node.Time := StrToFloatDef(Value, Now);
-  if Param = 'COUNT' then Node.Count := StrToIntDef(Value, 0);
-  if Param = 'RUN'   then Node.RunCount := StrToIntDef(Value, 1);
-  if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1);
-  if Param = 'HANDLE' then Node.Handle := StrToIntDef(Value, 0);
-end;
-
-
-function TFocus.GetVars(Node: PNode): String;
-begin
-  Result := '';
-  if Node = nil then Exit;
-  if Node.Attr <> 0 then
-    Result := Result + '&' + 'ATTR' + '=' + IntToStr(Node.Attr);
-  if Node.Time <> 0 then
-    Result := Result + '&' + 'TIME' + '=' + FloatToStr(Node.Time);
-  if Node.Count <> 0 then
-    Result := Result + '&' + 'COUNT' + '=' + IntToStr(Node.Count);
-  if Node.RunCount <> 0 then
-    Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
-  if Node.Activate <> 0 then
-    Result := Result + '&' + 'ACTIVATE' + '=' + FloatToStr(Node.Activate);
-  if Node.Handle <> 0 then
-    Result := Result + '&' + 'HANDLE' + '=' + FloatToStr(Node.Handle);
-  Delete(Result, 1, 1);
-end;
-
 
 function TFocus.NextID: String;
 begin
@@ -166,54 +133,15 @@ begin
 end;
 
 
-function TFocus.NewIndex(Name: String): PNode;          //SetIndex
-var
-  i, j, Index: Integer;
-  function AddIndex(Node: PNode; Name: Char): PNode;
+procedure TFocus.SetName(var Node: PNode; Name: String);
+begin
+  if Node = nil then
   begin
-    SetLength(Node.Index, Length(Node.Index) + 1);
-    Result := AllocMem(SizeOf(TNode));
-    Node.Index[High(Node.Index)] := Result;
-    Result.Attr := naEmpty;
-    Result.Name := Name;
-    Result.ParentIndex := Node;
-    Result := Node.Index[High(Node.Index)];
-    Inc(NodesCount);
-    Result.Path := GetIndex(Result); //test
-  end;
-begin
-  Result := Root;
-  for i:=1 to Length(Name) do
-  begin
-    Index := -1;
-    for j:=0 to High(Result.Index) do
-      if  Result.Index[j].Name = Name[i] then
-      begin
-        Index := j;
-        Break;
-      end;
-    if Index = -1
-    then Result := AddIndex(Result, Name[i])
-    else Result := Result.Index[Index];
-  end;
-  if Result <> Root
-  then Inc(Result.Count)
-  else Result := nil;
-end;
-
-
-procedure TFocus.SetSource(Node: PNode; Source: PNode);
-begin
-  Node.Source := Source;
-end;
-
-
-function TFocus.GetSource(Node: PNode): PNode;
-begin
-  Result := Node;
-  if Node = nil then Exit;
-  while Result.Source <> nil do
-    Result := Result.Source;
+    Node := NewIndex(NextID);
+    Node.ParentName := NewIndex(Name);
+  end
+  else
+    Node.ParentName := NewIndex(Name);
 end;
 
 
@@ -273,6 +201,88 @@ begin
         Exit;
       end;
     end;
+end;
+
+
+function TFocus.NewIndex(Name: String): PNode;          //SetIndex
+var
+  i, j, Index: Integer;
+  function AddIndex(Node: PNode; Name: Char): PNode;
+  begin
+    SetLength(Node.Index, Length(Node.Index) + 1);
+    Result := AllocMem(SizeOf(TNode));
+    Node.Index[High(Node.Index)] := Result;
+    Result.Attr := naEmpty;
+    Result.Name := Name;
+    Result.ParentIndex := Node;
+    Result := Node.Index[High(Node.Index)];
+    Inc(NodesCount);
+    Result.Path := GetIndex(Result); //test
+  end;
+begin
+  Result := Root;
+  for i:=1 to Length(Name) do
+  begin
+    Index := -1;
+    for j:=0 to High(Result.Index) do
+      if  Result.Index[j].Name = Name[i] then
+      begin
+        Index := j;
+        Break;
+      end;
+    if Index = -1
+    then Result := AddIndex(Result, Name[i])
+    else Result := Result.Index[Index];
+  end;
+  if Result <> Root
+  then Inc(Result.Count)
+  else Result := nil;
+end;
+
+procedure TFocus.SetVars(Node: PNode; Param, Value: String);
+begin
+  {Param := AnsiUpperCase(Param);
+  Value := AnsiUpperCase(Value);}
+  if Param = 'ATTR'  then Node.Attr := StrToIntDef(Value, 0);
+  if Param = 'TIME'  then Node.Time := StrToFloatDef(Value, Now);
+  if Param = 'COUNT' then Node.Count := StrToIntDef(Value, 0);
+  if Param = 'RUN'   then Node.RunCount := StrToIntDef(Value, 1);
+  if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1);
+  if Param = 'HANDLE' then Node.Handle := StrToIntDef(Value, 0);
+end;
+
+
+function TFocus.GetVars(Node: PNode): String;
+begin
+  Result := '';
+  if Node = nil then Exit;
+  if Node.Attr <> 0 then
+    Result := Result + '&' + 'ATTR' + '=' + IntToStr(Node.Attr);
+  if Node.Time <> 0 then
+    Result := Result + '&' + 'TIME' + '=' + FloatToStr(Node.Time);
+  if Node.Count <> 0 then
+    Result := Result + '&' + 'COUNT' + '=' + IntToStr(Node.Count);
+  if Node.RunCount <> 0 then
+    Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
+  if Node.Activate <> 0 then
+    Result := Result + '&' + 'ACTIVATE' + '=' + FloatToStr(Node.Activate);
+  if Node.Handle <> 0 then
+    Result := Result + '&' + 'HANDLE' + '=' + FloatToStr(Node.Handle);
+  Delete(Result, 1, 1);
+end;
+
+procedure TFocus.SetSource(Node: PNode; Source: PNode);
+begin
+  Node.Source := Source;
+end;
+
+
+function TFocus.GetSource(Node: PNode): PNode;
+begin
+  Result := Node;
+  if Node = nil then Exit;
+  while Result.Source <> nil do
+    Result := Result.Source;
 end;
 
 
@@ -411,99 +421,100 @@ begin
 end;
 
 
-function TFocus.NewLocal(Node: PNode): PNode;
-begin
-  Result := SetLocal(Node, NewIndex(NextID));
-end;
 
 
 function TFocus.NewNode(Line: String): PNode;
 var Link: TLink;
 begin
-  Link := TLink.Create(Line);
+  Link := TLink.BaseParse(Line);
   Result := NewNode(Link);
   Link.Destroy;
 end;
 
 
-function TFocus.NewNode(Line: TLink): PNode;
+function TFocus.NewNode(Link: TLink): PNode;
 var
   i: Integer;
 begin
-  Result := NewIndex(Line.ID);
-  if Result = nil then Exit;
 
-  if Line.ID[1] <> '@' then
-    Result := NewLocal(Result)
-  else
-  if Result.Attr = naEmpty then
-    LoadNode(Result);
-
-  if Result.Attr <> naLoad then   //Initialization
+  if Link.ID <> '' then
   begin
-    case Line.ID[1] of
-      '@' : Result.Attr := naNode;
+    Result := NewIndex(sID + Link.ID);
+    if Result.Attr = naEmpty then
+      LoadNode(Result);
+  end;
+
+
+  if Link.Name <> '' then
+  begin
+    SetName(Result, Link.Name);
+
+    case Link.Name[1] of
       '/' : Result.Attr := naModule;
       '!' : Result.Attr := naData;
       '0'..'9', '-': Result.Attr := naNumber;
       else  Result.Attr := naWord;
     end;
 
+    if Result.Attr = naNumber then
+    begin
+      if Pos(sDecimalSeparator, Link.Name) = 0
+      then Link.Name := sData + IntToStr4(    StrToIntDef(Link.Name, 0))
+      else Link.Name := sData + FloatToStr8(StrToFloatDef(Link.Name, 0));
+      Result.Attr := naData;
+    end;
+  end;
+
+
+  if Result = nil then Exit;
+
+  if Result.Attr = naData then
+    SetData(Result, DecodeStr(Copy(Link.ID, 2, MaxInt)));
+
+  if Result.Attr <> naLoad then   //Initialization
+  begin
     if Result.Attr = naWord then
         Result.Source := FindName(Result.ParentName);
   end;
 
-  if Line.Source <> nil then
+  if Link.Source <> nil then
   begin
     if (Result.Attr = naWord) and (Result.Attr <> naLoad) then
     begin  //hardcode
-      SetSource(GetSource(Result), NewNode(Line.Source));
+      SetSource(GetSource(Result), NewNode(Link.Source));
       Result := GetSource(Result)
     end
     else
-      SetSource(Result, NewNode(Line.Source));
+      SetSource(Result, NewNode(Link.Source));
   end;
 
-  if Line.Name <> '' then
-    Result.ParentName := NewIndex(Line.Name);
+  for i:=0 to High(Link.Names) do
+    SetVars(Result, Link.Names[i], Link.Values[i]);
 
-  for i:=0 to High(Line.Names) do
-    SetVars(Result, Line.Names[i], Line.Values[i]);
+  if Link.FType <> nil then
+    SetFType(Result, NewNode(Link.FType));
 
-  for i:=0 to High(Line.Params) do
-    SetParam(Result, NewNode(Line.Params[i]), i);
+  for i:=0 to High(Link.Params) do
+    SetParam(Result, NewNode(Link.Params[i]), i);
 
-  if Result.Attr = naNumber then
+  if Link.Value <> nil then
   begin
-    if Pos(',', Line.ID) = 0
-    then Line.ID := '!' + IntToStr4(    StrToIntDef(Line.ID, 0))
-    else Line.ID := '!' + FloatToStr8(StrToFloatDef(Line.ID, 0));
-    Result.Attr := naData;
+    if Link.Value.Name[1] = sData
+    then SetData(Result, DecodeStr(Copy(Link.Value.ID, 2, MaxInt)))
+    else SetValue(Result, NewNode(Link.Value));
   end;
 
-  if Result.Attr = naData then
-    SetData(Result, DecodeStr(Copy(Line.ID, 2, MaxInt)));
+  if Link.FElse <> nil then
+    SetFElse(Result, NewNode(Link.FElse));
 
-  if Line.FElse <> nil then
-  begin
-    Result.FTrue := NewNode(Line.Value);
-    if Line.FElse.Name <> '' then
-      Result.FElse := NewNode(Line.FElse);
-  end
-  else
-  if Line.Value <> nil then
-  begin
-    if Line.Value.ID[1] = '!'
-    then SetData(Result, DecodeStr(Copy(Line.Value.ID, 2, MaxInt)))
-    else SetValue(Result, NewNode(Line.Value));
-  end;
+  if Link.FTrue <> nil then
+    SetFTrue(Result, NewNode(Link.FTrue));
 
-  if Line.FType <> nil then
-    SetFType(Result, NewNode(Line.FType));
-  for i:=0 to High(Line.Local) do
-    SetLocal(Result, NewNode(Line.Local[i]));
-  if Line.Next <> nil then
-    SetNext(Result, NewNode(Line.Next));
+  if Link.Next <> nil then
+    SetNext(Result, NewNode(Link.Next));
+
+  for i:=0 to High(Link.Local) do
+    SetLocal(Result, NewNode(Link.Local[i]));
 end;
 
 
@@ -821,8 +832,9 @@ function TFocus.Execute(Line: String): PNode;
 var
   Link: TLink;
 begin
-  Link := TLink.Create(Line);
+  Link := TLink.UserParse(Line);
   Result := NewNode(Link);
+  Link.Destroy;
   NextNode(Prev, Result);
   if Result <> nil then
   begin

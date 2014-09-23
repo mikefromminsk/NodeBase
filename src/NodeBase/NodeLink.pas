@@ -25,6 +25,7 @@ const
 
   sFile = '/';
   sData = '!';
+  sDecimalSeparator = ',';
 
 
   Count = 10;
@@ -64,6 +65,7 @@ type
 
     constructor Create(Str: string);
     constructor UserParse(Str: String);  //рекурсивную для пользователя
+    procedure rec(var Str: String; Link: TLink);
     constructor BaseParse(Str: String);  //более простую для базы
     destructor Destroy;
   end;
@@ -79,23 +81,27 @@ end;
 
 function ToStrings(Str: string): CString;
 var
-  i, Start: Integer;
+  i, NameEnd: Integer;
   Indexes: array[1..Count + 1] of Integer;
 begin
+  NameEnd := 1;
   Indexes[High(Indexes)] := Length(Str) + 1;
   for i:=1 to Count do
     Indexes[i] := Pos(SysChars[i], Str);
   for i:=1 to Count do
     if Indexes[i] <> 0 then
     begin
-      Start := i;
-      Result[0] := Copy(Str, 0, Indexes[i] - Length(SysChars[i]));
+      NameEnd := i;
       Break;
     end;
-  for i:=Count downto Start do
+  for i:=Count downto NameEnd do
     if Indexes[i] = 0 then
+      Indexes[i] := Indexes[i + 1]
+    else if Indexes[i] > Indexes[i + 1] then
       Indexes[i] := Indexes[i + 1];
-  for i:=Start to Count do
+
+  Result[0] := Copy(Str, 1, Indexes[NameEnd] - Length(SysChars[NameEnd]));
+  for i:=NameEnd to Count do
     Result[i] := Copy(Str, Indexes[i] + Length(SysChars[i]), Indexes[i + 1] - (Indexes[i] + Length(SysChars[i])));
 end;
 
@@ -117,12 +123,12 @@ begin
     Source  := TLink.Create(Strings[iSource]);
   if Strings[iVars] <> '' then
   begin
-    Arr := slice(Strings[iVars], '&');
+    Arr := slice(Strings[iVars], sParamAnd);
     SetLength(Names, Length(Arr));
     SetLength(Values, Length(Arr));
     for i:=0 to High(Arr) do
     begin
-      PosValue := Pos('=', Arr[i]);
+      PosValue := Pos(sParamValue, Arr[i]);
       if PosValue = 0 then
         Names[i] := Arr[i]
       else
@@ -136,7 +142,7 @@ begin
     FType := TLink.Create(Strings[iType]);
   if Strings[iParams] <> '' then
   begin
-    Arr := slice(Strings[iParams], '&');
+    Arr := slice(Strings[iParams], sParamAnd);
     SetLength(Params, Length(Arr));
     for i:=0 to High(Arr) do
       Params[i] := TLink.Create(Arr[i]);
@@ -151,11 +157,36 @@ begin
     Next  := TLink.Create(Strings[iNext]);
   if Strings[iLocal] <> '' then
   begin
-    Arr := slice(Strings[iLocal], #10#10);
+    Arr := slice(Strings[iLocal], sLocal);
     SetLength(Local, Length(Arr));
     for i:=0 to High(Arr) do
       Local[i] := TLink.Create(Arr[i]);
   end;
+end;
+
+procedure TLink.rec(var Str: String; Link: TLink);
+var
+  PosMin: Integer;
+  Name: String;
+  SysChar: Char;
+begin
+  while Str <> '' do
+  begin
+    PosMin := Index([sParams, sParamAnd, sParamEnd], Str);
+    if PosMin = MaxInt
+    then SysChar := #0
+    else SysChar := Str[PosMin];
+
+    Name := Copy(Str, 1, PosMin - 1);
+    SetLength(Link.Params, Length(Link.Params) + 1);
+    Link.Params[High(Link.Params)] := TLink.UserParse(Name);
+    Delete(Str, 1, PosMin);
+    case SysChar of
+      sParams:   rec(Str, Link.Params[High(Link.Params)]);
+      sParamEnd: Exit;
+    end;
+  end;
+
 end;
 
 constructor TLink.UserParse(Str: String);
@@ -168,8 +199,11 @@ var
   Strings: CString;
   Arr   : AString;
 begin
-
-  if Pos(sParamValue, Str) < Pos(sParams, Str) then
+  PosValue := Pos(sParamValue, Str);
+  i := Pos(sParams, Str);
+  if ((PosValue <> 0) and (i = 0)) or
+     ((PosValue <> 0) and (i <> 0) and (PosValue < i)) then
+    Str[PosValue] := sValue;
 
 
   Strings := ToStrings(Str);
@@ -177,15 +211,15 @@ begin
   Name := Strings[iName];
   ID   := Strings[iID];
   if Strings[iSource] <> '' then
-    Source  := TLink.Create(Strings[iSource]);
+    Source  := TLink.UserParse(Strings[iSource]);
   if Strings[iVars] <> '' then
   begin
-    Arr := slice(Strings[iVars], '&');
+    Arr := slice(Strings[iVars], sParamAnd);
     SetLength(Names, Length(Arr));
     SetLength(Values, Length(Arr));
     for i:=0 to High(Arr) do
     begin
-      PosValue := Pos('=', Arr[i]);
+      PosValue := Pos(sParamValue, Arr[i]);
       if PosValue = 0 then
         Names[i] := Arr[i]
       else
@@ -196,28 +230,23 @@ begin
     end;
   end;
   if Strings[iType] <> '' then
-    FType := TLink.Create(Strings[iType]);
+    FType := TLink.UserParse(Strings[iType]);
   if Strings[iParams] <> '' then
-  begin
-    Arr := slice(Strings[iParams], '&');
-    SetLength(Params, Length(Arr));
-    for i:=0 to High(Arr) do
-      Params[i] := TLink.Create(Arr[i]);
-  end;
+    rec(Strings[iParams], Self);
   if Strings[iValue] <> '' then
-    Value := TLink.Create(Strings[iValue]);
+    Value := TLink.UserParse(Strings[iValue]);
   if Strings[iTrue] <> '' then
-    FTrue := TLink.Create(Strings[iTrue]);
+    FTrue := TLink.UserParse(Strings[iTrue]);
   if Strings[iElse] <> '' then
-    FElse := TLink.Create(Strings[iElse]);
+    FElse := TLink.UserParse(Strings[iElse]);
   if Strings[iNext] <> '' then
-    Next  := TLink.Create(Strings[iNext]);
+    Next  := TLink.UserParse(Strings[iNext]);
   if Strings[iLocal] <> '' then
   begin
-    Arr := slice(Strings[iLocal], #10#10);
+    Arr := slice(Strings[iLocal], sLocal);
     SetLength(Local, Length(Arr));
     for i:=0 to High(Arr) do
-      Local[i] := TLink.Create(Arr[i]);
+      Local[i] := TLink.UserParse(Arr[i]);
   end;
 end;
 
