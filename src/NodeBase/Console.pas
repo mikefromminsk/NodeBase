@@ -285,15 +285,15 @@ begin
 end;
 
 procedure TGG.Timer1Timer(Sender: TObject);
-{var
+var
   Count: Integer;
-  Node: Pnode;}
+  Node: Pnode;
 begin
-  {Base.Clear;
+  Base.Clear;
   Base.Module := Base.NewNode('@1');
   Node := ConsoleExec('func$activate?750,0', True);
   if Node <> nil then
-    Node := nil;   }
+    Node := nil;
 end;
 
 end.

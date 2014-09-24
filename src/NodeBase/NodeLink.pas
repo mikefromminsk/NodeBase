@@ -120,7 +120,7 @@ begin
   Name := Strings[iName];
   ID   := Strings[iID];
   if Strings[iSource] <> '' then
-    Source  := TLink.Create(Strings[iSource]);
+    Source  := TLink.BaseParse(Strings[iSource]);
   if Strings[iVars] <> '' then
   begin
     Arr := slice(Strings[iVars], sParamAnd);
@@ -139,28 +139,28 @@ begin
     end;
   end;
   if Strings[iType] <> '' then
-    FType := TLink.Create(Strings[iType]);
+    FType := TLink.BaseParse(Strings[iType]);
   if Strings[iParams] <> '' then
   begin
     Arr := slice(Strings[iParams], sParamAnd);
     SetLength(Params, Length(Arr));
     for i:=0 to High(Arr) do
-      Params[i] := TLink.Create(Arr[i]);
+      Params[i] := TLink.BaseParse(Arr[i]);
   end;
   if Strings[iValue] <> '' then
-    Value := TLink.Create(Strings[iValue]);
+    Value := TLink.BaseParse(Strings[iValue]);
   if Strings[iTrue] <> '' then
-    FTrue := TLink.Create(Strings[iTrue]);
+    FTrue := TLink.BaseParse(Strings[iTrue]);
   if Strings[iElse] <> '' then
-    FElse := TLink.Create(Strings[iElse]);
+    FElse := TLink.BaseParse(Strings[iElse]);
   if Strings[iNext] <> '' then
-    Next  := TLink.Create(Strings[iNext]);
+    Next  := TLink.BaseParse(Strings[iNext]);
   if Strings[iLocal] <> '' then
   begin
     Arr := slice(Strings[iLocal], sLocal);
     SetLength(Local, Length(Arr));
     for i:=0 to High(Arr) do
-      Local[i] := TLink.Create(Arr[i]);
+      Local[i] := TLink.BaseParse(Arr[i]);
   end;
 end;
 

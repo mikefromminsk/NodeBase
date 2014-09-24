@@ -28,21 +28,23 @@ type
   
   TNode = record
     Path          : String;          //test
-    Name          : String;     
-    Index         : ANode;
-    ParentIndex   : PNode;
+    Name          : String;
+    Data          : String;
     Source        : PNode;
-    ParentName    : PNode;
     FType         : PNode;
     Params        : ANode;
-    ParentParams  : PNode;
     Local         : ANode;
-    ParentLocal   : PNode;
     Value         : PNode;
     FTrue         : PNode;
     FElse         : PNode;
     Prev          : PNode;
     Next          : PNode;
+
+    Index         : ANode;
+    ParentIndex   : PNode;
+    ParentName    : PNode;
+    ParentParams  : PNode;
+    ParentLocal   : PNode;
 
     Attr        : Integer;
     Count       : Integer;
@@ -50,7 +52,7 @@ type
     RunCount    : Integer;
     Activate    : Integer;
     Handle      : Integer;
-    Data        : String;
+
   end;
 
   TFocus = class
@@ -121,7 +123,7 @@ begin
   Root := AllocMem(SizeOf(TNode));
   Root.Attr := naRoot;
   Root.Name := 'data';
-  Module := NewNode('root');
+  Module := NewNode('module');
 end;
 
 
@@ -241,8 +243,8 @@ end;
 
 procedure TFocus.SetVars(Node: PNode; Param, Value: String);
 begin
-  {Param := AnsiUpperCase(Param);
-  Value := AnsiUpperCase(Value);}
+  Param := AnsiUpperCase(Param);
+  Value := AnsiUpperCase(Value);
   if Param = 'ATTR'  then Node.Attr := StrToIntDef(Value, 0);
   if Param = 'TIME'  then Node.Time := StrToFloatDef(Value, Now);
   if Param = 'COUNT' then Node.Count := StrToIntDef(Value, 0);
@@ -440,8 +442,13 @@ begin
   if Link.ID <> '' then
   begin
     Result := NewIndex(sID + Link.ID);
+
+    if Link.ID = '184' then
+      Link.ID := '184';
+
     if Result.Attr = naEmpty then
       LoadNode(Result);
+
   end;
 
 
@@ -449,33 +456,37 @@ begin
   begin
     SetName(Result, Link.Name);
 
-    case Link.Name[1] of
-      '/' : Result.Attr := naModule;
-      '!' : Result.Attr := naData;
-      '0'..'9', '-': Result.Attr := naNumber;
-      else  Result.Attr := naWord;
+    if Result.Attr <> naLoad then   //Initialization
+    begin
+      case Link.Name[1] of
+        '/' : Result.Attr := naModule;
+        '!' : Result.Attr := naData;
+        '0'..'9', '-': Result.Attr := naNumber;
+        else  Result.Attr := naWord;
+      end;
+
+      if Result.Attr = naWord then
+        Result.Source := FindName(Result.ParentName);
+
+      if Result.Attr = naNumber then
+      begin
+        if Pos(sDecimalSeparator, Link.Name) = 0
+        then Link.Name := sData + IntToStr4(    StrToIntDef(Link.Name, 0))
+        else Link.Name := sData + FloatToStr8(StrToFloatDef(Link.Name, 0));
+        Result.Attr := naData;
+      end;
+
+      if Result.Attr = naData then
+        SetData(Result, DecodeStr(Copy(Link.Name, 2, MaxInt)));
     end;
 
-    if Result.Attr = naNumber then
-    begin
-      if Pos(sDecimalSeparator, Link.Name) = 0
-      then Link.Name := sData + IntToStr4(    StrToIntDef(Link.Name, 0))
-      else Link.Name := sData + FloatToStr8(StrToFloatDef(Link.Name, 0));
-      Result.Attr := naData;
-    end;
+
+
   end;
 
 
   if Result = nil then Exit;
 
-  if Result.Attr = naData then
-    SetData(Result, DecodeStr(Copy(Link.ID, 2, MaxInt)));
-
-  if Result.Attr <> naLoad then   //Initialization
-  begin
-    if Result.Attr = naWord then
-        Result.Source := FindName(Result.ParentName);
-  end;
 
   if Link.Source <> nil then
   begin
@@ -499,8 +510,8 @@ begin
 
   if Link.Value <> nil then
   begin
-    if Link.Value.Name[1] = sData
-    then SetData(Result, DecodeStr(Copy(Link.Value.ID, 2, MaxInt)))
+    if (Link.Value.Name <> '') and (Link.Value.Name[1] = sData)
+    then SetData(Result, DecodeStr(Copy(Link.Value.Name, 2, MaxInt)))
     else SetValue(Result, NewNode(Link.Value));
   end;
 
@@ -690,7 +701,7 @@ begin
 
   if Node.Attr = naModule then
     LoadModule(Node);
-  for i:=0 to High(Node.Params) do 
+  for i:=0 to High(Node.Params) do
     Run(Node.Params[i]);
   if (Node.Source <> nil) and (((Node.Source.ParentLocal = Module) and (Node.Source.Next <> nil))   //recode  2
     or (Node.Source.Attr = naDLLFunc)) then
@@ -764,7 +775,7 @@ end;
 
 procedure TFocus.Clear;
 begin
-  //RecursiveSave(Root);
+  RecursiveSave(Root);
   RecursiveDispose(Root);
   Prev := nil;
   Module := nil;
@@ -790,41 +801,45 @@ var
 begin
   Result := '';
   if Node = nil then Exit;
-  if Node.Source <> nil then
-    Result := Result + GetIndex(Node.Source) + '^';
+
   if Node.ParentName <> nil then
     Result := Result + GetIndex(Node.ParentName);
+
   Result := Result + GetIndex(Node);
-  Result := Result + '$' + GetVars(Node);
+
+  if Node.Source <> nil then
+    Result := Result + sSource + GetIndex(Node.Source);
+
+  Result := Result + sVars + GetVars(Node);
+
   if Node.FType <> nil then
-    Result := Result + ':' + GetIndex(Node.FType);
-  Str := '';
-  for i:=0 to High(Node.Params) do
-    Str := Str + GetIndex(Node.Params[i]) + '&';
-  if Str <> '' then
+    Result := Result + sType + GetIndex(Node.FType);
+
+  if Length(Node.Params) > 0 then
   begin
-    Delete(Str, Length(Str), 1);
-    Result := Result + '?' + Str;
+    Result := Result + sParams;
+    for i:=0 to High(Node.Params) do
+      Result := Result + GetIndex(Node.Params[i]) + sParamAnd;
+    Delete(Result, Length(Result), 1);
   end;
-  if (Node.FTrue <> nil) or (Node.FElse <> nil) then
-  begin
-    if Node.FTrue <> nil then
-      Result := Result + '#' + GetIndex(Node.FTrue);
-    Result := Result + '|';
-    if Node.FElse <> nil then
-      Result := Result + GetIndex(Node.FElse);
-  end
+
+  if Node.Data <> '' then
+    Result := Result + sValue + sData + EncodeStr(Node.Data)
   else
-    if Node.Attr = naData then
-      Result := Result + '#!' + EncodeStr(Node.Data)
-    else
-    if Node.Value <> nil then
-      Result := Result + '#' + GetIndex(Node.Value);
+  if Node.Value <> nil then
+    Result := Result + sValue + GetIndex(Node.Value);
+
+  if Node.FTrue <> nil then
+    Result := Result + sTrue + GetIndex(Node.FTrue);
+
+  if Node.FElse <> nil then
+    Result := Result + sElse + GetIndex(Node.FElse);
 
   if Node.Next <> nil then
-    Result := Result + #10 + GetIndex(Node.Next);
+    Result := Result + sNext + GetIndex(Node.Next);
+
   for i:=0 to High(Node.Local) do
-    Result := Result + #10#10 + GetIndex(Node.Local[i]);
+    Result := Result + sLocal + GetIndex(Node.Local[i]);
 end;
 
 

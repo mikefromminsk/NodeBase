@@ -5,11 +5,12 @@ uses
 
 {$R *.res}
 
-var 
-  Link: TLink;
-begin
-  Link := TLink.BaseParse('NameIDSource$Vars1:Type?Param1:type1=1&Param1:type#Value>True|FElse'#10'Next'#10#10'Local');
+var
+  Link : TLink;
 
+begin
+  link := TLink.BaseParse('@123');
+//  SHowMessage(Link.name);
   Application.Initialize;
   Base := TFocus.Create;
   Application.CreateForm(TGG, GG);
