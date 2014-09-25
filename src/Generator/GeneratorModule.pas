@@ -9,16 +9,27 @@ type
 
   TGFocus = class (TFocus) //TGeneratorFocus
   public
+
     procedure CreateFunc(Node: PNode; Level: Integer);
+
     procedure CreateData(Node: PNode);
+
     procedure CreateLocalVar(Node: PNode);
+
     procedure CreateFuncHead(Node: PNode; Level: Integer);
+
     procedure SetParams(Node: PNode; FuncNode: PNode);
+
     procedure CreateSequence(FuncNode: PNode);
+
     procedure CreateIfElseWhile(FuncNode: PNode);
+
     procedure CreateFuncBody(Node: PNode; Level: Integer);
+
     function NewRandomNode(Node: PNode): PNode;
+    
     function NewRandomType: String;
+
     function Generate: PNode;
   end;
 

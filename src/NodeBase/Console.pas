@@ -7,7 +7,7 @@ uses
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, ScktComp, AppEvnts, ShellApi,
   IdBaseComponent, IdComponent, IdTCPServer, IdCustomHTTPServer,
   IdHTTPServer, IdTCPConnection, IdTCPClient, IdHTTP, Menus,
-  NodeBaseKernel, NodeUtils, NodeLink, IdHTTPHeaderInfo;
+  Kernel, Utils, Link, IdHTTPHeaderInfo;
 
 type
   TGG = class(TForm)
