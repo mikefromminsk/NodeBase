@@ -53,8 +53,8 @@ type
     Name        : String;
     ID          : String;
     Source      : TLink;
-    Names       : Array of String;
-    Values      : Array of String;
+    Names       : AString;
+    Values      : AString;
     FType       : TLink;
     Params      : Array of TLink;
     Value       : TLink;
@@ -99,7 +99,6 @@ begin
       Indexes[i] := Indexes[i + 1]
     else if Indexes[i] > Indexes[i + 1] then
       Indexes[i] := Indexes[i + 1];
-
   Result[0] := Copy(Str, 1, Indexes[NameEnd] - Length(SysChars[NameEnd]));
   for i:=NameEnd to Count do
     Result[i] := Copy(Str, Indexes[i] + Length(SysChars[i]), Indexes[i + 1] - (Indexes[i] + Length(SysChars[i])));
@@ -111,7 +110,7 @@ constructor TLink.BaseParse(Str: String);
 //
 //Local
 var
-  i, PosValue: Integer;
+  i: Integer;
   Strings: CString;
   Arr   : AString;
 begin
@@ -122,22 +121,7 @@ begin
   if Strings[iSource] <> '' then
     Source  := TLink.BaseParse(Strings[iSource]);
   if Strings[iVars] <> '' then
-  begin
-    Arr := slice(Strings[iVars], sParamAnd);
-    SetLength(Names, Length(Arr));
-    SetLength(Values, Length(Arr));
-    for i:=0 to High(Arr) do
-    begin
-      PosValue := Pos(sParamValue, Arr[i]);
-      if PosValue = 0 then
-        Names[i] := Arr[i]
-      else
-      begin
-        Names[i] := Copy(Arr[i], 1, PosValue - 1);
-        Values[i] := Copy(Arr[i], PosValue + 1, MaxInt);
-      end;
-    end;
-  end;
+    slice_params(AnsiUpperCase(Strings[iVars]), sParamAnd, Names, Values);
   if Strings[iType] <> '' then
     FType := TLink.BaseParse(Strings[iType]);
   if Strings[iParams] <> '' then
@@ -176,7 +160,6 @@ begin
     if PosMin = MaxInt
     then SysChar := #0
     else SysChar := Str[PosMin];
-
     Name := Copy(Str, 1, PosMin - 1);
     SetLength(Link.Params, Length(Link.Params) + 1);
     Link.Params[High(Link.Params)] := TLink.UserParse(Name);
@@ -186,7 +169,6 @@ begin
       sParamEnd: Exit;
     end;
   end;
-
 end;
 
 constructor TLink.UserParse(Str: String);
@@ -205,7 +187,6 @@ begin
      ((PosValue <> 0) and (i <> 0) and (PosValue < i)) then
     Str[PosValue] := sValue;
 
-
   Strings := ToStrings(Str);
 
   Name := Strings[iName];
@@ -213,22 +194,7 @@ begin
   if Strings[iSource] <> '' then
     Source  := TLink.UserParse(Strings[iSource]);
   if Strings[iVars] <> '' then
-  begin
-    Arr := slice(Strings[iVars], sParamAnd);
-    SetLength(Names, Length(Arr));
-    SetLength(Values, Length(Arr));
-    for i:=0 to High(Arr) do
-    begin
-      PosValue := Pos(sParamValue, Arr[i]);
-      if PosValue = 0 then
-        Names[i] := Arr[i]
-      else
-      begin
-        Names[i] := Copy(Arr[i], 1, PosValue - 1);
-        Values[i] := Copy(Arr[i], PosValue + 1, MaxInt);
-      end;
-    end;
-  end;
+    slice_params(AnsiUpperCase(Strings[iVars]), sParamAnd, Names, Values);
   if Strings[iType] <> '' then
     FType := TLink.UserParse(Strings[iType]);
   if Strings[iParams] <> '' then

@@ -7,7 +7,6 @@ float=!float
 
 string=!string
 
-
 add$activate?a:int&b:int
 
 fadd$activate?a:float&b:float
@@ -63,4 +62,3 @@ round$activate?a:float
 abs$activate?a:int
 
 fabs$activate?a:float
-

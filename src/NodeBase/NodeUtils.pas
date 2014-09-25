@@ -10,6 +10,7 @@ type
   AString = Array of String;
 
 function slice(Text: String; Delimeter: String): AString;
+procedure slice_params(Text: String; Delimeter: String; var Names, Values: AString);
 function IntToStr4(Num: Integer): String;
 function StrToInt4(Str: String): Integer;
 function FloatToStr8(Num: Double): String;
@@ -47,6 +48,27 @@ begin
   begin
     SetLength(Result, Length(Result) + 1);
     Result[High(Result)] := Text;
+  end;
+end;
+
+procedure slice_params(Text: String; Delimeter: String; var Names, Values: AString);
+var
+  i, PosValue: Integer;
+  Arr   : AString;
+begin
+  Arr := slice(Text, Delimeter);
+  SetLength(Names, Length(Arr));
+  SetLength(Values, Length(Arr));
+  for i:=0 to High(Arr) do
+  begin
+    PosValue := Pos('=', Arr[i]);
+    if PosValue = 0 then
+      Names[i] := Arr[i]
+    else
+    begin
+      Names[i] := Copy(Arr[i], 1, PosValue - 1);
+      Values[i] := Copy(Arr[i], PosValue + 1, MaxInt);
+    end;
   end;
 end;
 

@@ -44,7 +44,12 @@ documetation
 
 search in branch cash
 
+branch cash ! @ 1
 
+$multitreading
+active_kernel = 2
+
+$transaction=992402
 
 
 [Application System]
@@ -63,95 +68,64 @@ auto find port
 
 method DUMP
 
+http auntification
+
+access to Node
+
 
 
 [Kernel Standart System]
-
-data to number
-
-id to $
 
 naPointer
 
 Parse and Build
 
-delete int type
+local\local\local
+
+new branch "Group" (sentence, params)
+Like: ANode
 
 rec code access trues
 
-filestruct in file like word
-
-context
-
-new branch Node
-sentence group
+contexts
+ 
+GarbageCollector
 
 160 count 14 min not delete
 
-Like nodes
 
-converter c++ to meta
-
-history
-prevState: AString;
-
-local\local\local
-var.var.var
-
-value control is Node
-
-Node.ParentParam
-
-source in sys params
-
-for$run=10#i=1,0
-for$end#i=finc?i
-
-branch cash ! @ 1
+History: AString;
 
 Next: ANode
 for Generator for подмены лучшей функцией
 
-http auntification
+
+$countr, countw
 
 
-$run read/write
-$count read
-
-$comment 
-don`t run
-
-$multitreading
-active_kernel = 2
-
-$transaction=992402
-
-controls: Array of Double; on frequesncy
-
-
-fastload
+Load Root with options
 
 
 
-
-
-
-
-
-
-GarbageCollector
 compare result
 
 
 
 
-testing execute func750 into the paper
 
 
 
 
 
-test git hub
+
+
+
+
+
+
+
+
+
 
 
 

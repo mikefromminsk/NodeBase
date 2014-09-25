@@ -56,11 +56,13 @@ type
   end;
 
   TFocus = class
-    ID        : Integer;
+    LastID    : Integer;
+    RootPath  : String;
     Root      : PNode;
     Prev      : PNode;
     Module    : PNode;
-    NodesCount: Integer;    //test
+
+    NodesCount: Integer; //test
 
     constructor Create;
 
@@ -101,12 +103,12 @@ type
 	  function LoadNode(Node: PNode): PNode;
 	  procedure LoadModule(Node: PNode);
 
-    procedure CallFunc(Node: PNode);
-    procedure Run(Node: PNode);
-
     procedure RecursiveSave(Node: PNode);
     procedure RecursiveDispose(Node: PNode);
     procedure Clear;
+
+    procedure CallFunc(Node: PNode);
+    procedure Run(Node: PNode);
 
 	  function GetIndex(Node: PNode): String;
     function GetNodeBody(Node: PNode): String;
@@ -127,11 +129,10 @@ begin
 end;
 
 
-
 function TFocus.NextID: String;
 begin
-  Inc(ID);
-  Result := '@' + IntToStr(ID);
+  Inc(LastID);
+  Result := sID + IntToStr(LastID);
 end;
 
 
@@ -243,8 +244,6 @@ end;
 
 procedure TFocus.SetVars(Node: PNode; Param, Value: String);
 begin
-  Param := AnsiUpperCase(Param);
-  Value := AnsiUpperCase(Value);
   if Param = 'ATTR'  then Node.Attr := StrToIntDef(Value, 0);
   if Param = 'TIME'  then Node.Time := StrToFloatDef(Value, Now);
   if Param = 'COUNT' then Node.Count := StrToIntDef(Value, 0);
@@ -753,7 +752,7 @@ begin
     Indexes[High(Indexes)] := Buf.Name;
     Buf := Buf.ParentIndex;
   end;
-  if (Length(Indexes) > 1) and (Indexes[High(Indexes) - 1] <> '@') then Exit;
+  if (Length(Indexes) > 1) and (Indexes[High(Indexes) - 1] <> sID) then Exit;
   ToFileSystemName(Indexes);
   Body := GetNodeBody(Node);
   SaveToFile(CreateDir(Indexes) + NodeFileName, Body);

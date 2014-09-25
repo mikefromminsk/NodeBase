@@ -124,8 +124,8 @@ begin
     Options := TStringList.Create;
     Options.LoadFromFile(OptionsFileName);
     IdHTTPServer1.DefaultPort := StrToIntDef(Options.Values['ServerPort'], 80);
-    Base.NodesCount := StrToIntDef(Options.Values['NodesCount'], 0);
-    Base.Root.Name := Options.Values['RootName'];
+    //Base.LastID := StrToIntDef(Options.Values['LastID'], 0);
+    Base.Root.Name := Options.Values['RootPath'];
     Options.Free;
   end;
   try
