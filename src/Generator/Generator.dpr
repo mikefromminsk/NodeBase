@@ -2,11 +2,11 @@ program Generator;
 
 uses
   Forms,
-  Console,  //SimpleTutor
-  NodeBaseKernel in '..\NodeBase\NodeBaseKernel.pas',
-  NodeUtils in '..\NodeBase\NodeUtils.pas',
-  NodeLink in '..\NodeBase\NodeLink.pas',
-  GeneratorModule;
+  Console,
+  Generator,
+  Kernel in '..\NodeBase\Kernel.pas',
+  Utils in '..\NodeBase\Utils.pas',
+  Link in '..\NodeBase\Link.pas';
 
 {$R *.res}
 

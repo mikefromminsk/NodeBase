@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, NodeBaseKernel, NodeLink, GeneratorModule;
+  Dialogs, StdCtrls, ExtCtrls, Kernel, Link, Generator;
 
 type
   TGG = class(TForm)

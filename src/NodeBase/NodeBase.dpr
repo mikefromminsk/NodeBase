@@ -1,7 +1,7 @@
 program NodeBase;
 
 uses
-  Console, Forms, Dialogs, SysUtils, Kernel, Link;
+  Console, Forms, Dialogs, SysUtils, Kernel;
 
 {$R *.res}
 

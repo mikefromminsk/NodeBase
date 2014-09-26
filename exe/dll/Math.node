@@ -1,64 +1,58 @@
 
 /../dll/math.dll$activate
 
-int=!int
+add$activate?a&b
 
-float=!float
+fadd$activate?a&b
 
-string=!string
+inc$activate?a
 
-add$activate?a:int&b:int
+finc$activate?a
 
-fadd$activate?a:float&b:float
+sub$activate?a&b
 
-inc$activate?a:int
+fsub$activate?a&b
 
-finc$activate?a:float
+mul$activate?a&b
 
-sub$activate?a:int&b:int
+fmul$activate?a&b
 
-fsub$activate?a:float&b:float
+_div$activate?a&b
 
-mul$activate?a:int&b:int
+fdiv$activate?a&b
 
-fmul$activate?a:float&b:float
+sqr$activate?a
 
-_div$activate?a:int&b:int
+fsqr$activate?a
 
-fdiv$activate?a:float&b:float
+sqrt$activate?a
 
-sqr$activate?a:int
-
-fsqr$activate?a:float
-
-sqrt$activate?a:int
-
-fsqrt$activate?a:float
+fsqrt$activate?a
 
 jmp
 
-jg$activate?a:int&a:int
+jg$activate?a&a
 
-fjg$activate?a:float&b:float
+fjg$activate?a&b
 
-jl$activate?a:int&b:int
+jl$activate?a&b
 
-fjl$activate?a:float&b:float
+fjl$activate?a&b
 
-je$activate?a:int&b:int
+je$activate?a&b
 
-fje$activate?a:float&b:float
+fje$activate?a&b
 
-stoi$activate?a:int
+stoi$activate?a
 
-stof$activate?a:int
+stof$activate?a
 
-itos$activate?a:int
+itos$activate?a
 
-ftos$activate?a:float
+ftos$activate?a
 
-round$activate?a:float
+round$activate?a
 
-abs$activate?a:int
+abs$activate?a
 
-fabs$activate?a:float
+fabs$activate?a
