@@ -7,7 +7,7 @@ uses
 
 begin
   Application.Initialize;
-  Base := TFocus.Create;
+  Base := TKernel.Create;
   Application.CreateForm(TGG, GG);
   Application.Run;
 end.

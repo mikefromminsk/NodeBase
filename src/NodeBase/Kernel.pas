@@ -56,7 +56,7 @@ type
     Handle      : Integer;
   end;
 
-  TFocus = class
+  TKernel = class
     LastID    : Integer;
     RootPath  : String;
     Root      : PNode;
@@ -75,7 +75,7 @@ type
 
     function NewIndex(Name: String): PNode;
 
-	  procedure SetSource(Node: PNode; Source: PNode);
+	  procedure SetSource({var} Node: PNode; Source: PNode);
 	  function GetSource(Node: PNode): PNode;
 
     procedure SetVars(Node: PNode; Param, Value: String);
@@ -120,7 +120,7 @@ type
 implementation
 
 
-constructor TFocus.Create;
+constructor TKernel.Create;
 begin
   NodesCount := 0;
   Root := AllocMem(SizeOf(TNode));
@@ -130,14 +130,14 @@ begin
 end;
 
 
-function TFocus.NextID: String;
+function TKernel.NextID: String;
 begin
   Inc(LastID);
   Result := sID + IntToStr(LastID);
 end;
 
 
-procedure TFocus.SetName(var Node: PNode; Name: String);
+procedure TKernel.SetName(var Node: PNode; Name: String);
 begin
   if Node = nil then
   begin
@@ -149,7 +149,7 @@ begin
 end;
 
 
-function TFocus.FindName(Index: PNode): PNode;
+function TKernel.FindName(Index: PNode): PNode;
 var Node, Find: PNode;
 begin
   Result := nil;
@@ -172,7 +172,7 @@ begin
 end;
 
 
-function TFocus.FindNameInNode(Node: PNode; Index: PNode): PNode;
+function TKernel.FindNameInNode(Node: PNode; Index: PNode): PNode;
 var
   i: Integer;
   Local: PNode;
@@ -208,7 +208,7 @@ begin
 end;
 
 
-function TFocus.NewIndex(Name: String): PNode;         
+function TKernel.NewIndex(Name: String): PNode;         
 var
   i, j, Index: Integer;
   function AddIndex(Node: PNode; Name: Char): PNode;
@@ -243,7 +243,7 @@ begin
   else Result := nil;
 end;
 
-procedure TFocus.SetVars(Node: PNode; Param, Value: String);
+procedure TKernel.SetVars(Node: PNode; Param, Value: String);
 begin
   if Param = 'ATTR'  then Node.Attr := StrToIntDef(Value, 0);
   if Param = 'TIME'  then Node.Time := StrToFloatDef(Value, Now);
@@ -254,7 +254,7 @@ begin
 end;
 
 
-function TFocus.GetVars(Node: PNode): String;
+function TKernel.GetVars(Node: PNode): String;
 begin
   Result := '';
   if Node = nil then Exit;
@@ -273,13 +273,13 @@ begin
   Delete(Result, 1, 1);
 end;
 
-procedure TFocus.SetSource(Node: PNode; Source: PNode);
+procedure TKernel.SetSource(Node: PNode; Source: PNode);
 begin
   Node.Source := Source;
 end;
 
 
-function TFocus.GetSource(Node: PNode): PNode;
+function TKernel.GetSource(Node: PNode): PNode;
 begin
   Result := Node;
   if Node = nil then Exit;
@@ -288,13 +288,13 @@ begin
 end;
 
 
-procedure TFocus.SetFType(Node: PNode; FType: PNode);
+procedure TKernel.SetFType(Node: PNode; FType: PNode);
 begin
   Node.FType := FType;
 end;
 
 
-procedure TFocus.SetParam(Node: PNode; Param: PNode; Index: Integer);
+procedure TKernel.SetParam(Node: PNode; Param: PNode; Index: Integer);
 begin
   if Param.FType <> nil then
   begin
@@ -326,7 +326,7 @@ begin
 end;
 
 
-function TFocus.SetValue(Node: PNode; Value: PNode): PNode;
+function TKernel.SetValue(Node: PNode; Value: PNode): PNode;
 begin
   Node.Value := Value;
 end;
@@ -345,7 +345,7 @@ begin
 end;
 
 
-function TFocus.GetValue(Node: PNode): PNode;
+function TKernel.GetValue(Node: PNode): PNode;
 var ValueStack: ANode;
 begin
   Result := nil;
@@ -367,32 +367,32 @@ begin
 end;
 
 
-procedure TFocus.SetData(Node: PNode; Value: String);
+procedure TKernel.SetData(Node: PNode; Value: String);
 begin
   Node.Data := Value;
 end;
 
 
-procedure TFocus.SetFTrue(Node: PNode; FTrue: PNode);
+procedure TKernel.SetFTrue(Node: PNode; FTrue: PNode);
 begin
   Node.FTrue := FTrue;
 end;
 
 
-procedure TFocus.SetFElse(Node: PNode; FElse: PNode);
+procedure TKernel.SetFElse(Node: PNode; FElse: PNode);
 begin
   Node.FElse := FElse;
 end;
 
 
-procedure TFocus.SetNext(Node: PNode; Next: PNode);
+procedure TKernel.SetNext(Node: PNode; Next: PNode);
 begin
   Node.Next := Next;
   Node.Next.Prev := Node;
 end;
 
 
-procedure TFocus.NextNode(var PrevNode: PNode; NextNode: PNode);
+procedure TKernel.NextNode(var PrevNode: PNode; NextNode: PNode);
 begin
   if PrevNode <> nil then
   begin
@@ -412,7 +412,7 @@ begin
 end;
 
 
-function TFocus.SetLocal(Node: PNode; Local: PNode): PNode;
+function TKernel.SetLocal(Node: PNode; Local: PNode): PNode;
 begin
   SetLength(Node.Local, Length(Node.Local) + 1);
   if Node.Attr = naEmpty
@@ -425,7 +425,7 @@ end;
 
 
 
-function TFocus.NewNode(Line: String): PNode;
+function TKernel.NewNode(Line: String): PNode;
 var Link: TLink;
 begin
   Link := TLink.BaseParse(Line);
@@ -434,7 +434,7 @@ begin
 end;
 
 
-function TFocus.NewNode(Link: TLink): PNode;
+function TKernel.NewNode(Link: TLink): PNode;
 var
   i: Integer;
 begin
@@ -529,7 +529,7 @@ begin
 end;
 
 
-function TFocus.LoadNode(Node: PNode): PNode;
+function TKernel.LoadNode(Node: PNode): PNode;
 var
   Indexes: AString;
   Body, Path: String;
@@ -553,7 +553,7 @@ begin
 end;
 
 
-procedure TFocus.LoadModule(Node: PNode);
+procedure TKernel.LoadModule(Node: PNode);
 var
   i: Integer;
   Func, PrevModule: PNode;
@@ -590,7 +590,7 @@ begin
 end;
 
 
-procedure TFocus.CallFunc(Node: PNode);
+procedure TKernel.CallFunc(Node: PNode);
 var
   Value: PNode;
   Params, Param: String;
@@ -676,7 +676,7 @@ begin
 end;
 
 
-procedure TFocus.Run(Node: PNode);
+procedure TKernel.Run(Node: PNode);
 label NextNode;
 var
   FuncResult, i: Integer;
@@ -734,7 +734,7 @@ begin
 end;
 
 
-procedure TFocus.RecursiveSave(Node: PNode);
+procedure TKernel.RecursiveSave(Node: PNode);
 var
   i: Integer;
   Indexes: AString;
@@ -758,7 +758,7 @@ begin
 end;
 
 
-procedure TFocus.RecursiveDispose(Node: PNode);
+procedure TKernel.RecursiveDispose(Node: PNode);
 var i: Integer;
 begin
   for i:=0 to High(Node.Index) do
@@ -769,7 +769,7 @@ begin
 end;
 
 
-procedure TFocus.Clear;
+procedure TKernel.Clear;
 begin
   RecursiveSave(Root);
   RecursiveDispose(Root);
@@ -778,7 +778,7 @@ begin
 end;
 
 
-function TFocus.GetIndex(Node: PNode): String;
+function TKernel.GetIndex(Node: PNode): String;
 begin
   Result := '';
   if Node <> nil then
@@ -790,9 +790,8 @@ begin
 end;
 
 
-function TFocus.GetNodeBody(Node: PNode): String;
+function TKernel.GetNodeBody(Node: PNode): String;
 var
-  Str: String;
   i: Integer;
 begin
   Result := '';
@@ -839,7 +838,7 @@ begin
 end;
 
 
-function TFocus.Execute(Line: String): PNode;
+function TKernel.Execute(Line: String): PNode;
 var
   Link: TLink;
 begin

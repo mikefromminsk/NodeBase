@@ -4,24 +4,12 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, Kernel, Link, Generator;
+  Dialogs, StdCtrls, ExtCtrls, Kernel, Link, GeneratorModule;
 
 type
   TGG = class(TForm)
-    ListBox: TListBox;
-    Address: TMemo;
     SeqBox: TListBox;
-    Splitter: TSplitter;
-    Timer: TTimer;
-    GarbageCollectorTimer: TTimer;
-    Button1: TButton;
-    Button2: TButton;
-    procedure TimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure AddressChange(Sender: TObject);
-    procedure GarbageCollectorTimerTimer(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
   public
     procedure ShowNode(Node: PNode);
     procedure ShowPascalCode(Node: PNode);
@@ -30,8 +18,8 @@ type
 var
   GG: TGG;
   FocusNode: PNode;
-  GFocus: TGFocus;
-  
+  Generator: TGenerator;
+
 implementation
 
 {$R *.dfm}
@@ -39,10 +27,6 @@ implementation
 procedure TGG.ShowNode(Node: PNode);
 begin
   if Node = nil then Exit;
-  ListBox.Items.Text := GFocus.GetNodeBody(Node);
-  Address.OnChange := nil;
-  Address.Text := GFocus.GetIndex(Node);
-  Address.OnChange := AddressChange;
   ShowPascalCode(Node);
 end;
 
@@ -58,13 +42,13 @@ var
     if Node.Params = nil then begin Result := ''; Exit; end;
     Str := Str + '(';
     for i:=0 to High(Node.Params) do
-      Str := Str + GFocus.GetIndex(Node.Params[i]) + ', ';
+      Str := Str + Generator.GetIndex(Node.Params[i]) + ', ';
     Delete(Str, Length(Str) - 1, 2);
     Str := Str + ')';
     Result := Str;
   end;
 begin
-  with GFocus do
+  with Generator do
   begin
     SeqBox.Clear;
     SeqBox.Items.Add('uses');
@@ -91,7 +75,7 @@ begin
     Node := Node.Next;
     while Node <> nil do
     begin
-      Body := GFocus.GetNodeBody(Node);
+      Body := Generator.GetNodeBody(Node);
       if Pos(#10, Body) <> 0 then
         Delete(Body, Pos(#10, Body), MaxInt);
       Str := GetIndex(Node);
@@ -122,40 +106,9 @@ begin
   end;
 end;
 
-procedure TGG.TimerTimer(Sender: TObject);
-begin
-  ShowNode(GFocus.Generate);
-end;
-
 procedure TGG.FormShow(Sender: TObject);
 begin
-  ShowNode(GFocus.Generate);
-end;
-
-procedure TGG.AddressChange(Sender: TObject);
-begin
-  ShowNode(GFocus.NewNode(Address.Text));
-end;
-
-procedure TGG.GarbageCollectorTimerTimer(Sender: TObject);
-var count: Integer;
-begin
-  Count := GFocus.NodesCount;
-  GFocus.GarbageCollector;
-  ShowMessage(IntToStr(GFocus.NodesCount - Count));
-end;
-
-procedure TGG.Button1Click(Sender: TObject);
-begin
-  Timer.Enabled := not Timer.Enabled;
-end;
-
-procedure TGG.Button2Click(Sender: TObject);
-var count: Integer;
-begin
-  Count := GFocus.NodesCount;
-  GFocus.GarbageCollector;
-  ShowMessage(IntToStr(GFocus.NodesCount - Count));
+  ShowNode(Generator.Generate);
 end;
 
 end.

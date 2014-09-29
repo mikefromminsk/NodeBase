@@ -1,13 +1,13 @@
-unit Generator;
+unit GeneratorModule;
 
 interface
 
 uses
-  Dialogs, SysUtils, Kernel, GeneratorUtils;
+  Dialogs, SysUtils, Kernel, Utils;
 
 type
 
-  TGenerator = class (TFocus) //TGeneratorFocus
+  TGenerator = class (TKernel) //TGeneratorFocus
 
     procedure CreateFunc(Node: PNode; Level: Integer);
 
@@ -25,9 +25,7 @@ type
 
     procedure CreateFuncBody(Node: PNode; Level: Integer);
 
-    function NewRandomNode(Node: PNode): PNode;
-    
-    function NewRandomType: String;
+    function NewRandomNode(FuncNode: PNode): PNode;
 
     function Generate: PNode;
   end;
@@ -66,47 +64,43 @@ procedure TGenerator.CreateLocalVar(Node: PNode);
 var i: Integer;
 begin
   for i:=0 to Random(LocalCount) do
-    AddLocal(Node, NewNode(NextID));
+    SetLocal(Node, NewNode(NextID));
 end;
 
 procedure TGenerator.CreateData(Node: PNode);
 var i: Integer;
 begin
   for i:=0 to Random(Data4Count) do
-    AddLocal(Node, NewNode(
+    SetLocal(Node, NewNode(
       IntToStr(CauchyRandom(IntBeginRange, IntCenterRange, IntEndRange))));
   for i:=0 to Random(Data8Count) do
-    AddLocal(Node, NewNode(
+    SetLocal(Node, NewNode(
       IntToStr(CauchyRandom(IntBeginRange, IntCenterRange, IntEndRange)) + ',' +
       IntToStr(CauchyRandom(FracBeginRange, FracCenterRange, FracEndRange)) ));
 end;
 
-function TGenerator.NewRandomNode(Node: PNode): PNode;
-var Index: Integer; Arr: TIntegerDynArray;
+function TGenerator.NewRandomNode(FuncNode: PNode): PNode;
+var
+  Index: Integer;
+  Arr: AInteger;
 begin
   Result := nil;
   SetLength(Arr, 4);
-  Arr[0] := Length(Node.Local);
-  Arr[1] := Length(Module.Local);
-  Arr[2] := Length(Node.Params);
-  Arr[3] := IfThen(Node.Value = nil, 0, 1);
+  Arr[0] := Length(FuncNode.Local);
+  Arr[1] := Length(FuncNode.Local);
+  Arr[2] := Length(FuncNode.Params);
+  Arr[3] := IfThen(FuncNode.Value = nil, 0, 1);
   case Random(Arr, Index) of
-    0: Result := Node.Local[Index];
+    0: Result := FuncNode.Local[Index];
     1: Result := Module.Local[Index];
-    2: Result := Node.Params[Index];
-    3: Result := Node.Value;
+    2: Result := FuncNode.Params[Index];
+    3: Result := FuncNode.Value;
   end;
   SetLength(Arr, 0);
-  if Result.Attr = naModule then
+  if RandomSource.Attr = naModule then
     Result := NewRandomNode(Result);
-  Result := NewNode(GetIndex(Result) + '^' + NextID);
-end;
 
-function TGenerator.NewRandomType(): String;
-begin
-  if Random(100) > 50
-  then Result := 'int'
-  else Result := 'float';
+  Result := NewNode(NextID + '^' + GetIndex(Result));
 end;
 
 procedure TGenerator.CreateFuncHead(Node: PNode; Level: Integer);
@@ -118,9 +112,9 @@ begin
   for i:=0 to Random(FunctionCount) do
   begin
     FuncNode := NewNode(NextID);
-    AddLocal(Node, FuncNode);
+    SetLocal(Node, FuncNode);
     for j:=0 to Random(FunctionParamsCount) do
-      AddParam(FuncNode, NewNode(NextID + ':' + NewRandomType), j);
+      SetParam(FuncNode, NewNode(NextID), j);
     SetValue(FuncNode, NewNode(NextID));
   end;
 end;
@@ -129,7 +123,7 @@ procedure TGenerator.SetParams(Node, FuncNode: PNode);
 var i: Integer;
 begin
   for i:=0 to High(Node.Params) do
-    AddParam(Node, NewRandomNode(FuncNode), i);
+    SetParam(Node, NewRandomNode(FuncNode), i);
 end;
 
 procedure TGenerator.CreateSequence(FuncNode: PNode);
@@ -151,8 +145,7 @@ begin
 end;
 
 procedure TGenerator.CreateFuncBody(Node: PNode; Level: Integer);
-var
-  i: Integer;
+var i: Integer;
 begin
   for i:=0 to High(Node.Local) do
     if Node.Local[i].Params <> nil then
@@ -164,9 +157,10 @@ var
   j, i, IfWhileElse: Integer;
   FirstPos, SecondPos, ThirdPos: Integer;
   FirstNode, SecondNode, ThirdNode: PNode;
-  ElseNode: PNode;
+  ExitNode: PNode;
   Node: PNode;
 begin
+  Exit;
   FuncNode := FuncNode.Next;
   if FuncNode = nil then Exit;
 
@@ -200,12 +194,12 @@ begin
 
     if IfWhileElse = 1 then   // if
     begin
-      NewNode(GetIndex(FirstNode) + '#|' + GetIndex(SecondNode));
+      SetFElse(FirstNode, SecondNode);
     end;
 
-    if IfWhileElse = 2 then  // while
+    {if IfWhileElse = 2 then  // while
     begin
-      NewNode(GetIndex(FirstNode) + '#|' + GetIndex(SecondNode));
+      SetFElse(FirstNode, SecondNode);
       ElseNode := NewNode('1#' + GetIndex(FirstNode) + '|');
       NextNode(SecondNode.Prev, ElseNode);
       NextNode(ElseNode, SecondNode);
@@ -213,11 +207,11 @@ begin
 
     if IfWhileElse = 3 then // if else
     begin
-      NewNode(GetIndex(FirstNode) + '#|' + GetIndex(SecondNode));
-      ElseNode := NewNode('1#' + GetIndex(ThirdNode) + '|');
+      SetFElse(FirstNode, SecondNode);
+      ExitNode := NewNode('1#' + GetIndex(ThirdNode) + '|');
       NextNode(SecondNode.Prev, ElseNode);
       NextNode(ElseNode, SecondNode);
-    end;
+    end; }
 
   end;
 end;
@@ -234,7 +228,8 @@ end;
 
 function TGenerator.Generate: PNode;
 begin
-  Result := NewNode(NextID + '#' + NextID);
+  Result := NewNode(NextID);
+  SetValue(Result, NewNode(NextID));
   CreateFunc(Result, FunctionLevel);
   Run(Result);
 end;

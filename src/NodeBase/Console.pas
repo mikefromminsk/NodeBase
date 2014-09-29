@@ -48,7 +48,7 @@ type
 
 var
   GG: TGG;
-  Base: TFocus;
+  Base: TKernel;
 
 const
   OptionsFileName = 'config.ini';
