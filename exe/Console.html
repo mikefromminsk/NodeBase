@@ -1,0 +1,707 @@
+﻿<html >
+<head>
+    <title>Console</title>
+    <style type="text/css">
+body
+{
+    margin: 0px;
+    width: 100%;
+    height: 100%;
+    overflow:  hidden;
+}
+
+#menu
+{
+    background-color: Highlight;
+    float: right;
+    width: 7%;
+    /*min-width: 64px;*/
+    height: 100%;
+}
+#content
+{
+    /*background-color: Gray;*/
+    height: 93%;
+}
+#footer
+{
+    background-color: Black;
+    position: absolute; 
+    bottom: 0;
+    width: 100%;
+    height: 7%;
+    min-height: 32px;
+    visibility: hidden;
+}
+
+
+#header 
+{
+    background-color: #F1F1F1;
+    height: 7%;
+    min-height: 64;
+    border-bottom:solid 1px #d9d9d9; 
+    
+}
+
+input
+{
+    width: 70%; 
+    font-size: 17px;
+    height: 32px;
+    padding: 0 0 0 10px;
+    font-family:arial, sans-serif; 
+    border:solid 1px #d9d9d9; 
+    border-top:solid 1px #c0c0c0; 
+    cursor: text;
+}
+
+</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+    <script type="text/javascript" src="https://ceti-redesign.googlecode.com/files/jquery.xdomainajax.js"></script>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+
+<script type="text/javascript">
+
+    var metaNodes = [];
+    var host = "http://" + window.document.location.host + "/"; //"http://localhost:82/";
+    var rootID = "@1";
+
+
+    function show(message) {
+        document.getElementById("footer").innerHTML = message;
+    }
+
+    $(function () {
+
+        loadNode(rootID);
+
+        setMode();
+
+        $("#search").keydown(function (event) {
+
+            if (event.keyCode == 13) {
+                deleteTree(rootID);
+
+                var query = document.getElementById('search').value;
+
+                var URLexpr = /(.+(:\/\/).+?(\/|$))(.*)/g;
+                var group = URLexpr.exec(query);
+                if (group != null) {
+                    host = group[1] + (!!group[3] ? "" : "/");
+                    query = group[4];
+                }
+
+                update();
+                loadNode(query);
+                document.getElementById('search').value = query;
+            }
+        });
+
+        window.onresize = setMode;
+
+    });
+
+
+    function getNode(id) {
+        if (!!!id) return;
+        for (var i = 0; i < metaNodes.length; i++) {
+            if ((metaNodes[i].query == id) || (metaNodes[i].id == id)) {
+                return metaNodes[i];
+            }
+        }
+    }
+
+    function deleteNode(id) {
+        if (!!!id) return;
+        for (var i = 0; i < metaNodes.length; i++) {
+            if ((metaNodes[i].query == id) || (metaNodes[i].id == id)) {
+                metaNodes.splice(i, 1);
+                return;
+            }
+        }
+    }
+
+
+
+
+    function loadNode(query, n) {
+
+
+        $.ajax({
+            type: "GET",
+            url: host + query,
+            success: function (get) {
+
+                var nodesArr = get.split('\n\n');
+                var MetaExpr = /^((.*?)\^)?(.*?)?(@(.*?))(\$(.*?))?(:(.*?))?(\?(.*?))?(#(.*?))?((\|)(.*?))?(\n(.*?))?$/g;
+                var group = MetaExpr.exec(nodesArr[0]);
+                if (group == null)
+                    return;
+                nodesArr.shift();
+
+
+                var paramsArr = !!group[11] ? group[11].split('&') : [];
+
+                var focusNode = getNode(group[4]);
+
+                if (metaNodes.length == 0) {
+                    rootID = group[4];
+                }
+
+
+                var sysParamsArr = !!group[7] ? group[7].split('&') : [];
+                var sysParams = [];
+                for (var i = 0; i < sysParamsArr.length; i++) {
+                    var param = sysParamsArr[i].split('=');
+                    sysParams[param[0]] = !!param[1] ? param[1] : "";
+                }
+
+
+                if (!!!focusNode) {
+                    //create
+                    metaNodes.push({
+                        query: undefined,
+                        source: group[2],
+                        name: group[3],
+                        id: group[4],
+                        sysparams: sysParams,
+                        ftype: group[9],
+                        params: paramsArr,
+                        value: !!!group[14] ? group[13] : undefined,
+                        ftrue: !!group[14] ? group[13] : undefined,
+                        felse: group[16],
+                        next: group[18],
+                        local: nodesArr
+                    });
+                    focusNode = metaNodes[metaNodes.length - 1];
+                }
+                else {
+                    //update
+                    focusNode.query = undefined;
+                    focusNode.source = group[2];
+                    focusNode.name = group[3];
+                    focusNode.id = group[4];
+                    focusNode.sysparams = sysParams;
+                    focusNode.ftype = group[9];
+                    focusNode.params = paramsArr;
+                    focusNode.value = !!!group[14] ? group[13] : undefined;
+                    focusNode.ftrue = !!group[14] ? group[13] : undefined;
+                    focusNode.felse = group[16];
+                    focusNode.next = group[18];
+                    focusNode.local = nodesArr;
+                }
+
+            },
+            error: function (request, error) {
+                if (!!!n) n = 1;
+                if (n < 3)
+                { loadNode(query, n + 1) }
+                else
+                { deleteTree(query); }
+            }
+        });
+
+    }
+
+
+    function deleteTree(id) {
+        var node = getNode(id);
+        if (!!!node) return;
+        if (!!node.local) { for (var local in node.local) deleteTree(local); }
+        if (!!node.next) { deleteTree(node.next); }
+        if (!!node.params) { for (var param in node.params) deleteTree(param); }
+        if (!!node.value) { deleteTree(node.value); }
+        if (!!node.ftype) { deleteTree(node.ftype); }
+        if (!!node.ftrue) { deleteTree(node.ftrue); }
+        if (!!node.felse) { deleteTree(node.felse); }
+        deleteNode(node.id);
+    }
+
+
+    function loadLinks(node) {
+
+
+        var height = !!node.height ? node.height : 0;
+
+        if (!!node.query) return;
+
+        if (!!node.local) {//and expand true
+            for (var i = 0; i < node.local.length; i++) {
+                metaNodes.push({ query: node.local[i], color: "red", parentLocal: node.id });
+                loadNode(node.local[i]);
+            }
+        }
+
+        if (!!node.next) {
+            metaNodes.push({ query: node.next, color: "green", prev: node.id });
+            loadNode(node.next);
+        }
+
+        if (!!node.params) {
+            for (var i = 0; i < node.params.length; i++) {
+                metaNodes.push({ query: node.params[i], color: "orange", parentParams: node.id });
+                loadNode(node.params[i]);
+            }
+        }
+
+        if (!!node.value) {
+            if (node.value.indexOf('@') != -1) {
+                metaNodes.push({ query: node.value, color: "blue", parentValue: node.id });
+                loadNode(node.value);
+            }
+        }
+
+        if (!!node.ftype) {
+            metaNodes.push({ query: node.ftype, color: "purple", parentType: node.id });
+            loadNode(node.ftype);
+        }
+
+        if (!!node.ftrue) {
+            metaNodes.push({ query: node.ftrue, color: "black", parentTrue: node.id });
+            loadNode(node.ftrue);
+        }
+
+        if (!!node.felse) {
+            metaNodes.push({ query: node.felse, color: "white", parentElse: node.id });
+            loadNode(node.felse);
+        }
+    }
+
+
+    var D = 40;
+    var R = D / 2;
+    var dist = 10;
+    var dRight = D + dist;
+    var dDown = D + dist;
+
+    function setHeight(root) {
+        if (!!!root) return;
+        var height = 0;
+        if (!!root.local) {
+            for (var i = 0; i < root.local.length; i++) {
+                var node = getNode(root.local[i]);
+                if (!!!node) continue;
+                setHeight(node);
+                height += dDown + node.height;
+            }
+        }
+        if (!!root.next) {
+            var node = getNode(root.next);
+            if (!!node) {
+                setHeight(node);
+                height += dDown + node.height;
+            }
+        }
+        root.height = height;
+    }
+
+
+    function setXY(root) {
+        if (!!!root) return;
+        var x = !!root.x ? root.x : 0,
+    y = !!root.y ? root.y : 0;
+        var top = 0;
+        var right = 0;
+
+
+        if (!!root.ftype) {
+            var node = getNode(root.ftype);
+            if (!!node) {
+
+                if (!!root.expand ? root.expand : false) {
+                    if (!(!!(node.dragging) && (node.dragging))) {
+                        node.y = y + R;
+                        node.x = x + R;
+                    }
+                    setXY(node);
+                }
+                else {
+                    deleteTree(node.id);
+                }
+            }
+        }
+
+        if (!!root.local) {
+            for (var i = 0; i < root.local.length; i++) {
+                var node = getNode(root.local[i]);
+                if (!!!node) continue;
+
+
+                if (!!root.expand ? root.expand : false) {
+                    top += dDown;
+                    if (!(!!(node.dragging) && (node.dragging))) {
+                        node.y = y + top;
+                        node.x = x + dRight;
+                    }
+                    setXY(node);
+                    top += node.height;
+                }
+                else {
+                    deleteTree(node.id);
+                }
+            }
+        }
+
+        if (!!root.params) {
+            right += dRight + root.labelWidth;
+            for (var i = 0; i < root.params.length; i++) {
+                var node = getNode(root.params[i]);
+                if (!!!node) continue;
+
+                if (!!root.expand ? root.expand : false) {
+                    if (!(!!(node.dragging) && (node.dragging))) {
+                        node.y = y + top;
+                        node.x = x + right;
+                    }
+                    setXY(node);
+                    right += dRight + node.labelWidth;
+                }
+                else {
+                    deleteTree(node.id);
+                }
+            }
+        }
+
+
+        if (!!root.ftrue) {
+            var node = getNode(root.ftrue);
+            if (!!node) {
+
+                if (!!root.expand ? root.expand : false) {
+
+                    if (!(!!(node.dragging) && (node.dragging))) {
+                        node.y = y + top - dDown;
+                        node.x = x + right + dRight;
+                    }
+                    setXY(node);
+                }
+                else {
+                    deleteTree(node.id);
+                }
+            }
+        }
+
+
+        if (!!root.felse) {
+            var node = getNode(root.felse);
+            if (!!node) {
+
+                if (!!root.expand ? root.expand : false) {
+
+                    if (!(!!(node.dragging) && (node.dragging))) {
+                        node.y = y + top + dDown;
+                        node.x = x + right + dRight;
+                    }
+                    setXY(node);
+                }
+                else {
+                    deleteTree(node.id);
+                }
+            }
+        }
+
+
+        if (!!root.value) {
+            var node = getNode(root.value);
+            if (!!node) {
+
+                if (!!root.expand ? root.expand : false) {
+
+                    if (!(!!(node.dragging) && (node.dragging))) {
+                        node.y = y + top;
+                        node.x = x + right;
+                    }
+                    setXY(node);
+                    right += dRight + node.labelWidth;
+                }
+                else {
+                    deleteTree(node.id);
+                }
+            }
+        }
+
+        if (!!root.next) {
+
+            var node = getNode(root.next);
+            if (!!node) {
+                if (!!root.expand ? root.expand : false) {
+                    top += dDown;
+                    if (!(!!(node.dragging) && (node.dragging))) {
+                        node.y = y + top;
+                        node.x = x;
+                    }
+                    setXY(node);
+                    top += node.height;
+                }
+                else {
+                    deleteTree(node.id);
+                }
+            }
+        }
+
+    }
+
+
+    var timerCounter = 0;
+
+    var update;
+
+
+    function setMode() {
+
+
+
+
+        var myNode = document.getElementById("content");
+        while (myNode.firstChild) {
+            myNode.removeChild(myNode.firstChild);
+        }
+
+
+        var startInnerRadius = 12;
+        var startOuterRadius = 20;
+        var width = document.getElementById('content').clientWidth,
+            height = document.getElementById('content').clientHeight;
+
+
+        d3.selection.prototype.dblTap = function (callback) {
+            var last = 0;
+            return this.each(function () {
+                d3.select(this).on("touchstart", function (e) {
+                    if ((d3.event.timeStamp - last) < 500) {
+                        return callback(e);
+                    }
+                    last = d3.event.timeStamp;
+                });
+            });
+        }
+        var color = d3.scale.category20();
+
+        var pie = d3.layout.pie()
+            .value(function (d) { return d.value; })
+            .sort(null);
+
+        var arc = d3.svg.arc()
+            .innerRadius(function (d) { return startOuterRadius - (startOuterRadius - startInnerRadius) * ((d.data.count / 20) > 1 ? 1 : (d.data.count / 20)); })
+            .outerRadius(startOuterRadius);
+
+        var transition = d3.transition()
+            .duration(1000)
+            .ease("linear");
+        var zoom = d3.behavior.zoom()
+            .scaleExtent([-10, 20])
+            .translate([width / 2, height / 2])
+            .on("zoom", zoomed);
+
+        var drag = d3.behavior.drag()
+            .origin(function (d) { return d; })
+            .on("dragstart", dragstarted)
+            .on("drag", dragged)
+            .on("dragend", dragended);
+
+        //create svg
+        var svg = d3.select("#content").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .call(zoom)
+            .on("dblclick.zoom", null)
+            .append("g");
+
+        //filter 
+        var defs = svg.append("defs");
+
+        var filter = defs.append("filter")
+            .attr("id", "dropshadow");
+        filter.append("feGaussianBlur")
+            .attr("in", "SourceAlpha")
+            .attr("stdDeviation", 1)
+            .attr("result", "blur");
+        filter.append("feOffset")
+            .attr("in", "blur")
+            .attr("dx", -2)
+            .attr("dy", 2)
+            .attr("result", "offsetBlur");
+        var feMerge = filter.append("feMerge");
+        feMerge.append("feMergeNode")
+            .attr("in", "offsetBlur")
+        feMerge.append("feMergeNode")
+            .attr("in", "SourceGraphic");
+    
+        var rect = svg.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .style("fill", "none")
+            .style("pointer-events", "all");
+
+
+        function zoomed() {
+            svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+            svg.selectAll("text").each(function (d) { d.labelWidth = this.getComputedTextLength(); }); //update label width
+            update();
+        }
+
+        function dragstarted(d) {
+            d.dragging = true;
+            d3.event.sourceEvent.stopPropagation();
+        }
+
+        function dragged(d) {
+            d3.select(this).attr("transform", function (d) {
+                return "translate(" + (d.x = d3.event.x) + "," + (d.y = d3.event.y) + ")";
+            });
+            update();
+        }
+
+        function dragended(d) {
+            d.dragging = false;
+        }
+
+        d3.selection.prototype.moveToFront = function () {
+            return this.each(function () {
+                this.parentNode.appendChild(this);
+            });
+        };
+
+        d3.selection.prototype.moveToBack = function () {
+            return this.each(function () {
+                var firstChild = this.parentNode.firstChild;
+                if (firstChild) {
+                    this.parentNode.insertBefore(this, firstChild);
+                }
+            });
+        };
+
+
+
+
+        update = function () {
+            setHeight(getNode(rootID));
+            setXY(getNode(rootID));
+
+            var g = svg.selectAll("g")
+                .data(metaNodes);
+
+            //delete
+            g.exit()
+                .attr("opacity", "1")
+                .transition()
+                .attr("opacity", "0")
+                .remove();
+
+
+            //create
+            var nodeGroup = g
+                .enter()
+                .append("g")
+                .call(drag)
+                .on("dblclick", function (d) {
+                    d.expand = !!d.expand ? !d.expand : true;
+                    if (d.expand) {
+                        loadNode(d.id); //del
+                        loadLinks(d);
+                    }
+                    update();
+                })
+                .dblTap(function (d) {
+                    d.expand = !!d.expand ? !d.expand : true;
+                    if (d.expand) {
+                        loadNode(d.id); //del
+                        loadLinks(d);
+                    }
+                    update();
+                })
+                .style("cursor", "pointer")
+                ;
+
+
+            g.transition()
+                .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+
+            var circle = nodeGroup
+                .append("circle")
+                .attr("r", startOuterRadius - 0.5)
+                .attr("fill", function (d) { return d.color; })
+                .attr("opacity", 0.5)
+                .attr("filter", function () { 
+                    if (/android|iphone|ipod|ipad|series60|symbian|windows ce|blackberry/i.test(navigator.userAgent)) { 
+                        return ""; //shadow off in mobile
+                    }
+                    return "url(#dropshadow)"; 
+                 })
+                .attr("opacity", "0")
+                .transition()
+                .attr("opacity", "1")
+                ;
+
+
+            var label = nodeGroup
+                .append("text")
+                .attr("font-size", "14px");
+
+
+            //udpate
+            svg.selectAll("text")
+                .text(function (d) {
+                    if (!!d.name) return d.name;
+                    if (!!d.id) return d.id;
+                    if (!!d.query) return d.query;
+                    return "";
+                })
+                .attr("transform", function () { return "translate(" + R + "," + 0 + ")"; })
+                .each(function (d) { d.labelWidth = this.getComputedTextLength(); })
+                ;
+
+
+            var path = svg.selectAll("g")
+                .attr("opacity", function (d) { return !!!d.query ? 1 : 0.3; })
+                .selectAll("path")
+                .data(function (d) { //sysparams to viewParams
+                    var viewParams = [];
+                    if (!!d.sysparams) {
+                        for (var key in d.sysparams) {
+                            if (key == 'COUNT') continue;
+                            viewParams.push({
+                                attr: key,
+                                count: d.sysparams['COUNT'],
+                                value: d.sysparams[key]
+                            });
+                        }
+                    }
+                    return pie(viewParams);
+                })
+                .enter()
+                .append("path")
+                .attr("fill", function (d, i) { return color(i) })
+                .attr("d", arc)
+                .style("stroke-width", "3")
+                .attr("opacity", "0")
+                .transition()
+                .attr("opacity", "1")
+
+        }
+        setInterval(update, 1000);
+        svg.call(zoom.event); // show initialize zoom
+    }    
+</script>
+</head>
+<body>
+    <div id="header">
+        <table height="100%" width="100%">
+            <tr>
+			<td><a href="http://metabrain.by:3000/redmine/projects">Задачи</a></td>
+                <td align="center" valign="middle" width="90%">
+                    <input id="search" type="text" />
+                </td>
+                <td><a href="https://docs.google.com/document/d/17u1HJQs8uSSK2I6wLv6yg27qW_w90aI3NLqF6cB7hhU/edit?usp=sharing">Документация</a></td>
+            </tr>
+        </table>
+    </div>
+    <div id="content">
+    </div>
+    <div id="footer">
+    </div>
+</body>
+</html>

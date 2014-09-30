@@ -10,6 +10,8 @@ type
   AString = Array of String;
   AInteger = Array of Integer;
 
+  ARange = Array[0..2] of Integer;
+
 function slice(Text: String; Delimeter: String): AString;
 procedure slice_params(Text: String; Delimeter: String; var Names, Values: AString);
 function IntToStr4(Num: Integer): String;
@@ -33,7 +35,7 @@ function Random(Range: Integer): Integer; overload;
 function Random(Arr: AInteger; var InnerIndex: Integer): Integer;  overload;
 function Random(Arr: AInteger): Integer; overload;
 function Random(const Arr: array of integer): Integer; overload;
-function CauchyRandom(BeginRange, CenterRange, EndRange: Integer): Integer;
+function RandomRange(Range: ARange): Integer;
 function IfThen(AValue: Boolean; const ATrue: Integer; const AFalse: Integer = 0): Integer;
 
 
@@ -324,12 +326,17 @@ begin
   Result := Random(Arr, InnerIndex);
 end;
 
-function CauchyRandom(BeginRange, CenterRange, EndRange: Integer): Integer;
-var MaxRange, MinRange: Integer;
+function RandomRange(Range: ARange): Integer;
+var
+  MaxRange, MinRange: Integer;
+  BeginRange, CenterRange, EndRange: Integer;
 begin
+  BeginRange  := Range[0];
+  CenterRange := Range[1];
+  EndRange    := Range[2];
   repeat
     MaxRange := Max(CenterRange - BeginRange, EndRange - CenterRange);
-    MinRange := Min(CenterRange - BeginRange, EndRange - CenterRange);
+    //MinRange := Min(CenterRange - BeginRange, EndRange - CenterRange);
     Result := Round(Tan(PI * (Random(MaxInt) / MaxInt - 0.5)));
     Result := Result mod (MaxRange + 1);
     Result := Result + CenterRange;

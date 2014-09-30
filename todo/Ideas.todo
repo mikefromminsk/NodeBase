@@ -6,6 +6,8 @@ generators
 client
 
 
+[mission]
+kill all humans
 
 [console]
 убрать таймер trigger monitor

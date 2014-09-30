@@ -2,9 +2,9 @@ program NodeGenerator;
 
 uses
   Forms, Console, Generator,
-  Kernel in '..\NodeBase\Kernel.pas',
-  Link in '..\NodeBase\Link.pas',
-  Utils in '..\NodeBase\Utils.pas';
+  Kernel in '..\NodeKernel\Kernel.pas',
+  Utils in '..\NodeKernel\Utils.pas',
+  Link in '..\NodeKernel\Link.pas';
 
 {$R *.res}
 
