@@ -687,7 +687,7 @@ var
     if Node <> nil then
     begin
       Result := 0;
-      for i:=0 to Length(Node.Data) do
+      for i:=1 to Length(Node.Data) do
         Inc(Result, Ord(Node.Data[i]));
     end;
   end;
@@ -771,7 +771,7 @@ end;
 
 procedure TKernel.Clear;
 begin
-  RecursiveSave(Root);
+  //RecursiveSave(Root);
   RecursiveDispose(Root);
   Prev := nil;
   Module := nil;

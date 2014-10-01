@@ -23,8 +23,17 @@ object GG: TGG
     ItemHeight = 17
     TabOrder = 0
   end
+  object Button1: TButton
+    Left = 248
+    Top = 64
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 1
+    OnClick = Button1Click
+  end
   object Timer: TTimer
-    Interval = 100
+    Interval = 1
     OnTimer = TimerTimer
     Left = 8
     Top = 8

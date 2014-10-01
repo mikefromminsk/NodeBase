@@ -45,7 +45,10 @@ http auntification
 
 access to Node
 
+AllocMem to naIndex
+and ReallocMem to naNode
 
+swap file > 90% hdd
 
 [System]
 
@@ -82,7 +85,7 @@ Load Root with options
 //local
 
 
-
+Generator config ini lastid
 
 
 
@@ -92,6 +95,8 @@ compare result
 
 
 recode
+
+
 
 
 

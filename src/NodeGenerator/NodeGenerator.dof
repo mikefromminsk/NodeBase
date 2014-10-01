@@ -98,7 +98,7 @@ SearchPath=
 Packages=vcl;rtl
 Conditionals=
 DebugSourceDirs=
-UsePackages=1
+UsePackages=0
 [Parameters]
 RunParams=
 HostApplication=
