@@ -50,6 +50,13 @@ and ReallocMem to naNode
 
 swap file > 90% hdd
 
+toOptions
+MaxAddrSpace=200
+
+
+
+NodeBase into any hdd or ssd
+
 [System]
 
 naPointer
@@ -94,15 +101,10 @@ Generator config ini lastid
 compare result
 
 
-recode
 
+load options
 
-
-
-
-
-
-
+[Generator]
 
 
 
