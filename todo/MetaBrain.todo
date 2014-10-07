@@ -15,7 +15,7 @@ union all module to one file
 
 saveNode to segment code with addlocal(to up)
 
-documetation
+documetation Readme.md
 
 search in branch cash
 
@@ -91,25 +91,42 @@ Load Root with options
 /from_exe_file
 //local
 
+addevent if parent local
 
-Generator config ini lastid
+
+
+
+
+
+
+
+
+
+
 
 
 
 [Generator]
 
 compare result
+ 
 
-
-
-load options
-
-[Generator]
-
+control node
 
 
 
 
+
+
+
+
+
+TKernel
+	Unit
+	
+	
+TGenerator
+	Task
 
 
 

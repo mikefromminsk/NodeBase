@@ -53,8 +53,7 @@ type
     Name        : String;
     ID          : String;
     Source      : TLink;
-    Names       : AString;
-    Values      : AString;
+    Vars        : TMap;
     FType       : TLink;
     Params      : Array of TLink;
     Value       : TLink;
@@ -62,8 +61,8 @@ type
     FElse       : TLink;
     Next        : TLink;
     Local       : Array of TLink;
-
-    constructor Create(Str: string);
+    constructor Create; overload;
+    constructor Create(Str: string); overload;
     constructor UserParse(Str: String);  //рекурсивную для пользователя
     procedure rec(var Str: String; Link: TLink);
     constructor BaseParse(Str: String);  //более простую для базы
@@ -72,7 +71,10 @@ type
 
 implementation
 
-
+constructor TLink.Create;
+begin
+  Vars := TMap.Create;
+end;
 
 constructor TLink.Create(Str: string);
 begin
@@ -114,6 +116,7 @@ var
   Strings: CString;
   Arr   : AString;
 begin
+  Create;
   Strings := ToStrings(Str);
 
   Name := Strings[iName];
@@ -121,7 +124,7 @@ begin
   if Strings[iSource] <> '' then
     Source  := TLink.BaseParse(Strings[iSource]);
   if Strings[iVars] <> '' then
-    slice_params(AnsiUpperCase(Strings[iVars]), sParamAnd, Names, Values);
+    Vars := TMap.Create(AnsiUpperCase(Strings[iVars]), sParamAnd);
   if Strings[iType] <> '' then
     FType := TLink.BaseParse(Strings[iType]);
   if Strings[iParams] <> '' then
@@ -181,6 +184,7 @@ var
   Strings: CString;
   Arr   : AString;
 begin
+  Create;
   PosValue := Pos(sParamValue, Str);
   i := Pos(sParams, Str);
   if ((PosValue <> 0) and (i = 0)) or
@@ -194,7 +198,7 @@ begin
   if Strings[iSource] <> '' then
     Source  := TLink.UserParse(Strings[iSource]);
   if Strings[iVars] <> '' then
-    slice_params(AnsiUpperCase(Strings[iVars]), sParamAnd, Names, Values);
+    Vars := TMap.Create(AnsiUpperCase(Strings[iVars]), sParamAnd);
   if Strings[iType] <> '' then
     FType := TLink.UserParse(Strings[iType]);
   if Strings[iParams] <> '' then

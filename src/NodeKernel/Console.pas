@@ -28,7 +28,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure CreateParams(var Params: TCreateParams); override;
     procedure FormShow(Sender: TObject);
-    function ConsoleExec(Line: String; WriteToConsole: Boolean = False): PNode;
+    function ConsoleExec(Line: String; WriteToConsole: Boolean = False): TNode;
     procedure IdHTTPServer1CommandGet(AThread: TIdPeerThread;
       ARequestInfo: TIdHTTPRequestInfo;
       AResponseInfo: TIdHTTPResponseInfo);
@@ -48,25 +48,43 @@ type
 
 var
   GG: TGG;
-  Base: TKernel;
+  Kernel: TKernel;
 
 const
-  OptionsFileName = 'config.ini';
   ConsoleFileName = 'Console.html';
 
 implementation
 
 {$R *.dfm}
 
-function TGG.ConsoleExec(Line: String; WriteToConsole: Boolean = False): PNode;
+procedure TGG.FormCreate(Sender: TObject);
+var i: Integer;
+begin
+  Kernel := TKernel.Create;
+  
+  IdHTTPServer1.DefaultPort := StrToIntDef(Kernel.Options.Get('ServerPort'), 80);
+
+  try
+    IdHTTPServer1.Active := True;
+    QueryBox.Lines.Add('DefaultPort: ' + IntToStr(IdHTTPServer1.DefaultPort));
+  except
+    on E: Exception do
+      QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) + ' already open. Change ServerPort in ' + OptionsFileName +' file.');
+  end;
+
+  for i:=0 to InputBox.Lines.Count - 1 do
+    ConsoleExec(InputBox.Lines[i]);
+end;
+
+function TGG.ConsoleExec(Line: String; WriteToConsole: Boolean = False): TNode;
 var
-  Value: PNode;
+  Value: TNode;
   Str: String;
 begin
-  Result := Base.Execute(Line);
+  Result := Kernel.Execute(Line);
   if Result <> nil then
   begin
-    Value := Base.GetValue(Result);
+    Value := Kernel.GetValue(Result);
     if Value <> nil then
     begin
       Str := Value.Data;
@@ -112,31 +130,6 @@ procedure TGG.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
   with Params do Style := (Style or WS_POPUP) and not WS_DLGFRAME;
-end;
-
-procedure TGG.FormCreate(Sender: TObject);
-var
-  i: Integer;
-  Options: TStringList;
-begin
-  if FileExists(OptionsFileName) then
-  begin
-    Options := TStringList.Create;
-    Options.LoadFromFile(OptionsFileName);
-    IdHTTPServer1.DefaultPort := StrToIntDef(Options.Values['ServerPort'], 80);
-    //Base.LastID := StrToIntDef(Options.Values['LastID'], 0);
-    Base.Root.Name := Options.Values['RootPath'];
-    Options.Free;
-  end;
-  try
-    IdHTTPServer1.Active := True;
-    QueryBox.Lines.Add('DefaultPort: ' + IntToStr(IdHTTPServer1.DefaultPort));
-  except
-    on E: Exception do
-      QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) + ' already open. Change ServerPort in ' + OptionsFileName +' file.');
-  end;
-  for i:=0 to InputBox.Lines.Count - 1 do
-    ConsoleExec(InputBox.Lines[i]);
 end;
 
 procedure TGG.FormShow(Sender: TObject);
@@ -217,14 +210,9 @@ begin
   if ARequestInfo.Command = 'GET' then
   begin
     if Document = '' then   // return html console
-    begin
-      AResponseInfo.ContentStream := TFileStream.Create(ConsoleFileName, fmOpenRead or fmShareCompat);  // to local dir
-    end
+      AResponseInfo.ContentStream := TFileStream.Create(ConsoleFileName, fmOpenRead or fmShareCompat)  // to local dir
     else
-    begin
-      AResponseInfo.ContentText := Base.GetNodeBody(Base.NewNode(Document));
-      //QueryBox.Lines.Add(ARequestInfo.Command + #10 + AResponseInfo.ContentText);
-    end;
+      AResponseInfo.ContentText := Kernel.GetNodeBody(Kernel.NewNode(Document));
   end;
   if ARequestInfo.Command = 'POST' then
   begin
@@ -234,7 +222,7 @@ begin
       Node := TStringList.Create;
       Node.Text := MemoryStreamToString(Stream);
 
-      with Base do
+      with Kernel do
       begin
         Module := nil;
         Prev := nil;
@@ -287,10 +275,10 @@ end;
 procedure TGG.Timer1Timer(Sender: TObject);
 var
   Count: Integer;
-  Node: Pnode;
+  Node: Tnode;
 begin
-  Base.Clear;
-  Base.Module := Base.NewNode('@1');
+  Kernel.Clear;
+  Kernel.Module := Kernel.NewNode('@1');
   Node := ConsoleExec('func$activate?750,0', True);
   if Node <> nil then
     Node := nil;

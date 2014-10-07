@@ -6,14 +6,43 @@ uses
   Windows, ImageHlp, Classes, SysUtils, StrUtils, Math, Dialogs, ExtCtrls,
   Messages;
 
+const
+  OptionsFileName = 'options.ini';
+
+//NodeAttribyte
+  naEmpty = 0;
+  naLoad = 1;
+  naData = 3;
+  naWord = 4;
+  naModule = 5;
+  naDLLFunc = 6;
+  naNumber = 7;
+  naRoot = 8;
+
+  NodeFileExtention = '.node';
+  ExternalModuleExtention = '.dll';
+
+  NodeFileName = 'Node' + NodeFileExtention;
+
 type
   AString = Array of String;
   AInteger = Array of Integer;
 
+  TMap = class
+    Names: AString;
+    Values: AString;
+    constructor Create; overload;
+    constructor Create(Text: String; Delimeter: String); overload;
+    function Get(Name: String): String;
+    function High: Integer;
+  end;
+
   ARange = Array[0..2] of Integer;
 
 function slice(Text: String; Delimeter: String): AString;
-procedure slice_params(Text: String; Delimeter: String; var Names, Values: AString);
+{procedure slice_params(Text: String; Delimeter: String; var Names, Values: AString);
+function get_param(Name: String; var Names, Values: AString): String;  }
+function StrToDef(Str, Default: String): String;
 function IntToStr4(Num: Integer): String;
 function StrToInt4(Str: String): Integer;
 function FloatToStr8(Num: Double): String;
@@ -65,7 +94,13 @@ begin
   end;
 end;
 
-procedure slice_params(Text: String; Delimeter: String; var Names, Values: AString);
+{ TMap }
+
+constructor TMap.Create;
+begin
+end;
+
+constructor TMap.Create(Text, Delimeter: String);
 var
   i, PosValue: Integer;
   Arr   : AString;
@@ -73,7 +108,7 @@ begin
   Arr := slice(Text, Delimeter);
   SetLength(Names, Length(Arr));
   SetLength(Values, Length(Arr));
-  for i:=0 to High(Arr) do
+  for i:=0 to System.High(Arr) do
   begin
     PosValue := Pos('=', Arr[i]);
     if PosValue = 0 then
@@ -84,6 +119,33 @@ begin
       Values[i] := Copy(Arr[i], PosValue + 1, MaxInt);
     end;
   end;
+  SetLength(Arr, 0);
+end;
+
+function TMap.High: Integer;
+begin
+  Result := System.High(Names);
+end;
+
+function TMap.Get(Name: String): String;
+var i: Integer;
+begin
+  Result := '';
+  for i:=0 to High do
+    if Names[i] = Name then
+    begin
+      Result := Values[i];
+      Exit;
+    end;
+end;
+
+
+function StrToDef(Str, Default: String): String;
+begin
+  if Str = '' then
+    Result := Default
+  else
+    Result := Str;
 end;
 
 function GetProcAddress(Handle: Integer; FuncName: String): Integer;
@@ -362,7 +424,6 @@ begin
   Result := Random(DynArr, InnerIndex);
   SetLength(DynArr, 0);
 end;
-
 
 
 initialization

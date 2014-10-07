@@ -46,6 +46,8 @@ end;       }
 
 procedure TGG.FormCreate(Sender: TObject);
 begin
+
+
   Generator := TGenerator.Create;
   Generator.Execute('/dll/math.node$activate');
 

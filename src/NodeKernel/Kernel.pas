@@ -3,129 +3,116 @@ unit Kernel;
 interface
 
 uses
-  SysUtils{AllocMem, Now}, Classes{TStrings}, Link, Utils, Dialogs;
-
-
-const
-
-//NodeAttribyte
-  naEmpty = 0;
-  naLoad = 1;
-  naData = 3;
-  naWord = 4;
-  naModule = 5;
-  naDLLFunc = 6;
-  naNumber = 7;
-  naRoot = 8;
-
-  NodeFileExtention = '.node';
-  ExternalModuleExtention = '.dll';
-
-  NodeFileName = 'Node' + NodeFileExtention;
+  SysUtils{Now}, Link, Utils, Dialogs;
 
 type
+  TNode = class;
+  ANode = array of TNode;
 
-  PNode = ^TNode;
-  ANode = array of PNode;
-  
-  TNode = record
+
+  TNode = class
     Path          : String;          //test
     Name          : String;
     Data          : String;
-    Source        : PNode;
-    FType         : PNode;
+    Source        : TNode;
+    FType         : TNode;
     Params        : ANode;
     Local         : ANode;
-    Value         : PNode;
-    FTrue         : PNode;
-    FElse         : PNode;
-    Prev          : PNode;
-    Next          : PNode;
+    Value         : TNode;
+    FTrue         : TNode;
+    FElse         : TNode;
+    Prev          : TNode;
+    Next          : TNode;
 
     Index         : ANode;
-    ParentIndex   : PNode;
-    ParentName    : PNode;
-    ParentParams  : PNode;
-    ParentLocal   : PNode;
+    ParentIndex   : TNode;
+    ParentName    : TNode;
+    ParentParams  : TNode;
+    ParentLocal   : TNode;
 
     Attr        : Integer;
-    Count       : Integer;
-    Time        : Double;
     RunCount    : Integer;
     Activate    : Integer;
     Handle      : Integer;
   end;
 
+
   TKernel = class
     LastID    : Integer;
-    RootPath  : String;
-    Root      : PNode;
-    Prev      : PNode;
-    Module    : PNode;
+    Root      : TNode;
+    Prev      : TNode;
+    Module    : TNode;
 
+
+    Options: TMap;
     NodesCount: Integer; //test
 
     constructor Create;
 
     function NextID: String;
 
-    procedure SetName(var Node: PNode; Name: String);
-	  function FindName(Index: PNode): PNode;
-    function FindNameInNode(Node: PNode; Index: PNode): PNode;
+    procedure SetName(var Node: TNode; Name: String);
+	  function FindName(Index: TNode): TNode;
+    function FindNameInNode(Node: TNode; Index: TNode): TNode;
 
-    function NewIndex(Name: String): PNode;
+    function NewIndex(Name: String): TNode;
 
-	  procedure SetSource({var} Node: PNode; Source: PNode);
-	  function GetSource(Node: PNode): PNode;
+	  procedure SetSource({var} Node: TNode; Source: TNode);
+	  function GetSource(Node: TNode): TNode;
 
-    procedure SetVars(Node: PNode; Param, Value: String);
-    function GetVars(Node: PNode): String;
+    procedure SetVars(Node: TNode; Param, Value: String);
+    function GetVars(Node: TNode): String;
 
-    procedure SetFType(Node: PNode; FType: PNode);
+    procedure SetFType(Node: TNode; FType: TNode);
 
-	  procedure SetParam(Node: PNode; Param: PNode; Index: Integer);
+	  procedure SetParam(Node: TNode; Param: TNode; Index: Integer);
 
-    function SetValue(Node: PNode; Value: PNode): PNode;
-    function GetValue(Node: PNode): PNode;
+    function SetValue(Node: TNode; Value: TNode): TNode;
+    function GetValue(Node: TNode): TNode;
 
-	  procedure SetData(Node: PNode; Value: String);
+	  procedure SetData(Node: TNode; Value: String);
 
-    procedure SetFTrue(Node: PNode; FTrue: PNode);
-    procedure SetFElse(Node: PNode; FElse: PNode);
+    procedure SetFTrue(Node: TNode; FTrue: TNode);
+    procedure SetFElse(Node: TNode; FElse: TNode);
 
-	  procedure SetNext(Node: PNode; Next: PNode);
-    procedure NextNode(var PrevNode: PNode; NextNode: PNode);
+	  procedure SetNext(Node: TNode; Next: TNode);
+    procedure NextNode(var PrevNode: TNode; NextNode: TNode);
 
-    function SetLocal(Node: PNode; Local: PNode): PNode;
+    function SetLocal(Node: TNode; Local: TNode): TNode;
 
-    function NewNode(Line: String): PNode; overload;
-    function NewNode(Link: TLink): PNode; overload;
+    function NewNode(Line: String): TNode; overload;
+    function NewNode(Link: TLink): TNode; overload;
 
-	  function LoadNode(Node: PNode): PNode;
-	  procedure LoadModule(Node: PNode);
+	  function LoadNode(Node: TNode): TNode;
+	  procedure LoadModule(Node: TNode);
 
-    procedure RecursiveSave(Node: PNode);
-    procedure RecursiveDispose(Node: PNode);
+    procedure RecursiveSave(Node: TNode);
+    procedure RecursiveDispose(Node: TNode);
     procedure Clear;
 
-    procedure CallFunc(Node: PNode);
-    procedure Run(Node: PNode);
+    procedure CallFunc(Node: TNode);
+    procedure Run(Node: TNode);
 
-	  function GetIndex(Node: PNode): String;
-    function GetNodeBody(Node: PNode): String;
+	  function GetIndex(Node: TNode): String;
+    function GetNodeBody(Node: TNode): String;
 
-    function Execute(Line: String): PNode; virtual;
+    function Execute(Line: String): TNode; virtual;
   end;
 
 implementation
 
+{ TKernel }
 
 constructor TKernel.Create;
 begin
-  NodesCount := 0;
-  Root := AllocMem(SizeOf(TNode));
+
+  
+  Options := TMap.Create(LoadFromFile(OptionsFileName), #10);
+  LastID := StrToIntDef(Options.Get('LastID'), 0);
+  Root := TNode.Create;
   Root.Attr := naRoot;
-  Root.Name := 'data';
+  Root.Name :=  StrToDef(Options.Get('RootName'), 'data');
+
   Module := NewNode('module');
 end;
 
@@ -137,7 +124,7 @@ begin
 end;
 
 
-procedure TKernel.SetName(var Node: PNode; Name: String);
+procedure TKernel.SetName(var Node: TNode; Name: String);
 begin
   if Node = nil then
   begin
@@ -149,8 +136,8 @@ begin
 end;
 
 
-function TKernel.FindName(Index: PNode): PNode;
-var Node, Find: PNode;
+function TKernel.FindName(Index: TNode): TNode;
+var Node, Find: TNode;
 begin
   Result := nil;
   if Index = nil then Exit;
@@ -172,10 +159,10 @@ begin
 end;
 
 
-function TKernel.FindNameInNode(Node: PNode; Index: PNode): PNode;
+function TKernel.FindNameInNode(Node: TNode; Index: TNode): TNode;
 var
   i: Integer;
-  Local: PNode;
+  Local: TNode;
 begin
   Result := nil;
   if Node.ParentName = Index then
@@ -208,13 +195,13 @@ begin
 end;
 
 
-function TKernel.NewIndex(Name: String): PNode;         
+function TKernel.NewIndex(Name: String): TNode;         
 var
   i, j, Index: Integer;
-  function AddIndex(Node: PNode; Name: Char): PNode;
+  function AddIndex(Node: TNode; Name: Char): TNode;
   begin
     SetLength(Node.Index, Length(Node.Index) + 1);
-    Result := AllocMem(SizeOf(TNode));
+    Result := TNode.Create;
     Node.Index[High(Node.Index)] := Result;
     Result.Attr := naEmpty;
     Result.Name := Name;
@@ -238,32 +225,25 @@ begin
     then Result := AddIndex(Result, Name[i])
     else Result := Result.Index[Index];
   end;
-  if Result <> Root
-  then Inc(Result.Count)
-  else Result := nil;
+  if Result = Root then
+    Result := nil;
 end;
 
-procedure TKernel.SetVars(Node: PNode; Param, Value: String);
+procedure TKernel.SetVars(Node: TNode; Param, Value: String);
 begin
   if Param = 'ATTR'  then Node.Attr := StrToIntDef(Value, 0);
-  if Param = 'TIME'  then Node.Time := StrToFloatDef(Value, Now);
-  if Param = 'COUNT' then Node.Count := StrToIntDef(Value, 0);
   if Param = 'RUN'   then Node.RunCount := StrToIntDef(Value, 1);
   if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1);
   if Param = 'HANDLE' then Node.Handle := StrToIntDef(Value, 0);
 end;
 
 
-function TKernel.GetVars(Node: PNode): String;
+function TKernel.GetVars(Node: TNode): String;
 begin
   Result := '';
   if Node = nil then Exit;
   if Node.Attr <> 0 then
     Result := Result + '&' + 'ATTR' + '=' + IntToStr(Node.Attr);
-  if Node.Time <> 0 then
-    Result := Result + '&' + 'TIME' + '=' + FloatToStr(Node.Time);
-  if Node.Count <> 0 then
-    Result := Result + '&' + 'COUNT' + '=' + IntToStr(Node.Count);
   if Node.RunCount <> 0 then
     Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
   if Node.Activate <> 0 then
@@ -273,13 +253,13 @@ begin
   Delete(Result, 1, 1);
 end;
 
-procedure TKernel.SetSource(Node: PNode; Source: PNode);
+procedure TKernel.SetSource(Node: TNode; Source: TNode);
 begin
   Node.Source := Source;
 end;
 
 
-function TKernel.GetSource(Node: PNode): PNode;
+function TKernel.GetSource(Node: TNode): TNode;
 begin
   Result := Node;
   if Node = nil then Exit;
@@ -288,13 +268,13 @@ begin
 end;
 
 
-procedure TKernel.SetFType(Node: PNode; FType: PNode);
+procedure TKernel.SetFType(Node: TNode; FType: TNode);
 begin
   Node.FType := FType;
 end;
 
 
-procedure TKernel.SetParam(Node: PNode; Param: PNode; Index: Integer);
+procedure TKernel.SetParam(Node: TNode; Param: TNode; Index: Integer);
 begin
   if Param.FType <> nil then
   begin
@@ -326,13 +306,13 @@ begin
 end;
 
 
-function TKernel.SetValue(Node: PNode; Value: PNode): PNode;
+function TKernel.SetValue(Node: TNode; Value: TNode): TNode;
 begin
   Node.Value := Value;
 end;
 
 
-function FindValue(var ValueStack: ANode; Value: PNode): Boolean;
+function FindValue(var ValueStack: ANode; Value: TNode): Boolean;
 var i: Integer;
 begin
   Result := False;
@@ -345,7 +325,7 @@ begin
 end;
 
 
-function TKernel.GetValue(Node: PNode): PNode;
+function TKernel.GetValue(Node: TNode): TNode;
 var ValueStack: ANode;
 begin
   Result := nil;
@@ -367,32 +347,32 @@ begin
 end;
 
 
-procedure TKernel.SetData(Node: PNode; Value: String);
+procedure TKernel.SetData(Node: TNode; Value: String);
 begin
   Node.Data := Value;
 end;
 
 
-procedure TKernel.SetFTrue(Node: PNode; FTrue: PNode);
+procedure TKernel.SetFTrue(Node: TNode; FTrue: TNode);
 begin
   Node.FTrue := FTrue;
 end;
 
 
-procedure TKernel.SetFElse(Node: PNode; FElse: PNode);
+procedure TKernel.SetFElse(Node: TNode; FElse: TNode);
 begin
   Node.FElse := FElse;
 end;
 
 
-procedure TKernel.SetNext(Node: PNode; Next: PNode);
+procedure TKernel.SetNext(Node: TNode; Next: TNode);
 begin
   Node.Next := Next;
   Node.Next.Prev := Node;
 end;
 
 
-procedure TKernel.NextNode(var PrevNode: PNode; NextNode: PNode);
+procedure TKernel.NextNode(var PrevNode: TNode; NextNode: TNode);
 begin
   if PrevNode <> nil then
   begin
@@ -412,7 +392,7 @@ begin
 end;
 
 
-function TKernel.SetLocal(Node: PNode; Local: PNode): PNode;
+function TKernel.SetLocal(Node: TNode; Local: TNode): TNode;
 begin
   SetLength(Node.Local, Length(Node.Local) + 1);
   if Node.Attr = naEmpty
@@ -425,7 +405,7 @@ end;
 
 
 
-function TKernel.NewNode(Line: String): PNode;
+function TKernel.NewNode(Line: String): TNode;
 var Link: TLink;
 begin
   Link := TLink.BaseParse(Line);
@@ -434,7 +414,7 @@ begin
 end;
 
 
-function TKernel.NewNode(Link: TLink): PNode;
+function TKernel.NewNode(Link: TLink): TNode;
 var
   i: Integer;
 begin
@@ -499,8 +479,8 @@ begin
       SetSource(Result, NewNode(Link.Source));
   end;
 
-  for i:=0 to High(Link.Names) do
-    SetVars(Result, Link.Names[i], Link.Values[i]);
+  for i:=0 to Link.Vars.High do
+    SetVars(Result, Link.Vars.Names[i], Link.Vars.Values[i]);
 
   if Link.FType <> nil then
     SetFType(Result, NewNode(Link.FType));
@@ -529,7 +509,7 @@ begin
 end;
 
 
-function TKernel.LoadNode(Node: PNode): PNode;
+function TKernel.LoadNode(Node: TNode): TNode;
 var
   Indexes: AString;
   Body, Path: String;
@@ -553,10 +533,10 @@ begin
 end;
 
 
-procedure TKernel.LoadModule(Node: PNode);
+procedure TKernel.LoadModule(Node: TNode);
 var
   i: Integer;
-  Func, PrevModule: PNode;
+  Func, PrevModule: TNode;
   List: AString;
   FileName, FileExt: String;
 begin
@@ -590,9 +570,9 @@ begin
 end;
 
 
-procedure TKernel.CallFunc(Node: PNode);
+procedure TKernel.CallFunc(Node: TNode);
 var
-  Value: PNode;
+  Value: TNode;
   Params, Param: String;
   Stack: array of Integer;
   Func, FourByte, i, BVal,
@@ -676,11 +656,11 @@ begin
 end;
 
 
-procedure TKernel.Run(Node: PNode);
+procedure TKernel.Run(Node: TNode);
 label NextNode;
 var
   FuncResult, i: Integer;
-  function CompareWithZero(Node: PNode): Integer;
+  function CompareWithZero(Node: TNode): Integer;
   var i: Integer;
   begin
     Result := -1;
@@ -734,12 +714,12 @@ begin
 end;
 
 
-procedure TKernel.RecursiveSave(Node: PNode);
+procedure TKernel.RecursiveSave(Node: TNode);
 var
   i: Integer;
   Indexes: AString;
   Body: String;
-  Buf: PNode;
+  Buf: TNode;
 begin
   Buf := Node;
   SetLength(Indexes, 0);
@@ -758,13 +738,13 @@ begin
 end;
 
 
-procedure TKernel.RecursiveDispose(Node: PNode);
+procedure TKernel.RecursiveDispose(Node: TNode);
 var i: Integer;
 begin
   for i:=0 to High(Node.Index) do
     RecursiveDispose(Node.Index[i]);
   if Node <> Root
-  then Dispose(Node)
+  then Node.Free
   else SetLength(Root.Index, 0);
 end;
 
@@ -778,7 +758,7 @@ begin
 end;
 
 
-function TKernel.GetIndex(Node: PNode): String;
+function TKernel.GetIndex(Node: TNode): String;
 begin
   Result := '';
   if Node <> nil then
@@ -790,7 +770,7 @@ begin
 end;
 
 
-function TKernel.GetNodeBody(Node: PNode): String;
+function TKernel.GetNodeBody(Node: TNode): String;
 var
   i: Integer;
 begin
@@ -838,7 +818,7 @@ begin
 end;
 
 
-function TKernel.Execute(Line: String): PNode;
+function TKernel.Execute(Line: String): TNode;
 var
   Link: TLink;
 begin
