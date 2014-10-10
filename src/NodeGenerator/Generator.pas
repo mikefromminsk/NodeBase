@@ -16,52 +16,55 @@ const
   SequenceCount = 10;
   IfWhileElseCount = 1;
 
-  IntRange: ARange = (-3{Begin}, 0{Center}, 10{End});
-  FracRange: ARange = (0{Begin>=0}, 0{Center}, 10{End});
+  IntRange : ARange = (-3, 0, 10);  // -3 < x < 10
+  FracRange: ARange = ( 0, 0, 10);  //  0 < x < 10
   IfWhileElseFrequency: Array[0..2] of Integer = (1{If}, 0{While}, 0{else});
 
 type
 
   TGenerator = class (TKernel)
+    Task: TNode;
 
-    function GetRandomSource(FuncNode: PNode): PNode;
-    function NewRandomNode(FuncNode: PNode): PNode;
+    function GetRandomSource(FuncNode: TNode): TNode;
+    function NewRandomNode(FuncNode: TNode): TNode;
 
-    procedure CreateData(Node: PNode);
+    procedure CreateData(Node: TNode);
 
-    procedure CreateLocalVar(Node: PNode);
+    procedure CreateLocalVar(Node: TNode);
 
-    procedure CreateSubFuncParams(Node: PNode; Level: Integer);
-    procedure CreateSubFunc(Node: PNode; Level: Integer);
+    procedure CreateSubFuncParams(Node: TNode; Level: Integer);
+    procedure CreateSubFunc(Node: TNode; Level: Integer);
 
-    procedure CreateSequence(FuncNode: PNode);
+    procedure CreateSequence(FuncNode: TNode);
 
-    procedure CreateParams(Node: PNode; FuncNode: PNode);
+    procedure CreateParams(Node: TNode; FuncNode: TNode);
 
-    procedure CreateIfElseWhile(FuncNode: PNode);
+    procedure CreateIfElseWhile(FuncNode: TNode);
 
-    procedure CreateFunc(Node: PNode; Level: Integer);
+    procedure CreateFunc(Node: TNode; Level: Integer);
 
-    function Generate: PNode;
+    function GenerateNode: TNode;
+
+    procedure GenerateParams(Node: TNode = nil);
   end;
 
 
 implementation
 
 
-function TGenerator.GetRandomSource(FuncNode: PNode): PNode;
+function TGenerator.GetRandomSource(FuncNode: TNode): TNode;
 var
   Index: Integer;
   Arr: AInteger;
 begin
   SetLength(Arr, 4);
   Arr[0] := Length(FuncNode.Local);
-  Arr[1] := Length(Module.Local);
+  Arr[1] := Length(FUnit.Local);
   Arr[2] := Length(FuncNode.Params);
   Arr[3] := IfThen(FuncNode.Value = nil, 0, 1);
   case Random(Arr, Index) of
     0: Result := FuncNode.Local[Index];
-    1: Result := Module.Local[Index];
+    1: Result := FUnit.Local[Index];
     2: Result := FuncNode.Params[Index];
     3: Result := FuncNode.Value;
   end;
@@ -71,14 +74,14 @@ begin
 end;
 
 
-function TGenerator.NewRandomNode(FuncNode: PNode): PNode;
+function TGenerator.NewRandomNode(FuncNode: TNode): TNode;
 begin
   Result := NewNode(NextID);
   SetSource(Result, GetRandomSource(FuncNode));
 end;
 
 
-procedure TGenerator.CreateData(Node: PNode);
+procedure TGenerator.CreateData(Node: TNode);
 var i: Integer;
 begin
   for i:=0 to Random(Data4Count) do
@@ -89,7 +92,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateLocalVar(Node: PNode);
+procedure TGenerator.CreateLocalVar(Node: TNode);
 var i: Integer;
 begin
   for i:=0 to Random(LocalVarCount) do
@@ -97,10 +100,10 @@ begin
 end;
 
 
-procedure TGenerator.CreateSubFuncParams(Node: PNode; Level: Integer);
+procedure TGenerator.CreateSubFuncParams(Node: TNode; Level: Integer);
 var
   i, j: Integer;
-  FuncNode: PNode;
+  FuncNode: TNode;
 begin
   if Level <= 0 then Exit;
   for i:=0 to Random(SubFuncCount) do
@@ -114,7 +117,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateSubFunc(Node: PNode; Level: Integer);
+procedure TGenerator.CreateSubFunc(Node: TNode; Level: Integer);
 var i: Integer;
 begin
   for i:=0 to High(Node.Local) do
@@ -123,11 +126,11 @@ begin
 end;
 
 
-procedure TGenerator.CreateSequence(FuncNode: PNode);
+procedure TGenerator.CreateSequence(FuncNode: TNode);
 var
   i: Integer;
-  Node: PNode;
-  NewNode: PNode;
+  Node: TNode;
+  NewNode: TNode;
 begin
   Node := FuncNode;
   for i:=0 to Random(SequenceCount) do
@@ -142,7 +145,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateParams(Node, FuncNode: PNode);
+procedure TGenerator.CreateParams(Node, FuncNode: TNode);
 var i: Integer;
 begin
   for i:=0 to High(Node.Params) do
@@ -150,13 +153,13 @@ begin
 end;
 
 
-procedure TGenerator.CreateIfElseWhile(FuncNode: PNode);
+procedure TGenerator.CreateIfElseWhile(FuncNode: TNode);
 var
   j, i, IfWhileElse: Integer;
   FirstPos, SecondPos, ThirdPos: Integer;
-  FirstNode, SecondNode, ThirdNode: PNode;
-  ExitNode: PNode;
-  Node: PNode;
+  FirstNode, SecondNode, ThirdNode: TNode;
+  ExitNode: TNode;
+  Node: TNode;
 begin
 
   FuncNode := FuncNode.Next;
@@ -215,7 +218,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateFunc(Node: PNode; Level: Integer);
+procedure TGenerator.CreateFunc(Node: TNode; Level: Integer);
 begin
   CreateLocalVar(Node);
   CreateData(Node);
@@ -226,13 +229,28 @@ begin
 end;
 
 
-function TGenerator.Generate: PNode;
+function TGenerator.GenerateNode: TNode;
 begin
   Result := NewNode(NextID);
   SetValue(Result, NewNode(NextID));
   CreateFunc(Result, SubLevel);
   Run(Result);
 end;
+
+procedure TGenerator.GenerateParams(Node: TNode = nil);
+var i: Integer;
+begin
+  if Node = nil then
+    Node := Task;
+
+  for i:=0 to High(Node.Params) do
+    if MapExistName(Node.Params[i].Vars, 'UNKNOWN') then
+    begin
+      SetParams(Node, GenerateNode, i);
+      AnalysingParams();
+    end;
+end;
+
 
 
 end.

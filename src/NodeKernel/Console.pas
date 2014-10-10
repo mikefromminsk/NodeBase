@@ -224,15 +224,15 @@ begin
 
       with Kernel do
       begin
-        Module := nil;
+        FUnit := nil;
         Prev := nil;
         Execute(Document);
-        SetLength(Module.Local, 0);
-        Module := nil;
+        SetLength(FUnit.Local, 0);
+        FUnit := nil;
         Prev := nil;
         for i:=0 to Node.Count - 1 do
           Execute(Node.Strings[i]);
-        AResponseInfo.ContentText := GetNodeBody(Module) + #10;
+        AResponseInfo.ContentText := GetNodeBody(FUnit) + #10;
       end;
 
       QueryBox.Lines.Add('«¿œ–Œ—'#10 + Node.Text);
@@ -278,7 +278,7 @@ var
   Node: Tnode;
 begin
   Kernel.Clear;
-  Kernel.Module := Kernel.NewNode('@1');
+  Kernel.FUnit := Kernel.NewNode('@1');
   Node := ConsoleExec('func$activate?750,0', True);
   if Node <> nil then
     Node := nil;

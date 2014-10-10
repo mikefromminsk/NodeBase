@@ -13,7 +13,7 @@ type
     Timer: TTimer;
     Button1: TButton;
     procedure FormCreate(Sender: TObject);
-    procedure ShowNode(Node: PNode);
+    procedure ShowNode(Node: TNode);
     procedure TimerTimer(Sender: TObject);
     procedure Button1Click(Sender: TObject);
   end;
@@ -26,24 +26,6 @@ implementation
 
 {$R *.dfm}
 
-{uses psAPI;
-
-
-function GetUsedMemory: LONGINT;
-var
-  pmc: PPROCESS_MEMORY_COUNTERS;
-  cb: Integer;
-begin
-  cb := SizeOf(_PROCESS_MEMORY_COUNTERS);
-  GetMem(pmc, cb);
-  pmc^.cb := cb;
-  if GetProcessMemoryInfo(GetCurrentProcess(), pmc, cb) then
-    result:=pmc^.WorkingSetSize
-  else
-    result:=0;
-  FreeMem(pmc);
-end;       }
-
 procedure TGG.FormCreate(Sender: TObject);
 begin
 
@@ -51,17 +33,17 @@ begin
   Generator := TGenerator.Create;
   Generator.Execute('/dll/math.node$activate');
 
-  ShowNode(Generator.Generate);
+  ShowNode(Generator.GenerateNode);
 end;
 
 
-procedure TGG.ShowNode(Node: PNode);
+procedure TGG.ShowNode(Node: TNode);
 var
   Body: String;
   Str, Res: String;
   i: Integer;
    Status: THeapStatus;
-  function ShowParams(Node: PNode): String;
+  function ShowParams(Node: TNode): String;
   var Str: String;
   i: Integer;
   begin
@@ -129,9 +111,9 @@ HeapErrorCode	Внутренний статус кучи
   AddFmt('dwTotalPhys - dwAvailPhys = %d', [(MemoryStatus.dwTotalPhys)-(MemoryStatus.dwAvailPhys)]);
 
     SeqBox.Items.Add('uses');
-    for i:=0 to High(Module.Local) do
+    for i:=0 to High(FUnit.Local) do
     begin
-      Str := GetIndex(Module.Local[i]) + ShowParams(Module.Local[i]);
+      Str := GetIndex(FUnit.Local[i]) + ShowParams(FUnit.Local[i]);
       Str := '  ' + Str + ';';
       SeqBox.Items.Add(Str);
     end;
@@ -205,13 +187,13 @@ begin
   if Status.TotalAddrSpace > 200 * 1024 * 1024 then  
   begin
     Generator.Clear;
-    Generator.Module := Generator.NewNode(Generator.NextID);
+    Generator.FUnit := Generator.NewNode(Generator.NextID);
     Generator.Execute('/dll/math.node$activate');
   end;
 
   for i:=0 to 1000 do
-    Generator.Generate;
-  ShowNode(Generator.Generate);
+    Generator.GenerateNode;
+  ShowNode(Generator.GenerateNode);
   Timer.Enabled := True;
 
 end;
@@ -226,7 +208,7 @@ begin
   begin
     Timer.Enabled := True;
     Generator.Clear;
-    Generator.Module := Generator.NewNode(Generator.NextID);
+    Generator.FUnit := Generator.NewNode(Generator.NextID);
     Generator.Execute('/dll/math.node$activate');
   end;
 end;

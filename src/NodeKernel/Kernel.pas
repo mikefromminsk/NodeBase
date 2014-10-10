@@ -34,6 +34,8 @@ type
     RunCount    : Integer;
     Activate    : Integer;
     Handle      : Integer;
+
+    Vars        : TMap;
   end;
 
 
@@ -41,7 +43,7 @@ type
     LastID    : Integer;
     Root      : TNode;
     Prev      : TNode;
-    Module    : TNode;
+    FUnit     : TNode;
 
 
     Options: TMap;
@@ -101,19 +103,21 @@ type
 
 implementation
 
+{  TNode }
+
+
 { TKernel }
 
 constructor TKernel.Create;
 begin
 
-  
   Options := TMap.Create(LoadFromFile(OptionsFileName), #10);
-  LastID := StrToIntDef(Options.Get('LastID'), 0);
+  LastID := StrToIntDef(Options.GetValue('LastID'), 0);
   Root := TNode.Create;
   Root.Attr := naRoot;
-  Root.Name :=  StrToDef(Options.Get('RootName'), 'data');
+  Root.Name :=  StrToDef(Options.GetValue('RootName'), 'data');
 
-  Module := NewNode('module');
+  FUnit := NewNode('module');
 end;
 
 
@@ -142,7 +146,7 @@ begin
   Result := nil;
   if Index = nil then Exit;
   if Prev = nil
-  then Node := Module
+  then Node := FUnit
   else Node := Prev;
   while Node <> nil do
   begin
@@ -231,10 +235,16 @@ end;
 
 procedure TKernel.SetVars(Node: TNode; Param, Value: String);
 begin
-  if Param = 'ATTR'  then Node.Attr := StrToIntDef(Value, 0);
-  if Param = 'RUN'   then Node.RunCount := StrToIntDef(Value, 1);
-  if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1);
-  if Param = 'HANDLE' then Node.Handle := StrToIntDef(Value, 0);
+       if Param = 'ATTR'     then Node.Attr     := StrToIntDef(Value, 0)
+  else if Param = 'RUN'      then Node.RunCount := StrToIntDef(Value, 1)
+  else if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1)
+  else if Param = 'HANDLE'   then Node.Handle   := StrToIntDef(Value, 0)
+  else
+  begin
+    if Node.Vars = nil then
+      Node.Vars := TMap.Create;
+    Node.Vars.Push(Param, Value);
+  end;
 end;
 
 
@@ -383,10 +393,10 @@ begin
   else
     if NextNode <> nil then
     begin
-      if Module = nil then
-        Module := NextNode
+      if FUnit = nil then
+        FUnit := NextNode
       else
-        SetLocal(Module, NextNode);
+        SetLocal(FUnit, NextNode);
     end;
   PrevNode := NextNode;
 end;
@@ -560,12 +570,12 @@ begin
   else
   if FileExt = NodeFileExtention then
   begin
-    PrevModule := Module;
-    Module := Node;
+    PrevModule := FUnit;
+    FUnit := Node;
     List := slice(LoadFromFile(FileName), #10);
     for i:=0 to High(List) do
       Execute(List[i]);
-    Module := PrevModule;
+    FUnit := PrevModule;
   end;
 end;
 
@@ -679,7 +689,7 @@ begin
     LoadModule(Node);
   for i:=0 to High(Node.Params) do
     Run(Node.Params[i]);
-  if (Node.Source <> nil) and (((Node.Source.ParentLocal = Module) and (Node.Source.Next <> nil))   //recode  2
+  if (Node.Source <> nil) and (((Node.Source.ParentLocal = FUnit) and (Node.Source.Next <> nil))   //recode  2
     or (Node.Source.Attr = naDLLFunc)) then
   begin
     for i:=0 to High(Node.Params) do
@@ -754,7 +764,7 @@ begin
   //RecursiveSave(Root);
   RecursiveDispose(Root);
   Prev := nil;
-  Module := nil;
+  FUnit := nil;
 end;
 
 

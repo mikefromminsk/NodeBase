@@ -32,7 +32,7 @@ GUI
 Linux
 x64
 
-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+алгоритм добавления в стандарт узлов
 
 planner
 
@@ -80,7 +80,7 @@ GarbageCollector
 History: AString;
 
 Next: ANode
-for Generator for пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+for Generator for подмены лучшей функцией
 
 
 $countr, countw
@@ -118,26 +118,14 @@ control node
 
 
 
-
-
-
-TKernel
-	Unit
-	
 	
 TGenerator
-Task
+	Task
 
 
 
 
-
-
-
-
-
-
-
+change
 
 
 

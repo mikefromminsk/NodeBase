@@ -33,12 +33,15 @@ type
     Values: AString;
     constructor Create; overload;
     constructor Create(Text: String; Delimeter: String); overload;
-    function Get(Name: String): String;
+    function GetValue(Name: String): String;
+    procedure Push(Name, Value: String);
     function High: Integer;
   end;
 
   ARange = Array[0..2] of Integer;
 
+function MapGetValue(Map: TMap; Name: String): String;
+function MapExistName(Map: TMap; Name: String): Boolean;
 function slice(Text: String; Delimeter: String): AString;
 {procedure slice_params(Text: String; Delimeter: String; var Names, Values: AString);
 function get_param(Name: String; var Names, Values: AString): String;  }
@@ -98,6 +101,7 @@ end;
 
 constructor TMap.Create;
 begin
+  //
 end;
 
 constructor TMap.Create(Text, Delimeter: String);
@@ -127,14 +131,43 @@ begin
   Result := System.High(Names);
 end;
 
-function TMap.Get(Name: String): String;
+function TMap.GetValue(Name: String): String;
 var i: Integer;
 begin
   Result := '';
+  //Name := AnsiUpperCase(Name);
   for i:=0 to High do
     if Names[i] = Name then
     begin
       Result := Values[i];
+      Exit;
+    end;
+end;
+
+procedure TMap.Push(Name, Value: String);
+begin
+  SetLength(Names, Length(Names) + 1);
+  SetLength(Values, Length(Values) + 1);
+  Names[High] := Name;
+  Values[High] := Value;
+end;
+
+function MapGetValue(Map: TMap; Name: String): String;
+begin
+  Result := '';
+  if Map = nil then Exit;
+  Result := Map.GetValue(Name);
+end;
+
+function MapExistName(Map: TMap; Name: String): Boolean;
+var i: Integer;
+begin
+  Result := False;
+  if Map = nil then Exit;
+  for i:=0 to High(Map.Names) do
+    if Map.Names[i] = Name then
+    begin
+      Result := True;
       Exit;
     end;
 end;
@@ -424,6 +457,8 @@ begin
   Result := Random(DynArr, InnerIndex);
   SetLength(DynArr, 0);
 end;
+
+
 
 
 initialization
