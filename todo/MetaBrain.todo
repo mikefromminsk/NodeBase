@@ -1,6 +1,7 @@
 [M4 G2]
 MetaBase NeuroBase NodeBase
 language for machines, not for human
+Neuro-information model
 
 
 [basic task]
@@ -32,7 +33,7 @@ GUI
 Linux
 x64
 
-алгоритм добавления в стандарт узлов
+documentation add link to TNode
 
 planner
 
@@ -80,7 +81,7 @@ GarbageCollector
 History: AString;
 
 Next: ANode
-for Generator for подмены лучшей функцией
+Generator: search and replace best function
 
 
 $countr, countw
@@ -93,7 +94,10 @@ Load Root with options
 
 addevent if parent local
 
+MetaBase is file system
 
+
+save arhive Nodes in DUMP file
 
 
 
@@ -108,27 +112,19 @@ addevent if parent local
 
 [Generator]
 
+
+CreateApplication
+
+rename Attr to FType
+
+rename Math32.dll
+
+
+set vars "GENERATE"
+generate
 compare result
- 
+save true result
 
-control node
-
-
-
-
-
-
-	
-TGenerator
-	Task
-
-
-
-
-change
-
-
-
-
+Kernel is analog compilator
 
 

@@ -88,6 +88,7 @@ type
 	  function LoadNode(Node: TNode): TNode;
 	  procedure LoadModule(Node: TNode);
 
+    procedure RecursiveSetNull(Node: TNode);
     procedure RecursiveSave(Node: TNode);
     procedure RecursiveDispose(Node: TNode);
     procedure Clear;
@@ -673,6 +674,7 @@ var
   function CompareWithZero(Node: TNode): Integer;
   var i: Integer;
   begin
+  //function StrScan(const Str: PChar; Chr: Char): PChar;
     Result := -1;
     if Node <> nil then
     begin
@@ -748,13 +750,69 @@ begin
 end;
 
 
+procedure TKernel.RecursiveSetNull(Node: TNode);
+var
+  i: Integer;
+  Buf: TNode;
+begin
+  for i:=0 to High(Node.Index) do
+  begin
+    RecursiveSetNull(Node.Index[i]);
+    Buf := Node.Index[i];
+    Buf := nil;
+  end;
+  setLength(Node.Index, 0);
+
+
+  Node.Path := '';
+  Node.Name := '';
+  Node.Data := '';
+  Node.Source := nil;
+  Node.FType := nil;
+
+  Node.ParentName := nil;
+  Node.ParentParams := nil;
+  Node.ParentLocal := nil;
+  Node.ParentIndex := nil;
+  Node.Prev := nil;
+  Node.Next := nil;
+  Node.FElse := nil;
+  Node.FTrue := nil;
+  Node.Value := nil;
+
+  for i:=0 to High(Node.Params) do
+  begin
+    Buf := Node.Params[i];
+    Buf := nil;
+  end;
+  SetLength(Node.Params, 0);
+  for i:=0 to High(Node.Local) do
+  begin
+    Buf := Node.Local[i];
+    Buf := nil;
+  end;
+  SetLength(Node.Local, 0);
+
+  if Node.Vars <> nil then
+    Node.Vars.free;
+
+end;
+
+
 procedure TKernel.RecursiveDispose(Node: TNode);
 var i: Integer;
 begin
   for i:=0 to High(Node.Index) do
+  begin
+
     RecursiveDispose(Node.Index[i]);
-  if Node <> Root
-  then Node.Free
+
+  end;
+  if Node <> Root then
+  begin
+    RecursiveSetNull(Node);
+    Node := nil;
+  end
   else SetLength(Root.Index, 0);
 end;
 

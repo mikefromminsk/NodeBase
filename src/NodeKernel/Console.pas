@@ -62,7 +62,7 @@ var i: Integer;
 begin
   Kernel := TKernel.Create;
   
-  IdHTTPServer1.DefaultPort := StrToIntDef(Kernel.Options.Get('ServerPort'), 80);
+  IdHTTPServer1.DefaultPort := StrToIntDef(MapGetValue(Kernel.Options, 'ServerPort'), 80);
 
   try
     IdHTTPServer1.Active := True;

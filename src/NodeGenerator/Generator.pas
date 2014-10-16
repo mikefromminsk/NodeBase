@@ -20,9 +20,14 @@ const
   FracRange: ARange = ( 0, 0, 10);  //  0 < x < 10
   IfWhileElseFrequency: Array[0..2] of Integer = (1{If}, 0{While}, 0{else});
 
+
+
 type
 
   TGenerator = class (TKernel)
+
+
+  
     Task: TNode;
 
     function GetRandomSource(FuncNode: TNode): TNode;
