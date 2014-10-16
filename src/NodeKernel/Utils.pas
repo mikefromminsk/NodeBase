@@ -36,6 +36,7 @@ type
     function GetValue(Name: String): String;
     procedure Push(Name, Value: String);
     function High: Integer;
+    destructor Destroy; override;
   end;
 
   ARange = Array[0..2] of Integer;
@@ -150,6 +151,12 @@ begin
   SetLength(Values, Length(Values) + 1);
   Names[High] := Name;
   Values[High] := Value;
+end;
+
+destructor TMap.Destroy;
+begin
+  Names := nil;
+  Values := nil;
 end;
 
 function MapGetValue(Map: TMap; Name: String): String;
@@ -457,6 +464,8 @@ begin
   Result := Random(DynArr, InnerIndex);
   SetLength(DynArr, 0);
 end;
+
+
 
 
 

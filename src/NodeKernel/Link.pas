@@ -66,7 +66,7 @@ type
     constructor UserParse(Str: String);  //рекурсивную для пользователя
     procedure rec(var Str: String; Link: TLink);
     constructor BaseParse(Str: String);  //более простую для базы
-    destructor Destroy;
+    destructor Destroy; override;
   end;
 
 implementation
@@ -223,38 +223,16 @@ end;
 destructor TLink.Destroy;
 var i: Integer;
 begin
-  if Source <> nil then
-    Source.Destroy;
-  if FType <> nil then
-    FType.Destroy;
+  FreeAndNil(Source);
+  FreeAndNil(Vars);
+  FreeAndNil(FType);
   for i:=0 to High(Params) do
-    if Params[i] <> nil then
-      Params[i].Destroy;
-  if Value <> nil then
-    Value.Destroy;
-  if FElse <> nil then
-    FElse.Destroy;
-  if Next <> nil then
-    Next.Destroy;
+    FreeAndNil(Params[i]);
+  FreeAndNil(Value);
+  FreeAndNil(FElse);
+  FreeAndNil(Next);
   for i:=0 to High(Local) do
-    if Local[i] <> nil then
-      Local[i].Destroy;
-  inherited Destroy;
+    FreeAndNil(Local[i]);
 end;
 
 end.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
