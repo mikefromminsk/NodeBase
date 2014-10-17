@@ -249,12 +249,30 @@ begin
     Node := Task;
 
   for i:=0 to High(Node.Params) do
-    if MapExistName(Node.Params[i].Vars, 'UNKNOWN') then
+    if MapExistName(Node.Params[i].Vars, 'GENERATE') then
     begin
-      SetParams(Node, GenerateNode, i);
+      SetParam(Node, GenerateNode, i);
       AnalysingParams();
     end;
 end;
+
+
+procedure TGenerator.CreateApplication;
+begin
+  SetControl();
+  Generate();
+  Run();
+  Compare();
+  Save();
+  Destroy();
+end;
+
+procedure TGenerator.Generator;
+begin
+  while True do
+    CreateApplicetion;
+end;
+
 
 
 

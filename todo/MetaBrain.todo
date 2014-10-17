@@ -128,3 +128,17 @@ save true result
 Kernel is analog compilator
 
 
+Block dispose and save for safe true result
+
+task TNode;
+
+
+
+
+
+
+
+
+
+
+
