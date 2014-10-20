@@ -50,7 +50,22 @@ type
 
     function GenerateNode: TNode;
 
-    procedure GenerateParams(Node: TNode = nil);
+
+
+
+
+    procedure SetParamsControl(Node: TNode);
+
+    procedure GenerateParams(Node: TNode);
+
+    function CompareWithZero(Node: TNode): Integer;
+
+    procedure SaveUnit(Node: TNode);
+
+    procedure SaveAndDestroyParams(Node: TNode);
+    procedure CreateApplication;
+
+    procedure Generator;
   end;
 
 
@@ -242,35 +257,95 @@ begin
   Run(Result);
 end;
 
-procedure TGenerator.GenerateParams(Node: TNode = nil);
-var i: Integer;
-begin
-  if Node = nil then
-    Node := Task;
 
+
+
+
+
+procedure TGenerator.SetParamsControl(Node: TNode);
+var
+  i: Integer;
+begin
+  for i:=0 to High(Node.Params) do
+    if Node.Params[i].Source = nil then
+      MapSetPush(Node.Params[i].Vars, 'GENERATE', '');
+end;
+
+procedure TGenerator.GenerateParams(Node: TNode);
+var
+  i: Integer;
+begin
   for i:=0 to High(Node.Params) do
     if MapExistName(Node.Params[i].Vars, 'GENERATE') then
+      Node.Params[i].Source := GenerateNode.Source;
+end;
+
+function TGenerator.CompareWithZero(Node: TNode): Integer;
+var i: Integer;
+begin
+  Result := -1;
+  if Node <> nil then
+  begin
+    Result := 0;
+    for i:=1 to Length(Node.Data) do
     begin
-      SetParam(Node, GenerateNode, i);
-      AnalysingParams();
+      Result := 1;
+      Exit;
     end;
+  end;
+end;
+
+procedure TGenerator.SaveUnit(Node: TNode);
+var
+  i: Integer;
+begin
+  if Node = nil then Exit;
+  SaveUnit(Node.Source);
+  SaveUnit(Node.FType);
+  for i:=0 to High(Node.Params) do
+    SaveUnit(Node.Params[i]);
+  for i:=0 to High(Node.Local) do
+    SaveUnit(Node.Local[i]);
+  SaveUnit(Node.Value);
+  SaveUnit(Node.FTrue);
+  SaveUnit(Node.FElse);
+  SaveUnit(Node.Next);
+  SaveNode(Node);
 end;
 
 
-procedure TGenerator.CreateApplication;
+procedure TGenerator.SaveAndDestroyParams(Node: TNode);
+var
+  i: Integer;
 begin
-  SetControl();
-  Generate();
-  Run();
-  Compare();
-  Save();
-  Destroy();
+  for i:=0 to High(Node.Params) do
+    if MapExistName(Node.Params[i].Vars, 'GENERATE') then
+    begin
+      SaveUnit(Node.Params[i]);
+      Node.Params[i].Free;
+    end;
+end;
+
+procedure TGenerator.CreateApplication;
+var
+  i: Integer;
+begin
+  SetParamsControl(Task);
+  GenerateParams(Task);
+  Run(Task);
+
+  if CompareWithZero(Task) = 0 then
+    SaveAndDestroyParams(Task);
+  //SaveID;
 end;
 
 procedure TGenerator.Generator;
 begin
   while True do
+  begin
     CreateApplicetion;
+    Break;
+  end;
 end;
 
 

@@ -41,6 +41,7 @@ type
 
   ARange = Array[0..2] of Integer;
 
+procedure MapSetPush(Map: TMap; Name, Value: String);
 function MapGetValue(Map: TMap; Name: String): String;
 function MapExistName(Map: TMap; Name: String): Boolean;
 function slice(Text: String; Delimeter: String): AString;
@@ -177,6 +178,12 @@ begin
       Result := True;
       Exit;
     end;
+end;
+
+procedure MapSetPush(Map: TMap; Name, Value: String);
+begin
+  if Map = nil then Exit;
+  Map.Push(Name, Value);
 end;
 
 

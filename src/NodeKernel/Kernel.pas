@@ -88,6 +88,7 @@ type
 	  function LoadNode(Node: TNode): TNode;
 	  procedure LoadModule(Node: TNode);
 
+    procedure SaveNode(Node: TNode);
     procedure RecursiveSave(Node: TNode);
     procedure RecursiveDispose(Node: TNode);
     procedure Clear;
@@ -717,9 +718,8 @@ begin
 end;
 
 
-procedure TKernel.RecursiveSave(Node: TNode);
+procedure TKernel.SaveNode(Node: TNode);
 var
-  i: Integer;
   Indexes: AString;
   Body: String;
   Buf: TNode;
@@ -736,11 +736,16 @@ begin
   ToFileSystemName(Indexes);
   Body := GetNodeBody(Node);
   SaveToFile(CreateDir(Indexes) + NodeFileName, Body);
+end;
+
+procedure TKernel.RecursiveSave(Node: TNode);
+var
+  i: Integer;
+begin
+  SaveNode(Node);
   for i:=0 to High(Node.Index) do
     RecursiveSave(Node.Index[i]);
 end;
-
-
 
 
 
