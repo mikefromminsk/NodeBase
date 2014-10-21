@@ -41,6 +41,17 @@ type
 
   ARange = Array[0..2] of Integer;
 
+
+function ExtractFileExt(Str: String): String;
+function FileExists(Str: String): Boolean;
+function LowerCase(Str: String): String;
+function StrToIntDef(Str: String; Default: Integer): Integer;
+function StrToFloatDef(Str: String; Default: Double): Double;
+function IntToStr(Number: Integer): String;
+function StrToInt(Str: String): Integer;
+function FloatToStr(Number: Double): String;
+function StrToFloat(Str: String): Double;
+function Now: Double;
 procedure MapSetPush(Map: TMap; Name, Value: String);
 function MapGetValue(Map: TMap; Name: String): String;
 function MapExistName(Map: TMap; Name: String): Boolean;
@@ -78,6 +89,56 @@ var
 
 implementation
 
+
+function StrToIntDef(Str: String; Default: Integer): Integer;
+begin
+  Result := SysUtils.StrToIntDef(Str, Default);
+end;
+
+function StrToFloatDef(Str: String; Default: Double): Double;
+begin
+  Result := SysUtils.StrToFloatDef(Str, Default);
+end;
+
+function IntToStr(Number: Integer): String;
+begin
+  Result := SysUtils.IntToStr(Number);
+end;
+
+function StrToInt(Str: String): Integer;
+begin
+  Result := SysUtils.StrToInt(Str);
+end;
+
+function FloatToStr(Number: Double): String;
+begin
+  Result := SysUtils.FloatToStr(Number);
+end;
+
+function StrToFloat(Str: String): Double;
+begin
+  Result := SysUtils.StrToFloat(Str);
+end;
+
+function FileExists(Str: String): Boolean;
+begin
+  Result := SysUtils.FileExists(Str);
+end;
+
+function LowerCase(Str: String): String;
+begin
+  Result := SysUtils.LowerCase(Str);
+end;
+
+function ExtractFileExt(Str: String): String;
+begin
+  Result := SysUtils.ExtractFileExt(Str);
+end;
+
+function Now: Double;
+begin
+  Result := SysUtils.Now;
+end;
 
 function slice(Text: String; Delimeter: String): AString;
 var

@@ -62,10 +62,10 @@ type
 
     procedure SaveUnit(Node: TNode);
 
+    procedure SaveResult(Node: TNode);
     procedure SaveAndDestroyParams(Node: TNode);
     procedure CreateApplication;
 
-    procedure Generator;
   end;
 
 
@@ -89,7 +89,7 @@ begin
     3: Result := FuncNode.Value;
   end;
   SetLength(Arr, 0);
-  if Result.Attr = naModule then
+  if Result.FType = naModule then
     Result := GetRandomSource(Result);
 end;
 
@@ -156,7 +156,7 @@ begin
   for i:=0 to Random(SequenceCount) do
   begin
     NewNode := NewRandomNode(FuncNode);
-    if GetSource(NewNode).Attr = naDllFunc then Continue;
+    if GetSource(NewNode).FType = naDllFunc then Continue;
     NextNode(Node, NewNode);
     SetValue(Node, NewRandomNode(FuncNode));
     if Node.Value.Source.Params <> nil then
@@ -301,7 +301,7 @@ var
 begin
   if Node = nil then Exit;
   SaveUnit(Node.Source);
-  SaveUnit(Node.FType);
+  SaveUnit(Node.ValueType);
   for i:=0 to High(Node.Params) do
     SaveUnit(Node.Params[i]);
   for i:=0 to High(Node.Local) do
@@ -326,6 +326,18 @@ begin
     end;
 end;
 
+procedure TGenerator.SaveResult(Node: TNode);
+var
+  i: Integer;
+begin
+  for i:=0 to High(Node.Params) do
+  begin
+    if MapExistName(Node.Params[i].Vars, 'GENERATE') then
+      SetLocal(Task, Node.Params[i]);
+  end;
+end;
+
+
 procedure TGenerator.CreateApplication;
 var
   i: Integer;
@@ -334,20 +346,14 @@ begin
   GenerateParams(Task);
   Run(Task);
 
+
   if CompareWithZero(Task) = 0 then
-    SaveAndDestroyParams(Task);
-  //SaveID;
-end;
-
-procedure TGenerator.Generator;
-begin
-  while True do
   begin
-    CreateApplicetion;
-    Break;
+    SaveResult(Task);
+    SaveAndDestroyParams(Task);
   end;
-end;
 
+end;
 
 
 

@@ -120,7 +120,7 @@ HeapErrorCode	Внутренний статус кучи
     Res := '';
     if Node.Value <> nil then
     begin
-      if GetValue(Node).Attr = naData then
+      if GetValue(Node).FType = naData then
         Res := ': Result = ' + EncodeStr(GetValue(Node).Data)
       else
         Res := ': Result = ' + GetIndex(GetValue(Node));
@@ -158,7 +158,7 @@ HeapErrorCode	Внутренний статус кучи
       begin
         Str := 'if ' + Str;
         if Node.FTrue <> nil then
-          Str := Str + ' then ' + GetIndex(GetSource(Node.FType));
+          Str := Str + ' then ' + GetIndex(GetSource(Node.ValueType));
         if Node.FElse <> nil then
           Str := Str + ' else ' + GetIndex(GetSource(Node.FElse));
       end;

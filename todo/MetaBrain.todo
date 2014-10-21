@@ -37,7 +37,7 @@ documentation add link to TNode
 
 planner
 
-auto find port
+auto find ports
 
 method DUMP
 #0 end of Node in dump file
@@ -54,9 +54,10 @@ swap file > 90% hdd
 toOptions
 MaxAddrSpace=200
 
-
-
 NodeBase into any hdd or ssd
+
+
+
 
 [System]
 
@@ -73,7 +74,7 @@ rec code access trues
 
 contexts
  
-GarbageCollector
+using language GarbageCollector
 
 160 count 14 min not delete
 
@@ -95,12 +96,13 @@ Load Root with options
 addevent if parent local
 
 MetaBase is file system
+MetaBase is compilator
 
 
 save arhive Nodes in DUMP file
 
 
-
+rename Math32.dll
 
 
 
@@ -113,24 +115,34 @@ save arhive Nodes in DUMP file
 [Generator]
 
 
-CreateApplication
 
-rename Attr to FType
-
-rename Math32.dll
-
-
-set vars "GENERATE"
-generate
-compare result
-save true result
-
-Kernel is analog compilator
+show vars in pascalcode
+like constarray
+like dirrective
 
 
-Block dispose and save for safe true result
+delete naInt
 
-task TNode;
+
+
+testing in right panel
+in listbox
+dbl click into local
+like explorer
+
+
+
+GenerateParams
+
+
+
+
+
+
+
+
+
+
 
 
 
