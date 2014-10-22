@@ -151,7 +151,7 @@ begin
   end;
 end;
 
-procedure TLink.rec(var Str: String; Link: TLink);
+procedure TLink.rec(var Str: String; Link: TLink);    //recode add ? & ;
 var
   PosMin: Integer;
   Name: String;

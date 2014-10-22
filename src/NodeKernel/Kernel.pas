@@ -35,7 +35,7 @@ type
     Activate    : Integer;
     Handle      : Integer;
 
-    Vars        : TMap;
+    Vars        : TMap;  //Attr
   end;
 
 
@@ -88,9 +88,12 @@ type
 	  function LoadNode(Node: TNode): TNode;
 	  procedure LoadModule(Node: TNode);
 
+    procedure SaveUnit(Node: TNode);
+    procedure FreeUnit(Node: TNode);
+
     procedure SaveNode(Node: TNode);
-    procedure RecursiveSave(Node: TNode);
-    procedure RecursiveDispose(Node: TNode);
+    procedure IndexSave(Node: TNode);
+    procedure IndexDispose(Node: TNode);
     procedure Clear;
 
     procedure CallFunc(Node: TNode);
@@ -99,7 +102,7 @@ type
 	  function GetIndex(Node: TNode): String;
     function GetNodeBody(Node: TNode): String;
 
-    function Execute(Line: String): TNode; virtual;
+    function UserNode(Line: String): TNode; virtual;
   end;
 
 implementation
@@ -233,7 +236,7 @@ end;
 
 procedure TKernel.SetVars(Node: TNode; Param, Value: String);
 begin
-       if Param = 'TYPE'     then Node.FType     := StrToIntDef(Value, 0)
+       if Param = vnType     then Node.FType     := StrToIntDef(Value, 0)
   else if Param = 'RUN'      then Node.RunCount := StrToIntDef(Value, 1)
   else if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1)
   else if Param = 'HANDLE'   then Node.Handle   := StrToIntDef(Value, 0)
@@ -251,7 +254,7 @@ begin
   Result := '';
   if Node = nil then Exit;
   if Node.FType <> 0 then
-    Result := Result + '&' + 'TYPE' + '=' + IntToStr(Node.FType);
+    Result := Result + '&' + vnType + '=' + IntToStr(Node.FType);
   if Node.RunCount <> 0 then
     Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
   if Node.Activate <> 0 then
@@ -562,7 +565,7 @@ begin
     FUnit := Node;
     List := slice(LoadFromFile(FileName), #10);
     for i:=0 to High(List) do
-      Execute(List[i]);
+      UserNode(List[i]);
     FUnit := PrevModule;
   end;
 end;
@@ -658,21 +661,6 @@ procedure TKernel.Run(Node: TNode);
 label NextNode;
 var
   FuncResult, i: Integer;
-  function CompareWithZero(Node: TNode): Integer;
-  var i: Integer;
-  begin
-    Result := -1;
-    if Node <> nil then
-    begin
-      Result := 0;
-      for i:=1 to Length(Node.Data) do
-        if Node.Data[i] <> #0 then
-        begin
-          Result := 1;
-          Exit;
-        end;
-    end;
-  end;
 begin
   NextNode:
   if Node = nil then Exit;
@@ -692,7 +680,7 @@ begin
     CallFunc(Node);
   if (Node.FTrue <> nil) or (Node.FElse <> nil) then
   begin
-    FuncResult := CompareWithZero(GetValue(Node));
+    FuncResult := CompareWithZero(GetValue(Node).Data);
     if (FuncResult = 1) and (Node.FTrue <> nil) then
     begin
       Node := GetSource(Node.FTrue);
@@ -715,6 +703,41 @@ begin
   Goto NextNode;
 end;
 
+procedure TKernel.SaveUnit(Node: TNode);
+var
+  i: Integer;
+begin
+  if Node = nil then Exit;
+  SaveUnit(Node.Source);
+  SaveUnit(Node.ValueType);
+  for i:=0 to High(Node.Params) do
+    SaveUnit(Node.Params[i]);
+  for i:=0 to High(Node.Local) do
+    SaveUnit(Node.Local[i]);
+  SaveUnit(Node.Value);
+  SaveUnit(Node.FTrue);
+  SaveUnit(Node.FElse);
+  SaveUnit(Node.Next);
+  SaveNode(Node);
+end;
+
+procedure TKernel.FreeUnit(Node: TNode);
+var
+  i: Integer;
+begin
+  if Node = nil then Exit;
+  FreeUnit(Node.Source);
+  FreeUnit(Node.ValueType);
+  for i:=0 to High(Node.Params) do
+    FreeUnit(Node.Params[i]);
+  for i:=0 to High(Node.Local) do
+    FreeUnit(Node.Local[i]);
+  FreeUnit(Node.Value);
+  FreeUnit(Node.FTrue);
+  FreeUnit(Node.FElse);
+  FreeUnit(Node.Next);
+  Node.Free;
+end;
 
 procedure TKernel.SaveNode(Node: TNode);
 var
@@ -736,22 +759,22 @@ begin
   SaveToFile(CreateDir(Indexes) + NodeFileName, Body);
 end;
 
-procedure TKernel.RecursiveSave(Node: TNode);
+procedure TKernel.IndexSave(Node: TNode);
 var
   i: Integer;
 begin
   SaveNode(Node);
   for i:=0 to High(Node.Index) do
-    RecursiveSave(Node.Index[i]);
+    IndexSave(Node.Index[i]);
 end;
 
 
 
-procedure TKernel.RecursiveDispose(Node: TNode);
+procedure TKernel.IndexDispose(Node: TNode);
 var i: Integer;
 begin
   for i:=0 to High(Node.Index) do
-    RecursiveDispose(Node.Index[i]);
+    IndexDispose(Node.Index[i]);
   if Node <> Root then
   begin
     Node.Free;
@@ -763,11 +786,11 @@ end;
 
 procedure TKernel.Clear;
 begin
-  //RecursiveSave(Root);
+  //IndexSave(Root);
     Prev := nil;
   FUnit := nil;
 
-  RecursiveDispose(Root);
+  IndexDispose(Root);
   //ShowMessage(IntTOStr(NodeCount));
 
 
@@ -834,7 +857,7 @@ begin
 end;
 
 
-function TKernel.Execute(Line: String): TNode;
+function TKernel.UserNode(Line: String): TNode;
 var
   Link: TLink;
 begin

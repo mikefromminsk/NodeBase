@@ -7,6 +7,13 @@ uses
   Messages;
 
 const
+
+
+//VarName
+  vnType = 'TYPE';
+  vnGenerate = 'GENERATE';
+
+
   OptionsFileName = 'options.ini';
 
 //NodeAttribyte
@@ -42,6 +49,7 @@ type
   ARange = Array[0..2] of Integer;
 
 
+function CompareWithZero(Str: String): Integer;  
 function ExtractFileExt(Str: String): String;
 function FileExists(Str: String): Boolean;
 function LowerCase(Str: String): String;
@@ -89,6 +97,22 @@ var
 
 implementation
 
+
+function CompareWithZero(Str: String): Integer;
+var i: Integer;
+begin
+  Result := -1;
+  if Str <> '' then
+  begin
+    Result := 0;
+    for i:=1 to Length(Str) do
+      if Str[i] <> #0 then
+      begin
+        Result := 1;
+        Exit;
+      end;
+  end;
+end;
 
 function StrToIntDef(Str: String; Default: Integer): Integer;
 begin

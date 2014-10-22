@@ -25,17 +25,13 @@ implementation
 {$R *.dfm}
 
 procedure TGG.FormCreate(Sender: TObject);
-var
-  num: Double;
 begin
   Generator := TGenerator.Create;
-  Generator.Execute('/dll/math32.node$activate');
+  Generator.UserNode('/dll/math32.node$activate');
   ShowNode(Generator.GenerateNode, GenerateBox);
 
-  Generator.Task := Generator.Execute('roundto$activate?3,14&-2');
-  Num := StrToFloat8(Generator.Task.Source.Value.Data);
-  ShowMessage(FloatToStr(Num));
-  //Generator.CreateApplication;
+  Generator.Task := Generator.UserNode('task?roundto?x&-2;&3,14');
+  Generator.CreateApplication;
   ShowNode(Generator.Task, TaskBox);
 end;
 

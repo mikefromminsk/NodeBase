@@ -7,7 +7,6 @@ uses
 
 const
 
-  Data4Count = 1;
   Data8Count = 2;
   LocalVarCount = 2;
   SubLevel = 1;
@@ -54,13 +53,9 @@ type
 
 
 
-    procedure SetParamsControl(Node: TNode);
+    procedure FindGenerateNode(Node: TNode; var Nodes: ANode);
 
     procedure GenerateParams(Node: TNode);
-
-    function CompareWithZero(Node: TNode): Integer;
-
-    procedure SaveUnit(Node: TNode);
 
     procedure SaveResult(Node: TNode);
     procedure SaveAndDestroyParams(Node: TNode);
@@ -100,12 +95,9 @@ begin
   SetSource(Result, GetRandomSource(FuncNode));
 end;
 
-
 procedure TGenerator.CreateData(Node: TNode);
 var i: Integer;
 begin
-  {for i:=0 to Random(Data4Count) do
-    SetLocal(Node, NewNode( IntToStr(RandomRange(IntRange)) )); }
   for i:=0 to Random(Data8Count) do
     SetLocal(Node, NewNode(
       IntToStr(RandomRange(IntRange)) + ',' + IntToStr(RandomRange(FracRange)) ));
@@ -262,13 +254,21 @@ end;
 
 
 
-procedure TGenerator.SetParamsControl(Node: TNode);
+procedure TGenerator.FindGenerateNode(Node: TNode; var Nodes: ANode);
 var
   i: Integer;
 begin
   for i:=0 to High(Node.Params) do
+  begin
     if Node.Params[i].Source = nil then
-      MapSetPush(Node.Params[i].Vars, 'GENERATE', '');
+      MapSetPush(Node.Params[i].Vars, vnGenerate, '');
+
+    if MapExistName(Node.Params[i].Vars, vnGenerate) then
+    begin
+      SetLength(Nodes, Length(Nodes));
+      Nodes[High(Nodes)] := Node.Params[i];
+    end;
+  end;
 end;
 
 procedure TGenerator.GenerateParams(Node: TNode);
@@ -280,40 +280,6 @@ begin
       Node.Params[i].Source := GenerateNode.Source;
 end;
 
-function TGenerator.CompareWithZero(Node: TNode): Integer;
-var i: Integer;
-begin
-  Result := -1;
-  if Node <> nil then
-  begin
-    Result := 0;
-    for i:=1 to Length(Node.Data) do
-    begin
-      Result := 1;
-      Exit;
-    end;
-  end;
-end;
-
-procedure TGenerator.SaveUnit(Node: TNode);
-var
-  i: Integer;
-begin
-  if Node = nil then Exit;
-  SaveUnit(Node.Source);
-  SaveUnit(Node.ValueType);
-  for i:=0 to High(Node.Params) do
-    SaveUnit(Node.Params[i]);
-  for i:=0 to High(Node.Local) do
-    SaveUnit(Node.Local[i]);
-  SaveUnit(Node.Value);
-  SaveUnit(Node.FTrue);
-  SaveUnit(Node.FElse);
-  SaveUnit(Node.Next);
-  SaveNode(Node);
-end;
-
-
 procedure TGenerator.SaveAndDestroyParams(Node: TNode);
 var
   i: Integer;
@@ -322,7 +288,7 @@ begin
     if MapExistName(Node.Params[i].Vars, 'GENERATE') then
     begin
       SaveUnit(Node.Params[i]);
-      Node.Params[i].Free;
+      FreeUnit(Node.Params[i]);
     end;
 end;
 
@@ -341,13 +307,14 @@ end;
 procedure TGenerator.CreateApplication;
 var
   i: Integer;
+  GenNode: ANode;
 begin
-  SetParamsControl(Task);
+  //SetLength(GenNode, 0);
+  FindGenerateNode(Task, GenNode);
   GenerateParams(Task);
   Run(Task);
 
-
-  if CompareWithZero(Task) = 0 then
+  if CompareWithZero(GetValue(Task).Data) = 0 then
   begin
     SaveResult(Task);
     SaveAndDestroyParams(Task);
