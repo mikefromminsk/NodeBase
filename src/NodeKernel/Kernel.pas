@@ -666,13 +666,16 @@ var
   function CompareWithZero(Node: TNode): Integer;
   var i: Integer;
   begin
-  //function StrScan(const Str: PChar; Chr: Char): PChar;
     Result := -1;
     if Node <> nil then
     begin
       Result := 0;
       for i:=1 to Length(Node.Data) do
-        Inc(Result, Ord(Node.Data[i]));
+        if Node.Data[i] <> #0 then
+        begin
+          Result := 1;
+          Exit;
+        end;
     end;
   end;
 begin

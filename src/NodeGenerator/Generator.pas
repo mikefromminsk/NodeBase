@@ -104,8 +104,8 @@ end;
 procedure TGenerator.CreateData(Node: TNode);
 var i: Integer;
 begin
-  for i:=0 to Random(Data4Count) do
-    SetLocal(Node, NewNode( IntToStr(RandomRange(IntRange)) ));
+  {for i:=0 to Random(Data4Count) do
+    SetLocal(Node, NewNode( IntToStr(RandomRange(IntRange)) )); }
   for i:=0 to Random(Data8Count) do
     SetLocal(Node, NewNode(
       IntToStr(RandomRange(IntRange)) + ',' + IntToStr(RandomRange(FracRange)) ));

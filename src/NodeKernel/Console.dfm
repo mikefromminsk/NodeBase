@@ -96,7 +96,7 @@ object GG: TGG
     Font.Name = 'Arial'
     Font.Style = []
     Lines.Strings = (
-      '/dll/math.node$activate'
+      '/dll/math32.node$activate'
       ''
       'func?a:float#res'
       'i'
@@ -105,13 +105,13 @@ object GG: TGG
       'i=1,0'
       'dx=1,0'
       'while'
-      'fje?i&a>exit'
-      'i=finc?i'
-      'res=fadd?res&dx'
-      'dx=fdiv?1,0&fsqr?i'
+      'je?i&a>exit'
+      'i=inc?i'
+      'res=add?res&dx'
+      'dx=fdiv?1,0&sqr?i'
       '1>while'
       'here^exit'
-      'res=fsqrt?fmul?res&6,0'
+      'res=sqrt?mul?res&6,0'
       ''
       'func$activate?750,0')
     ParentColor = True

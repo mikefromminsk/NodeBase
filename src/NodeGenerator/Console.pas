@@ -10,12 +10,10 @@ uses
 type
   TGG = class(TForm)
     SeqBox: TListBox;
-    Timer: TTimer;
-    Button1: TButton;
+    TaskBox: TListBox;
+    Splitter: TSplitter;
     procedure FormCreate(Sender: TObject);
     procedure ShowNode(Node: TNode);
-    procedure TimerTimer(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
   end;
 
 var
@@ -28,21 +26,21 @@ implementation
 
 procedure TGG.FormCreate(Sender: TObject);
 begin
-
-
   Generator := TGenerator.Create;
-  Generator.Execute('/dll/math.node$activate');
-
+  Generator.Execute('/dll/math32.node$activate');
   ShowNode(Generator.GenerateNode);
-end;
 
+  {Generator.Task := Generator.Execute('task?round?x&2;&je?x&3,14;');
+  Generator.CreateApplication;
+  ShowNode(Generator.Task); }
+end;
 
 procedure TGG.ShowNode(Node: TNode);
 var
   Body: String;
   Str, Res: String;
   i: Integer;
-   Status: THeapStatus;
+
   function ShowParams(Node: TNode): String;
   var Str: String;
   i: Integer;
@@ -56,66 +54,25 @@ var
     Result := Str;
   end;
 
- procedure AddFmt(const Fmt: string; Args: array of const);
+  procedure Add(Str: String);
   begin
-    SeqBox.Items.Add(Format(Fmt, Args));
+    SeqBox.Items.Add(Str);
   end;
-var MemoryStatus: TMemoryStatus;
+
 begin
- MemoryStatus.dwLength := SizeOf(MemoryStatus);
   with Generator do
   begin
     SeqBox.Clear;
-  Status := GetHeapStatus;
-  GlobalMemoryStatus(MemoryStatus);
-
-{
-
-TotalAddrSpace	Адресное пространство, доступное вашей программе в байтах. Значение этого поля будет расти, по мере того, как увеличивается объём памяти, динамически выделяемый вашей программой.
-TotalUncommitted	Показывает, сколько байтов из TotalAddrSpace не находятся в swap-файле.
-TotalCommitted	Показывает, сколько байтов из TotalAddrSpace находятся в swap-файле. Соответственно, TotalCommited + TotalUncommited = TotalAddrSpace
-TotalAllocated	Сколько всего байтов памяти было динамически выделено вашей программой
-TotalFree	Сколько памяти (в байтах) доступно для выделения вашей программой. Если программа превышает это значение, и виртуальной памяти для этого достаточно, ОС автоматом увеличит адресное пространство для вашего приложения и соответственно увеличится значения TotalAddrSpace
-FreeSmall	Доступная, но неиспользуемая память (в байтах), находящаяся в "маленьких" блоках.
-FreeBig	Доступная, но неиспользуемая память (в байтах), находящаяся в "больших" блоках. Большие блоки могут формироваться из непрерывных последовательностей "маленьких".
-Unused	Память (в байтах) никогда не выделявшаяся (но доступная) вашей программой. Unused + FreeSmall + FreeBig = TotalFree.
-Overhead	Сколько памяти (в байтах) необходимо менеджеру кучи, чтобы обслуживать все блоки, динамически выделяемые вашей программой.
-HeapErrorCode	Внутренний статус кучи
-
-
-  DWORD dwLength; 	// Размер структуры
-	DWORD dwMemoryLoad;	// Процент использования памяти
-	DWORD dwTotalPhys;	// Физическая память, байт
-	DWORD dwAvailPhys;	// Свободная физическая память, байт
-	DWORD dwTotalPageFile;	// Размер файла подкачки, байт
-	DWORD dwAvailPageFile;	// Свободных байт в файле подкачки
-	DWORD dwTotalVirtual;	// Виртуальная память, используемая процессом
-	DWORD dwAvailVirtual;   // Свободная виртуальная память
-
-
-  TotalAddrSpace / dwTotalPhys > 30
-
-  }
-  AddFmt('TotalAddrSpace = %d', [Status.TotalAddrSpace]);
-  AddFmt('TotalUncommitted = %d', [Status.TotalUncommitted]);
-  AddFmt('TotalCommitted = %d', [Status.TotalCommitted]);
-  AddFmt('TotalAllocated = %d', [Status.TotalAllocated]);
-  AddFmt('TotalFree =%d', [Status.TotalFree]);
-  AddFmt('FreeSmall =%d', [Status.FreeSmall]);
-  AddFmt('FreeBig = %d', [Status.FreeBig]);
-  AddFmt('Unused = %d', [Status.Unused]);
-  AddFmt('Overhead = %d', [Status.Overhead]);
-  AddFmt('dwMemoryLoad = %d', [MemoryStatus.dwMemoryLoad]);
-  AddFmt('dwTotalPhys = %d', [MemoryStatus.dwTotalPhys]);
-  AddFmt('dwAvailPhys = %d', [MemoryStatus.dwAvailPhys]);
-  AddFmt('dwTotalPhys - dwAvailPhys = %d', [(MemoryStatus.dwTotalPhys)-(MemoryStatus.dwAvailPhys)]);
-
-    SeqBox.Items.Add('uses');
+    Add('unit ' + GetIndex(FUnit) + ';');
+    Add('');
+    Add('interface');
+    Add('');
+    Add('uses');
     for i:=0 to High(FUnit.Local) do
     begin
       Str := GetIndex(FUnit.Local[i]) + ShowParams(FUnit.Local[i]);
       Str := '  ' + Str + ';';
-      SeqBox.Items.Add(Str);
+      Add(Str);
     end;
     Res := '';
     if Node.Value <> nil then
@@ -125,18 +82,22 @@ HeapErrorCode	Внутренний статус кучи
       else
         Res := ': Result = ' + GetIndex(GetValue(Node));
     end;
+    Add('');
+    Add('implementation');
+    Add('');
+    Add('//...');
+    Add('');
+    Add('function ' + GetIndex(Node.ParentName) + GetIndex(Node) + ShowParams(Node) + Res + ';');
 
-    SeqBox.Items.Add('function ' + GetIndex(Node.ParentName) + GetIndex(Node) + ShowParams(Node) + Res + ';');
-
-    SeqBox.Items.Add('var');
+    Add('var');
     for i:=0 to High(Node.Local) do
     begin
       Str := GetIndex(Node.Local[i]) + ShowParams(Node.Local[i]);
       Str := '  ' + Str + ';';
-      SeqBox.Items.Add(Str);
+      Add(Str);
     end;
 
-    SeqBox.Items.Add('begin');
+    Add('begin');
     Node := Node.Next;
     while Node <> nil do
     begin
@@ -164,53 +125,16 @@ HeapErrorCode	Внутренний статус кучи
       end;
 
       Str := '  ' + Str + ';';
-      SeqBox.Items.Add(Str);
+      Add(Str);
       Node := Node.Next;
     end;
-    SeqBox.Items.Add('end;');
+    Add('end;');
+    Add('');
+    Add('//...');
+    Add('');
+    Add('end.');
   end;
 end;
 
-
-
-procedure TGG.TimerTimer(Sender: TObject);
-var
-  i: Integer;
-  Status: THeapStatus;
-  MemoryStatus: TMemoryStatus;
-begin
-  Timer.Enabled := False;
-
-  Status := GetHeapStatus;
-  GlobalMemoryStatus(MemoryStatus);
-
-  if Status.TotalAddrSpace > 200 * 1024 * 1024 then  
-  begin
-    Generator.Clear;
-    Generator.FUnit := Generator.NewNode(Generator.NextID);
-    Generator.Execute('/dll/math.node$activate');
-  end;
-
-  for i:=0 to 1000 do
-    Generator.GenerateNode;
-  ShowNode(Generator.GenerateNode);
-  Timer.Enabled := True;
-
-end;
-
-procedure TGG.Button1Click(Sender: TObject);
-begin
-  if Timer.Enabled = True then
-  begin
-    Timer.Enabled := False;
-  end
-  else
-  begin
-    Timer.Enabled := True;
-    Generator.Clear;
-    Generator.FUnit := Generator.NewNode(Generator.NextID);
-    Generator.Execute('/dll/math.node$activate');
-  end;
-end;
 
 end.

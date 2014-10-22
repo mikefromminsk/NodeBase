@@ -1,7 +1,7 @@
 object GG: TGG
   Left = 234
   Top = 150
-  Width = 414
+  Width = 603
   Height = 645
   Color = clBtnFace
   Font.Charset = RUSSIAN_CHARSET
@@ -13,29 +13,30 @@ object GG: TGG
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 17
+  object Splitter: TSplitter
+    Left = 293
+    Top = 0
+    Height = 611
+    Align = alRight
+  end
   object SeqBox: TListBox
     Left = 0
     Top = 0
-    Width = 406
+    Width = 293
     Height = 611
     Align = alClient
     BorderStyle = bsNone
     ItemHeight = 17
     TabOrder = 0
   end
-  object Button1: TButton
-    Left = 248
-    Top = 64
-    Width = 75
-    Height = 25
-    Caption = 'Button1'
+  object TaskBox: TListBox
+    Left = 296
+    Top = 0
+    Width = 299
+    Height = 611
+    Align = alRight
+    BorderStyle = bsNone
+    ItemHeight = 17
     TabOrder = 1
-    OnClick = Button1Click
-  end
-  object Timer: TTimer
-    Interval = 1
-    OnTimer = TimerTimer
-    Left = 8
-    Top = 8
   end
 end
