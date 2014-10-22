@@ -19,7 +19,7 @@ object GG: TGG
     Height = 611
     Align = alRight
   end
-  object SeqBox: TListBox
+  object GenerateBox: TListBox
     Left = 0
     Top = 0
     Width = 293

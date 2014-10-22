@@ -453,23 +453,18 @@ begin
 
       if Result.FType = naNumber then
       begin
-        if Pos(sDecimalSeparator, Link.Name) = 0
+        {if Pos(sDecimalSeparator, Link.Name) = 0
         then Link.Name := sData + IntToStr4  (  StrToIntDef(Link.Name, 0))
-        else Link.Name := sData + FloatToStr8(StrToFloatDef(Link.Name, 0));
+        else }Link.Name := sData + FloatToStr8(StrToFloatDef(Link.Name, 0));
         Result.FType := naData;
       end;
 
       if Result.FType = naData then
         SetData(Result, DecodeStr(Copy(Link.Name, 2, MaxInt)));
     end;
-
-
-
   end;
 
-
   if Result = nil then Exit;
-
 
   if Link.Source <> nil then
   begin

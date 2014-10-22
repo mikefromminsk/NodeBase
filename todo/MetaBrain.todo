@@ -102,10 +102,6 @@ MetaBase is compilator
 save arhive Nodes in DUMP file
 
 
-rename Math32.dll
-
-
-
 
 
 
@@ -115,14 +111,11 @@ rename Math32.dll
 [Generator]
 
 
+GenerateParams
 
 show vars in pascalcode
 like constarray
 like dirrective
-
-
-delete naInt
-
 
 
 testing in right panel
@@ -132,7 +125,10 @@ like explorer
 
 
 
-GenerateParams
+testing saveunit 
+
+testing destroyunit
+
 
 
 

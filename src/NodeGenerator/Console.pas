@@ -9,11 +9,11 @@ uses
 
 type
   TGG = class(TForm)
-    SeqBox: TListBox;
+    GenerateBox: TListBox;
     TaskBox: TListBox;
     Splitter: TSplitter;
     procedure FormCreate(Sender: TObject);
-    procedure ShowNode(Node: TNode);
+    procedure ShowNode(Node: TNode; List: TListBox);
   end;
 
 var
@@ -25,17 +25,21 @@ implementation
 {$R *.dfm}
 
 procedure TGG.FormCreate(Sender: TObject);
+var
+  num: Double;
 begin
   Generator := TGenerator.Create;
   Generator.Execute('/dll/math32.node$activate');
-  ShowNode(Generator.GenerateNode);
+  ShowNode(Generator.GenerateNode, GenerateBox);
 
-  {Generator.Task := Generator.Execute('task?round?x&2;&je?x&3,14;');
-  Generator.CreateApplication;
-  ShowNode(Generator.Task); }
+  Generator.Task := Generator.Execute('roundto$activate?3,14&-2');
+  Num := StrToFloat8(Generator.Task.Source.Value.Data);
+  ShowMessage(FloatToStr(Num));
+  //Generator.CreateApplication;
+  ShowNode(Generator.Task, TaskBox);
 end;
 
-procedure TGG.ShowNode(Node: TNode);
+procedure TGG.ShowNode(Node: TNode; List: TListBox);
 var
   Body: String;
   Str, Res: String;
@@ -56,13 +60,15 @@ var
 
   procedure Add(Str: String);
   begin
-    SeqBox.Items.Add(Str);
+    List.Items.Add(Str);
   end;
 
 begin
+  if (Node = nil) or (List = nil) then Exit;
+
   with Generator do
   begin
-    SeqBox.Clear;
+    List.Clear;
     Add('unit ' + GetIndex(FUnit) + ';');
     Add('');
     Add('interface');

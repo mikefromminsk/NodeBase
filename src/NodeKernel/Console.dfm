@@ -101,19 +101,19 @@ object GG: TGG
       'func?a:float#res'
       'i'
       'dx'
-      'res=0,0'
-      'i=1,0'
-      'dx=1,0'
+      'res=0'
+      'i=1'
+      'dx=1'
       'while'
       'je?i&a>exit'
       'i=inc?i'
       'res=add?res&dx'
-      'dx=fdiv?1,0&sqr?i'
+      'dx=fdiv?1&sqr?i'
       '1>while'
       'here^exit'
-      'res=sqrt?mul?res&6,0'
+      'res=sqrt?mul?res&6'
       ''
-      'func$activate?750,0')
+      'func$activate?750')
     ParentColor = True
     ParentFont = False
     ScrollBars = ssVertical
