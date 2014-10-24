@@ -49,6 +49,7 @@ type
   ARange = Array[0..2] of Integer;
 
 
+function FindCloseTag(Str: String; Open, Close: Char): Integer;
 function CompareWithZero(Str: String): Integer;  
 function ExtractFileExt(Str: String): String;
 function FileExists(Str: String): Boolean;
@@ -97,6 +98,30 @@ var
 
 implementation
 
+
+function FindCloseTag(Str: String; Open, Close: Char): Integer;
+var
+  i: Integer;
+  Level: Integer;
+begin
+  Result := MaxInt;
+  Level := 0;
+  for i:=1 to Length(Str) do
+  begin
+    if (Str[i] = Open) or (Str[i] = Close) then
+    begin
+      if Str[i] = Open then
+        Inc(Level);
+      if Str[i] = Close then
+        Dec(Level);
+      if Level <= 0 then
+      begin
+        Result := i;
+        Exit;
+      end;
+    end;
+  end;
+end;
 
 function CompareWithZero(Str: String): Integer;
 var i: Integer;

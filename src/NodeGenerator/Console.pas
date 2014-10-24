@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls,
-  Kernel, Generator, Utils;
+  Kernel, Generator, Utils, Link;
 
 type
   TGG = class(TForm)
@@ -25,14 +25,15 @@ implementation
 {$R *.dfm}
 
 procedure TGG.FormCreate(Sender: TObject);
+var Link: TLink;
 begin
   Generator := TGenerator.Create;
   Generator.UserNode('/dll/math32.node$activate');
   ShowNode(Generator.GenerateNode, GenerateBox);
 
-  Generator.Task := Generator.UserNode('task?roundto?x&-2;&3,14');
+  {Generator.Task := Generator.UserNode('task?roundto?x&-2;&3,14');
   Generator.CreateApplication;
-  ShowNode(Generator.Task, TaskBox);
+  ShowNode(Generator.Task, TaskBox); }
 end;
 
 procedure TGG.ShowNode(Node: TNode; List: TListBox);

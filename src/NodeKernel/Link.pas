@@ -63,8 +63,8 @@ type
     Local       : Array of TLink;
     constructor Create; overload;
     constructor Create(Str: string); overload;
+    procedure rec(Str: String; Link: TLink);
     constructor UserParse(Str: String);  //рекурсивную для пользователя
-    procedure rec(var Str: String; Link: TLink);
     constructor BaseParse(Str: String);  //более простую для базы
     destructor Destroy; override;
   end;
@@ -151,28 +151,28 @@ begin
   end;
 end;
 
-procedure TLink.rec(var Str: String; Link: TLink);    //recode add ? & ;
+procedure TLink.rec(Str: String; Link: TLink);
 var
-  PosMin: Integer;
-  Name: String;
+  PosMin, ParamsLength: Integer;
+  ParamsStr: String;
   SysChar: Char;
 begin
   while Str <> '' do
   begin
-    PosMin := Index([sParams, sParamAnd, sParamEnd], Str);
-    if PosMin = MaxInt
-    then SysChar := #0
-    else SysChar := Str[PosMin];
-    Name := Copy(Str, 1, PosMin - 1);
+    PosMin := Index([sParams, sParamAnd], Str);
     SetLength(Link.Params, Length(Link.Params) + 1);
-    Link.Params[High(Link.Params)] := TLink.UserParse(Name);
-    Delete(Str, 1, PosMin);
-    case SysChar of
-      sParams:   rec(Str, Link.Params[High(Link.Params)]);
-      sParamEnd: Exit;
+    Link.Params[High(Link.Params)] := TLink.Create(Copy(Str, 1, PosMin - 1));
+    if (PosMin <> MaxInt) and (Str[PosMin] = sParams) then
+    begin
+      ParamsLength := Length(Str) - FindCloseTag(Str, sParams, sParamEnd);
+      ParamsStr := Copy(Str, PosMin + 1,  ParamsLength - 1); //CopyI
+      Delete(Str, PosMin, ParamsLength + 1);
+      rec(ParamsStr, Link.Params[High(Link.Params)]);
     end;
+    Delete(Str, 1, PosMin);
   end;
 end;
+
 
 constructor TLink.UserParse(Str: String);
 //Name@ID^Source$Names=Values:FType?Params#Value>FTrue|FElse

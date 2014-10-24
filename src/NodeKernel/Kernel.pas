@@ -480,8 +480,9 @@ begin
       SetSource(Result, NewNode(Link.Source));
   end;
 
-  for i:=0 to Link.Vars.High do
-    SetVars(Result, Link.Vars.Names[i], Link.Vars.Values[i]);
+  if Link.Vars <> nil then
+    for i:=0 to Link.Vars.High do
+      SetVars(Result, Link.Vars.Names[i], Link.Vars.Values[i]);
 
   if Link.FType <> nil then
     SetFType(Result, NewNode(Link.FType));
