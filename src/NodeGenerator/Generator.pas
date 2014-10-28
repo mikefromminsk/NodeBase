@@ -55,7 +55,7 @@ type
 
     procedure FindGenerateNode(Node: TNode; var Nodes: ANode);
 
-    procedure GenerateParams(Node: TNode);
+    procedure GenerateNodes(var Nodes: ANode);
 
     procedure SaveResult(Node: TNode);
     procedure SaveAndDestroyParams(Node: TNode);
@@ -255,8 +255,7 @@ end;
 
 
 procedure TGenerator.FindGenerateNode(Node: TNode; var Nodes: ANode);
-var
-  i: Integer;
+var i: Integer;
 begin
   for i:=0 to High(Node.Params) do
   begin
@@ -271,13 +270,11 @@ begin
   end;
 end;
 
-procedure TGenerator.GenerateParams(Node: TNode);
-var
-  i: Integer;
+procedure TGenerator.GenerateNodes(var Nodes: ANode);
+var i: Integer;
 begin
-  for i:=0 to High(Node.Params) do
-    if MapExistName(Node.Params[i].Vars, 'GENERATE') then
-      Node.Params[i].Source := GenerateNode.Source;
+  for i:=0 to High(Nodes) do
+    Nodes[i].Source := GenerateNode.Source;
 end;
 
 procedure TGenerator.SaveAndDestroyParams(Node: TNode);

@@ -8,15 +8,11 @@ uses
 
 const
 
-
 //VarName
   vnType = 'TYPE';
   vnGenerate = 'GENERATE';
 
-
-  OptionsFileName = 'options.ini';
-
-//NodeAttribyte
+//NodeType
   naEmpty = 0;
   naLoad = 1;
   naData = 3;
@@ -26,9 +22,14 @@ const
   naNumber = 7;
   naRoot = 8;
 
+//NodeStatus
+  nsSave = 1;
+  nsFree = 2;
+
+//File Names
+  OptionsFileName = 'options.ini';
   NodeFileExtention = '.node';
   ExternalModuleExtention = '.dll';
-
   NodeFileName = 'Node' + NodeFileExtention;
 
 type
@@ -48,7 +49,7 @@ type
 
   ARange = Array[0..2] of Integer;
 
-
+procedure FreeAndNil(var Obj);
 function FindCloseTag(Str: String; Open, Close: Char): Integer;
 function CompareWithZero(Str: String): Integer;  
 function ExtractFileExt(Str: String): String;
@@ -98,6 +99,14 @@ var
 
 implementation
 
+procedure FreeAndNil(var Obj);
+var
+  Temp: TObject;
+begin
+  Temp := TObject(Obj);
+  Pointer(Obj) := nil;
+  Temp.Free;
+end;
 
 function FindCloseTag(Str: String; Open, Close: Char): Integer;
 var

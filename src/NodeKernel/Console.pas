@@ -64,6 +64,10 @@ begin
   
   IdHTTPServer1.DefaultPort := StrToIntDef(MapGetValue(Kernel.Options, 'ServerPort'), 80);
 
+  if not FileExists(OptionsFileName) then
+    QueryBox.Lines.Add('Not exist options file (' + OptionsFileName + ')');
+
+
   try
     IdHTTPServer1.Active := True;
     QueryBox.Lines.Add('DefaultPort: ' + IntToStr(IdHTTPServer1.DefaultPort));
@@ -81,7 +85,7 @@ var
   Value: TNode;
   Str: String;
 begin
-  Result := Kernel.Execute(Line);
+  Result := Kernel.UserNode(Line);
   if Result <> nil then
   begin
     Value := Kernel.GetValue(Result);
@@ -226,12 +230,12 @@ begin
       begin
         FUnit := nil;
         Prev := nil;
-        Execute(Document);
+        UserNode(Document);
         SetLength(FUnit.Local, 0);
         FUnit := nil;
         Prev := nil;
         for i:=0 to Node.Count - 1 do
-          Execute(Node.Strings[i]);
+          UserNode(Node.Strings[i]);
         AResponseInfo.ContentText := GetNodeBody(FUnit) + #10;
       end;
 
@@ -276,12 +280,27 @@ procedure TGG.Timer1Timer(Sender: TObject);
 var
   Count: Integer;
   Node: Tnode;
+  i: Integer;
 begin
-  Kernel.Clear;
+  {with Kernel do
+  begin
+    //SaveUnit(FUnit);
+
+    Node := NewNode(NextID);
+
+    for i:=0 to 10000 do
+      SetLocal(Node, NewNode(NextID));
+
+    FreeUnit(Node);
+  end; }
+
+//  ShowMessage(Node.Name);
+
+{  Kernel.Clear;
   Kernel.FUnit := Kernel.NewNode('@1');
   Node := ConsoleExec('func$activate?750,0', True);
   if Node <> nil then
-    Node := nil;
+    Node := nil;   }
 end;
 
 end.

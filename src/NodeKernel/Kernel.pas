@@ -31,7 +31,7 @@ type
     ParentLocal   : TNode;
 
     FType       : Integer;
-    RunCount    : Integer;
+    Status      : Integer;
     Activate    : Integer;
     Handle      : Integer;
 
@@ -88,13 +88,14 @@ type
 	  function LoadNode(Node: TNode): TNode;
 	  procedure LoadModule(Node: TNode);
 
+    procedure FreeNode(Node: TNode);
+
     procedure SaveUnit(Node: TNode);
     procedure FreeUnit(Node: TNode);
 
     procedure SaveNode(Node: TNode);
     procedure IndexSave(Node: TNode);
     procedure IndexDispose(Node: TNode);
-    procedure Clear;
 
     procedure CallFunc(Node: TNode);
     procedure Run(Node: TNode);
@@ -103,9 +104,34 @@ type
     function GetNodeBody(Node: TNode): String;
 
     function UserNode(Line: String): TNode; virtual;
+
   end;
 
 implementation
+
+
+procedure Clear(var Nodes: ANode);
+begin
+  SetLength(Nodes, 0);
+end;
+
+procedure AddItem(var Nodes: ANode; Node: TNode);
+begin
+  SetLength(Nodes, Length(Nodes) + 1);
+  Nodes[High(Nodes)] := Node;
+end;
+
+procedure DeleteItem(var Nodes: ANode; Node: TNode);
+var i: Integer;
+begin         //dangeros to param
+  for i:=0 to High(Nodes) do
+    if Nodes[i] = Node then
+    begin
+      Nodes[i] := Nodes[High(Nodes)];
+      SetLength(Nodes, High(Nodes));
+    end;
+end;
+
 
 { TKernel }
 
@@ -205,14 +231,13 @@ var
   i, j, Index: Integer;
   function AddIndex(Node: TNode; Name: Char): TNode;
   begin
-    SetLength(Node.Index, Length(Node.Index) + 1);
     Result := TNode.Create;
-    Node.Index[High(Node.Index)] := Result;
     Result.FType := naEmpty;
     Result.Name := Name;
     Result.ParentIndex := Node;
+    AddItem(Node.Index, Result);
     Result := Node.Index[High(Node.Index)];
-    Inc(NodesCount);
+    Inc(NodesCount);   //test
     Result.Path := GetIndex(Result); //test
   end;
 begin
@@ -237,7 +262,6 @@ end;
 procedure TKernel.SetVars(Node: TNode; Param, Value: String);
 begin
        if Param = vnType     then Node.FType     := StrToIntDef(Value, 0)
-  else if Param = 'RUN'      then Node.RunCount := StrToIntDef(Value, 1)
   else if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1)
   else if Param = 'HANDLE'   then Node.Handle   := StrToIntDef(Value, 0)
   else
@@ -255,8 +279,6 @@ begin
   if Node = nil then Exit;
   if Node.FType <> 0 then
     Result := Result + '&' + vnType + '=' + IntToStr(Node.FType);
-  if Node.RunCount <> 0 then
-    Result := Result + '&' + 'RUN' + '=' + IntToStr(Node.RunCount);
   if Node.Activate <> 0 then
     Result := Result + '&' + 'ACTIVATE' + '=' + FloatToStr(Node.Activate);
   if Node.Handle <> 0 then
@@ -290,15 +312,13 @@ begin
   if Param.ValueType <> nil then
   begin
     Param.Source := nil;
-    SetLength(Node.Params, Length(Node.Params) + 1);
-    Node.Params[High(Node.Params)] := Param;
+    AddItem(Node.Params, Param);
   end
   else
   begin
     if Index = Length(Node.Params) then
     begin
-      SetLength(Node.Params, Length(Node.Params) + 1);
-      Node.Params[Index] := Param;
+      AddItem(Node.Params, Param);
     end
     else
     if Index <= High(Node.Params) then
@@ -337,13 +357,12 @@ end;
 
 
 function TKernel.GetValue(Node: TNode): TNode;
-var ValueStack: ANode;
+var ValueStack: ANode; //recode to status
 begin
   Result := nil;
   while Node <> nil do
   begin
-    SetLength(ValueStack, Length(ValueStack) + 1);
-    ValueStack[High(ValueStack)] := Node;
+    AddItem(ValueStack, Node);
     if Node.Source <> nil then
       Node := Node.Source
     else
@@ -354,7 +373,7 @@ begin
       Node := Node.Value;
     end;
   end;
-  SetLength(ValueStack, 0);
+  Clear(ValueStack);
 end;
 
 
@@ -405,11 +424,10 @@ end;
 
 function TKernel.SetLocal(Node: TNode; Local: TNode): TNode;
 begin
-  SetLength(Node.Local, Length(Node.Local) + 1);
   if Node.FType = naEmpty
   then Local.ParentName  := Node
   else Local.ParentLocal := Node;
-  Node.Local[High(Node.Local)] := Local;
+  AddItem(Node.Local, Local);
   Result := Local;
 end;
 
@@ -705,10 +723,11 @@ begin
 end;
 
 procedure TKernel.SaveUnit(Node: TNode);
-var
-  i: Integer;
+var i: Integer;
 begin
   if Node = nil then Exit;
+  if Node.Status = nsSave then Exit;
+  Node.Status := nsSave;
   SaveUnit(Node.Source);
   SaveUnit(Node.ValueType);
   for i:=0 to High(Node.Params) do
@@ -722,11 +741,41 @@ begin
   SaveNode(Node);
 end;
 
+
+{function TKernel.SelectUnit(Node: TNode): ANode;
+begin
+  //sdf
+end;    }
+
+
+procedure TKernel.FreeNode(Node: TNode);
+var i: Integer;
+begin
+  Node.Source := nil;
+  Node.ValueType := nil;
+  Clear(Node.Params);
+  Clear(Node.Local);
+  Node.Value := nil;
+  Node.FTrue := nil;
+  Node.FElse := nil;
+  Node.Next := nil;
+  if Length(Node.Index) = 0 then
+  begin
+    DeleteItem(Node.ParentIndex.Index, Node);
+    if Node.ParentIndex.FType = naEmpty then
+      FreeNode(Node.ParentIndex);
+    Node.Free;
+  end
+  else
+    Node.FType := naEmpty;
+end;
+
 procedure TKernel.FreeUnit(Node: TNode);
-var
-  i: Integer;
+var i: Integer;
 begin
   if Node = nil then Exit;
+  if Node.Status = nsFree then Exit;
+  Node.Status := nsFree;
   FreeUnit(Node.Source);
   FreeUnit(Node.ValueType);
   for i:=0 to High(Node.Params) do
@@ -737,8 +786,9 @@ begin
   FreeUnit(Node.FTrue);
   FreeUnit(Node.FElse);
   FreeUnit(Node.Next);
-  Node.Free;
+  FreeNode(Node);
 end;
+
 
 procedure TKernel.SaveNode(Node: TNode);
 var
@@ -760,15 +810,14 @@ begin
   SaveToFile(CreateDir(Indexes) + NodeFileName, Body);
 end;
 
-procedure TKernel.IndexSave(Node: TNode);
-var
-  i: Integer;
+
+procedure TKernel.IndexSave(Node: TNode); //or Branch
+var i: Integer;
 begin
   SaveNode(Node);
   for i:=0 to High(Node.Index) do
     IndexSave(Node.Index[i]);
 end;
-
 
 
 procedure TKernel.IndexDispose(Node: TNode);
@@ -781,20 +830,7 @@ begin
     Node.Free;
   end
   else
-    SetLength(Root.Index, 0);
-end;
-
-
-procedure TKernel.Clear;
-begin
-  //IndexSave(Root);
-    Prev := nil;
-  FUnit := nil;
-
-  IndexDispose(Root);
-  //ShowMessage(IntTOStr(NodeCount));
-
-
+    Clear(Root.Index);
 end;
 
 
@@ -870,8 +906,6 @@ begin
   begin
     if Result.Activate <> 0 then
     begin
-      if Result.RunCount = 0 then
-        Result.RunCount := 1;
       Run(Result);
       Result.Activate := 0;
     end;
