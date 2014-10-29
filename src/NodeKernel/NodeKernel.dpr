@@ -1,7 +1,7 @@
 program NodeKernel;
 
 uses
-  Forms, Console, Kernel;
+  Forms, Console;
 
 {$R *.res}
 

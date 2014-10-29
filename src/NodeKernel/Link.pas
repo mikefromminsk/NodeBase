@@ -47,6 +47,9 @@ type
 
   CString = array[0..Count] of String;
 
+  TLink = class;
+  ALink = array of TLink;
+
   TLink = class
   public
 
@@ -55,12 +58,12 @@ type
     Source      : TLink;
     Vars        : TMap;
     FType       : TLink;
-    Params      : Array of TLink;
+    Params      : ALink;
     Value       : TLink;
     FTrue       : TLink;
     FElse       : TLink;
     Next        : TLink;
-    Local       : Array of TLink;
+    Local       : ALink;
     constructor Create; overload;
     constructor Create(Str: string); overload;
     procedure rec(Str: String; Link: TLink);
@@ -118,7 +121,6 @@ var
 begin
   Create;
   Strings := ToStrings(Str);
-
   Name := Strings[iName];
   ID   := Strings[iID];
   if Strings[iSource] <> '' then
@@ -151,9 +153,10 @@ begin
   end;
 end;
 
-procedure TLink.rec(Str: String; Link: TLink);
+
+procedure TLink.rec(Str: String; Link: TLink);   //rename
 var
-  PosMin, ParamsLength: Integer;
+  PosMin, PosCloseTag, ParamsLength: Integer;
   ParamsStr: String;
   SysChar: Char;
 begin
@@ -161,11 +164,15 @@ begin
   begin
     PosMin := Index([sParams, sParamAnd], Str);
     SetLength(Link.Params, Length(Link.Params) + 1);
-    Link.Params[High(Link.Params)] := TLink.Create(Copy(Str, 1, PosMin - 1));
+    Link.Params[High(Link.Params)] := TLink.UserParse(Copy(Str, 1, PosMin - 1));
     if (PosMin <> MaxInt) and (Str[PosMin] = sParams) then
     begin
-      ParamsLength := Length(Str) - FindCloseTag(Str, sParams, sParamEnd);
-      ParamsStr := Copy(Str, PosMin + 1,  ParamsLength - 1); //CopyI
+      PosCloseTag := FindCloseTag(Str, sParams, sParamEnd);
+      if PosCloseTag = 0 then
+        ParamsLength := Length(Str)
+      else
+        ParamsLength := PosCloseTag - PosMin;
+      ParamsStr := Copy(Str, PosMin + 1,  ParamsLength - 1);
       Delete(Str, PosMin, ParamsLength + 1);
       rec(ParamsStr, Link.Params[High(Link.Params)]);
     end;
@@ -174,8 +181,9 @@ begin
 end;
 
 
+
 constructor TLink.UserParse(Str: String);
-//Name@ID^Source$Names=Values:FType?Params#Value>FTrue|FElse
+//Name@ID^Source$Names=Values:FType?param?param&param;&param#Value>FTrue|FElse
 //Next
 //
 //Local
@@ -190,9 +198,7 @@ begin
   if ((PosValue <> 0) and (i = 0)) or
      ((PosValue <> 0) and (i <> 0) and (PosValue < i)) then
     Str[PosValue] := sValue;
-
   Strings := ToStrings(Str);
-
   Name := Strings[iName];
   ID   := Strings[iID];
   if Strings[iSource] <> '' then
