@@ -8,6 +8,12 @@ Neuro-information model
 Generation Pi Code
 
 
+[principles]
+clean sheet better
+interactivity better speed
+speed better ram
+
+
 
 [Application System]
 
@@ -107,7 +113,7 @@ stackoverflow
 delete first element in stack when stack out
 
 
-
+dof file change in other pc
 
 
 [Generator]
@@ -121,26 +127,9 @@ like dirrective
 like comments
 
 
-testing in right panel
-in listbox
-dbl click into local
-like explorer
 
 
 
-testing saveunit 
-
-testing destroyunit
-
-
-
-
-
-
-
-
-
-RootPath
 RootIndexRangeBegin
 RootIndexRangeEnd
 

@@ -16,6 +16,7 @@ const
 
   naLastID = 'LASTID';
   naServerPort = 'SERVERPORT';
+  naRootPath = 'ROOTPATH';
 
 //NodeType
   ntEmpty   = 'EMPTY';

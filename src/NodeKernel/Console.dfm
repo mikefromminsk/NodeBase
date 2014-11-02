@@ -1,6 +1,6 @@
 object GG: TGG
-  Left = 204
-  Top = 115
+  Left = 833
+  Top = 218
   Width = 533
   Height = 510
   BorderIcons = [biSystemMenu]

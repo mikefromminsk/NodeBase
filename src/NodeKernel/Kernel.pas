@@ -85,12 +85,12 @@ type
 	  function LoadNode(Node: TNode): TNode;
 	  procedure LoadModule(Node: TNode);
 
+    procedure SaveNode(Node: TNode);
     procedure FreeNode(Node: TNode);
 
     procedure SaveUnit(Node: TNode);
     procedure FreeUnit(Node: TNode);
 
-    procedure SaveNode(Node: TNode);
     procedure IndexSave(Node: TNode);
     procedure IndexDispose(Node: TNode);
 
@@ -789,12 +789,15 @@ var
 begin
   Buf := Node;
   SetLength(Indexes, 0);
-  while Buf <> nil do
+  while Buf <> Root do
   begin
     SetLength(Indexes, Length(Indexes) + 1);
     Indexes[High(Indexes)] := Buf.Name;
     Buf := Buf.ParentIndex;
   end;
+  SetLength(Indexes, Length(Indexes) + 1);
+  Indexes[High(Indexes)] := Root.Attr[naRootPath];
+
   if (Length(Indexes) > 1) and (Indexes[High(Indexes) - 1] <> sID) then Exit;
   ToFileSystemName(Indexes);
   Body := GetNodeBody(Node);
