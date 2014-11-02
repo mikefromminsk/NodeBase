@@ -14,6 +14,7 @@ type
     Path          : String;          //test
     Name          : String;
     Data          : String;
+    
     Source        : TNode;
     ValueType     : TNode;
     Params        : ANode;
@@ -30,24 +31,23 @@ type
     ParentParams  : TNode;
     ParentLocal   : TNode;
 
-    FType       : Integer;
-    Status      : Integer;
-    Activate    : Integer;
-    Handle      : Integer;
 
-    Vars        : TMap;  //Attr
+    Status        : Integer;
+    Attributes    : TMap;
+
+    function  GetType: String;
+    procedure SetType(Value: String);
+    function  GetAttr(Name: String): String;
+    procedure SetAttr(Name, Value: String);
+    property  FType: String read GetType write SetType;
+    property  Attr[Name: String]: String read GetAttr write SetAttr;
   end;
 
 
   TKernel = class
-    LastID    : Integer;
     Root      : TNode;
     Prev      : TNode;
     FUnit     : TNode;
-
-
-    Options: TMap;
-    NodesCount: Integer; //test
 
     constructor Create;
 
@@ -61,9 +61,6 @@ type
 
 	  procedure SetSource({var} Node: TNode; Source: TNode);
 	  function GetSource(Node: TNode): TNode;
-
-    procedure SetVars(Node: TNode; Param, Value: String);
-    function GetVars(Node: TNode): String;
 
     procedure SetFType(Node: TNode; FType: TNode);
 
@@ -133,16 +130,39 @@ begin         //dangeros to param
 end;
 
 
+{ TNode }
+
+function TNode.GetAttr(Name: String): String;
+begin
+  Result := '';
+  if Attributes <> nil then
+    Result := Attributes.GetValue(Name);
+end;
+
+procedure TNode.SetAttr(Name, Value: String);
+begin
+  if Attributes = nil then
+    Attributes := TMap.Create;
+  Attributes.SetValue(Name, Value);
+end;
+
+function TNode.GetType: String;
+begin
+  Result := Attr[naType];
+end;
+
+procedure TNode.SetType(Value: String);
+begin
+  Attr[naType] := Value;
+end;
+
 { TKernel }
 
 constructor TKernel.Create;
 begin
-
-  Options := TMap.Create(LoadFromFile(OptionsFileName), #10);
-  LastID := StrToIntDef(Options.GetValue('LastID'), 0);
   Root := TNode.Create;
-  Root.FType := naRoot;
-  Root.Name :=  StrToDef(Options.GetValue('RootName'), 'data');
+  Root.Attributes := TMap.Create(LoadFromFile(RootFileName), #10);
+  Root.FType := ntRoot;
 
   FUnit := NewNode('module');
 end;
@@ -150,8 +170,8 @@ end;
 
 function TKernel.NextID: String;
 begin
-  Inc(LastID);
-  Result := sID + IntToStr(LastID);
+  Root.Attr[naLastID] := IntToStr(StrToIntDef(Root.Attr[naLastID], 0) + 1);
+  Result := sID + Root.Attr[naLastID];
 end;
 
 
@@ -212,7 +232,7 @@ begin
     for i:=0 to High(Node.Local) do
     begin
       Local := Node.Local[i];
-      if Local.FType = naModule then
+      if Local.FType = ntModule then
       begin
         Result := FindNameInNode(Local, Index);
         if Result <> nil then Exit;
@@ -232,12 +252,11 @@ var
   function AddIndex(Node: TNode; Name: Char): TNode;
   begin
     Result := TNode.Create;
-    Result.FType := naEmpty;
+    Result.FType := ntEmpty;
     Result.Name := Name;
     Result.ParentIndex := Node;
     AddItem(Node.Index, Result);
     Result := Node.Index[High(Node.Index)];
-    Inc(NodesCount);   //test
     Result.Path := GetIndex(Result); //test
   end;
 begin
@@ -259,32 +278,6 @@ begin
     Result := nil;
 end;
 
-procedure TKernel.SetVars(Node: TNode; Param, Value: String);
-begin
-       if Param = vnType     then Node.FType     := StrToIntDef(Value, 0)
-  else if Param = 'ACTIVATE' then Node.Activate := StrToIntDef(Value, 1)
-  else if Param = 'HANDLE'   then Node.Handle   := StrToIntDef(Value, 0)
-  else
-  begin
-    if Node.Vars = nil then
-      Node.Vars := TMap.Create;
-    Node.Vars.Push(Param, Value);
-  end;    
-end;
-
-
-function TKernel.GetVars(Node: TNode): String;
-begin
-  Result := '';
-  if Node = nil then Exit;
-  if Node.FType <> 0 then
-    Result := Result + '&' + vnType + '=' + IntToStr(Node.FType);
-  if Node.Activate <> 0 then
-    Result := Result + '&' + 'ACTIVATE' + '=' + FloatToStr(Node.Activate);
-  if Node.Handle <> 0 then
-    Result := Result + '&' + 'HANDLE' + '=' + FloatToStr(Node.Handle);
-  Delete(Result, 1, 1);
-end;
 
 procedure TKernel.SetSource(Node: TNode; Source: TNode);
 begin
@@ -424,7 +417,7 @@ end;
 
 function TKernel.SetLocal(Node: TNode; Local: TNode): TNode;
 begin
-  if Node.FType = naEmpty
+  if Node.FType = ntEmpty
   then Local.ParentName  := Node
   else Local.ParentLocal := Node;
   AddItem(Node.Local, Local);
@@ -452,7 +445,7 @@ begin
   begin
     Result := NewIndex(sID + Link.ID);
 
-    if Result.FType = naEmpty then
+    if Result.FType = ntEmpty then
       LoadNode(Result);
   end;
 
@@ -460,27 +453,25 @@ begin
   begin
     SetName(Result, Link.Name);
 
-    if Result.FType <> naLoad then   //Initialization
+    if Result.FType <> ntLoad then   //Initialization
     begin
       case Link.Name[1] of
-        '/' : Result.FType := naModule;
-        '!' : Result.FType := naData;
-        '0'..'9', '-': Result.FType := naNumber;
-        else  Result.FType := naWord;
+        '/' : Result.FType := ntModule;
+        '!' : Result.FType := ntData;
+        '0'..'9', '-': Result.FType := ntNumber;
+        else  Result.FType := ntWord;
       end;
 
-      if Result.FType = naWord then
+      if Result.FType = ntWord then
         Result.Source := FindName(Result.ParentName);
 
-      if Result.FType = naNumber then
+      if Result.FType = ntNumber then
       begin
-        {if Pos(sDecimalSeparator, Link.Name) = 0
-        then Link.Name := sData + IntToStr4  (  StrToIntDef(Link.Name, 0))
-        else }Link.Name := sData + FloatToStr8(StrToFloatDef(Link.Name, 0));
-        Result.FType := naData;
+        Link.Name := sData + FloatToStr8(StrToFloatDef(Link.Name, 0));
+        Result.FType := ntData;
       end;
 
-      if Result.FType = naData then
+      if Result.FType = ntData then
         SetData(Result, DecodeStr(Copy(Link.Name, 2, MaxInt)));
     end;
   end;
@@ -489,7 +480,7 @@ begin
 
   if Link.Source <> nil then
   begin
-    if (Result.FType = naWord) and (Result.FType <> naLoad) then
+    if (Result.FType = ntWord) and (Result.FType <> ntLoad) then
     begin  //hardcode
       SetSource(GetSource(Result), NewNode(Link.Source));
       Result := GetSource(Result)
@@ -500,7 +491,7 @@ begin
 
   if Link.Vars <> nil then
     for i:=0 to Link.Vars.High do
-      SetVars(Result, Link.Vars.Names[i], Link.Vars.Values[i]);
+      Result.Attr[Link.Vars.Names[i]] := Link.Vars.Values[i]; //optimization
 
   if Link.FType <> nil then
     SetFType(Result, NewNode(Link.FType));
@@ -535,7 +526,7 @@ var
   Body, Path: String;
 begin
   if Node = nil then Exit;
-  Node.FType := naLoad;
+  Node.FType := ntLoad;
 
   SetLength(Indexes, 0);
   while Node <> nil do
@@ -565,14 +556,14 @@ begin
   FileExt := LowerCase(ExtractFileExt(FileName));
   if FileExt = ExternalModuleExtention then
   begin
-    if Node.Handle = 0 then
+    if Node.Attr[naHandle] = '' then
     begin
-      Node.Handle := GetFunctionList(FileName, List);
+      Node.Attr[naHandle] := IntToStr(GetFunctionList(FileName, List));
       for i:=0 to High(List) do
       begin
         Func := NewNode(List[i]);
-        Func.FType := naDLLFunc;
-        Func.Handle := GetProcAddress(Node.Handle, List[i]);
+        Func.FType := ntDLLFunc;
+        Func.Attr[naHandle] := IntToStr(GetProcAddress(StrToInt(Node.Attr[naHandle]), List[i]));
         SetLocal(Node, Func);
       end;
     end;
@@ -601,7 +592,7 @@ var
   IfFloat: Integer;
 begin
   BVal := BVal + 1;
-  Func := Node.Handle;
+  Func := StrToInt(Node.Attr[naHandle]);
   if (Func = 0) then Exit;
   EAXParam := 0; EDXParam := 0; ECXParam := 0; RegParamCount := 0;
 
@@ -684,18 +675,18 @@ begin
   NextNode:
   if Node = nil then Exit;
 
-  if Node.FType = naModule then
+  if Node.FType = ntModule then
     LoadModule(Node);
   for i:=0 to High(Node.Params) do
     Run(Node.Params[i]);
   if (Node.Source <> nil) and (((Node.Source.ParentLocal = FUnit) and (Node.Source.Next <> nil))   //recode  2
-    or (Node.Source.FType = naDLLFunc)) then
+    or (Node.Source.FType = ntDLLFunc)) then
   begin
     for i:=0 to High(Node.Params) do
       SetParam(GetSource(Node), GetValue(Node.Params[i]), i);
     Run(Node.Source);
   end;
-  if Node.FType = naDLLFunc then
+  if Node.FType = ntDLLFunc then
     CallFunc(Node);
   if (Node.FTrue <> nil) or (Node.FElse <> nil) then
   begin
@@ -762,12 +753,12 @@ begin
   if Length(Node.Index) = 0 then
   begin
     DeleteItem(Node.ParentIndex.Index, Node);
-    if Node.ParentIndex.FType = naEmpty then
+    if Node.ParentIndex.FType = ntEmpty then
       FreeNode(Node.ParentIndex);
     Node.Free;
   end
   else
-    Node.FType := naEmpty;
+    Node.FType := ntEmpty;
 end;
 
 procedure TKernel.FreeUnit(Node: TNode);
@@ -861,7 +852,13 @@ begin
   if Node.Source <> nil then
     Result := Result + sSource + GetIndex(Node.Source);
 
-  Result := Result + sVars + GetVars(Node);
+  if Node.Attributes <> nil then
+  begin
+    for i:=0 to Node.Attributes.High do
+      Result := Result + Node.Attributes.Names[i] + sVal + Node.Attributes.Values[i] + sAnd;
+    Delete(Result, Length(Result) - Length(sAnd) + 1, Length(sAnd));
+  end;
+
 
   if Node.ValueType <> nil then
     Result := Result + sType + GetIndex(Node.ValueType);
@@ -870,8 +867,8 @@ begin
   begin
     Result := Result + sParams;
     for i:=0 to High(Node.Params) do
-      Result := Result + GetIndex(Node.Params[i]) + sParamAnd;
-    Delete(Result, Length(Result) - Length(sParamAnd) + 1, Length(sParamAnd));
+      Result := Result + GetIndex(Node.Params[i]) + sAnd;
+    Delete(Result, Length(Result) - Length(sAnd) + 1, Length(sAnd));
   end;
 
   if Node.Data <> '' then
@@ -904,12 +901,10 @@ begin
   NextNode(Prev, Result);
   if Result <> nil then
   begin
-    if Result.Activate <> 0 then
-    begin
+    if MapExistName(Result.Attributes, naActivate) then
       Run(Result);
-      Result.Activate := 0;
-    end;
   end;
 end;
+
 
 end.

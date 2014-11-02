@@ -14,8 +14,8 @@ const
   sVars       = '$';
   sType       = ':';
   sParams     = '?';
-  sParamValue = '=';
-  sParamAnd   = '&';
+  sVal        = '=';
+  sAnd        = '&';
   sParamEnd   = ';';
   sValue      = '#';
   sTrue       = '>';
@@ -126,12 +126,12 @@ begin
   if Strings[iSource] <> '' then
     Source  := TLink.BaseParse(Strings[iSource]);
   if Strings[iVars] <> '' then
-    Vars := TMap.Create(AnsiUpperCase(Strings[iVars]), sParamAnd);
+    Vars := TMap.Create(AnsiUpperCase(Strings[iVars]), sAnd);
   if Strings[iType] <> '' then
     FType := TLink.BaseParse(Strings[iType]);
   if Strings[iParams] <> '' then
   begin
-    Arr := slice(Strings[iParams], sParamAnd);
+    Arr := slice(Strings[iParams], sAnd);
     SetLength(Params, Length(Arr));
     for i:=0 to High(Arr) do
       Params[i] := TLink.BaseParse(Arr[i]);
@@ -162,7 +162,7 @@ var
 begin
   while Str <> '' do
   begin
-    PosMin := Index([sParams, sParamAnd], Str);
+    PosMin := Index([sParams, sAnd], Str);
     SetLength(Link.Params, Length(Link.Params) + 1);
     Link.Params[High(Link.Params)] := TLink.UserParse(Copy(Str, 1, PosMin - 1));
     if (PosMin <> MaxInt) and (Str[PosMin] = sParams) then
@@ -193,7 +193,7 @@ var
   Arr   : AString;
 begin
   Create;
-  PosValue := Pos(sParamValue, Str);
+  PosValue := Pos(sVal, Str);
   i := Pos(sParams, Str);
   if ((PosValue <> 0) and (i = 0)) or
      ((PosValue <> 0) and (i <> 0) and (PosValue < i)) then
@@ -204,7 +204,7 @@ begin
   if Strings[iSource] <> '' then
     Source  := TLink.UserParse(Strings[iSource]);
   if Strings[iVars] <> '' then
-    Vars := TMap.Create(AnsiUpperCase(Strings[iVars]), sParamAnd);
+    Vars := TMap.Create(AnsiUpperCase(Strings[iVars]), sAnd);
   if Strings[iType] <> '' then
     FType := TLink.UserParse(Strings[iType]);
   if Strings[iParams] <> '' then

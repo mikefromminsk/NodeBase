@@ -56,7 +56,8 @@ MaxAddrSpace=200
 
 NodeBase into any hdd or ssd
 
-
+findItem
+if find then set first position
 
 
 [System]
@@ -136,6 +137,12 @@ testing destroyunit
 
 
 
+
+
+
+RootPath
+RootIndexRangeBegin
+RootIndexRangeEnd
 
 
 

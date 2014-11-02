@@ -50,9 +50,6 @@ var
   GG: TGG;
   Kernel: TKernel;
 
-const
-  ConsoleFileName = 'Console.html';
-
 implementation
 
 {$R *.dfm}
@@ -61,11 +58,11 @@ procedure TGG.FormCreate(Sender: TObject);
 var i: Integer;
 begin
   Kernel := TKernel.Create;
-  
-  IdHTTPServer1.DefaultPort := StrToIntDef(MapGetValue(Kernel.Options, 'ServerPort'), 80);
 
-  if not FileExists(OptionsFileName) then
-    QueryBox.Lines.Add('Not exist options file (' + OptionsFileName + ')');
+  IdHTTPServer1.DefaultPort := StrToIntDef(Kernel.Root.Attr[naServerPort], 80);
+
+  if not FileExists(RootFileName) then
+    QueryBox.Lines.Add('Not exist root file (' + RootFileName + ')');
 
 
   try
@@ -73,7 +70,7 @@ begin
     QueryBox.Lines.Add('DefaultPort: ' + IntToStr(IdHTTPServer1.DefaultPort));
   except
     on E: Exception do
-      QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) + ' already open. Change ServerPort in ' + OptionsFileName +' file.');
+      QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) + ' already open. Change ServerPort in ' + RootFileName +' file.');
   end;
 
   for i:=0 to InputBox.Lines.Count - 1 do

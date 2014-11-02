@@ -8,26 +8,32 @@ uses
 
 const
 
-//VarName
-  vnType = 'TYPE';
-  vnGenerate = 'GENERATE';
+//NodeAttribute
+  naType = 'TYPE';
+  {vnGenerate = 'GENERATE';     }
+  naHandle = 'HANDLE';
+  naActivate = 'ACTIVATE';
+
+  naLastID = 'LASTID';
+  naServerPort = 'SERVERPORT';
 
 //NodeType
-  naEmpty = 0;
-  naLoad = 1;
-  naData = 3;
-  naWord = 4;
-  naModule = 5;
-  naDLLFunc = 6;
-  naNumber = 7;
-  naRoot = 8;
+  ntEmpty   = 'EMPTY';
+  ntLoad    = 'LOAD';
+  ntData    = 'DATA';
+  ntWord    = 'WORD';
+  ntModule  = 'MODULE';
+  ntDLLFunc = 'DLLFUNC';
+  ntNumber  = 'NUMBER';
+  ntRoot    = 'ROOT';
 
 //NodeStatus
   nsSave = 1;
   nsFree = 2;
 
 //File Names
-  OptionsFileName = 'options.ini';
+  ConsoleFileName = 'Console.html';
+  RootFileName = 'root.ini';
   NodeFileExtention = '.node';
   ExternalModuleExtention = '.dll';
   NodeFileName = 'Node' + NodeFileExtention;
@@ -37,11 +43,14 @@ type
   AInteger = Array of Integer;
 
   TMap = class
+  public
     Names: AString;
     Values: AString;
     constructor Create; overload;
     constructor Create(Text: String; Delimeter: String); overload;
+    function IndexOf(Name: String): Integer;
     function GetValue(Name: String): String;
+    procedure SetValue(Name, Value: String);
     procedure Push(Name, Value: String);
     function High: Integer;
     destructor Destroy; override;
@@ -62,7 +71,7 @@ function StrToInt(Str: String): Integer;
 function FloatToStr(Number: Double): String;
 function StrToFloat(Str: String): Double;
 function Now: Double;
-procedure MapSetPush(Map: TMap; Name, Value: String);
+procedure MapSetValue(Map: TMap; Name, Value: String);
 function MapGetValue(Map: TMap; Name: String): String;
 function MapExistName(Map: TMap; Name: String): Boolean;
 function slice(Text: String; Delimeter: String): AString;
@@ -252,17 +261,38 @@ begin
   Result := System.High(Names);
 end;
 
-function TMap.GetValue(Name: String): String;
-var i: Integer;
+function TMap.IndexOf(Name: String): Integer;
+var
+  i, Index: Integer;
 begin
-  Result := '';
-  //Name := AnsiUpperCase(Name);
+  Result := -1;
   for i:=0 to High do
     if Names[i] = Name then
     begin
-      Result := Values[i];
+      Result := i;
       Exit;
     end;
+end;
+
+function TMap.GetValue(Name: String): String;
+var i, Index: Integer;
+begin
+  Index := IndexOf(Name);
+  if Index = -1 then
+    Result := ''
+  else
+    Result := Values[Index]
+end;
+
+procedure TMap.SetValue(Name, Value: String);
+var
+  Index: Integer;
+begin
+  Index := IndexOf(Name);
+  if Index = -1 then
+    Push(Name, Value)
+  else
+    Values[Index] := Value;
 end;
 
 procedure TMap.Push(Name, Value: String);
@@ -287,24 +317,20 @@ begin
 end;
 
 function MapExistName(Map: TMap; Name: String): Boolean;
-var i: Integer;
+var Index: Integer;
 begin
   Result := False;
   if Map = nil then Exit;
-  for i:=0 to High(Map.Names) do
-    if Map.Names[i] = Name then
-    begin
-      Result := True;
-      Exit;
-    end;
+  Index := Map.IndexOf(Name);
+  if Index <> -1 then
+    Result := True;
 end;
 
-procedure MapSetPush(Map: TMap; Name, Value: String);
+procedure MapSetValue(Map: TMap; Name, Value: String);
 begin
   if Map = nil then Exit;
-  Map.Push(Name, Value);
+  Map.SetValue(Name, Value);
 end;
-
 
 function StrToDef(Str, Default: String): String;
 begin

@@ -84,7 +84,7 @@ begin
     3: Result := FuncNode.Value;
   end;
   SetLength(Arr, 0);
-  if Result.FType = naModule then
+  if Result.FType = ntModule then
     Result := GetRandomSource(Result);
 end;
 
@@ -148,7 +148,7 @@ begin
   for i:=0 to Random(SequenceCount) do
   begin
     NewNode := NewRandomNode(FuncNode);
-    if GetSource(NewNode).FType = naDllFunc then Continue;
+    if GetSource(NewNode).FType = ntDllFunc then Continue;
     NextNode(Node, NewNode);
     SetValue(Node, NewRandomNode(FuncNode));
     if Node.Value.Source.Params <> nil then
