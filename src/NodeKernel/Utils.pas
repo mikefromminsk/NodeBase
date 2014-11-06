@@ -9,16 +9,16 @@ uses
 const
 
 //NodeAttribute
-  naType = 'TYPE';
-  {vnGenerate = 'GENERATE';     }
-  naHandle = 'HANDLE';
-  naActivate = 'ACTIVATE';
+  naType        = 'TYPE';
+  naHandle      = 'HANDLE';
+  naActivate    = 'ACTIVATE';
+  naLastID      = 'LASTID';
+  naStartID     = 'STARTID';
+  naServerPort  = 'SERVERPORT';
+  naRootPath    = 'ROOTPATH';
+  naGenerate    = 'GENERATE';
 
-  naLastID = 'LASTID';
-  naServerPort = 'SERVERPORT';
-  naRootPath = 'ROOTPATH';
-
-//NodeType
+//naType Values
   ntEmpty   = 'EMPTY';
   ntLoad    = 'LOAD';
   ntData    = 'DATA';
@@ -36,8 +36,8 @@ const
   ConsoleFileName = 'Console.html';
   RootFileName = 'root.ini';
   NodeFileExtention = '.node';
-  ExternalModuleExtention = '.dll';
   NodeFileName = 'Node' + NodeFileExtention;
+  ExternalModuleExtention = '.dll';
 
 type
   AString = Array of String;

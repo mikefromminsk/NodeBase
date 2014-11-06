@@ -55,26 +55,16 @@ implementation
 {$R *.dfm}
 
 procedure TGG.FormCreate(Sender: TObject);
-var i: Integer;
+var
+  i: Integer;
+  Node: TNode;
 begin
   Kernel := TKernel.Create;
 
-  IdHTTPServer1.DefaultPort := StrToIntDef(Kernel.Root.Attr[naServerPort], 80);
-
-  if not FileExists(RootFileName) then
-    QueryBox.Lines.Add('Not exist root file (' + RootFileName + ')');
-
-
-  try
-    IdHTTPServer1.Active := True;
-    QueryBox.Lines.Add('DefaultPort: ' + IntToStr(IdHTTPServer1.DefaultPort));
-  except
-    on E: Exception do
-      QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) + ' already open. Change ServerPort in ' + RootFileName +' file.');
-  end;
-
   for i:=0 to InputBox.Lines.Count - 1 do
     ConsoleExec(InputBox.Lines[i]);
+
+
 end;
 
 function TGG.ConsoleExec(Line: String; WriteToConsole: Boolean = False): TNode;
@@ -89,13 +79,10 @@ begin
     if Value <> nil then
     begin
       Str := Value.Data;
-      if Length(Str) = 4 then
-        Str := IntToStr(StrToInt4(Str))
+      if Length(Str) = 8 then
+        Str := FloatToStr(StrToFloat8(Str))
       else
-        if Length(Str) = 8 then
-          Str := FloatToStr(StrToFloat8(Str))
-        else
-          Str := EncodeStr(Str);
+        Str := EncodeStr(Str);
     end;
   end;
   if Str = '' then
@@ -135,6 +122,18 @@ end;
 
 procedure TGG.FormShow(Sender: TObject);
 begin
+  if not FileExists(RootFileName) then
+    QueryBox.Lines.Add('Not exist root file (' + RootFileName + ')');
+  try
+    IdHTTPServer1.DefaultPort := StrToIntDef(Kernel.Root.Attr[naServerPort], 80);
+    IdHTTPServer1.Active := True;
+    QueryBox.Lines.Add('DefaultPort: ' + IntToStr(IdHTTPServer1.DefaultPort));
+  except
+    on E: Exception do
+      QueryBox.Lines.Add('Error: Port ' + IntToStr(IdHTTPServer1.DefaultPort) +
+        ' already open. Change ServerPort in ' + RootFileName +' file.');
+  end;
+
   InputBox.SelStart := Length(InputBox.Lines.Text);
 end;
 

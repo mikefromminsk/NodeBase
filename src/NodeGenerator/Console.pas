@@ -10,7 +10,6 @@ uses
 type
   TGG = class(TForm)
     GenerateBox: TListBox;
-    TaskBox: TListBox;
     Splitter: TSplitter;
     procedure FormCreate(Sender: TObject);
     procedure ShowNode(Node: TNode; List: TListBox);
@@ -28,12 +27,17 @@ procedure TGG.FormCreate(Sender: TObject);
 var Link: TLink;
 begin
   Generator := TGenerator.Create;
-  Generator.UserNode('/dll/math32.node$activate');
-  ShowNode(Generator.GenerateNode, GenerateBox);
 
-  {Generator.Task := Generator.UserNode('task?roundto?x&-2;&3,14');
-  Generator.CreateApplication;
-  ShowNode(Generator.Task, TaskBox); }
+  with Generator do
+  begin
+    UserNode('/dll/math32.node$activate');
+    ShowNode(GenerateNode, GenerateBox);
+    
+    Root.Attr[naStartID] := '1000';
+    FindSolution(UserNode('task?roundto?x&-2;&3,14'));
+    
+  end;
+  {ShowNode(Generator.Task, TaskBox); }
 end;
 
 procedure TGG.ShowNode(Node: TNode; List: TListBox);
@@ -80,7 +84,7 @@ begin
     Res := '';
     if Node.Value <> nil then
     begin
-      if GetValue(Node).FType = naData then
+      if GetValue(Node).FType = ntData then
         Res := ': Result = ' + EncodeStr(GetValue(Node).Data)
       else
         Res := ': Result = ' + GetIndex(GetValue(Node));

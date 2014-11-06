@@ -14,7 +14,7 @@ object GG: TGG
   PixelsPerInch = 96
   TextHeight = 17
   object Splitter: TSplitter
-    Left = 293
+    Left = 592
     Top = 0
     Height = 611
     Align = alRight
@@ -22,21 +22,11 @@ object GG: TGG
   object GenerateBox: TListBox
     Left = 0
     Top = 0
-    Width = 293
+    Width = 592
     Height = 611
     Align = alClient
     BorderStyle = bsNone
     ItemHeight = 17
     TabOrder = 0
-  end
-  object TaskBox: TListBox
-    Left = 296
-    Top = 0
-    Width = 299
-    Height = 611
-    Align = alRight
-    BorderStyle = bsNone
-    ItemHeight = 17
-    TabOrder = 1
   end
 end

@@ -27,7 +27,7 @@ type
 
 
   
-    Task: TNode;
+
 
     function GetRandomSource(FuncNode: TNode): TNode;
     function NewRandomNode(FuncNode: TNode): TNode;
@@ -53,13 +53,9 @@ type
 
 
 
-    procedure FindGenerateNode(Node: TNode; var Nodes: ANode);
+    procedure FindUnknown(Node: TNode; var Unknown: ANode);
 
-    procedure GenerateNodes(var Nodes: ANode);
-
-    procedure SaveResult(Node: TNode);
-    procedure SaveAndDestroyParams(Node: TNode);
-    procedure CreateApplication;
+    procedure FindSolution(Task: TNode);
 
   end;
 
@@ -246,7 +242,6 @@ begin
   Result := NewNode(NextID);
   SetValue(Result, NewNode(NextID));
   CreateFunc(Result, SubLevel);
-  Run(Result);
 end;
 
 
@@ -254,69 +249,51 @@ end;
 
 
 
-procedure TGenerator.FindGenerateNode(Node: TNode; var Nodes: ANode);
+
+
+
+procedure TGenerator.FindUnknown(Node: TNode; var Unknown: ANode);  //out
 var i: Integer;
 begin
   for i:=0 to High(Node.Params) do
   begin
     if Node.Params[i].Source = nil then
-      MapSetPush(Node.Params[i].Vars, vnGenerate, '');
+      Node.Params[i].Attr[naGenerate] := 'T';
 
-    if MapExistName(Node.Params[i].Vars, vnGenerate) then
-    begin
-      SetLength(Nodes, Length(Nodes));
-      Nodes[High(Nodes)] := Node.Params[i];
-    end;
-  end;
-end;
-
-procedure TGenerator.GenerateNodes(var Nodes: ANode);
-var i: Integer;
-begin
-  for i:=0 to High(Nodes) do
-    Nodes[i].Source := GenerateNode.Source;
-end;
-
-procedure TGenerator.SaveAndDestroyParams(Node: TNode);
-var
-  i: Integer;
-begin
-  for i:=0 to High(Node.Params) do
-    if MapExistName(Node.Params[i].Vars, 'GENERATE') then
-    begin
-      SaveUnit(Node.Params[i]);
-      FreeUnit(Node.Params[i]);
-    end;
-end;
-
-procedure TGenerator.SaveResult(Node: TNode);
-var
-  i: Integer;
-begin
-  for i:=0 to High(Node.Params) do
-  begin
-    if MapExistName(Node.Params[i].Vars, 'GENERATE') then
-      SetLocal(Task, Node.Params[i]);
+    if Node.Params[i].Attr[naGenerate] <> '' then
+      AddItem(Unknown, Node.Params[i]);
   end;
 end;
 
 
-procedure TGenerator.CreateApplication;
+procedure TGenerator.FindSolution(Task: TNode);
 var
+  Unknown: ANode;
+  Branch: TNode;
   i: Integer;
-  GenNode: ANode;
 begin
-  //SetLength(GenNode, 0);
-  FindGenerateNode(Task, GenNode);
-  GenerateParams(Task);
+  //Set Branch
+  Branch := NewNode(Root.Attr[naStartID]);
+
+  FindUnknown(Task, Unknown);
+
+  //GenerateNodes
+  for i:=0 to High(Unknown) do
+    Unknown[i].Source := GenerateNode;
+
   Run(Task);
 
-  if CompareWithZero(GetValue(Task).Data) = 0 then
+  {if CompareWithZero(GetValue(Task).Data) = 0 then
   begin
-    SaveResult(Task);
-    SaveAndDestroyParams(Task);
-  end;
+    SaveBranch(Branch);
 
+    for i:=0 to High(Unknown) do
+     SaveResult
+
+  end;  }
+  FreeBranch(Branch);
+
+  Unknown := nil;
 end;
 
 

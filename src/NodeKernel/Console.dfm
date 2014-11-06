@@ -19,8 +19,8 @@ object GG: TGG
   TextHeight = 13
   object Splitter: TSplitter
     Left = 0
-    Top = 409
-    Width = 517
+    Top = 414
+    Width = 525
     Height = 4
     Cursor = crHandPoint
     Align = alBottom
@@ -30,10 +30,10 @@ object GG: TGG
     ResizeStyle = rsLine
   end
   object Splitter1: TSplitter
-    Left = 228
+    Left = 236
     Top = 0
     Width = 4
-    Height = 409
+    Height = 414
     Align = alRight
     Color = cl3DDkShadow
     MinSize = 1
@@ -41,8 +41,8 @@ object GG: TGG
   end
   object OutputBox: TRichEdit
     Left = 0
-    Top = 413
-    Width = 517
+    Top = 418
+    Width = 525
     Height = 58
     Align = alBottom
     BevelInner = bvNone
@@ -60,10 +60,10 @@ object GG: TGG
     WordWrap = False
   end
   object QueryBox: TRichEdit
-    Left = 232
+    Left = 240
     Top = 0
     Width = 285
-    Height = 409
+    Height = 414
     Align = alRight
     BevelInner = bvNone
     BevelOuter = bvNone
@@ -84,8 +84,8 @@ object GG: TGG
   object InputBox: TRichEdit
     Left = 0
     Top = 0
-    Width = 228
-    Height = 409
+    Width = 236
+    Height = 414
     Align = alClient
     BevelInner = bvNone
     BevelOuter = bvNone

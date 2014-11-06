@@ -11,21 +11,22 @@ type
 
 
   TNode = class
+  public
     Path          : String;          //test
-    Name          : String;
-    Data          : String;
-    
+    IndexName     : String;
+    IndexChilds   : ANode;
+
     Source        : TNode;
     ValueType     : TNode;
     Params        : ANode;
     Local         : ANode;
     Value         : TNode;
+    Data          : String;
     FTrue         : TNode;
     FElse         : TNode;
     Prev          : TNode;
     Next          : TNode;
 
-    Index         : ANode;
     ParentIndex   : TNode;
     ParentName    : TNode;
     ParentParams  : TNode;
@@ -35,12 +36,14 @@ type
     Status        : Integer;
     Attributes    : TMap;
 
+
     function  GetType: String;
     procedure SetType(Value: String);
     function  GetAttr(Name: String): String;
     procedure SetAttr(Name, Value: String);
     property  FType: String read GetType write SetType;
     property  Attr[Name: String]: String read GetAttr write SetAttr;
+    destructor Destroy; override;
   end;
 
 
@@ -59,7 +62,7 @@ type
 
     function NewIndex(Name: String): TNode;
 
-	  procedure SetSource({var} Node: TNode; Source: TNode);
+	  procedure SetSource(Node: TNode; Source: TNode);
 	  function GetSource(Node: TNode): TNode;
 
     procedure SetFType(Node: TNode; FType: TNode);
@@ -86,13 +89,9 @@ type
 	  procedure LoadModule(Node: TNode);
 
     procedure SaveNode(Node: TNode);
-    procedure FreeNode(Node: TNode);
 
-    procedure SaveUnit(Node: TNode);
-    procedure FreeUnit(Node: TNode);
-
-    procedure IndexSave(Node: TNode);
-    procedure IndexDispose(Node: TNode);
+    procedure SaveBranch(Node: TNode);
+    procedure FreeBranch(Node: TNode);
 
     procedure CallFunc(Node: TNode);
     procedure Run(Node: TNode);
@@ -103,6 +102,10 @@ type
     function UserNode(Line: String): TNode; virtual;
 
   end;
+
+procedure Clear(var Nodes: ANode);
+procedure AddItem(var Nodes: ANode; Node: TNode);
+procedure DeleteItem(var Nodes: ANode; Node: TNode);
 
 implementation
 
@@ -156,6 +159,12 @@ begin
   Attr[naType] := Value;
 end;
 
+destructor TNode.Destroy;
+begin
+  if Attributes <> nil then
+    Attributes.Free;
+end;
+
 { TKernel }
 
 constructor TKernel.Create;
@@ -163,15 +172,13 @@ begin
   Root := TNode.Create;
   Root.Attributes := TMap.Create(LoadFromFile(RootFileName), #10);
   Root.FType := ntRoot;
-
-  FUnit := NewNode('module');
 end;
 
 
 function TKernel.NextID: String;
 begin
   Root.Attr[naLastID] := IntToStr(StrToIntDef(Root.Attr[naLastID], 0) + 1);
-  Result := sID + Root.Attr[naLastID];
+  Result := sID + Root.Attr[naStartID] + Root.Attr[naLastID];
 end;
 
 
@@ -249,14 +256,14 @@ end;
 function TKernel.NewIndex(Name: String): TNode;         
 var
   i, j, Index: Integer;
-  function AddIndex(Node: TNode; Name: Char): TNode;
+  function AddIndex(Node: TNode; IndexName: String): TNode;
   begin
     Result := TNode.Create;
     Result.FType := ntEmpty;
-    Result.Name := Name;
+    Result.IndexName := IndexName;
     Result.ParentIndex := Node;
-    AddItem(Node.Index, Result);
-    Result := Node.Index[High(Node.Index)];
+    AddItem(Node.IndexChilds, Result);
+    Result := Node.IndexChilds[High(Node.IndexChilds)];
     Result.Path := GetIndex(Result); //test
   end;
 begin
@@ -264,15 +271,15 @@ begin
   for i:=1 to Length(Name) do
   begin
     Index := -1;
-    for j:=0 to High(Result.Index) do
-      if  Result.Index[j].Name = Name[i] then
+    for j:=0 to High(Result.IndexChilds) do
+      if  Result.IndexChilds[j].IndexName = Name[i] then
       begin
         Index := j;
         Break;
       end;
     if Index = -1
     then Result := AddIndex(Result, Name[i])
-    else Result := Result.Index[Index];
+    else Result := Result.IndexChilds[Index];
   end;
   if Result = Root then
     Result := nil;
@@ -426,7 +433,6 @@ end;
 
 
 
-
 function TKernel.NewNode(Line: String): TNode;
 var Link: TLink;
 begin
@@ -532,7 +538,7 @@ begin
   while Node <> nil do
   begin
     SetLength(Indexes, Length(Indexes) + 1);
-    Indexes[High(Indexes)] := Node.Name;
+    Indexes[High(Indexes)] := Node.IndexName;
     Node := Node.ParentIndex;
   end;
   Path := ToFileSystemName(Indexes) + NodeFileName;
@@ -713,73 +719,6 @@ begin
   Goto NextNode;
 end;
 
-procedure TKernel.SaveUnit(Node: TNode);
-var i: Integer;
-begin
-  if Node = nil then Exit;
-  if Node.Status = nsSave then Exit;
-  Node.Status := nsSave;
-  SaveUnit(Node.Source);
-  SaveUnit(Node.ValueType);
-  for i:=0 to High(Node.Params) do
-    SaveUnit(Node.Params[i]);
-  for i:=0 to High(Node.Local) do
-    SaveUnit(Node.Local[i]);
-  SaveUnit(Node.Value);
-  SaveUnit(Node.FTrue);
-  SaveUnit(Node.FElse);
-  SaveUnit(Node.Next);
-  SaveNode(Node);
-end;
-
-
-{function TKernel.SelectUnit(Node: TNode): ANode;
-begin
-  //sdf
-end;    }
-
-
-procedure TKernel.FreeNode(Node: TNode);
-var i: Integer;
-begin
-  Node.Source := nil;
-  Node.ValueType := nil;
-  Clear(Node.Params);
-  Clear(Node.Local);
-  Node.Value := nil;
-  Node.FTrue := nil;
-  Node.FElse := nil;
-  Node.Next := nil;
-  if Length(Node.Index) = 0 then
-  begin
-    DeleteItem(Node.ParentIndex.Index, Node);
-    if Node.ParentIndex.FType = ntEmpty then
-      FreeNode(Node.ParentIndex);
-    Node.Free;
-  end
-  else
-    Node.FType := ntEmpty;
-end;
-
-procedure TKernel.FreeUnit(Node: TNode);
-var i: Integer;
-begin
-  if Node = nil then Exit;
-  if Node.Status = nsFree then Exit;
-  Node.Status := nsFree;
-  FreeUnit(Node.Source);
-  FreeUnit(Node.ValueType);
-  for i:=0 to High(Node.Params) do
-    FreeUnit(Node.Params[i]);
-  for i:=0 to High(Node.Local) do
-    FreeUnit(Node.Local[i]);
-  FreeUnit(Node.Value);
-  FreeUnit(Node.FTrue);
-  FreeUnit(Node.FElse);
-  FreeUnit(Node.Next);
-  FreeNode(Node);
-end;
-
 
 procedure TKernel.SaveNode(Node: TNode);
 var
@@ -792,7 +731,7 @@ begin
   while Buf <> Root do
   begin
     SetLength(Indexes, Length(Indexes) + 1);
-    Indexes[High(Indexes)] := Buf.Name;
+    Indexes[High(Indexes)] := Buf.IndexName;
     Buf := Buf.ParentIndex;
   end;
   SetLength(Indexes, Length(Indexes) + 1);
@@ -805,26 +744,24 @@ begin
 end;
 
 
-procedure TKernel.IndexSave(Node: TNode); //or Branch
+procedure TKernel.SaveBranch(Node: TNode); //or Branch
 var i: Integer;
 begin
   SaveNode(Node);
-  for i:=0 to High(Node.Index) do
-    IndexSave(Node.Index[i]);
+  for i:=0 to High(Node.IndexChilds) do
+    SaveBranch(Node.IndexChilds[i]);
 end;
 
 
-procedure TKernel.IndexDispose(Node: TNode);
+procedure TKernel.FreeBranch(Node: TNode);
 var i: Integer;
 begin
-  for i:=0 to High(Node.Index) do
-    IndexDispose(Node.Index[i]);
+  for i:=0 to High(Node.IndexChilds) do
+    FreeBranch(Node.IndexChilds[i]);
   if Node <> Root then
-  begin
-    Node.Free;
-  end
+    Node.Free
   else
-    Clear(Root.Index);
+    Clear(Root.IndexChilds);
 end;
 
 
@@ -834,7 +771,7 @@ begin
   if Node <> nil then
     while Node.ParentIndex <> nil do
     begin
-      Result := Node.Name + Result;
+      Result := Node.IndexName + Result;
       Node := Node.ParentIndex;
     end;
 end;
