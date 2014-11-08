@@ -1,4 +1,4 @@
-unit Console;
+unit GeneratorConsole;
 
 interface
 
@@ -8,7 +8,7 @@ uses
   Kernel, Generator, Utils, Link;
 
 type
-  TGG = class(TForm)
+  TGeneratorConsole = class(TForm)
     GenerateBox: TListBox;
     Splitter: TSplitter;
     procedure FormCreate(Sender: TObject);
@@ -16,14 +16,14 @@ type
   end;
 
 var
-  GG: TGG;
+  GeneratorConsoleForm: TGeneratorConsole;
   Generator: TGenerator;
 
 implementation
 
 {$R *.dfm}
 
-procedure TGG.FormCreate(Sender: TObject);
+procedure TGeneratorConsole.FormCreate(Sender: TObject);
 var Link: TLink;
 begin
   Generator := TGenerator.Create;
@@ -40,7 +40,7 @@ begin
   {ShowNode(Generator.Task, TaskBox); }
 end;
 
-procedure TGG.ShowNode(Node: TNode; List: TListBox);
+procedure TGeneratorConsole.ShowNode(Node: TNode; List: TListBox);
 var
   Body: String;
   Str, Res: String;

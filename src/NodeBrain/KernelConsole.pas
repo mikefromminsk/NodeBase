@@ -1,4 +1,4 @@
-unit Console;
+unit KernelConsole;
 
 interface
 
@@ -10,7 +10,7 @@ uses
   Kernel, Utils, Link, IdHTTPHeaderInfo;
 
 type
-  TGG = class(TForm)
+  TKernelConsole = class(TForm)
     OutputBox: TRichEdit;
     Splitter: TSplitter;
     Timer1: TTimer;
@@ -47,14 +47,14 @@ type
   end;
 
 var
-  GG: TGG;
+  KernelConsoleForm: TKernelConsole;
   Kernel: TKernel;
 
 implementation
 
 {$R *.dfm}
 
-procedure TGG.FormCreate(Sender: TObject);
+procedure TKernelConsole.FormCreate(Sender: TObject);
 var
   i: Integer;
   Node: TNode;
@@ -67,7 +67,7 @@ begin
 
 end;
 
-function TGG.ConsoleExec(Line: String; WriteToConsole: Boolean = False): TNode;
+function TKernelConsole.ConsoleExec(Line: String; WriteToConsole: Boolean = False): TNode;
 var
   Value: TNode;
   Str: String;
@@ -87,26 +87,26 @@ begin
   end;
   if Str = '' then
     Str := 'NULL';
-  GG.OutputBox.Lines.Text := Str;
+  OutputBox.Lines.Text := Str;
   if WriteToConsole then
-    GG.InputBox.Lines.Add(Line);
+    InputBox.Lines.Add(Line);
 end;
 
 function HttpResponse(Line: String): String;
 begin
   Result := 'HTTP/1.1 200 OK'#10#10 + Line;
-  GG.QueryBox.Text := GG.QueryBox.Text + Result;
-  GG.QueryBox.Lines.Add('************************'#10);
+  KernelConsoleForm.QueryBox.Text := KernelConsoleForm.QueryBox.Text + Result;
+  KernelConsoleForm.QueryBox.Lines.Add('************************'#10);
 end;
 
-procedure TGG.InputBoxKeyDown(Sender: TObject; var Key: Word;
+procedure TKernelConsole.InputBoxKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if Key = VK_F9 then Close;
   if Key = VK_ESCAPE then PostMessage(Handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
 end;
 
-procedure TGG.InputBoxKeyUp(Sender: TObject; var Key: Word;
+procedure TKernelConsole.InputBoxKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if Key = 13 then
@@ -114,13 +114,13 @@ begin
 end;
 
 //Style Form mini
-procedure TGG.CreateParams(var Params: TCreateParams);
+procedure TKernelConsole.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
   with Params do Style := (Style or WS_POPUP) and not WS_DLGFRAME;
 end;
 
-procedure TGG.FormShow(Sender: TObject);
+procedure TKernelConsole.FormShow(Sender: TObject);
 begin
   if not FileExists(RootFileName) then
     QueryBox.Lines.Add('Not exist root file (' + RootFileName + ')');
@@ -138,7 +138,7 @@ begin
 end;
 
 // TRAY
-procedure TGG.IconMode(n: Integer; Icon: TIcon);
+procedure TKernelConsole.IconMode(n: Integer; Icon: TIcon);
 var Nim: TNotifyIconData;
 //  tip : array[0..63] of Char;
 begin
@@ -150,7 +150,7 @@ begin
     uFlags := NIF_ICON or NIF_MESSAGE or NIF_TIP;
     hicon := Icon.Handle;
     uCallbackMessage := WM_USER + 1;
-    lstrcpyn(szTip, PChar(GG.Caption), SizeOf(szTip));
+    lstrcpyn(szTip, PChar(Caption), SizeOf(szTip));
   end;
   case n of
     1: Shell_NotifyIcon(Nim_Add, @Nim);
@@ -159,7 +159,7 @@ begin
   end;
 end;
 
-procedure TGG.ControlWindow(var Msg: TMessage);
+procedure TKernelConsole.ControlWindow(var Msg: TMessage);
 begin
   if Msg.WParam = SC_MINIMIZE then
   begin
@@ -171,7 +171,7 @@ begin
     inherited;
 end;
 
-procedure TGG.IconMouse(var Msg: TMessage);
+procedure TKernelConsole.IconMouse(var Msg: TMessage);
 var p: TPoint;
 begin
   GetCursorPos(p);
@@ -195,7 +195,7 @@ begin
   SetString(Result, PAnsiChar(M.Memory), M.Size);
 end;
 
-procedure TGG.IdHTTPServer1CommandGet(AThread: TIdPeerThread;
+procedure TKernelConsole.IdHTTPServer1CommandGet(AThread: TIdPeerThread;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 var
   Node: TStringList;
@@ -245,34 +245,34 @@ begin
   end;
 end;
 
-procedure TGG.IdHTTPServer1CreatePostStream(ASender: TIdPeerThread;
+procedure TKernelConsole.IdHTTPServer1CreatePostStream(ASender: TIdPeerThread;
   var VPostStream: TStream);
 begin
   VPostStream := TMemoryStream.Create;
 end;
 
-procedure TGG.IdHTTPServer1Exception(AThread: TIdPeerThread;
+procedure TKernelConsole.IdHTTPServer1Exception(AThread: TIdPeerThread;
   AException: Exception);
 begin
   QueryBox.Lines.Add('Error: ' + StringReplace(AException.Message, #13#10, #32, [rfReplaceAll]));
 end;
 
-procedure TGG.FormDestroy(Sender: TObject);
+procedure TKernelConsole.FormDestroy(Sender: TObject);
 begin
   IconMode(2, Application.Icon);
 end;
 
-procedure TGG.ExitClick(Sender: TObject);
+procedure TKernelConsole.ExitClick(Sender: TObject);
 begin
   Application.Terminate;
 end;
 
-procedure TGG.ConsoleClick(Sender: TObject);
+procedure TKernelConsole.ConsoleClick(Sender: TObject);
 begin
   ShellExecute(Handle, 'open', PChar('http://localhost:' + IntToStr(IdHTTPServer1.DefaultPort)), nil, nil, SW_SHOW);
 end;
 
-procedure TGG.Timer1Timer(Sender: TObject);
+procedure TKernelConsole.Timer1Timer(Sender: TObject);
 var
   Count: Integer;
   Node: Tnode;

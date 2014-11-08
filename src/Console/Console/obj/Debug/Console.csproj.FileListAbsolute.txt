@@ -1,6 +1,0 @@
-C:\Documents and Settings\GaidukMD\Desktop\meta\src\Console\Console\bin\Console.dll
-C:\Documents and Settings\GaidukMD\Desktop\meta\src\Console\Console\obj\Debug\ResolveAssemblyReference.cache
-C:\Documents and Settings\GaidukMD\Desktop\meta\src\Console\Console\obj\Debug\Console.dll
-C:\Documents and Settings\GaidukMD\Desktop\meta\src\Console\Console\bin\Console.htm
-C:\Documents and Settings\GaidukMD\Desktop\meta\exe\Console\Console.htm
-C:\Documents and Settings\GaidukMD\Desktop\meta\exe\Console\Console.dll

@@ -1,4 +1,4 @@
-object GG: TGG
+object GeneratorConsole: TGeneratorConsole
   Left = 234
   Top = 150
   Width = 603
@@ -14,16 +14,16 @@ object GG: TGG
   PixelsPerInch = 96
   TextHeight = 17
   object Splitter: TSplitter
-    Left = 592
+    Left = 584
     Top = 0
-    Height = 611
+    Height = 606
     Align = alRight
   end
   object GenerateBox: TListBox
     Left = 0
     Top = 0
-    Width = 592
-    Height = 611
+    Width = 584
+    Height = 606
     Align = alClient
     BorderStyle = bsNone
     ItemHeight = 17
