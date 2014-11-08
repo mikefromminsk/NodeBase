@@ -21,12 +21,12 @@ const
 //naType Values
   ntEmpty   = 'EMPTY';
   ntLoad    = 'LOAD';
-  ntData    = 'DATA';
+  ntRoot    = 'ROOT';
+  ntString  = 'STRING';
+  ntNumber  = 'NUMBER';
   ntWord    = 'WORD';
   ntModule  = 'MODULE';
   ntDLLFunc = 'DLLFUNC';
-  ntNumber  = 'NUMBER';
-  ntRoot    = 'ROOT';
 
 //NodeStatus
   nsSave = 1;
@@ -61,7 +61,6 @@ type
 
 procedure FreeAndNil(var Obj);
 function FindCloseTag(Str: String; Open, Close: Char): Integer;
-function CompareWithZero(Str: String): Integer;  
 function ExtractFileExt(Str: String): String;
 function FileExists(Str: String): Boolean;
 function LowerCase(Str: String): String;
@@ -139,22 +138,6 @@ begin
         Exit;
       end;
     end;
-  end;
-end;
-
-function CompareWithZero(Str: String): Integer;
-var i: Integer;
-begin
-  Result := -1;
-  if Str <> '' then
-  begin
-    Result := 0;
-    for i:=1 to Length(Str) do
-      if Str[i] <> #0 then
-      begin
-        Result := 1;
-        Exit;
-      end;
   end;
 end;
 

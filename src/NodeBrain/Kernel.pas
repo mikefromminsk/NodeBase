@@ -93,7 +93,8 @@ type
     procedure SaveBranch(Node: TNode);
     procedure FreeBranch(Node: TNode);
 
-    procedure CallFunc(Node: TNode);
+    procedure Call(Node: TNode);
+    function Compare(Node: TNode): Boolean;
     procedure Run(Node: TNode);
 
 	  function GetIndex(Node: TNode): String;
@@ -463,7 +464,7 @@ begin
     begin
       case Link.Name[1] of
         '/' : Result.FType := ntModule;
-        '!' : Result.FType := ntData;
+        '!' : Result.FType := ntString;
         '0'..'9', '-': Result.FType := ntNumber;
         else  Result.FType := ntWord;
       end;
@@ -472,12 +473,9 @@ begin
         Result.Source := FindName(Result.ParentName);
 
       if Result.FType = ntNumber then
-      begin
-        Link.Name := sData + FloatToStr8(StrToFloatDef(Link.Name, 0));
-        Result.FType := ntData;
-      end;
+        SetData(Result, FloatToStr8(StrToFloatDef(Link.Name, 0)));
 
-      if Result.FType = ntData then
+      if Result.FType = ntString then
         SetData(Result, DecodeStr(Copy(Link.Name, 2, MaxInt)));
     end;
   end;
@@ -587,7 +585,7 @@ begin
 end;
 
 
-procedure TKernel.CallFunc(Node: TNode);
+procedure TKernel.Call(Node: TNode);
 var
   Value: TNode;
   Params, Param: String;
@@ -661,62 +659,79 @@ begin
     MOV IfFloat, 0
     JMP @2
     @1:
-    FSTP QWORD PTR [DBVal]     
+    FSTP QWORD PTR [DBVal]
     MOV IfFloat, 1
     @2:
   end;
 
   if IfFloat = 0
   then SetValue(Node, NewNode('!' + EncodeStr(IntToStr4(BVal))))
-  else SetValue(Node, NewNode('!' + EncodeStr(FloatToStr8(DBVal))));
+  else SetValue(Node, NewNode(FloatToStr(DBVal)));
+end;
 
+function TKernel.Compare(Node: TNode): Boolean;
+var i: Integer;
+begin
+  Result := False;
+  if Node = nil then Exit;
+  if Node.FType = ntNumber then
+  begin
+    if StrToFloat8(Node.Data) = 1 then
+      Result := True;
+    Exit;
+  end;
+  if Node.FType = ntString then
+  begin
+    if Node.Data <> '' then
+      Result := True;
+    Exit;
+  end;
 end;
 
 
 procedure TKernel.Run(Node: TNode);
-label NextNode;
 var
   FuncResult, i: Integer;
 begin
-  NextNode:
-  if Node = nil then Exit;
-
-  if Node.FType = ntModule then
-    LoadModule(Node);
-  for i:=0 to High(Node.Params) do
-    Run(Node.Params[i]);
-  if (Node.Source <> nil) and (((Node.Source.ParentLocal = FUnit) and (Node.Source.Next <> nil))   //recode  2
-    or (Node.Source.FType = ntDLLFunc)) then
+  while True do
   begin
+    if Node = nil then Exit;
+    if Node.FType = ntModule then
+      LoadModule(Node);
     for i:=0 to High(Node.Params) do
-      SetParam(GetSource(Node), GetValue(Node.Params[i]), i);
-    Run(Node.Source);
-  end;
-  if Node.FType = ntDLLFunc then
-    CallFunc(Node);
-  if (Node.FTrue <> nil) or (Node.FElse <> nil) then
-  begin
-    FuncResult := CompareWithZero(GetValue(Node).Data);
-    if (FuncResult = 1) and (Node.FTrue <> nil) then
+      Run(Node.Params[i]);
+    if (Node.Source <> nil) and (((Node.Source.ParentLocal = FUnit) and (Node.Source.Next <> nil))   //recode  2
+      or (Node.Source.FType = ntDLLFunc)) then
     begin
-      Node := GetSource(Node.FTrue);
-      Goto NextNode;
+      for i:=0 to High(Node.Params) do
+        SetParam(GetSource(Node), GetValue(Node.Params[i]), i);
+      Run(Node.Source);
     end;
-    if (FuncResult = 0) and (Node.FElse <> nil) then
+    if Node.FType = ntDLLFunc then
+      Call(Node);
+    if (Node.FTrue <> nil) or (Node.FElse <> nil) then
     begin
-      Node := GetSource(Node.FElse);
-      Goto NextNode;
+      if Compare(GetValue(Node)) then
+        if Node.FTrue <> nil then
+        begin
+          Node := GetSource(Node.FTrue);
+          Continue;
+        end
+      else
+        if Node.FElse <> nil then      
+        begin
+          Node := GetSource(Node.FElse);
+          Continue;
+        end;
+    end
+    else
+    if (Node.Source <> nil) and (Node.Value <> nil) then
+    begin
+      Run(Node.Value);
+      Node.Source.Value := GetValue(Node.Value);
     end;
-  end
-  else
-  if (Node.Source <> nil) and (Node.Value <> nil) then
-  begin
-    Run(Node.Value);
-    Node.Source.Value := GetValue(Node.Value);
+    Node := Node.Next;
   end;
-
-  Node := Node.Next;
-  Goto NextNode;
 end;
 
 
@@ -736,7 +751,6 @@ begin
   end;
   SetLength(Indexes, Length(Indexes) + 1);
   Indexes[High(Indexes)] := Root.Attr[naRootPath];
-
   if (Length(Indexes) > 1) and (Indexes[High(Indexes) - 1] <> sID) then Exit;
   ToFileSystemName(Indexes);
   Body := GetNodeBody(Node);
@@ -845,6 +859,8 @@ begin
       Run(Result);
   end;
 end;
+
+
 
 
 end.

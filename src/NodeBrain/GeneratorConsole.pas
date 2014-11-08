@@ -34,7 +34,7 @@ begin
     ShowNode(GenerateNode, GenerateBox);
     
     Root.Attr[naStartID] := '1000';
-    FindSolution(UserNode('task?roundto?x&-2;&3,14'));
+    FindSolution(UserNode('roundto?x&-2;&3,14'));
     
   end;
   {ShowNode(Generator.Task, TaskBox); }
@@ -84,7 +84,7 @@ begin
     Res := '';
     if Node.Value <> nil then
     begin
-      if GetValue(Node).FType = ntData then
+      if GetValue(Node).FType = ntString then
         Res := ': Result = ' + EncodeStr(GetValue(Node).Data)
       else
         Res := ': Result = ' + GetIndex(GetValue(Node));

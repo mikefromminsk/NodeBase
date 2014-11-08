@@ -25,10 +25,6 @@ type
 
   TGenerator = class (TKernel)
 
-
-  
-
-
     function GetRandomSource(FuncNode: TNode): TNode;
     function NewRandomNode(FuncNode: TNode): TNode;
 
@@ -48,10 +44,6 @@ type
     procedure CreateFunc(Node: TNode; Level: Integer);
 
     function GenerateNode: TNode;
-
-
-
-
 
     procedure FindUnknown(Node: TNode; var Unknown: ANode);
 
@@ -282,15 +274,13 @@ begin
     Unknown[i].Source := GenerateNode;
 
   Run(Task);
-
-  {if CompareWithZero(GetValue(Task).Data) = 0 then
+  if Compare(GetValue(Task)) then
   begin
     SaveBranch(Branch);
 
     for i:=0 to High(Unknown) do
-     SaveResult
-
-  end;  }
+      SetLocal(Unknown[i], Unknown[i].Source);
+  end;
   FreeBranch(Branch);
 
   Unknown := nil;

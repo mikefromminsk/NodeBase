@@ -77,13 +77,10 @@ begin
   begin
     Value := Kernel.GetValue(Result);
     if Value <> nil then
-    begin
-      Str := Value.Data;
-      if Length(Str) = 8 then
-        Str := FloatToStr(StrToFloat8(Str))
+      if Value.FType = ntNumber then
+        Str := FloatToStr(StrToFloat8(Value.Data))
       else
-        Str := EncodeStr(Str);
-    end;
+        Str := EncodeStr(Value.Data);
   end;
   if Str = '' then
     Str := 'NULL';
