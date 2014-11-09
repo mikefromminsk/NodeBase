@@ -264,12 +264,11 @@ var
   Branch: TNode;
   i: Integer;
 begin
-  //Set Branch
+
   Branch := NewNode(Root.Attr[naStartID]);
 
   FindUnknown(Task, Unknown);
 
-  //GenerateNodes
   for i:=0 to High(Unknown) do
     Unknown[i].Source := GenerateNode;
 
@@ -279,8 +278,12 @@ begin
     SaveBranch(Branch);
 
     for i:=0 to High(Unknown) do
+    begin
       SetLocal(Unknown[i], Unknown[i].Source);
+      SaveNode(Unknown[i]);
+    end;
   end;
+
   FreeBranch(Branch);
 
   Unknown := nil;

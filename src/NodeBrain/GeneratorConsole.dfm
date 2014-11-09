@@ -1,7 +1,7 @@
 object GeneratorConsole: TGeneratorConsole
-  Left = 234
-  Top = 150
-  Width = 603
+  Left = 175
+  Top = 47
+  Width = 318
   Height = 645
   Color = clBtnFace
   Font.Charset = RUSSIAN_CHARSET
@@ -13,16 +13,10 @@ object GeneratorConsole: TGeneratorConsole
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 17
-  object Splitter: TSplitter
-    Left = 584
-    Top = 0
-    Height = 606
-    Align = alRight
-  end
   object GenerateBox: TListBox
     Left = 0
     Top = 0
-    Width = 584
+    Width = 302
     Height = 606
     Align = alClient
     BorderStyle = bsNone

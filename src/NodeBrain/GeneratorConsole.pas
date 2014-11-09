@@ -10,7 +10,6 @@ uses
 type
   TGeneratorConsole = class(TForm)
     GenerateBox: TListBox;
-    Splitter: TSplitter;
     procedure FormCreate(Sender: TObject);
     procedure ShowNode(Node: TNode; List: TListBox);
   end;
@@ -34,7 +33,7 @@ begin
     ShowNode(GenerateNode, GenerateBox);
     
     Root.Attr[naStartID] := '1000';
-    FindSolution(UserNode('roundto?x&-2;&3,14'));
+    FindSolution(UserNode('je?roundto?x&-2;&3,14'));
     
   end;
   {ShowNode(Generator.Task, TaskBox); }

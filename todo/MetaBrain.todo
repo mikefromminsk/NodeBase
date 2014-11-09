@@ -88,8 +88,6 @@ using language GarbageCollector
 
 History: AString;
 
-Next: ANode
-Generator: search and replace best function
 
 
 $countr, countw
@@ -116,19 +114,16 @@ delete first element in stack when stack out
 dof file change in other pc
 
 
+
+
 [Generator]
 
-
-GenerateParams
 
 show vars in pascalcode
 like array
 like dirrective
 like comments
 
-
-create applicatoin
-find solution
 
 
 
@@ -137,13 +132,15 @@ Parent name to string
 
 
 
-Разделить data to string and number. future valuetype to record.
-compare to true
 
 
 
+Next: ANode
+Generator: search and replace best function
 
+AHistory
 
+Local
 
 
 
