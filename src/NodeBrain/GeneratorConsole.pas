@@ -12,6 +12,8 @@ type
     GenerateBox: TListBox;
     procedure FormCreate(Sender: TObject);
     procedure ShowNode(Node: TNode; List: TListBox);
+    procedure GenerateBoxDrawItem(Control: TWinControl; Index: Integer;
+      Rect: TRect; State: TOwnerDrawState);
   end;
 
 var
@@ -22,8 +24,10 @@ implementation
 
 {$R *.dfm}
 
+
+
 procedure TGeneratorConsole.FormCreate(Sender: TObject);
-var Link: TLink;
+//var Link: TLink;
 begin
   Generator := TGenerator.Create;
 
@@ -38,6 +42,8 @@ begin
   end;
   {ShowNode(Generator.Task, TaskBox); }
 end;
+
+
 
 procedure TGeneratorConsole.ShowNode(Node: TNode; List: TListBox);
 var
@@ -142,5 +148,44 @@ begin
   end;
 end;
 
+procedure TGeneratorConsole.GenerateBoxDrawItem(Control: TWinControl;
+  Index: Integer; Rect: TRect; State: TOwnerDrawState);
+var
+  Line: string;
+  i : Integer;
+  R : TRect;
+  WordPos: Integer;
+const
+  SysWords: Array[0..9] of String = ('function', 'uses', 'unit', 'interface',
+    'implementation', 'begin', 'end', 'var', 'if', 'else');
+begin
+  R.Left := Rect.Left;
+  R.Top := Rect.Top ;
+  R.Bottom := Rect.Bottom;
+  with Control as TListBox do
+  begin
+    if odSelected in State then
+      Canvas.Brush.Color := clHighlight
+    else
+      Canvas.Brush.Color := clWindow;
+    Canvas.FillRect(Rect);
+
+    Line := Items[Index];
+    Canvas.Font.Style := Canvas.Font.Style - [fsBold];
+    DrawText(Canvas.Handle, PChar(Line), Length(Line), R, DT_LEFT);
+
+    Canvas.Font.Style := Canvas.Font.Style + [fsBold];
+    for i:=0 to High(SysWords) do
+    begin
+      WordPos := Pos(SysWords[i], Line);
+      if WordPos <> 0 then
+      begin
+        R.Left := Canvas.TextWidth(Copy(Line, 1, WordPos - 1));
+        R.Right := R.Left + Canvas.TextWidth(SysWords[i]);
+        DrawText(Canvas.Handle, PChar(SysWords[i]), Length(SysWords[i]), R, DT_LEFT);
+      end;
+    end;
+  end;
+end;
 
 end.

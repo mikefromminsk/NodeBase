@@ -18,9 +18,17 @@ object GeneratorConsole: TGeneratorConsole
     Top = 0
     Width = 302
     Height = 606
+    Style = lbOwnerDrawFixed
     Align = alClient
     BorderStyle = bsNone
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Font.Style = []
     ItemHeight = 17
+    ParentFont = False
     TabOrder = 0
+    OnDrawItem = GenerateBoxDrawItem
   end
 end
