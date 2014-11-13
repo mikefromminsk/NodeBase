@@ -15,7 +15,17 @@ speed better ram
 
 
 
-[Application System]
+[Projects]
+Time Tracker
+console
+teleport
+generators
+client
+
+
+
+
+[Console]
 
 release
 union all module to one file
@@ -66,7 +76,12 @@ findItem
 if find then set first position
 
 
-[System]
+
+
+
+
+
+[Kernel]
 
 naPointer
 
@@ -88,10 +103,7 @@ using language GarbageCollector
 
 History: AString;
 
-
-
 $countr, countw
-
 
 Load Root with options
 
@@ -111,36 +123,45 @@ stackoverflow
 delete first element in stack when stack out
 
 
-dof file change in other pc
-
-
-
-
-[Generator]
-
-
-show vars in pascalcode
-like array
-like dirrective
-like comments
-
-
-
-
-
-Parent name to string
+dof file change in other IDE
 
 
 
 
 
 
-Next: ANode
+
+
+[Generator 2]
+
+
+show vars in pascalcode like const TYPE = 'NODE';
+
+
+
+
+
 Generator: search and replace best function
-
+ANext
 AHistory
+ALocal
 
-Local
+
+
+
+
+[Generator 3]
+
+
+
+
+
+
+
+
+
+
+
 
 
 

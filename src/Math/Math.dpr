@@ -1,4 +1,4 @@
-library fMath;
+library Math32;
 
 uses
   Math, SysUtils, Dialogs;

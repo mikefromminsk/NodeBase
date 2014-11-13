@@ -4,7 +4,7 @@ uses
   Forms, GeneratorConsole, Generator;
 
 {$R *.res}
-
+                 
 begin
   Application.Initialize;
   Application.CreateForm(TGeneratorConsole, GeneratorConsoleForm);
