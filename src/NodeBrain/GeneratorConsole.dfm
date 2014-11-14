@@ -2,7 +2,7 @@ object GeneratorConsole: TGeneratorConsole
   Left = 175
   Top = 47
   Width = 318
-  Height = 645
+  Height = 740
   Color = clBtnFace
   Font.Charset = RUSSIAN_CHARSET
   Font.Color = clWindowText
@@ -16,8 +16,8 @@ object GeneratorConsole: TGeneratorConsole
   object GenerateBox: TListBox
     Left = 0
     Top = 0
-    Width = 302
-    Height = 606
+    Width = 310
+    Height = 706
     Style = lbOwnerDrawFixed
     Align = alClient
     BorderStyle = bsNone
