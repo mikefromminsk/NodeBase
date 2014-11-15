@@ -100,7 +100,9 @@ type
 	  function GetIndex(Node: TNode): String;
     function GetNodeBody(Node: TNode): String;
 
-    function UserNode(Line: String): TNode; virtual;
+    function RunNode(Line: String): TNode;
+
+    //function GetNode(Line: String): TNode;
 
   end;
 
@@ -579,7 +581,7 @@ begin
     FUnit := Node;
     List := slice(LoadFromFile(FileName), #10);
     for i:=0 to High(List) do
-      UserNode(List[i]);
+      RunNode(List[i]);
     FUnit := PrevModule;
   end;
 end;
@@ -845,7 +847,7 @@ begin
 end;
 
 
-function TKernel.UserNode(Line: String): TNode;
+function TKernel.RunNode(Line: String): TNode;
 var
   Link: TLink;
 begin

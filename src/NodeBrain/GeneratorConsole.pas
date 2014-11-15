@@ -33,11 +33,11 @@ begin
 
   with Generator do
   begin
-    UserNode('/dll/math32.node$activate');
+    RunNode('/dll/math32.node$activate');
     ShowNode(GenerateNode, GenerateBox);
     
     Root.Attr[naStartID] := '1000';
-    FindSolution(UserNode('je?roundto?x&-2;&3,14'));
+    FindSolution(RunNode('je?roundto?x&-2;&3,14'));
     
   end;
   {ShowNode(Generator.Task, TaskBox); }

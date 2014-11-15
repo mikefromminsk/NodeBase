@@ -16,8 +16,8 @@ object GeneratorConsole: TGeneratorConsole
   object GenerateBox: TListBox
     Left = 0
     Top = 0
-    Width = 310
-    Height = 706
+    Width = 302
+    Height = 701
     Style = lbOwnerDrawFixed
     Align = alClient
     BorderStyle = bsNone
