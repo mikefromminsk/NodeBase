@@ -1,12 +1,12 @@
 program NodeBrain;
 
 uses
-  Forms, GeneratorConsole, Generator;
+  Forms, PascalConsole, Generator;
 
 {$R *.res}
                  
 begin
   Application.Initialize;
-  Application.CreateForm(TGeneratorConsole, GeneratorConsoleForm);
+  Application.CreateForm(TPascalConsole, PascalConsoleForm);
   Application.Run;
 end.

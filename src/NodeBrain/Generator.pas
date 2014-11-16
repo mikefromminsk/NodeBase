@@ -25,6 +25,10 @@ type
 
   TGenerator = class (TKernel)
 
+    Task: TNode;
+
+    constructor Create; overload;  
+
     function GetRandomSource(FuncNode: TNode): TNode;
     function NewRandomNode(FuncNode: TNode): TNode;
 
@@ -47,13 +51,18 @@ type
 
     procedure FindUnknown(Node: TNode; var Unknown: ANode);
 
-    procedure FindSolution(Task: TNode);
+    procedure FindSolution; //StartGeneration
 
   end;
 
 
 implementation
 
+
+constructor TGenerator.Create;
+begin
+  inherited;
+end;
 
 function TGenerator.GetRandomSource(FuncNode: TNode): TNode;
 var
@@ -258,7 +267,7 @@ begin
 end;
 
 
-procedure TGenerator.FindSolution(Task: TNode);
+procedure TGenerator.FindSolution;
 var
   Unknown: ANode;
   Branch: TNode;
@@ -288,6 +297,8 @@ begin
 
   Unknown := nil;
 end;
+
+
 
 
 
