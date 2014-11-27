@@ -1,18 +1,18 @@
-[M4 G2]
-MetaBase NeuroBase NodeBase
+[N4 C2]
+NodeBase
 language for machines, not for human
 Neuro-information model
 
 
 [basic task]
-Generation Pi Code
+Create Pi Code
 
 
 [principles]
 clean sheet better
 interactivity better speed
 speed better ram
-
+all data variable to file
 
 
 [Projects]
@@ -43,7 +43,7 @@ active_kernel = 2
 
 $transaction=992402
 
-restart metabase
+restart nodebase
 
 GUI
 Linux
@@ -100,20 +100,15 @@ using language GarbageCollector
 
 160 count 14 min not delete
 
-
 History: AString;
-
-$countr, countw
-
-Load Root with options
 
 /from_exe_file
 //local
 
 addevent if parent local
 
-MetaBase is file system
-MetaBase is compilator
+NodeBase is file system
+NodeBase is compilator
 
 
 save arhive Nodes in DUMP file
@@ -129,45 +124,44 @@ dof file change in other IDE
 
 
 
+[Creator 2]
+
+CreatorParams to Root Node
+
+Data8Count=2
+LocalVarCount=2
+SubLevel=1
+SubFuncCount=3
+SubFuncParamsCount=2
+SequenceCount=10
+IfWhileElseCount=1
+IntBeginRange=-3 
+IntCenterRange=0
+IntEndRange=10
+FracBeginRange=0
+FracCenterRange=0
+FracEndRange=10
+IfCount=1
+WhileCount=0
+ElseCount=0
 
 
-
-[Generator 2]
-
-
-show vars in pascalcode like const TYPE = 'NODE';
-
-
-
-
-
-Generator: search and replace best function
+Creator: search and replace best function
 ANext
 AHistory
 ALocal
 
 
-
+FastAttribute with get count and replace position
 
 
 [Generator 3]
 
 
-generated 1000
+to Java
+Kernel to Java
 
-GenerateRec
-  LastGenID
-  Data8Count = 2;
-  LocalVarCount = 2;
-  SubLevel = 1;
-  SubFuncCount = 3;
-  SubFuncParamsCount = 2;
-  SequenceCount = 10;
-  IfWhileElseCount = 1;
 
-  IntRange : ARange = (-3, 0, 10);  // -3 < x < 10
-  FracRange: ARange = ( 0, 0, 10);  //  0 < x < 10
-  IfWhileElseFrequency: Array[0..2] of Integer = (1{If}, 0{While}, 0{else});
 
 
 

@@ -1,6 +1,6 @@
 object PascalConsole: TPascalConsole
-  Left = 175
-  Top = 47
+  Left = 196
+  Top = 89
   Width = 318
   Height = 740
   Color = clBtnFace
@@ -16,8 +16,8 @@ object PascalConsole: TPascalConsole
   object GenerateBox: TListBox
     Left = 0
     Top = 0
-    Width = 302
-    Height = 701
+    Width = 310
+    Height = 706
     Style = lbOwnerDrawFixed
     Align = alClient
     BorderStyle = bsNone

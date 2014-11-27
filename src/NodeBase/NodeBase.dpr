@@ -1,7 +1,7 @@
-program NodeBrain;
+program NodeBase;
 
 uses
-  Forms, PascalConsole, Generator;
+  Forms, PascalConsole, Creator;
 
 {$R *.res}
                  

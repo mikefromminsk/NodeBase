@@ -1,4 +1,4 @@
-unit Generator;
+unit Creator;
 
 interface
 
@@ -23,7 +23,7 @@ const
 
 type
 
-  TGenerator = class (TKernel)
+  TCreator = class (TKernel)
 
     Task: TNode;
 
@@ -47,7 +47,7 @@ type
 
     procedure CreateFunc(Node: TNode; Level: Integer);
 
-    function GenerateNode: TNode;
+    function CreateNode: TNode;
 
     procedure FindUnknown(Node: TNode; var Unknown: ANode);
 
@@ -59,12 +59,12 @@ type
 implementation
 
 
-constructor TGenerator.Create;
+constructor TCreator.Create;
 begin
   inherited;
 end;
 
-function TGenerator.GetRandomSource(FuncNode: TNode): TNode;
+function TCreator.GetRandomSource(FuncNode: TNode): TNode;
 var
   Index: Integer;
   Arr: AInteger;
@@ -86,13 +86,13 @@ begin
 end;
 
 
-function TGenerator.NewRandomNode(FuncNode: TNode): TNode;
+function TCreator.NewRandomNode(FuncNode: TNode): TNode;
 begin
   Result := NewNode(NextID);
   SetSource(Result, GetRandomSource(FuncNode));
 end;
 
-procedure TGenerator.CreateData(Node: TNode);
+procedure TCreator.CreateData(Node: TNode);
 var i: Integer;
 begin
   for i:=0 to Random(Data8Count) do
@@ -101,7 +101,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateLocalVar(Node: TNode);
+procedure TCreator.CreateLocalVar(Node: TNode);
 var i: Integer;
 begin
   for i:=0 to Random(LocalVarCount) do
@@ -109,7 +109,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateSubFuncParams(Node: TNode; Level: Integer);
+procedure TCreator.CreateSubFuncParams(Node: TNode; Level: Integer);
 var
   i, j: Integer;
   FuncNode: TNode;
@@ -126,7 +126,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateSubFunc(Node: TNode; Level: Integer);
+procedure TCreator.CreateSubFunc(Node: TNode; Level: Integer);
 var i: Integer;
 begin
   for i:=0 to High(Node.Local) do
@@ -135,7 +135,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateSequence(FuncNode: TNode);
+procedure TCreator.CreateSequence(FuncNode: TNode);
 var
   i: Integer;
   Node: TNode;
@@ -154,7 +154,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateParams(Node, FuncNode: TNode);
+procedure TCreator.CreateParams(Node, FuncNode: TNode);
 var i: Integer;
 begin
   for i:=0 to High(Node.Params) do
@@ -162,7 +162,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateIfElseWhile(FuncNode: TNode);
+procedure TCreator.CreateIfElseWhile(FuncNode: TNode);
 var
   j, i, IfWhileElse: Integer;
   FirstPos, SecondPos, ThirdPos: Integer;
@@ -227,7 +227,7 @@ begin
 end;
 
 
-procedure TGenerator.CreateFunc(Node: TNode; Level: Integer);
+procedure TCreator.CreateFunc(Node: TNode; Level: Integer);
 begin
   CreateLocalVar(Node);
   CreateData(Node);
@@ -238,22 +238,14 @@ begin
 end;
 
 
-function TGenerator.GenerateNode: TNode;
+function TCreator.CreateNode: TNode;
 begin
   Result := NewNode(NextID);
   SetValue(Result, NewNode(NextID));
   CreateFunc(Result, SubLevel);
 end;
 
-
-
-
-
-
-
-
-
-procedure TGenerator.FindUnknown(Node: TNode; var Unknown: ANode);  //out
+procedure TCreator.FindUnknown(Node: TNode; var Unknown: ANode);  //out
 var i: Integer;
 begin
   for i:=0 to High(Node.Params) do
@@ -267,7 +259,7 @@ begin
 end;
 
 
-procedure TGenerator.FindSolution;
+procedure TCreator.FindSolution;
 var
   Unknown: ANode;
   Branch: TNode;
@@ -279,7 +271,7 @@ begin
   FindUnknown(Task, Unknown);
 
   for i:=0 to High(Unknown) do
-    Unknown[i].Source := GenerateNode;
+    Unknown[i].Source := CreateNode;
 
   Run(Task);
   if Compare(GetValue(Task)) then

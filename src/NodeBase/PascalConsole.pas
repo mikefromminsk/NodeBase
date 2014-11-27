@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls,
-  Kernel, Generator, Utils, Link;
+  Kernel, Creator, Utils, Link;
 
 type
   TPascalConsole = class(TForm)
@@ -18,7 +18,7 @@ type
 
 var
   PascalConsoleForm: TPascalConsole;
-  Generator: TGenerator;
+  Generator: TCreator;
 
 implementation
 
@@ -89,17 +89,23 @@ begin
     end;
     Add('');
     Add('implementation');
-    Add('');
-    Add('//...');
+//    Add('');
+//    Add('//...');
     Add('');
     Add('function ' + {GetName(Node.ParentName) +} GetName(Node) + ShowParams(Node) + Res + ';');
 
-    Add('var');
-    for i:=0 to High(Node.Local) do
+    if High(Node.Local) <> -1 then
     begin
-      Str := GetName(Node.Local[i]) + ShowParams(Node.Local[i]);
-      Str := '  ' + Str + ';';
-      Add(Str);
+      Add('var');
+      for i:=0 to High(Node.Local) do
+        Add('  ' + GetName(Node.Local[i]) + ShowParams(Node.Local[i]) + ';');
+    end;
+
+    if (Node.Attributes <> nil) and (Node.Attributes.High <> -1) then
+    begin
+      Add('const');
+      for i:=0 to Node.Attributes.High do
+        Add('  ' + Node.Attributes.Names[i] + ' = ''' + Node.Attributes.Values[i] + ''';');
     end;
 
     Add('begin');
@@ -134,10 +140,10 @@ begin
       Node := Node.Next;
     end;
     Add('end;');
-    Add('');
-    Add('//...');
-    Add('');
-    Add('end.');
+//    Add('');
+//    Add('//...');
+//    Add('');
+//    Add('end.');
   end;
 end;
 
@@ -149,8 +155,8 @@ var
   R : TRect;
   WordPos: Integer;
 const
-  SysWords: Array[0..9] of String = ('function', 'uses', 'unit', 'interface',
-    'implementation', 'begin', 'end', 'var', 'if', 'else');
+  SysWords: Array[0..10] of String = ('function', 'uses', 'unit', 'interface',
+    'implementation', 'begin', 'end', 'var', 'if', 'else', 'const');
 begin
   R.Left := Rect.Left;
   R.Top := Rect.Top ;
@@ -187,7 +193,7 @@ end;
 
 procedure TPascalConsole.FormCreate(Sender: TObject);
 begin
-  Generator := TGenerator.Create;
+  Generator := TCreator.Create;
 
   with Generator do
   begin
