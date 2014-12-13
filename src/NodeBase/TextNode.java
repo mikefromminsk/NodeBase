@@ -1,4 +1,5 @@
 package NodeBase;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,22 +12,16 @@ public class TextNode
 	String 				Comment;
 	String 				ID;
 	TextNode 			Source;
-	Map<String, String> Vars = new HashMap<String, String>();
+	Map<String, String>	Vars;
 	TextNode 			Type;
-	TextNode[] 			Params;
+	ArrayList<TextNode>	Params;
 	TextNode 			Value;
 	TextNode 			True;
 	TextNode 			Else;
 	TextNode 			Next;
-	TextNode[] 			Local;
+	ArrayList<TextNode>	Locals;
 	
-	
-	public static void main(String[] args)
-	{
-		String[] Result = ToString("Comment@ID^Source$Vars?Params#Value|Else");
-		System.out.println(Result.length);
-	}
-	
+
 	public TextNode(String string) 
 	{
 		ID = string;
@@ -34,38 +29,195 @@ public class TextNode
 	
 	static String[] ToString(String Str)
 	{
-		int Count = Const.CharCount;
-		int[] Indexes = new int[Count];
-		int NameEnd = 0;
+		int[] indexes = new int[Const.CharCount + 1];
+		for (int i=0; i<Const.CharCount; i++)
+			indexes[i] = Str.indexOf(Const.CharSequence[i]);
 		
-		Indexes[Indexes.length - 1] = Str.length() + 1;
-		
-		for (int i=0; i<Count; i++)
-			Indexes[i] = Str.indexOf(Const.CharSequence[i]);
-		
-		for (int i=0; i<Count; i++) 
-			if (Indexes[i] != -1)
-			{
-				NameEnd = i;
-				break;
-			}
+		indexes[indexes.length - 1] = Str.length();
 
-		for (int i=0; i<Count-1; i++)
-			if (Indexes[i] == -1)
-				Indexes[i] = Indexes[i + 1];
+		for (int i=indexes.length - 2; i>=0; i--)
+			if (indexes[i] == -1)
+				indexes[i] = indexes[i + 1];
 			else
-				if (Indexes[i] > Indexes[i + 1])
-					Indexes[i] = Indexes[i + 1];
+				if (indexes[i] > indexes[i + 1])
+					indexes[i] = indexes[i + 1];
 		
-		String[] Result = new String[Count];
-		Result[0] = Str.substring(1, Indexes[NameEnd] - Const.CharSequence[NameEnd].length());
-		
-		for(int i=0; i<Count; i++)
-			Result[i] = Str.substring(Indexes[i] + Const.CharSequence[i].length(), Indexes[i + 1] - (Indexes[i] + Const.CharSequence[i].length()));
+		String[] Result = new String[Const.CharCount];
+		for(int i=0; i<Const.CharCount; i++)
+			if (indexes[i] != indexes[i + 1])
+				Result[i] = Str.substring(indexes[i] + Const.CharSequence[i].length(), indexes[i + 1]);
 		
 		return Result;
 	}
 	
 	
+	//Comment@ID^Source$Name=Val&Name=Val:Type?Name=Val&Name=Val#Value>True|Else\nNext\n\nLocal\n\nLocal2
+	TextNode BaseParse()
+	{
+		Destroy();
+		String[] strings = ToString(ID);
+		Comment = strings[Const.iComment];
+		ID = strings[Const.iID];
+		if (strings[Const.iSource] != null)
+			Source = new TextNode(strings[Const.iSource]);
+		if (strings[Const.iVars] != null)
+		{
+			Vars = new HashMap<String, String>();
+			String[] vars = strings[Const.iVars].split(Const.sAnd);
+			for (int i=0; i<vars.length; i++)
+			{
+				String[] var = vars[i].split(Const.sEqual);
+				if (var.length == 2)
+					Vars.put(var[0], var[1]);
+				else
+					Vars.put(var[0], null);
+			}
+		}
+		if (strings[Const.iType] != null)
+			Type = new TextNode(strings[Const.iType]);
+		if (strings[Const.iParams] != null)
+		{
+			Params = new ArrayList<TextNode>();
+		    String[] params = strings[Const.iParams].split(Const.sAnd);
+		    for (int i=0; i<params.length; i++)
+		    	Params.add(new TextNode(params[i]));
+		}
+		if (strings[Const.iValue] != null)
+			Value = new TextNode(strings[Const.iValue]);
+		if (strings[Const.iTrue] != null)
+			True = new TextNode(strings[Const.iTrue]);
+		if (strings[Const.iElse] != null)
+			Else = new TextNode(strings[Const.iElse]);
+		if (strings[Const.iNext] != null)
+			Next = new TextNode(strings[Const.iNext]);
+		if (strings[Const.iLocal] != null)
+		{
+			Locals = new ArrayList<TextNode>();
+		    String[] locals = strings[Const.iLocal].split(Const.sLocal);
+		    for (int i=0; i<locals.length; i++)
+		    	Locals.add(new TextNode(locals[i]));
+		}
+		return this;
+	}
+	
+	static int Index(String[] substrs, String str)
+	{
+		int result = -1;
+		for (int i=0; i<substrs.length; i++)
+		{
+			int pos = str.indexOf(substrs[i]);
+			if (pos != -1)
+				result = (result == -1) ? pos : Math.min(result, pos);
+		}
+		return result;
+	}
+	
+	static int FindCloseTag(String str, char open, char close)
+	{
+		int level = 0;
+		for (int i=0; i<str.length(); i++)
+			if ((str.charAt(i) == open) || (str.charAt(i) == close))
+			{
+				if (str.charAt(i) == open)
+					level++;
+				if (str.charAt(i) == close)
+					level--;
+				if (level == 0)
+					return i;
+			}
+		return -1;
+	}
+
+	void StackOverFlow(String str, TextNode node)
+	{
+		node.Params = new ArrayList<TextNode>();
+		while (!str.isEmpty()) 
+		{
+			int funcEnd = Index(new String[]{Const.sParams, Const.sAnd} , str);
+			if (funcEnd == -1)
+			{
+				node.Params.add(new TextNode(str).UserParse());
+				break;
+			}
+			else
+			{
+				node.Params.add(new TextNode(str.substring(0, funcEnd)).UserParse());
+				if (str.charAt(funcEnd) == Const.sParams.charAt(0))
+				{
+					int closePos = FindCloseTag(str, Const.sParams.charAt(0), Const.sParamEnd.charAt(0));
+					String ParamsStr = (closePos == -1) ? str : str.substring(funcEnd + 1, closePos);
+					StackOverFlow(ParamsStr, node.Params.get(node.Params.size() - 1));
+					str = Utils.deleteStr(str, funcEnd, closePos + 1);
+				}
+				str = Utils.deleteStr(str, 0, funcEnd + 1);
+			}			
+		}
+	}
+
+	TextNode UserParse()
+	{
+		Destroy();
+		//to 
+		/*  PosValue := Pos(sVal, Str);
+		  i := Pos(sParams, Str);
+		  if ((PosValue <> 0) and (i = 0)) or
+		     ((PosValue <> 0) and (i <> 0) and (PosValue < i)) then
+		    Str[PosValue] := sValue;*/ 
+		    
+		String[] strings = ToString(ID);
+		Comment = strings[Const.iComment];
+		ID = strings[Const.iID];
+		if (strings[Const.iSource] != null)
+			Source = new TextNode(strings[Const.iSource]).UserParse();
+		if (strings[Const.iVars] != null)
+		{
+			Vars = new HashMap<String, String>();
+			String[] vars = strings[Const.iVars].toUpperCase().split(Const.sAnd);
+			for (int i=0; i<vars.length; i++)
+			{
+				String[] var = vars[i].split(Const.sEqual);
+				if (var.length == 2)
+					Vars.put(var[0], var[1]);
+				else
+					Vars.put(var[0], null);
+			}
+		}
+		if (strings[Const.iType] != null)
+			Type = new TextNode(strings[Const.iType]).UserParse();
+		if (strings[Const.iParams] != null)
+			StackOverFlow(strings[Const.iParams], this);
+		if (strings[Const.iValue] != null)
+			Value = new TextNode(strings[Const.iValue]).UserParse();
+		if (strings[Const.iTrue] != null)
+			True = new TextNode(strings[Const.iTrue]).UserParse();
+		if (strings[Const.iElse] != null)
+			Else = new TextNode(strings[Const.iElse]).UserParse();
+		if (strings[Const.iNext] != null)
+			Next = new TextNode(strings[Const.iNext]).UserParse();
+		if (strings[Const.iLocal] != null)
+		{
+			Locals = new ArrayList<TextNode>();
+		    String[] locals = strings[Const.iLocal].split(Const.sLocal);
+		    for (int i=0; i<locals.length; i++)
+		    	Locals.add(new TextNode(locals[i]).UserParse());
+		}
+		return this;
+	}
+	
+
+	void Destroy()
+	{
+		/*TextNode 	Source;
+		String[]	Vars;
+		TextNode 	Type;
+		TextNode[]	Params;
+		TextNode 	Value;
+		TextNode 	True;
+		TextNode 	Else;
+		TextNode 	Next;
+		TextNode[]	Local;*/
+	}
+	
+
 
 }

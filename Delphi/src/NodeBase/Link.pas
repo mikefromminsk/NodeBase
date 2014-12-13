@@ -90,21 +90,27 @@ var
   Indexes: array[1..Count + 1] of Integer;
 begin
   NameEnd := 1;
+  
   Indexes[High(Indexes)] := Length(Str) + 1;
+  
   for i:=1 to Count do
     Indexes[i] := Pos(SysChars[i], Str);
+    
   for i:=1 to Count do
     if Indexes[i] <> 0 then
     begin
       NameEnd := i;
       Break;
     end;
+    
   for i:=Count downto NameEnd do
     if Indexes[i] = 0 then
       Indexes[i] := Indexes[i + 1]
     else if Indexes[i] > Indexes[i + 1] then
       Indexes[i] := Indexes[i + 1];
+      
   Result[0] := Copy(Str, 1, Indexes[NameEnd] - Length(SysChars[NameEnd]));
+  
   for i:=NameEnd to Count do
     Result[i] := Copy(Str, Indexes[i] + Length(SysChars[i]), Indexes[i + 1] - (Indexes[i] + Length(SysChars[i])));
 end;

@@ -123,6 +123,12 @@ using adb to switch phone and pc or wifi
 
 if / dont exist then each char is index
 
+Type is SubStructure (subnodes)
+is a continue IndexNode
+
+merge all module to one file
+
+
 
 [Creator 2]
 
@@ -177,8 +183,7 @@ rename parentname to comment
 link class many to many
 
 
-
-
+TNode extends TIndexNode 
 
 
 
