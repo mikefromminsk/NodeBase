@@ -20,8 +20,8 @@ class Const
 	  ntRoot    = "ROOT",
 	  ntString  = "STRING",
 	  ntNumber  = "NUMBER",
-	  ntWord    = "WORD",
-	  ntModule  = "MODULE",
+	  ntComment = "COMMENT",
+	  ntFile  	= "FILE",
 	  ntDLLFunc = "DLLFUNC";
 	  
 	final static String 
@@ -73,8 +73,8 @@ class Const
 	  ExternalModuleExtention = ".dll"*/;
 	
 	
-
-	static String EscapedStrings[] = {"/", "\\", ":", "*", "?", "@", "\"", "<", ">", "|", "con"};
+	static String IllegalCharacters = "/\\:*?@\"<>|";
+	static String IllegalFileNames[] = {"con"};
 						
 
 }

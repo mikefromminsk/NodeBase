@@ -6,6 +6,7 @@ package NodeBase;
 	 */
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 public class Kernel
@@ -33,14 +34,10 @@ public class Kernel
 		return root.getAttr(Const.naLastID);
 	}
 	
-
-
-	
-	
-	Node LoadNode(Node node)
+	void LoadNode(Node node)
 	{
 		node.setNodeType(Const.ntLoad);
-		IndexTree indexNode = node.indexNode;
+		IndexTree indexNode = node.Index;
 
 		ArrayList<String> indexes = new ArrayList<String>();
 		while (indexNode != null)
@@ -54,56 +51,100 @@ public class Kernel
 		String body = Utils.LoadFromFile(path);
 		if (body != null)
 			setNode(body);
-			
-		
-		return result;
-	}
-	/*
+	}	
+
 	
-	function TKernel.LoadNode(Node: TNode): TNode;
-	var
-	  Indexes: AString;
-	  Body, Path: String;
-	begin
-	  if Node = nil then Exit;
-	  Node.FType := ntLoad;
-
-	  SetLength(Indexes, 0);
-	  while Node <> nil do
-	  begin
-	    SetLength(Indexes, Length(Indexes) + 1);
-	    Indexes[High(Indexes)] := Node.IndexName;
-	    Node := Node.ParentIndex;
-	  end;
-	  Path := ToFileSystemName(Indexes) + NodeFileName;
-	  SetLength(Indexes, 0);
-
-	  Body := LoadFromFile(Path);
-	  if Body <> '' then
-	    NewNode(Body);
-	end;*/
-	
-
-	Node newNode(TextNode node) 
+	Node newNode(TextNode textNode) 
 	{
 		Node result = null;
 		
 		
-		if (node.ID != null)
+		if (textNode.ID != null)
 		{
-			result = Index(Const.sID + node.ID);
-			
+			result = rootIndex.newSubIndex(Const.sID + textNode.ID);
 			if (result.getNodeType() == null)
-				result = LoadNode(result);
+				LoadNode(result);
 		}
 		
+		if (textNode.Comment != null)
+		{
+			//SetName(Result, Link.Name);
+			
+			if (result.getNodeType() != Const.ntLoad)
+			{
+				switch (textNode.Comment.charAt(0)) {
+				case '/': result.setNodeType(Const.ntFile);    break;
+				case '!': result.setNodeType(Const.ntString);  break;
+				case '0': case '1': case '2': case '3': case '4': 
+				case '5': case '6': case '7': case '8': case '9': 
+						  result.setNodeType(Const.ntNumber);  break;
+				default:  result.setNodeType(Const.ntComment); break;
+				}
+				
+				/*if (result.getNodeType() == Const.ntComment)
+					result.setSource(FindSource());*/
+				if (result.getNodeType() == Const.ntNumber)
+					result.setData(textNode.Comment);
+				if (result.getNodeType() == Const.ntString)
+					result.setData(textNode.Comment.substring(1));
+			}	
+		}
 		
+		if (result == null) return null;
+		
+		if (textNode.Source != null)
+		{
+			if ((result.getNodeType() == Const.ntComment) && 
+				(result.getNodeType() != Const.ntLoad))
+			{
+				result.getSource().setSource(newNode(textNode.Source));
+				result = result.getSource();
+			}
+			else
+				result.setSource(newNode(textNode.Source));
+		}
+		
+		if (textNode.Attr != null)
+		{
+			Iterator it = textNode.Attr.entrySet().iterator();
+		    while (it.hasNext()) 
+		    {
+		        Map.Entry pairs = (Map.Entry)it.next();
+		        result.setAttr((String)pairs.getKey(), (String)pairs.getValue());
+		    }
+		}
+		
+		if (textNode.Type != null)
+			result.setType(newNode(textNode.Type));
+		
+		if (textNode.Params != null)
+			for (int i=0; i<textNode.Params.size(); i++)
+				result.setParam(newNode(textNode.Params.get(i)));
+
+		if (textNode.Value != null)
+			if (textNode.Value.Comment.charAt(0) == Const.sData.charAt(0))
+				result.setData(Utils.decodeStr(textNode.Value.Comment.substring(2)));
+			else
+				result.setValue(newNode(textNode.Value));
+		
+		if (textNode.Else != null)
+			result.setElse(newNode(textNode.Else));
+		if (textNode.True != null)
+			result.setTrue(newNode(textNode.True));					
+		if (textNode.Next != null)
+			result.setNext(newNode(textNode.Next));
+		
+		for (int i=0; i<textNode.Locals.size(); i++)
+			result.setLocal(newNode(textNode.Locals.get(i)));
 		
 		return result;
 	}
 
 	
-	
+	/*String GetNodeBody(Node node)
+	{
+		
+	}*/
 
 	Node getNode()
 	{

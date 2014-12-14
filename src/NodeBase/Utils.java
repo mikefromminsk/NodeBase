@@ -35,27 +35,6 @@ public class Utils
 			return null;
 		}
 	}
-	
-	class indexResult{
-		int posInString;
-		int posInSubStrings;	
-		public indexResult(int i, int j) {
-			posInString = i;
-			posInSubStrings = j;
-		}
-	}
-	
-	static indexResult Index(String[] substrs, String str)
-	{
-		indexResult result = new indexResult(-1, -1);
-		for (int i=0; i<substrs.length; i++)
-		{
-			int pos = str.indexOf(substrs[i]);
-			if (pos != -1)
-				result.posInString = (result.posInString == -1) ? pos : Math.min(result.posInString, pos);
-		}
-		return result;
-	}
 
 	public static Map<String, String> slice(String string, String delimeter)    
 	{
@@ -74,42 +53,66 @@ public class Utils
 
 	public static String toFileSystemName(ArrayList<String> indexes) 
 	{
+		String result = "";
 		for (int i=0; i<indexes.size(); i++)
 		{
 			String index = indexes.get(i);
-			int pos = Utils.Index
+			if (index.length() == 1)
+			{
+				if (!(															 // if not
+						((index.charAt(0) >= 48) && (index.charAt(0) <= 57)) ||  //numbers
+						((index.charAt(0) >= 65) && (index.charAt(0) <= 90)) ||  //eng uppercase
+						((index.charAt(0) >= 97) && (index.charAt(0) <= 122))    //eng lowercase
+					))
+					index = String.format("%02X", index.charAt(0));
+			}
+			else
+			{
+				for (int j=0; j<Const.IllegalFileNames.length; j++)
+					if (index == Const.IllegalFileNames[j])
+						index = index + '1'; //recode
+			}
+			result = index + "/" + result;
 		}
 		return null;
 	}
 	
+	static String encodeStr(String str)
+	{
+		String result = null;
+		for (int i=0; i<str.length(); i++)
+			if (															 // if
+					((str.charAt(i) >= 48) && (str.charAt(i) <= 57)) ||  //numbers
+					((str.charAt(i) >= 65) && (str.charAt(i) <= 90)) ||  //eng uppercase
+					((str.charAt(i) >= 97) && (str.charAt(i) <= 122))    //eng lowercase
+				)
+				result += "" + str.charAt(i);
+			else
+				result += "%" + String.format("%02X", str.charAt(i));
+		return result;
+	}
+	
+	static String decodeStr(String str)
+	{
+		String result = null;
+		int i=1;
+		while (i <= str.length())
+		{
+			if (str.charAt(i) != '%')
+				result += "" + str.charAt(i);
+			else
+			{
+				i++;
+				String esc = str.substring(i, i + 2);
+				i++;
+				int charCode = Integer.parseUnsignedInt(esc, 16);
+				result += (char)charCode;
+			}
+			i++;
+		}
+		return result;
+	}
 
 	
-	/*function ToFileSystemName(var Indexes: AString): String;
-var          //c:\data\@\1\
-  i, j: Integer;
-  Index: String;
-const
-  IllegalCharacters = [#0..#32, '/', '\', ':', '*', '?', '@', '"', '<', '>', '|'];
-  IllegalFileNames: array[0..0] of String = ('con') ;
-begin
-  Result := '';
-  for i:=0 to High(Indexes) do
-  begin
-    Index := Indexes[i];
-    if Length(Index) = 1 then
-    begin
-      if Index[1] in IllegalCharacters then
-        Indexes[i] := IntToHex(Ord(Index[1]), 2);
-    end
-    else
-    begin
-      for j:=0 to High(IllegalFileNames) do
-        if Index = IllegalFileNames[i] then
-          Indexes[i] := Indexes[i] + '1';
-    end;
-    Result := Indexes[i] + '\' + Result;
-  end;
-end;*/
-
 
 }

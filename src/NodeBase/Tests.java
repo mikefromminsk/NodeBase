@@ -14,10 +14,11 @@ public class Tests {
 	public static void main(String[] args) 
 	{
 
+		/*System.out.println( String.format("%02X",255));
 		Kernel kernel = new Kernel();
 		kernel.NextID();
 		
-		/*System.out.println(Utils.LoadFromFile("e:\\aaa.txt"));
+		System.out.println(Utils.LoadFromFile("e:\\aaa.txt"));
 		
 		
 		TextNode node = new TextNode("Comment");

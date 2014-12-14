@@ -42,12 +42,12 @@ class Link
 
 public class Node
 {
-	IndexTree indexNode;
+	IndexTree Index;
 	
 	String Path;
 	String Data;
 	Map<String, String>	Attr;
-	Link 
+	private Link 
 		Comment,
 		Source,
 		Type,
@@ -60,7 +60,15 @@ public class Node
 	
 	Node(IndexTree index)
 	{
-		this.indexNode = index;
+		this.Index = index;
+	}
+	
+	/*public void setIndex(IndexTree index) {
+		Index = index;
+	}*/
+	
+	public String getIndex() {
+		return null;
 	}
 	
 	public String getAttr(String key) {
@@ -92,68 +100,77 @@ public class Node
 		Comment = comment;
 	}
 
-	public Link getSource() {
-		return Source;
+	public Node getSource() {
+		return Source.node;
 	}
 	
-	public void setSource(Link source) {
-		Source = source;
+	public void setSource(Node node) {
+		Source.node = node;
 	}
 	
-	public Link getType() {
-		return Type;
+	public Node getType() {
+		return Type.node;
 	}
 	
-	public void setType(Link type) {
-		Type = type;
+	public void setType(Node node) {
+		Type.node = node;
 	}
 	
-	public Link getParams() {
-		return Params;
+	public Node getParam() {
+		return Params.node;
 	}
 	
-	public void setParams(Link params) {
-		Params = params;
+	public void setParam(Node params) {
+		Params.node = params;
 	}
 	
-	public Link getValue() {
-		return Value;
+	public Node getValue() {
+		return Value.node;
 	}
 	
-	public void setValue(Link value) {
-		Value = value;
+	public void setValue(Node node) {
+		Value.node = node;
 	}
 	
-	public Link getTrue() {
-		return True;
+	public String getData() {
+		return Data;
 	}
 	
-	public void setTrue(Link true1) {
-		True = true1;
+	public void setData(String data) {
+		Data = data;
 	}
 	
-	public Link getElse() {
-		return Else;
+	public Node getTrue() {
+		return True.node;
 	}
 	
-	public void setElse(Link else1) {
-		Else = else1;
+	public void setTrue(Node node) {
+		True.node = node;
 	}
 	
-	public Link getNext() {
-		return Next;
+	public Node getElse() {
+		return Else.node;
 	}
 	
-	public void setNext(Link next) {
-		Next = next;
+	public void setElse(Node node) {
+		Else.node = node;
 	}
 	
-	public Link getLocals() {
+	public Node getNext() {
+		return Next.node;
+	}
+	
+	public void setNext(Node next) {
+		Next.node = next;
+	}
+	
+	/*public Link getLocals() {
 		return Locals;
-	}
-	
-	public void setLocals(Link locals) {
-		Locals = locals;
+	}*/
+
+	public void setLocal(Node local) {
+		if (Locals.nodes.indexOf(local) != -1)
+			Locals.nodes.add(local);
 	}
 
 }

@@ -12,7 +12,7 @@ public class TextNode
 	String 				Comment;
 	String 				ID;
 	TextNode 			Source;
-	Map<String, String>	Vars;
+	Map<String, String>	Attr;
 	TextNode 			Type;
 	ArrayList<TextNode>	Params;
 	TextNode 			Value;
@@ -61,7 +61,7 @@ public class TextNode
 		if (strings[Const.iSource] != null)
 			Source = new TextNode(strings[Const.iSource]);
 		if (strings[Const.iVars] != null)
-			Vars = Utils.slice(strings[Const.iVars], Const.sAnd);
+			Attr = Utils.slice(strings[Const.iVars], Const.sAnd);
 		if (strings[Const.iType] != null)
 			Type = new TextNode(strings[Const.iType]);
 		if (strings[Const.iParams] != null)
@@ -107,6 +107,18 @@ public class TextNode
 		return -1;
 	}
 
+	static int Index(String[] substrs, String str)
+	{
+		int result = -1;
+		for (int i=0; i<substrs.length; i++)
+		{
+			int pos = str.indexOf(substrs[i]);
+			if (pos != -1)
+				result = (result == -1) ? pos : Math.min(result, pos);
+		}
+		return result;
+	}
+	
 	void StackOverFlow(String str, TextNode node)
 	{
 		node.Params = new ArrayList<TextNode>();
@@ -149,7 +161,7 @@ public class TextNode
 		if (strings[Const.iSource] != null)
 			Source = new TextNode(strings[Const.iSource]).UserParse();
 		if (strings[Const.iVars] != null)
-			Vars = Utils.slice(strings[Const.iVars], Const.sAnd);
+			Attr = Utils.slice(strings[Const.iVars], Const.sAnd);
 		if (strings[Const.iType] != null)
 			Type = new TextNode(strings[Const.iType]).UserParse();
 		if (strings[Const.iParams] != null)
