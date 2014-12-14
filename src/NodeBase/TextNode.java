@@ -60,8 +60,8 @@ public class TextNode
 		ID = strings[Const.iID];
 		if (strings[Const.iSource] != null)
 			Source = new TextNode(strings[Const.iSource]);
-		if (strings[Const.iVars] != null)
-			Attr = Utils.slice(strings[Const.iVars], Const.sAnd);
+		if (strings[Const.iAttr] != null)
+			Attr = Utils.slice(strings[Const.iAttr], Const.sAnd);
 		if (strings[Const.iType] != null)
 			Type = new TextNode(strings[Const.iType]);
 		if (strings[Const.iParams] != null)
@@ -79,10 +79,10 @@ public class TextNode
 			Else = new TextNode(strings[Const.iElse]);
 		if (strings[Const.iNext] != null)
 			Next = new TextNode(strings[Const.iNext]);
-		if (strings[Const.iLocal] != null)
+		if (strings[Const.iLocals] != null)
 		{
 			Locals = new ArrayList<TextNode>();
-		    String[] locals = strings[Const.iLocal].split(Const.sLocal);
+		    String[] locals = strings[Const.iLocals].split(Const.sLocals);
 		    for (int i=0; i<locals.length; i++)
 		    	Locals.add(new TextNode(locals[i]));
 		}
@@ -160,8 +160,8 @@ public class TextNode
 		ID = strings[Const.iID];
 		if (strings[Const.iSource] != null)
 			Source = new TextNode(strings[Const.iSource]).UserParse();
-		if (strings[Const.iVars] != null)
-			Attr = Utils.slice(strings[Const.iVars], Const.sAnd);
+		if (strings[Const.iAttr] != null)
+			Attr = Utils.slice(strings[Const.iAttr], Const.sAnd);
 		if (strings[Const.iType] != null)
 			Type = new TextNode(strings[Const.iType]).UserParse();
 		if (strings[Const.iParams] != null)
@@ -174,16 +174,15 @@ public class TextNode
 			Else = new TextNode(strings[Const.iElse]).UserParse();
 		if (strings[Const.iNext] != null)
 			Next = new TextNode(strings[Const.iNext]).UserParse();
-		if (strings[Const.iLocal] != null)
+		if (strings[Const.iLocals] != null)
 		{
 			Locals = new ArrayList<TextNode>();
-		    String[] locals = strings[Const.iLocal].split(Const.sLocal);
+		    String[] locals = strings[Const.iLocals].split(Const.sLocals);
 		    for (int i=0; i<locals.length; i++)
 		    	Locals.add(new TextNode(locals[i]).UserParse());
 		}
 		return this;
 	}
-	
 
 	void Destroy()
 	{

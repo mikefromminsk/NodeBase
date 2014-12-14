@@ -15,20 +15,23 @@ class Const
 
 	//naType Values
 	final static String 
-	  //ntEmpty   = "EMPTY",
-	  ntLoad    = "LOAD",
 	  ntRoot    = "ROOT",
 	  ntString  = "STRING",
 	  ntNumber  = "NUMBER",
 	  ntComment = "COMMENT",
 	  ntFile  	= "FILE",
-	  ntDLLFunc = "DLLFUNC";
+	  ntExternalFunc = "EXTERNALFUNC";
+	
+	//Node Status
+	final static String 
+	  ntLoad    = "LOAD",
+	  ntSave    = "SAVE";
 	  
 	final static String 
 		sComment   	= "",
 		sID 		= "@",
 		sSource 	= "^",
-		sVars       = "$",
+		sAttr       = "$",
 		sType       = ":",
 		sParams     = "?",
 		sEqual      = "=",
@@ -38,11 +41,11 @@ class Const
 		sTrue       = ">",
 		sElse       = "|",
 		sNext       = "\n",
-		sLocal      = "\n\n";
+		sLocals     = "\n\n";
 	
 	
 	static String 
-		CharSequence[] = {sComment, sID, sSource, sVars, sType, sParams, sValue, sTrue, sElse, sNext, sLocal};
+		CharSequence[] = {sComment, sID, sSource, sAttr, sType, sParams, sValue, sTrue, sElse, sNext, sLocals};
 	
 	static int CharCount = CharSequence.length;
 	
@@ -51,14 +54,14 @@ class Const
 		iComment = 0,
 		iID      = 1,
 		iSource  = 2,
-		iVars    = 3,
+		iAttr    = 3,
 		iType    = 4,
 		iParams  = 5,
 		iValue   = 6,
 		iTrue    = 7,
 		iElse    = 8,
 		iNext    = 9,
-		iLocal   = 10;
+		iLocals  = 10;
 	
 	public final static String 
 	  	sFile 		= "/",

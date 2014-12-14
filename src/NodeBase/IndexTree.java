@@ -44,6 +44,17 @@ public class IndexTree
 		return indexNode.node;
 	}
 	
+	public String getIndex() 
+	{
+		String result = null;
+		IndexTree indexNode = this;
+		while (indexNode.parent != null)
+		{
+			result = indexNode.IndexName + result;
+			indexNode = indexNode.parent;
+		}
+		return result;
+	}
 	
 	Node node;
 }

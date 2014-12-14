@@ -5,12 +5,16 @@ package NodeBase;
 	 *  2014
 	 */
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
 public class Kernel
 {
+	ModuleLoader loader = new ModuleLoader(ClassLoader.getSystemClassLoader());
+	
 	IndexTree rootIndex;
 	Node
 		root,
@@ -34,26 +38,34 @@ public class Kernel
 		return root.getAttr(Const.naLastID);
 	}
 	
-	void LoadNode(Node node)
+	String getFileName(Node node)
 	{
-		node.setNodeType(Const.ntLoad);
 		IndexTree indexNode = node.Index;
-
 		ArrayList<String> indexes = new ArrayList<String>();
 		while (indexNode != null)
 		{
 			indexes.add(indexNode.IndexName);
 			indexNode = indexNode.parent;
 		}
-		String path = Utils.toFileSystemName(indexes) + Const.NodeFileName;
+		String fileName = root.getAttr(Const.naRootPath) + Utils.toFileSystemName(indexes) + Const.NodeFileName;
 		indexes.clear();
-		
-		String body = Utils.LoadFromFile(path);
+		return fileName;
+	}
+	
+	void LoadNode(Node node)
+	{
+		node.setNodeType(Const.ntLoad); //recode to status
+		String body = Utils.LoadFromFile(getFileName(node));
 		if (body != null)
 			setNode(body);
 	}	
-
 	
+	void SaveNode(Node node)
+	{
+		//node.setNodeType(Const.ntSave);
+		Utils.SaveToFile(getFileName(node), node.getBody());
+	}
+
 	Node newNode(TextNode textNode) 
 	{
 		Node result = null;
@@ -140,11 +152,113 @@ public class Kernel
 		return result;
 	}
 
-	
-	/*String GetNodeBody(Node node)
+	private Node nextNode(Node prev, Node next) 
 	{
+		Node result; 
+		if (prev != null)
+			prev.setNext(next);
+		else
+			if (next != null)
+				unit = next;
+			else
+				unit.setLocal(next);
+		return next;
+	}
+	
+	void loadModule(Node node)
+	{
+		String fileName = node.Comment.node.getIndex().substring(2);
+		if (fileName.indexOf(".java") != -1)
+		{
+			try 
+			{
+			 	Class c = loader.loadClass("Module");
+			  	Method[] methods = c.getMethods(); 
+			  	for (Method method : methods) 
+			  	{ 
+			  		System.out.println("Имя: " + method.getName()); 
+			    	System.out.println("Возвращаемый тип: " + method.getReturnType().getName()); 
+			         
+			    	Class[] paramTypes = method.getParameterTypes(); 
+			      	System.out.print("Типы параметров: "); 
+			     	for (Class paramType : paramTypes) 
+			        	System.out.print(" " + paramType.getName()); 
+			  	}
+			        
+				Object obj = c.newInstance();
+				Class[] paramTypes = new Class[] { int.class }; 
+				Method method = c.getMethod("run", paramTypes); 
+				Object[] params = new Object[] { new Integer(10) }; 
+				Object ret = method.invoke(obj, params);
+				System.out.print("вернулось " + ((Integer)ret).toString()); 
+			        
+			  } catch (ClassNotFoundException e) {
+			    e.printStackTrace();
+			  } catch (InstantiationException e) {
+			    e.printStackTrace();
+			  } catch (IllegalAccessException e) {
+			    e.printStackTrace();
+			  } catch (NoSuchMethodException e) {
+				e.printStackTrace();
+			  } catch (SecurityException e) {
+				e.printStackTrace();
+			  } catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			  } catch (InvocationTargetException e) {
+				e.printStackTrace();
+			  }
+		}
 		
-	}*/
+	}
+	
+	void run(Node node)
+	{
+		while (true)
+		{
+			if (node.getNodeType() == Const.ntFile)
+				loadModule(node); //recode
+			for (int i=0; i<node.Params.nodes.size(); i++)
+				run(node.Params.nodes.get(i));
+		    if ((node.Source != null) && (((node.Source.node.Locals.parent == unit) 
+		    		&& (node.Source.node.Next != null)) || (node.Source.node.getNodeType() == Const.ntExternalFunc))) //recode
+		    {
+		    	for (int i=0; i<node.Params.nodes.size(); i++)
+		    		node.getSource().setParam(node.Params.nodes.get(i).getValue(), i);
+		    	run(node.Source.node);
+		    }
+		    if (node.getNodeType() == Const.ntExternalFunc)
+		    	call(node);
+		    if ((node.True != null) || (node.Else != null))
+		    {
+		    	if (compare(node.getValue()))
+		    	{
+		    		if (node.True != null)
+		    		{
+		    			node = node.True.node.getSource();
+		    			continue;
+		    		}
+		    	}
+		    	else
+		    	{
+		    		if (node.Else != null)
+		    		{
+		    			node = node.Else.node.getSource();
+		    			continue;
+		    		}
+		    	}
+		    }
+		    else
+		    if ((node.Source != null) && (node.Value != null))
+		    {
+		    	run(node.Value.node);
+		    	node.Source.node.Value.node = node.Value.node.getValue();
+		    }
+		    node = node.Next.node;
+		}
+	}
+	
+	
+	
 
 	Node getNode()
 	{
@@ -157,9 +271,14 @@ public class Kernel
 		return newNode(node);
 	}
 
-	Node runNode()
+	Node runNode(String string)
 	{
-		return null;
+		Node result = newNode(new TextNode(string).UserParse());
+		prev = nextNode(prev, result);
+		if (result != null)
+			if (result.getAttr(Const.naActivate) != null)
+				run(result);
+		return result;
 	}
 	
 	

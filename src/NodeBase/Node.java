@@ -2,6 +2,7 @@ package NodeBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 
@@ -9,9 +10,9 @@ import java.util.Map;
 
 class Link
 {
-	Node parent;
-	Node node;
-	ArrayList<Node> nodes;
+	public Node parent;
+	public Node node;
+	public ArrayList<Node> nodes;
 	
 	Link(Node node, Node parent)
 	{
@@ -47,7 +48,7 @@ public class Node
 	String Path;
 	String Data;
 	Map<String, String>	Attr;
-	private Link 
+	Link 
 		Comment,
 		Source,
 		Type,
@@ -162,6 +163,8 @@ public class Node
 	
 	public void setNext(Node next) {
 		Next.node = next;
+		if (next != null)
+			next.Next.parent = this;
 	}
 	
 	/*public Link getLocals() {
@@ -171,6 +174,52 @@ public class Node
 	public void setLocal(Node local) {
 		if (Locals.nodes.indexOf(local) != -1)
 			Locals.nodes.add(local);
+	}
+
+	public String getBody() 
+	{
+		String result = null;
+
+		if (Comment != null)
+			result += Const.sComment + Comment.node.getIndex();
+		if (Source != null)
+			result += Const.sSource + Source.node.getIndex();
+		
+		if (Attr != null)
+		{
+			String str = null;
+			for (Map.Entry entry: Attr.entrySet()) { 
+				if (str != null)
+					str += Const.sAnd;
+				str += (String) entry.getKey() + Const.sEqual + (String) entry.getValue();
+			} 
+			result += Const.sAttr + str;
+		}
+		if (Type != null)
+			result += Const.sType + Type.node.getIndex();
+		if (Params != null)
+		{
+			String str = null;
+			for (int i=0; i<Params.nodes.size(); i++)
+			{
+				if (str != null)
+					str += Const.sAnd;
+				str += Params.nodes.get(i).getIndex();
+			}
+			result += Const.sParams + str;
+		}
+		if (Value != null)
+			result += Const.sValue + Value.node.getIndex();
+		if (True != null)
+			result += Const.sTrue + True.node.getIndex();
+		if (Else != null)
+			result += Const.sElse + Else.node.getIndex();
+		if (Next != null)
+			result += Const.sNext + Next.node.getIndex();
+		if (Locals != null)
+			for (int i=0; i<Locals.nodes.size(); i++)
+				result += Const.sLocals + Locals.nodes.get(i).getIndex();
+		return result;
 	}
 
 }

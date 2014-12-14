@@ -1,7 +1,12 @@
 package NodeBase;
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -30,9 +35,20 @@ public class Utils
 			byte[] encoded = Files.readAllBytes(Paths.get(path));
 			return new String(encoded);	
 		} 
-		catch (IOException  e) 
-		{
+		catch (IOException  e){
 			return null;
+		}
+	}
+	
+	public static void SaveToFile(String fileName, String text)
+	{
+		try {
+			PrintWriter out = new PrintWriter(fileName);
+			out.print(text);
+			out.close();
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
