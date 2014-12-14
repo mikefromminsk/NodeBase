@@ -1,5 +1,7 @@
 package NodeBase;
 
+import java.io.File;
+
 public class Tests {
 	
 	static String deleteStr(String str, int fromindex, int toindex)
@@ -11,7 +13,14 @@ public class Tests {
 	
 	public static void main(String[] args) 
 	{
-		/*TextNode node = new TextNode("Comment");
+
+		Kernel kernel = new Kernel();
+		kernel.NextID();
+		
+		/*System.out.println(Utils.LoadFromFile("e:\\aaa.txt"));
+		
+		
+		TextNode node = new TextNode("Comment");
 		node.BaseParse();
 		System.out.println(node.Comment);
 		

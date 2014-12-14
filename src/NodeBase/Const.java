@@ -2,6 +2,28 @@ package NodeBase;
 
 class Const 
 {
+	//NodeAttribute
+	final static String 
+	  naType        = "TYPE",
+	  naHandle      = "HANDLE",
+	  naActivate    = "ACTIVATE",
+	  naLastID      = "LASTID",
+	  naStartID     = "STARTID",
+	  naServerPort  = "SERVERPORT",
+	  naRootPath    = "ROOTPATH",
+	  naGenerate    = "GENERATE";
+
+	//naType Values
+	final static String 
+	  //ntEmpty   = "EMPTY",
+	  ntLoad    = "LOAD",
+	  ntRoot    = "ROOT",
+	  ntString  = "STRING",
+	  ntNumber  = "NUMBER",
+	  ntWord    = "WORD",
+	  ntModule  = "MODULE",
+	  ntDLLFunc = "DLLFUNC";
+	  
 	final static String 
 		sComment   	= "",
 		sID 		= "@",
@@ -42,4 +64,17 @@ class Const
 	  	sFile 		= "/",
 	  	sData 		= "!",
 	  	sDecimalSeparator = ",";
+	
+	//File Names
+	public final static String 
+	  RootFileName = "root.ini",
+	  NodeFileExtention = ".node",
+	  NodeFileName = "Node" + NodeFileExtention/*,
+	  ExternalModuleExtention = ".dll"*/;
+	
+	
+
+	static String EscapedStrings[] = {"/", "\\", ":", "*", "?", "@", "\"", "<", ">", "|", "con"};
+						
+
 }

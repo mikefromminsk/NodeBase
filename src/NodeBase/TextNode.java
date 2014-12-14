@@ -61,18 +61,7 @@ public class TextNode
 		if (strings[Const.iSource] != null)
 			Source = new TextNode(strings[Const.iSource]);
 		if (strings[Const.iVars] != null)
-		{
-			Vars = new HashMap<String, String>();
-			String[] vars = strings[Const.iVars].split(Const.sAnd);
-			for (int i=0; i<vars.length; i++)
-			{
-				String[] var = vars[i].split(Const.sEqual);
-				if (var.length == 2)
-					Vars.put(var[0], var[1]);
-				else
-					Vars.put(var[0], null);
-			}
-		}
+			Vars = Utils.slice(strings[Const.iVars], Const.sAnd);
 		if (strings[Const.iType] != null)
 			Type = new TextNode(strings[Const.iType]);
 		if (strings[Const.iParams] != null)
@@ -100,17 +89,7 @@ public class TextNode
 		return this;
 	}
 	
-	static int Index(String[] substrs, String str)
-	{
-		int result = -1;
-		for (int i=0; i<substrs.length; i++)
-		{
-			int pos = str.indexOf(substrs[i]);
-			if (pos != -1)
-				result = (result == -1) ? pos : Math.min(result, pos);
-		}
-		return result;
-	}
+	
 	
 	static int FindCloseTag(String str, char open, char close)
 	{
@@ -170,18 +149,7 @@ public class TextNode
 		if (strings[Const.iSource] != null)
 			Source = new TextNode(strings[Const.iSource]).UserParse();
 		if (strings[Const.iVars] != null)
-		{
-			Vars = new HashMap<String, String>();
-			String[] vars = strings[Const.iVars].toUpperCase().split(Const.sAnd);
-			for (int i=0; i<vars.length; i++)
-			{
-				String[] var = vars[i].split(Const.sEqual);
-				if (var.length == 2)
-					Vars.put(var[0], var[1]);
-				else
-					Vars.put(var[0], null);
-			}
-		}
+			Vars = Utils.slice(strings[Const.iVars], Const.sAnd);
 		if (strings[Const.iType] != null)
 			Type = new TextNode(strings[Const.iType]).UserParse();
 		if (strings[Const.iParams] != null)
