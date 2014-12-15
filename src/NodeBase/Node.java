@@ -102,7 +102,10 @@ public class Node
 	}
 
 	public Node getSource() {
-		return Source.node;
+		Node result = this;
+		while (result.Source != null)
+			result = result.Source.node;
+		return result;
 	}
 	
 	public void setSource(Node node) {
@@ -121,12 +124,42 @@ public class Node
 		return Params.node;
 	}
 	
-	public void setParam(Node params) {
-		Params.node = params;
+	public void setParam(Node param, int index) {
+		if (param.getType() != null)
+		{
+			param.Source = null;
+			Params.nodes.add(param);
+		}
+		else
+		{
+			if (index == Params.nodes.size())
+				Params.nodes.add(param);
+			else
+			if (index <= Params.nodes.size())
+				if (Params.nodes.get(index) != param)
+					Params.nodes.set(index, param);
+		}
 	}
 	
 	public Node getValue() {
-		return Value.node;
+		ArrayList<Node> valueStack = new ArrayList<Node>();
+		Node result = null;
+		Node node = this;
+		while (node != null)
+		{
+			valueStack.add(node);
+			if (node.Source != null)
+				node = node.Source.node;
+			else
+			{
+				result = node;
+				if (node.Value != null) break;
+				if (valueStack.indexOf(node.Value.node) != -1) break;
+				node = node.Value.node;
+			}
+		}
+		valueStack.clear();
+		return result;
 	}
 	
 	public void setValue(Node node) {

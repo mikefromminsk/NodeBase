@@ -72,8 +72,8 @@ class Const
 	public final static String 
 	  RootFileName = "root.ini",
 	  NodeFileExtention = ".node",
-	  NodeFileName = "Node" + NodeFileExtention/*,
-	  ExternalModuleExtention = ".dll"*/;
+	  NodeFileName = "Node" + NodeFileExtention,
+	  ExternalModuleExtention = ".java";
 	
 	
 	static String IllegalCharacters = "/\\:*?@\"<>|";

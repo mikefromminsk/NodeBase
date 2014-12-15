@@ -1,6 +1,8 @@
 package NodeBase;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class Tests {
 	
@@ -13,7 +15,10 @@ public class Tests {
 	
 	public static void main(String[] args) 
 	{
-
+		
+		Kernel kernel = new Kernel();
+		kernel.loadModule(null);
+		
 		/*System.out.println( String.format("%02X",255));
 		Kernel kernel = new Kernel();
 		kernel.NextID();

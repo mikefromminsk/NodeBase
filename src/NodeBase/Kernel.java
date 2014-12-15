@@ -5,6 +5,7 @@ package NodeBase;
 	 *  2014
 	 */
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.Map;
 
 public class Kernel
 {
-	ModuleLoader loader = new ModuleLoader(ClassLoader.getSystemClassLoader());
+
 	
 	IndexTree rootIndex;
 	Node
@@ -165,32 +166,31 @@ public class Kernel
 		return next;
 	}
 	
+	ModuleLoader loader = new ModuleLoader(ClassLoader.getSystemClassLoader());
+	
 	void loadModule(Node node)
 	{
-		String fileName = node.Comment.node.getIndex().substring(2);
-		if (fileName.indexOf(".java") != -1)
+		String fileName = "C:\\Users\\GaidukMD\\Desktop\\NodeBase\\src\\Module.java";
+		if (fileName.indexOf(".java") == fileName.length() - ".java".length())
 		{
 			try 
 			{
-			 	Class c = loader.loadClass("Module");
-			  	Method[] methods = c.getMethods(); 
+				File moduleFile = new File(fileName);
+				loader.pathToDir = moduleFile.getParentFile().getAbsolutePath();
+			 	Class c = loader.loadClass(moduleFile.getName().replace(".java", ""));
+			  	Method[] methods = c.getDeclaredMethods(); 
 			  	for (Method method : methods) 
 			  	{ 
-			  		System.out.println("Имя: " + method.getName()); 
-			    	System.out.println("Возвращаемый тип: " + method.getReturnType().getName()); 
-			         
+			  		System.out.println(method.getName()); 
+			    	System.out.println(method.getReturnType().getName()); 
 			    	Class[] paramTypes = method.getParameterTypes(); 
-			      	System.out.print("Типы параметров: "); 
 			     	for (Class paramType : paramTypes) 
-			        	System.out.print(" " + paramType.getName()); 
+			        	System.out.print(paramType.getName()); 
 			  	}
-			        
-				Object obj = c.newInstance();
-				Class[] paramTypes = new Class[] { int.class }; 
-				Method method = c.getMethod("run", paramTypes); 
-				Object[] params = new Object[] { new Integer(10) }; 
-				Object ret = method.invoke(obj, params);
-				System.out.print("вернулось " + ((Integer)ret).toString()); 
+			  	
+			  	Object obj = c.newInstance();
+
+ 
 			        
 			  } catch (ClassNotFoundException e) {
 			    e.printStackTrace();
@@ -198,17 +198,31 @@ public class Kernel
 			    e.printStackTrace();
 			  } catch (IllegalAccessException e) {
 			    e.printStackTrace();
-			  } catch (NoSuchMethodException e) {
-				e.printStackTrace();
-			  } catch (SecurityException e) {
+			  }  catch (SecurityException e) {
 				e.printStackTrace();
 			  } catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			  } catch (InvocationTargetException e) {
 				e.printStackTrace();
 			  }
 		}
 		
+	}
+	
+	void call(Node node)
+	{
+		try
+		{
+			Object obj = c.newInstance();
+			Class[] paramTypes = new Class[] { int.class }; 
+			Method method = c.getMethod("run", paramTypes); 
+			Object[] params = new Object[] { new Integer(10) }; 
+			Object ret = method.invoke(obj, params);
+			System.out.print(((Integer)ret).toString());
+			
+		}catch (InvocationTargetException e) {
+			e.printStackTrace();
+		  }catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		  }
 	}
 	
 	void run(Node node)

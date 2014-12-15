@@ -121,7 +121,7 @@ public class Utils
 				i++;
 				String esc = str.substring(i, i + 2);
 				i++;
-				int charCode = Integer.parseUnsignedInt(esc, 16);
+				int charCode = Integer.parseInt(esc, 16);
 				result += (char)charCode;
 			}
 			i++;
