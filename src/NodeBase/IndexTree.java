@@ -6,7 +6,7 @@ public class IndexTree
 {
 	String IndexName;
 	IndexTree parent;
-	ArrayList<IndexTree> Childs = new ArrayList<IndexTree>();
+	ArrayList<IndexTree> nodes = new ArrayList<IndexTree>();
 
 	Node newSubIndex(String index)
 	{
@@ -23,21 +23,21 @@ public class IndexTree
 		for (int i=0; i<indexes.length; i++)
 		{
 			int subIndexPos = -1;
-			for (int j=0; j<indexNode.Childs.size(); i++)
-				if (indexNode.Childs.get(j).IndexName == indexes[i])
+			for (int j=0; j<indexNode.nodes.size(); i++)
+				if (indexNode.nodes.get(j).IndexName == indexes[i])
 				{
 					subIndexPos = j;
 					break;
 				}
 			if (subIndexPos == -1)
 			{
-				indexNode.Childs.add(new IndexTree());
-				indexNode.Childs.get(indexNode.Childs.size() - 1).parent = indexNode;
-				indexNode = indexNode.Childs.get(indexNode.Childs.size() - 1);
+				indexNode.nodes.add(new IndexTree());
+				indexNode.nodes.get(indexNode.nodes.size() - 1).parent = indexNode;
+				indexNode = indexNode.nodes.get(indexNode.nodes.size() - 1);
 				indexNode.IndexName = indexes[i];
 			}
 			else
-				indexNode = indexNode.Childs.get(subIndexPos);
+				indexNode = indexNode.nodes.get(subIndexPos);
 		}
 		if (indexNode.node == null)
 			indexNode.node = new Node(indexNode);

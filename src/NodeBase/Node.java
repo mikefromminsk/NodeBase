@@ -46,7 +46,7 @@ public class Node
 	IndexTree Index;
 	
 	String Path;
-	String Data;
+	Object Data;
 	Map<String, String>	Attr;
 	Link 
 		Comment,
@@ -166,7 +166,7 @@ public class Node
 		Value.node = node;
 	}
 	
-	public String getData() {
+	public Object getData() {
 		return Data;
 	}
 	
@@ -253,6 +253,17 @@ public class Node
 			for (int i=0; i<Locals.nodes.size(); i++)
 				result += Const.sLocals + Locals.nodes.get(i).getIndex();
 		return result;
+	}
+	
+	Boolean compare()
+	{
+		if (getNodeType() == Const.ntNumber)
+			if ((Double)Data == 1)
+				return true;
+		if (getNodeType() == Const.ntString)
+			if (((String)Data).isEmpty())
+				return true;
+		return false;
 	}
 
 }

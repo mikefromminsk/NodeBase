@@ -15,7 +15,6 @@ import java.util.Map;
 public class Kernel
 {
 
-	
 	IndexTree rootIndex;
 	Node
 		root,
@@ -53,7 +52,7 @@ public class Kernel
 		return fileName;
 	}
 	
-	void LoadNode(Node node)
+	void loadNode(Node node)
 	{
 		node.setNodeType(Const.ntLoad); //recode to status
 		String body = Utils.LoadFromFile(getFileName(node));
@@ -61,11 +60,19 @@ public class Kernel
 			setNode(body);
 	}	
 	
-	void SaveNode(Node node)
+	void saveNode(Node node)
 	{
 		//node.setNodeType(Const.ntSave);
 		Utils.SaveToFile(getFileName(node), node.getBody());
 	}
+	
+	void saveTree(IndexTree indexTree)
+	{
+		saveNode(indexTree.node);
+		for (int i=0; i<indexTree.nodes.size(); i++)
+			saveTree(indexTree.nodes.get(i));
+	}
+	
 
 	Node newNode(TextNode textNode) 
 	{
@@ -76,7 +83,7 @@ public class Kernel
 		{
 			result = rootIndex.newSubIndex(Const.sID + textNode.ID);
 			if (result.getNodeType() == null)
-				LoadNode(result);
+				loadNode(result);
 		}
 		
 		if (textNode.Comment != null)
@@ -132,7 +139,7 @@ public class Kernel
 		
 		if (textNode.Params != null)
 			for (int i=0; i<textNode.Params.size(); i++)
-				result.setParam(newNode(textNode.Params.get(i)));
+				result.setParam(newNode(textNode.Params.get(i)), i);
 
 		if (textNode.Value != null)
 			if (textNode.Value.Comment.charAt(0) == Const.sData.charAt(0))
@@ -153,7 +160,7 @@ public class Kernel
 		return result;
 	}
 
-	private Node nextNode(Node prev, Node next) 
+	Node nextNode(Node prev, Node next) 
 	{
 		Node result; 
 		if (prev != null)
@@ -167,65 +174,51 @@ public class Kernel
 	}
 	
 	ModuleLoader loader = new ModuleLoader(ClassLoader.getSystemClassLoader());
+
+	Object obj = null; 
 	
-	void loadModule(Node node)
+	void loadModule(Node node) throws Exception
 	{
 		String fileName = "C:\\Users\\GaidukMD\\Desktop\\NodeBase\\src\\Module.java";
 		if (fileName.indexOf(".java") == fileName.length() - ".java".length())
 		{
-			try 
-			{
-				File moduleFile = new File(fileName);
-				loader.pathToDir = moduleFile.getParentFile().getAbsolutePath();
-			 	Class c = loader.loadClass(moduleFile.getName().replace(".java", ""));
-			  	Method[] methods = c.getDeclaredMethods(); 
-			  	for (Method method : methods) 
-			  	{ 
-			  		System.out.println(method.getName()); 
-			    	System.out.println(method.getReturnType().getName()); 
-			    	Class[] paramTypes = method.getParameterTypes(); 
-			     	for (Class paramType : paramTypes) 
-			        	System.out.print(paramType.getName()); 
-			  	}
-			  	
-			  	Object obj = c.newInstance();
 
+			File moduleFile = new File(fileName);
+			loader.pathToDir = moduleFile.getParentFile().getAbsolutePath();
+		 	Class c = loader.loadClass(moduleFile.getName().replace(".java", ""));
+		 	Method[] methods = c.getDeclaredMethods(); 
+		  	for (Method method : methods) 
+		  	{ 
+		  		System.out.println(method.getName()); 
+		    	System.out.println(method.getReturnType().getName()); 
+		    	Class[] paramTypes = method.getParameterTypes(); 
+		     	for (Class paramType : paramTypes) 
+		        	System.out.print(paramType.getName()); 
+		  	}
+		  	
+		  	obj = c.newInstance();
  
-			        
-			  } catch (ClassNotFoundException e) {
-			    e.printStackTrace();
-			  } catch (InstantiationException e) {
-			    e.printStackTrace();
-			  } catch (IllegalAccessException e) {
-			    e.printStackTrace();
-			  }  catch (SecurityException e) {
-				e.printStackTrace();
-			  } catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			  }
+			  
 		}
 		
 	}
 	
-	void call(Node node)
+	void call(Node node) throws Exception
 	{
-		try
-		{
-			Object obj = c.newInstance();
-			Class[] paramTypes = new Class[] { int.class }; 
-			Method method = c.getMethod("run", paramTypes); 
-			Object[] params = new Object[] { new Integer(10) }; 
-			Object ret = method.invoke(obj, params);
-			System.out.print(((Integer)ret).toString());
+		Class c = obj.getClass();
+		Class[] paramTypes = new Class[] { int.class }; 
+		Method method = null;
+		
+		method = c.getMethod("run", paramTypes);
+		
+		Object[] params = new Object[] { new Integer(10) }; 
+		Object ret = method.invoke(obj, params);
 			
-		}catch (InvocationTargetException e) {
-			e.printStackTrace();
-		  }catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		  }
+		
+			System.out.print(((Integer)ret).toString());
 	}
 	
-	void run(Node node)
+	void run(Node node) throws Exception
 	{
 		while (true)
 		{
@@ -244,7 +237,7 @@ public class Kernel
 		    	call(node);
 		    if ((node.True != null) || (node.Else != null))
 		    {
-		    	if (compare(node.getValue()))
+		    	if (node.getValue().compare())
 		    	{
 		    		if (node.True != null)
 		    		{
@@ -270,9 +263,6 @@ public class Kernel
 		    node = node.Next.node;
 		}
 	}
-	
-	
-	
 
 	Node getNode()
 	{
@@ -285,7 +275,7 @@ public class Kernel
 		return newNode(node);
 	}
 
-	Node runNode(String string)
+	Node runNode(String string) throws Exception
 	{
 		Node result = newNode(new TextNode(string).UserParse());
 		prev = nextNode(prev, result);

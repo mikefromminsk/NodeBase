@@ -1,21 +1,23 @@
-[N4 C2]
+# N1 K5 B3
 NodeBase
+builder creator generator
 language for machines, not for human
 Neuro-information model
 
 
-[basic task]
+## basic task
 Create Pi Code
 
 
-[principles]
-clean sheet better
+## principles
+All fucked-up! Let's start with a clean list.
+Shut up and show me!
 interactivity better speed
 speed better ram
-all data variable to file
 
 
-[Projects]
+
+## Projects
 Time Tracker
 console
 teleport
@@ -25,7 +27,7 @@ client
 
 
 
-[Console]
+## Console
 
 release
 union all module to one file
@@ -82,7 +84,7 @@ History: AString;
 history and dump using delimiter chr(0) 
 
 
-[Kernel]
+## Kernel
 
 naPointer
 
@@ -130,7 +132,7 @@ merge all module to one file
 
 
 
-[Creator 2]
+## builder v3
 
 CreatorParams to Root Node
 
@@ -164,26 +166,20 @@ ALocal
 
 FastAttribute with get count and replace position
 
-
-[Generator 3]
-
-
 to Java
-Kernel to Java
 
 
-builder creator generator
 
-Delete word randome
+Delete word random
 
 Delete center range
 
-rename parentname to comment
+
+## kernel v5
+
+Kernel to Java
 
 link class many to many
-
-
-TNode extends TIndexNode 
 
 
 
