@@ -15,7 +15,7 @@ import java.util.Map;
 public class Kernel
 {
 
-	IndexTree rootIndex;
+	IndexNode rootIndex;
 	Node
 		root,
 		prev,
@@ -23,7 +23,7 @@ public class Kernel
 	
 	public Kernel() 
 	{
-		rootIndex = new IndexTree();
+		rootIndex = new IndexNode();
 		rootIndex.node = new Node(rootIndex);
 		root = rootIndex.node;
 		root.Attr = Utils.slice(Utils.LoadFromFile(Const.RootFileName), "\n");
@@ -38,24 +38,10 @@ public class Kernel
 		return root.getAttr(Const.naLastID);
 	}
 	
-	String getFileName(Node node)
-	{
-		IndexTree indexNode = node.Index;
-		ArrayList<String> indexes = new ArrayList<String>();
-		while (indexNode != null)
-		{
-			indexes.add(indexNode.IndexName);
-			indexNode = indexNode.parent;
-		}
-		String fileName = root.getAttr(Const.naRootPath) + Utils.toFileSystemName(indexes) + Const.NodeFileName;
-		indexes.clear();
-		return fileName;
-	}
-	
 	void loadNode(Node node)
 	{
 		node.setNodeType(Const.ntLoad); //recode to status
-		String body = Utils.LoadFromFile(getFileName(node));
+		String body = Utils.LoadFromFile(root.getAttr(Const.naRootPath) + node.Index.getIndexFileName());
 		if (body != null)
 			setNode(body);
 	}	
@@ -63,14 +49,14 @@ public class Kernel
 	void saveNode(Node node)
 	{
 		//node.setNodeType(Const.ntSave);
-		Utils.SaveToFile(getFileName(node), node.getBody());
+		Utils.SaveToFile(root.getAttr(Const.naRootPath) + node.Index.getIndexFileName(), node.getBody());
 	}
 	
-	void saveTree(IndexTree indexTree)
+	void saveTree(IndexNode indexTree)
 	{
 		saveNode(indexTree.node);
-		for (int i=0; i<indexTree.nodes.size(); i++)
-			saveTree(indexTree.nodes.get(i));
+		for (int i=0; i<indexTree.childs.size(); i++)
+			saveTree(indexTree.childs.get(i));
 	}
 	
 
@@ -81,7 +67,8 @@ public class Kernel
 		
 		if (textNode.ID != null)
 		{
-			result = rootIndex.newSubIndex(Const.sID + textNode.ID);
+			IndexNode index = rootIndex.getSubNode(Const.sID + textNode.ID);
+			
 			if (result.getNodeType() == null)
 				loadNode(result);
 		}
@@ -246,13 +233,11 @@ public class Kernel
 		    		}
 		    	}
 		    	else
-		    	{
 		    		if (node.Else != null)
 		    		{
 		    			node = node.Else.node.getSource();
 		    			continue;
 		    		}
-		    	}
 		    }
 		    else
 		    if ((node.Source != null) && (node.Value != null))

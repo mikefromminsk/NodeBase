@@ -10,19 +10,17 @@ public class Tests {
 	
 	public static void main(String[] args) throws Exception 
 	{
-		{
-			Kernel kernel = new Kernel();
-			kernel.loadModule(null);
-			kernel.call(null);
+
+		/*{
+			beginTest("indexNode");
+			IndexNode node = new IndexNode();
+			testingEqual(node.getSubNode("ind1/ind2/ind3").getIndex(), "ind1/ind2/ind3");
+			testingEqual(node.getSubNode("ind1/ind2/ind4").getIndex(), "ind1/ind2/ind4");
+			testingEqual(node.getSubNode("ab").getIndex(), "ab");
+			testingEqual(node.getSubNode("ac").getIndex(), "ac");
+			testingEqual(node.getSubNode("a").childs.size(), 2);
 		}
-		{
-			beginTest("loadModule");
-			Kernel kernel = new Kernel();
-			kernel.loadModule(null);
-			kernel.call(null);
-			testError();
-		}
-		/*System.out.println( String.format("%02X",255));
+		System.out.println( String.format("%02X",255));
 		Kernel kernel = new Kernel();
 		kernel.NextID();
 		
@@ -55,6 +53,30 @@ public class Tests {
 		endTesting();
 	}
 	
+	static void testingEqual(String str1, String str2)
+	{
+		if (str1.compareTo(str2) != 0)
+		{
+			testError();
+			System.out.println(str1 + " != " + str2);
+		}
+	}
+	
+	static void testingEqual(int num1, int num2)
+	{
+		if (num1 != num2)
+		{
+			testError();
+			System.out.println(Integer.toString(num1) + " != " + Integer.toString(num2));
+		}
+	}
+	
+	private static void testError(String message)
+	{
+		testError();
+		System.out.println(message);
+	}
+
 	static String testName = null;
 	static int success = 0;
 	static int errors = 0;
@@ -66,7 +88,7 @@ public class Tests {
 	}
 	
 	private static void testError() {
-		System.out.println(testName + " не работает");
+		System.out.println(testName);
 		errors++;
 		testName = null;
 	}

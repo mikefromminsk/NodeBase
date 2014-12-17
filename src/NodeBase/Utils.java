@@ -66,32 +66,6 @@ public class Utils
 		}
 		return result;
 	}
-
-	public static String toFileSystemName(ArrayList<String> indexes) 
-	{
-		String result = "";
-		for (int i=0; i<indexes.size(); i++)
-		{
-			String index = indexes.get(i);
-			if (index.length() == 1)
-			{
-				if (!(															 // if not
-						((index.charAt(0) >= 48) && (index.charAt(0) <= 57)) ||  //numbers
-						((index.charAt(0) >= 65) && (index.charAt(0) <= 90)) ||  //eng uppercase
-						((index.charAt(0) >= 97) && (index.charAt(0) <= 122))    //eng lowercase
-					))
-					index = String.format("%02X", index.charAt(0));
-			}
-			else
-			{
-				for (int j=0; j<Const.IllegalFileNames.length; j++)
-					if (index == Const.IllegalFileNames[j])
-						index = index + '1'; //recode
-			}
-			result = index + "/" + result;
-		}
-		return null;
-	}
 	
 	static String encodeStr(String str)
 	{

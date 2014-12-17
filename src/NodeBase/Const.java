@@ -69,12 +69,13 @@ class Const
 	  	sDecimalSeparator = ",";
 	
 	//File Names
-	public final static String 
+	public static String 
 	  RootFileName = "root.ini",
 	  NodeFileExtention = ".node",
 	  NodeFileName = "Node" + NodeFileExtention,
-	  ExternalModuleExtention = ".java";
-	
+	  ExternalModuleExtention = ".java",
+	  FileDelimeter = "/";
+	  
 	
 	static String IllegalCharacters = "/\\:*?@\"<>|";
 	static String IllegalFileNames[] = {"con"};

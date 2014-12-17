@@ -43,7 +43,7 @@ class Link
 
 public class Node
 {
-	IndexTree Index;
+	IndexNode Index;
 	
 	String Path;
 	Object Data;
@@ -59,7 +59,7 @@ public class Node
 		Next,
 		Locals;
 	
-	Node(IndexTree index)
+	Node(IndexNode index)
 	{
 		this.Index = index;
 	}
@@ -68,9 +68,9 @@ public class Node
 		Index = index;
 	}*/
 	
-	public String getIndex() {
+	/*public String getIndex() {
 		return null;
-	}
+	}*/
 	
 	public String getAttr(String key) {
 		if (Attr == null)
@@ -214,9 +214,9 @@ public class Node
 		String result = null;
 
 		if (Comment != null)
-			result += Const.sComment + Comment.node.getIndex();
+			result += Const.sComment + Comment.node.Index.getIndex();
 		if (Source != null)
-			result += Const.sSource + Source.node.getIndex();
+			result += Const.sSource + Source.node.Index.getIndex();
 		
 		if (Attr != null)
 		{
@@ -229,7 +229,7 @@ public class Node
 			result += Const.sAttr + str;
 		}
 		if (Type != null)
-			result += Const.sType + Type.node.getIndex();
+			result += Const.sType + Type.node.Index.getIndex();
 		if (Params != null)
 		{
 			String str = null;
@@ -237,21 +237,21 @@ public class Node
 			{
 				if (str != null)
 					str += Const.sAnd;
-				str += Params.nodes.get(i).getIndex();
+				str += Params.nodes.get(i).Index.getIndex();
 			}
 			result += Const.sParams + str;
 		}
 		if (Value != null)
-			result += Const.sValue + Value.node.getIndex();
+			result += Const.sValue + Value.node.Index.getIndex();
 		if (True != null)
-			result += Const.sTrue + True.node.getIndex();
+			result += Const.sTrue + True.node.Index.getIndex();
 		if (Else != null)
-			result += Const.sElse + Else.node.getIndex();
+			result += Const.sElse + Else.node.Index.getIndex();
 		if (Next != null)
-			result += Const.sNext + Next.node.getIndex();
+			result += Const.sNext + Next.node.Index.getIndex();
 		if (Locals != null)
 			for (int i=0; i<Locals.nodes.size(); i++)
-				result += Const.sLocals + Locals.nodes.get(i).getIndex();
+				result += Const.sLocals + Locals.nodes.get(i).Index.getIndex();
 		return result;
 	}
 	
