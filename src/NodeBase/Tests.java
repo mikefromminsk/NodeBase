@@ -10,7 +10,38 @@ public class Tests {
 	
 	public static void main(String[] args) throws Exception 
 	{
-
+		{
+			beginTest("Node getters and setters");
+			Node node = new Node(new Index("node"));
+			node.setComment(new Node(new Index("comment")));
+			node.setSource(new Node(new Index("source")));
+			node.setType(new Node(new Index("type")));
+			node.setValue(new Node(new Index("value")));
+			node.setTrue(new Node(new Index("true")));
+			node.setElse(new Node(new Index("else")));
+			node.setNext(new Node(new Index("next")));
+			testEqual(node.getComment().getIndex(), "comment");
+			testEqual(node.getSource().getIndex(), "source");
+			testEqual(node.getType().getIndex(), "type");
+			testEqual(node.getValue().getIndex(), "value");
+			testEqual(node.getTrue().getIndex(), "true");
+			testEqual(node.getElse().getIndex(), "else");
+			testEqual(node.getNext().getIndex(), "next");
+			node.setAttr("attr1", "val1");
+			node.setAttr("attr2", "val2");
+			node.setAttr("attr3", null);
+			testEqual(node.getAttr("attr1"), "val1");
+			testEqual(node.getAttr("attr2"), "val2");
+			testEqual(node.getAttr("attr3"), null);
+			node.setData("data");
+			testEqual(node.getData().toString(), "data");
+			
+			/*
+			node.setParam(0, new Node(new Index("param1")));
+			node.setParam(1, new Node(new Index("param2")));
+			testEqual(node.getParams().size(), 2);
+			*/
+		}
 		
 		{
 			beginTest("TextNode UserParse");
@@ -65,46 +96,15 @@ public class Tests {
 		}
 		
 		{
-			beginTest("IndexNode");
-			IndexNode node = new IndexNode();
-			testEqual(node.getSubNode("ind1/ind2/ind3").getIndex(), "ind1/ind2/ind3");
-			testEqual(node.getSubNode("ind1/ind2/ind4").getIndex(), "ind1/ind2/ind4");
+			beginTest("Index");
+			Index node = new Index("");
+			testEqual(node.getSubNode("ind1/ind2/ind3").getIndex(), "/ind1/ind2/ind3");
+			testEqual(node.getSubNode("ind1/ind2/ind4").getIndex(), "/ind1/ind2/ind4");
 			testEqual(node.getSubNode("ab").getIndex(), "ab");
 			testEqual(node.getSubNode("ac").getIndex(), "ac");
 			testEqual(node.getSubNode("a").childs.size(), 2);
 		}
-		/*
 		
-		System.out.println( String.format("%02X",255));
-		Kernel kernel = new Kernel();
-		kernel.NextID();
-		
-		System.out.println(Utils.LoadFromFile("e:\\aaa.txt"));
-		
-		
-		TextNode node = new TextNode("Comment");
-		node.BaseParse();
-		System.out.println(node.Comment);
-		
-		TextNode node = new TextNode("Comment@ID^Source$Names=Values&na=va:Type?Param&Param#Value>True|Else\nNext\n\nLocal\n\nLocal2");
-		node.BaseParse();
-		System.out.println(node.ID);
-	
-		
-		System.out.println("Utils.Index " + Utils.Index(new String[]{"Foo","Bar","Baz"}, "ssdfdBazfFoosdf")); 
-		
-		TextNode node2 = new TextNode("Comment@ID^Source$Names=Values:Type?Param&Param#Value>True|Else\nNext\n\nLocal\n\nLocal2");
-		node2.UserParse();
-		System.out.println(node2.ID);
-		
-		System.out.println(FindCloseTag("func?par1?par2&par3;&par4", '?', ';'));
-		
-		System.out.println(deleteStr("1234567890", 4, 5));
-		
-		
-		TextNode node2 = new TextNode("Comment@ID^Source$Names=Values&na=va:Type?par1?par2&par3;&par4#Value>True|Else\nNext\n\nLocal\n\nLocal2");
-		node2.UserParse();
-		System.out.println(node2.ID);*/
 		endTesting();
 	}
 	

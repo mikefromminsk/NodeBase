@@ -15,7 +15,7 @@ import java.util.Map;
 public class Kernel
 {
 
-	IndexNode rootIndex;
+	Index rootIndex;
 	Node
 		root,
 		prev,
@@ -23,7 +23,7 @@ public class Kernel
 	
 	public Kernel() 
 	{
-		rootIndex = new IndexNode();
+		rootIndex = new Index();
 		rootIndex.node = new Node(rootIndex);
 		root = rootIndex.node;
 		root.attr = Utils.slice(Utils.LoadFromFile(Const.RootFileName), "\n");
@@ -52,7 +52,7 @@ public class Kernel
 		Utils.SaveToFile(root.getAttr(Const.naRootPath) + node.Index.getIndexFileName(), node.getBody());
 	}
 	
-	void saveTree(IndexNode indexTree)
+	void saveTree(Index indexTree)
 	{
 		saveNode(indexTree.node);
 		for (int i=0; i<indexTree.childs.size(); i++)
@@ -67,7 +67,7 @@ public class Kernel
 		
 		if (textNode.ID != null)
 		{
-			IndexNode index = rootIndex.getSubNode(Const.sID + textNode.ID);
+			Index index = rootIndex.getSubNode(Const.sID + textNode.ID);
 			
 			if (result.getNodeType() == null)
 				loadNode(result);

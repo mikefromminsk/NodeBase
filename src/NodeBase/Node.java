@@ -36,13 +36,13 @@ class Link
 
 public class Node
 {
-	IndexNode index;
+	Index index;
 	String path;
 	Object data;
 	Map<String, String>	attr;
 	Link[] links = new Link[Const.LinksCount];
 	
-	Node(IndexNode index)
+	Node(Index index)
 	{
 		setIndex(index);
 	}
@@ -153,7 +153,7 @@ public class Node
 		return index.getIndex();
 	}
 	
-	void setIndex(IndexNode index) {
+	void setIndex(Index index) {
 		this.index = index;
 	}
 	

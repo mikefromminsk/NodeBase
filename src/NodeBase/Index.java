@@ -2,14 +2,17 @@ package NodeBase;
 
 import java.util.ArrayList;
 
-public class IndexNode
+public class Index
 {
 	String index;
-	Node node;
-	IndexNode parent;
-	ArrayList<IndexNode> childs = new ArrayList<IndexNode>();
+	Index parent;
+	ArrayList<Index> childs = new ArrayList<Index>();
 
-	public IndexNode getSubNode(String index)
+	public Index(String index) {
+		this.index = index;
+	}
+	
+	public Index getSubNode(String index)
 	{
 		String[] indexes = index.split(Const.FileDelimeter);
 		if (indexes.length == 1)
@@ -19,7 +22,7 @@ public class IndexNode
 				indexes[i] = "" + index.charAt(i);
 		}
 		
-		IndexNode node = this;
+		Index node = this;
 		for (int i=0; i<indexes.length; i++)
 		{
 			int subIndexPos = -1;
@@ -31,10 +34,9 @@ public class IndexNode
 				}
 			if (subIndexPos == -1)
 			{
-				node.childs.add(new IndexNode());
+				node.childs.add(new Index(indexes[i]));
 				node.childs.get(node.childs.size() - 1).parent = node;
 				node = node.childs.get(node.childs.size() - 1);
-				node.index = indexes[i];
 			}
 			else
 				node = node.childs.get(subIndexPos);
@@ -44,9 +46,9 @@ public class IndexNode
 	
 	public ArrayList<String> toStrings()
 	{
-		IndexNode node = this;
+		Index node = this;
 		ArrayList<String> result = new ArrayList<String>();
-		while (node.parent != null)
+		while (node != null)
 		{
 			result.add(node.index);
 			node = node.parent;
