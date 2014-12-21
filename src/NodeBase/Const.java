@@ -45,9 +45,9 @@ class Const
 	
 	
 	static String 
-		CharSequence[] = {sComment, sID, sSource, sAttr, sType, sParams, sValue, sTrue, sElse, sNext, sLocals};
+		LinksSequence[] = {sComment, sID, sSource, sAttr, sType, sParams, sValue, sTrue, sElse, sNext, sLocals};
 	
-	static int CharCount = CharSequence.length;
+	static int LinksCount = LinksSequence.length;
 	
 
 	final static Integer 

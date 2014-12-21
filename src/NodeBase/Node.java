@@ -11,29 +11,22 @@ import java.util.Map;
 class Link
 {
 	public Node parent;
-	public Node node;
-	public ArrayList<Node> nodes;
+	public ArrayList<Node> nodes = new ArrayList<Node>();
 	
-	Link(Node node, Node parent)
-	{
-		this.node = node;
+	Link(Node parent, Node node){
 		this.parent = parent;
+		add(node);
 	}
 	
-	void add(Node node)
-	{
-		if (nodes == null)
-		{
-			nodes = new ArrayList<Node>();
-			nodes.add(this.node);
-		}
+	void add(Node node){
 		nodes.add(node);
 	}
 	
-	Node get(int i)
-	{
-		if (nodes == null)
-			return null;
+	Node getNode(){
+		return nodes.get(0);
+	}
+	
+	Node getNode(int i){
 		return nodes.get(i);
 	}
 }
@@ -43,48 +36,137 @@ class Link
 
 public class Node
 {
-	IndexNode Index;
-	
-	String Path;
-	Object Data;
-	Map<String, String>	Attr;
-	Link 
-		Comment,
-		Source,
-		Type,
-		Params,
-		Value,
-		True,
-		Else,
-		Next,
-		Locals;
+	IndexNode index;
+	String path;
+	Object data;
+	Map<String, String>	attr;
+	Link[] links = new Link[Const.LinksCount];
 	
 	Node(IndexNode index)
 	{
-		this.Index = index;
+		setIndex(index);
 	}
 	
-	/*public void setIndex(IndexTree index) {
-		Index = index;
-	}*/
+	ArrayList<Node> getLinks(int linkId){
+		return links[linkId] != null? links[linkId].nodes : null;
+	}
 	
-	/*public String getIndex() {
-		return null;
-	}*/
+	Node getLink(int linkId){
+		return links[linkId] != null? links[linkId].getNode() : null;
+	}
+	
+	void setLink(int linkId, int index, Node node){
+		if (links[linkId] == null)
+			links[linkId] = new Link(this, node);
+		links[linkId].nodes.set(0, node);
+	}
+	
+	void setLink(int linkId, Node node){
+		setLink(linkId, 0, node);
+	}
+	
+	Node getComment(){
+		return getLink(Const.iComment);
+	}
+	
+	void setComment(Node node){
+		setLink(Const.iComment, node);
+	}
+
+	Node getSource(){
+		return getLink(Const.iSource);
+	}
+	
+	void setSource(Node node){
+		setLink(Const.iSource, node);
+	}
+	
+	Node getType(){
+		return getLink(Const.iType);
+	}
+	
+	void setType(Node node){
+		setLink(Const.iType, node);
+	}
+	
+	Node getValue(){
+		return getLink(Const.iValue);
+	}
+	
+	void setValue(Node node){
+		setLink(Const.iValue, node);
+	}
+	
+	Node getTrue(){
+		return getLink(Const.iTrue);
+	}
+	
+	void setTrue(Node node){
+		setLink(Const.iTrue, node);
+	}
+	
+	Node getElse(){
+		return getLink(Const.iElse);
+	}
+	
+	void setElse(Node node){
+		setLink(Const.iElse, node);
+	}
+	
+	Node getNext(){
+		return getLink(Const.iNext);
+	}
+	
+	void setNext(Node node){
+		setLink(Const.iNext, node);
+	}
+	
+	ArrayList<Node> getParams(){
+		return getLinks(Const.iParams);
+	}
+	
+	void setParam(int index, Node node){
+		setLink(Const.iParams, index, node);
+	}
+	
+	ArrayList<Node> getLocals(){
+		return getLinks(Const.iLocals);
+	}
+	
+	void setLocals(int index, Node node){
+		setLink(Const.iLocals, index, node);
+	}
 	
 	public String getAttr(String key) {
-		if (Attr == null)
+		if (attr == null)
 			return null;
-		return Attr.get(key);
+		return attr.get(key);
 	}
 	
-	public void setAttr(String key, String value) {
-		if (Attr == null)
-			Attr = new HashMap<String, String>();
-		Attr.put(key, value);
+	void setAttr(String key, String value) {
+		if (attr == null)
+			attr = new HashMap<String, String>();
+		attr.put(key, value);
 	}
-
-
+	
+	String getIndex() {
+		return index.getIndex();
+	}
+	
+	void setIndex(IndexNode index) {
+		this.index = index;
+	}
+	
+	Object getData() {
+		return data;
+	}
+	
+	void setData(Object data) {
+		this.data = data;
+	}
+	
+	// end getters and setters
+	
 	public String getNodeType() {
 		return getAttr(Const.naType);
 	}
@@ -93,13 +175,8 @@ public class Node
 		setAttr(Const.naType, type);
 	}
 	
-	public Link getComment() {
-		return Comment;
-	}
 	
-	public void setComment(Link comment) {
-		Comment = comment;
-	}
+	/*
 
 	public Node getSource() {
 		Node result = this;
@@ -200,9 +277,9 @@ public class Node
 			next.Next.parent = this;
 	}
 	
-	/*public Link getLocals() {
+	public Link getLocals() {
 		return Locals;
-	}*/
+	}
 
 	public void setLocal(Node local) {
 		if (Locals.nodes.indexOf(local) != -1)
@@ -264,6 +341,6 @@ public class Node
 			if (((String)Data).isEmpty())
 				return true;
 		return false;
-	}
+	}*/
 
 }

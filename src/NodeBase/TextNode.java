@@ -29,9 +29,9 @@ public class TextNode
 	
 	static String[] ToString(String Str)
 	{
-		int[] indexes = new int[Const.CharCount + 1];
-		for (int i=0; i<Const.CharCount; i++)
-			indexes[i] = Str.indexOf(Const.CharSequence[i]);
+		int[] indexes = new int[Const.LinksCount + 1];
+		for (int i=0; i<Const.LinksCount; i++)
+			indexes[i] = Str.indexOf(Const.LinksSequence[i]);
 		
 		indexes[indexes.length - 1] = Str.length();
 
@@ -42,10 +42,10 @@ public class TextNode
 				if (indexes[i] > indexes[i + 1])
 					indexes[i] = indexes[i + 1];
 		
-		String[] Result = new String[Const.CharCount];
-		for(int i=0; i<Const.CharCount; i++)
+		String[] Result = new String[Const.LinksCount];
+		for(int i=0; i<Const.LinksCount; i++)
 			if (indexes[i] != indexes[i + 1])
-				Result[i] = Str.substring(indexes[i] + Const.CharSequence[i].length(), indexes[i + 1]);
+				Result[i] = Str.substring(indexes[i] + Const.LinksSequence[i].length(), indexes[i + 1]);
 		
 		return Result;
 	}
@@ -149,11 +149,12 @@ public class TextNode
 	{
 		Destroy();
 		//to 
-		/*  PosValue := Pos(sVal, Str);
-		  i := Pos(sParams, Str);
-		  if ((PosValue <> 0) and (i = 0)) or
-		     ((PosValue <> 0) and (i <> 0) and (PosValue < i)) then
-		    Str[PosValue] := sValue;*/ 
+		int posValue = ID.indexOf(Const.sEqual);
+		int posParams = ID.indexOf(Const.sParams);
+		int posAttr = ID.indexOf(Const.sAttr);
+		if (((posAttr == -1) & (posValue != -1) & (posParams == -1)) |
+			((posAttr == -1) & (posValue != -1) & (posParams != -1) & (posParams < posParams)))
+			ID = ID.replace(Const.sEqual, Const.sValue);
 		    
 		String[] strings = ToString(ID);
 		Comment = strings[Const.iComment];

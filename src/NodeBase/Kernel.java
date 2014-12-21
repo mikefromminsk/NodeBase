@@ -26,7 +26,7 @@ public class Kernel
 		rootIndex = new IndexNode();
 		rootIndex.node = new Node(rootIndex);
 		root = rootIndex.node;
-		root.Attr = Utils.slice(Utils.LoadFromFile(Const.RootFileName), "\n");
+		root.attr = Utils.slice(Utils.LoadFromFile(Const.RootFileName), "\n");
 		if (root.getAttr(Const.naLastID) == null)
 			root.setAttr(Const.naLastID, "0");
 		root.setNodeType(Const.ntRoot);
