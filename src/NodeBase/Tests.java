@@ -20,6 +20,14 @@ public class Tests {
 			node.setTrue(new Node(new Index("true")));
 			node.setElse(new Node(new Index("else")));
 			node.setNext(new Node(new Index("next")));
+			node.setAttr("attr1", "val1");
+			node.setAttr("attr2", "val2");
+			node.setAttr("attr3", null);
+			node.setData("data");
+			node.setParam(0, new Node(new Index("param1")));
+			node.setParam(1, new Node(new Index("param2")));
+			node.setLocal(0, new Node(new Index("local1")));
+			node.setLocal(1, new Node(new Index("local2")));
 			testEqual(node.getComment().getIndex(), "comment");
 			testEqual(node.getSource().getIndex(), "source");
 			testEqual(node.getType().getIndex(), "type");
@@ -27,20 +35,16 @@ public class Tests {
 			testEqual(node.getTrue().getIndex(), "true");
 			testEqual(node.getElse().getIndex(), "else");
 			testEqual(node.getNext().getIndex(), "next");
-			node.setAttr("attr1", "val1");
-			node.setAttr("attr2", "val2");
-			node.setAttr("attr3", null);
 			testEqual(node.getAttr("attr1"), "val1");
 			testEqual(node.getAttr("attr2"), "val2");
 			testEqual(node.getAttr("attr3"), null);
-			node.setData("data");
 			testEqual(node.getData().toString(), "data");
-			
-			/*
-			node.setParam(0, new Node(new Index("param1")));
-			node.setParam(1, new Node(new Index("param2")));
+			testEqual(node.getParams().get(0).getIndex(), "param1");
+			testEqual(node.getParam(1).getIndex(), "param2");
 			testEqual(node.getParams().size(), 2);
-			*/
+			testEqual(node.getLocals().get(0).getIndex(), "local1");
+			testEqual(node.getLocal(1).getIndex(), "local2");
+			testEqual(node.getParams().size(), 2);
 		}
 		
 		{

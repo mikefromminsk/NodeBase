@@ -55,10 +55,24 @@ public class Node
 		return links[linkId] != null? links[linkId].getNode() : null;
 	}
 	
+	
+	Node getLink(int linkId, int subIndex) {
+		if (links[linkId] == null)
+			return null;
+		if (subIndex < links[linkId].nodes.size())
+			return links[linkId].nodes.get(subIndex);
+		return null;
+	}
+	
 	void setLink(int linkId, int index, Node node){
 		if (links[linkId] == null)
 			links[linkId] = new Link(this, node);
-		links[linkId].nodes.set(0, node);
+		else
+		if (links[linkId].nodes.size() < index)
+			links[linkId].nodes.set(index, node);
+		else
+		if (links[linkId].nodes.size() == index)
+			links[linkId].nodes.add(node);
 	}
 	
 	void setLink(int linkId, Node node){
@@ -125,6 +139,10 @@ public class Node
 		return getLinks(Const.iParams);
 	}
 	
+	Node getParam(int index){
+		return getLink(Const.iParams, index);
+	}
+
 	void setParam(int index, Node node){
 		setLink(Const.iParams, index, node);
 	}
@@ -133,7 +151,11 @@ public class Node
 		return getLinks(Const.iLocals);
 	}
 	
-	void setLocals(int index, Node node){
+	Node getLocal(int index){
+		return getLink(Const.iLocals, index);
+	}
+	
+	void setLocal(int index, Node node){
 		setLink(Const.iLocals, index, node);
 	}
 	
@@ -177,28 +199,11 @@ public class Node
 	
 	
 	/*
-
 	public Node getSource() {
 		Node result = this;
 		while (result.Source != null)
 			result = result.Source.node;
 		return result;
-	}
-	
-	public void setSource(Node node) {
-		Source.node = node;
-	}
-	
-	public Node getType() {
-		return Type.node;
-	}
-	
-	public void setType(Node node) {
-		Type.node = node;
-	}
-	
-	public Node getParam() {
-		return Params.node;
 	}
 	
 	public void setParam(Node param, int index) {
@@ -239,48 +244,6 @@ public class Node
 		return result;
 	}
 	
-	public void setValue(Node node) {
-		Value.node = node;
-	}
-	
-	public Object getData() {
-		return Data;
-	}
-	
-	public void setData(String data) {
-		Data = data;
-	}
-	
-	public Node getTrue() {
-		return True.node;
-	}
-	
-	public void setTrue(Node node) {
-		True.node = node;
-	}
-	
-	public Node getElse() {
-		return Else.node;
-	}
-	
-	public void setElse(Node node) {
-		Else.node = node;
-	}
-	
-	public Node getNext() {
-		return Next.node;
-	}
-	
-	public void setNext(Node next) {
-		Next.node = next;
-		if (next != null)
-			next.Next.parent = this;
-	}
-	
-	public Link getLocals() {
-		return Locals;
-	}
-
 	public void setLocal(Node local) {
 		if (Locals.nodes.indexOf(local) != -1)
 			Locals.nodes.add(local);
