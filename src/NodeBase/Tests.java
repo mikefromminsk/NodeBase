@@ -11,6 +11,17 @@ public class Tests {
 	public static void main(String[] args) throws Exception 
 	{
 		{
+			beginTest("Module Loader");
+			Kernel kernel = new Kernel();
+			Node node = new Node(new Index("C:\\Users\\GaidukMD\\Desktop\\NodeBase\\src\\Module.java"));
+			kernel.loadModule(node);
+			Node param = new Node(new Index(""));
+			param.data = 10;
+			node.getLocals().get(0).setParam(0, node);
+			kernel.call(node.getLocals().get(0));
+			testEqual(node.getLocals().get(0).getValue().data.toString(), "10");
+		}
+		{
 			beginTest("Node getters and setters");
 			Node node = new Node(new Index("node"));
 			node.setComment(new Node(new Index("comment")));
