@@ -14,8 +14,9 @@ import java.util.Map;
 
 public class Kernel
 {
-
+	ModuleLoader loader = new ModuleLoader(ClassLoader.getSystemClassLoader());
 	Index rootIndex;
+	String LastID;
 	Node
 		root,
 		prev,
@@ -29,38 +30,56 @@ public class Kernel
 		root.attr = Utils.slice(Utils.LoadFromFile(Const.RootFileName), "\n");
 		if (root.getAttr(Const.naLastID) == null)
 			root.setAttr(Const.naLastID, "0");
+		LastID = root.getAttr(Const.naLastID);
 		root.setNodeType(Const.ntRoot);
 	}
 	
 	String NextID()
+
 	{
-		root.setAttr(Const.naLastID, Utils.Inc(Const.naLastID));
-		return root.getAttr(Const.naLastID);
+		return Utils.Inc(LastID);
 	}
 	
-	void loadNode(Node node)
+	void load(Node node)
 	{
 		node.setNodeType(Const.ntLoad); //recode to status
 		String body = Utils.LoadFromFile(root.getAttr(Const.naRootPath) + node.Index.getIndexFileName());
+		void loadModule(Node node) throws Exception
+		{
+			String fileName = "C:\\Users\\GaidukMD\\Desktop\\NodeBase\\src\\Module.java";
+			if (fileName.indexOf(".java") == fileName.length() - ".java".length())
+			{
+
+				File moduleFile = new File(fileName);
+				loader.pathToDir = moduleFile.getParentFile().getAbsolutePath();
+			 	Class c = loader.loadClass(moduleFile.getName().replace(".java", ""));
+			 	Method[] methods = c.getDeclaredMethods(); 
+			  	for (Method method : methods) 
+			  	{ 
+			  		System.out.println(method.getName()); 
+			    	System.out.println(method.getReturnType().getName()); 
+			    	Class[] paramTypes = method.getParameterTypes(); 
+			     	for (Class paramType : paramTypes) 
+			        	System.out.print(paramType.getName()); 
+			  	}
+			  	
+			  	obj = c.newInstance();
+	 
+				  
+			}
+			
+		}
 		if (body != null)
 			setNode(body);
 	}	
 	
-	void saveNode(Node node)
+	void save(Node node)
 	{
 		//node.setNodeType(Const.ntSave);
 		Utils.SaveToFile(root.getAttr(Const.naRootPath) + node.Index.getIndexFileName(), node.getBody());
 	}
-	
-	void saveTree(Index indexTree)
-	{
-		saveNode(indexTree.node);
-		for (int i=0; i<indexTree.childs.size(); i++)
-			saveTree(indexTree.childs.get(i));
-	}
-	
 
-	Node newNode(TextNode textNode) 
+	Node set(TextNode textNode) 
 	{
 		Node result = null;
 		
@@ -143,66 +162,20 @@ public class Kernel
 		
 		for (int i=0; i<textNode.Locals.size(); i++)
 			result.setLocal(newNode(textNode.Locals.get(i)));
-		
+		saveNode(result);
 		return result;
 	}
-
-	Node nextNode(Node prev, Node next) 
+	
+	Node set(String code)
 	{
-		Node result; 
-		if (prev != null)
-			prev.setNext(next);
-		else
-			if (next != null)
-				unit = next;
-			else
-				unit.setLocal(next);
-		return next;
+		TextNode node = new TextNode(code).UserParse();
+		return newNode(node);
 	}
 	
-	ModuleLoader loader = new ModuleLoader(ClassLoader.getSystemClassLoader());
-
-	Object obj = null; 
-	
-	void loadModule(Node node) throws Exception
+	Node get(String code)
 	{
-		String fileName = "C:\\Users\\GaidukMD\\Desktop\\NodeBase\\src\\Module.java";
-		if (fileName.indexOf(".java") == fileName.length() - ".java".length())
-		{
-
-			File moduleFile = new File(fileName);
-			loader.pathToDir = moduleFile.getParentFile().getAbsolutePath();
-		 	Class c = loader.loadClass(moduleFile.getName().replace(".java", ""));
-		 	Method[] methods = c.getDeclaredMethods(); 
-		  	for (Method method : methods) 
-		  	{ 
-		  		System.out.println(method.getName()); 
-		    	System.out.println(method.getReturnType().getName()); 
-		    	Class[] paramTypes = method.getParameterTypes(); 
-		     	for (Class paramType : paramTypes) 
-		        	System.out.print(paramType.getName()); 
-		  	}
-		  	
-		  	obj = c.newInstance();
- 
-			  
-		}
-		
-	}
-	
-	void call(Node node) throws Exception
-	{
-		Class c = obj.getClass();
-		Class[] paramTypes = new Class[] { int.class }; 
-		Method method = null;
-		
-		method = c.getMethod("run", paramTypes);
-		
-		Object[] params = new Object[] { new Integer(10) }; 
-		Object ret = method.invoke(obj, params);
-			
-		
-			System.out.print(((Integer)ret).toString());
+		TextNode node = new TextNode(code).UserParse();
+		return newNode(node.ID);
 	}
 	
 	void run(Node node) throws Exception
@@ -249,28 +222,46 @@ public class Kernel
 		}
 	}
 
-	Node getNode()
-	{
-		return null;
-	}
-	
-	Node setNode(String code)
-	{
-		TextNode node = new TextNode(code).UserParse();
-		return newNode(node);
-	}
-
-	Node runNode(String string) throws Exception
+	Node run(String string) throws Exception
 	{
 		Node result = newNode(new TextNode(string).UserParse());
+
+		Object call(Node node) throws Exception
+		{
+			Class c = obj.getClass();
+			Class[] paramTypes = new Class[] { int.class }; 
+			Method method = null;
+			
+			method = c.getMethod("run", paramTypes);
+			
+			Object[] params = new Object[] { new Integer(10) }; 
+			Object ret = method.invoke(obj, params);
+			return ret;	
+			
+				System.out.print(((Integer)ret).toString());
+		}
+		
+
+		
+		
+		Node next(Node prev, Node next) 
+		{
+			Node result; 
+			if (prev != null)
+				prev.setNext(next);
+			else
+				if (next != null)
+					unit = next;
+				else
+					unit.setLocal(next);
+			return next;
+		}
+		
 		prev = nextNode(prev, result);
 		if (result != null)
 			if (result.getAttr(Const.naActivate) != null)
 				run(result);
 		return result;
 	}
-	
-	
-	
 	
 }
