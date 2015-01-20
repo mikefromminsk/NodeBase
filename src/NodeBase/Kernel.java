@@ -34,12 +34,6 @@ public class Kernel
 		root.setNodeType(Const.ntRoot);
 	}
 	
-	String NextID()
-
-	{
-		return Utils.Inc(LastID);
-	}
-	
 	void load(Node node)
 	{
 		node.setNodeType(Const.ntLoad); //recode to status
@@ -83,7 +77,7 @@ public class Kernel
 	{
 		Node result = null;
 		
-		
+		Utils.Inc(LastID);
 		if (textNode.ID != null)
 		{
 			Index index = rootIndex.getSubNode(Const.sID + textNode.ID);
