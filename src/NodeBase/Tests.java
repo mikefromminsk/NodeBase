@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 
 public class Tests {
 	
-	
+	             /*
 	
 	public static void main(String[] args) throws Exception 
 	{
@@ -175,8 +175,8 @@ public class Tests {
 	private static void endTesting() {
 		if (testName != null)
 			success++;
-		//System.out.println("ошибок " + Integer.toString(errors) + " успешно " + Integer.toString(success));
+		//System.out.println("пїЅпїЅпїЅпїЅпїЅпїЅ " + Integer.toString(errors) + " пїЅпїЅпїЅпїЅпїЅпїЅпїЅ " + Integer.toString(success));
 	}
 
-	
+	     */
 }

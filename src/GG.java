@@ -11,20 +11,20 @@ public class GG {
 
     static class Time
     {
-        float func;
-        float param1;
-        float param2;
-        float trueto;
-        float result;
+        double func;
+        double par1;
+        double par2;
+        double trueto;
+        double result;
     }
 
     static class TimeID
     {
-        float timeIndex;
-        float funcIndex;
-        float linkIndex;
-        float trueIndex;
-        float resultIndex;
+        double timeIndex;
+        double funcIndex;
+        double linkIndex;
+        double trueIndex;
+        double resultIndex;
 
     }
 
@@ -32,117 +32,163 @@ public class GG {
 
     public static void main(String[] args) {
 
-        float[] inputVars = {1, 0, 6};
-        float funcCount = 8;
-        float timeIndex = 0;
+        double[] inputVars = {1, 6, 3};
         ArrayList<TimeID> rightFuncs = new ArrayList<TimeID>();
+
+        //set time
+        double timeIndex = 3;
+
+
         while (true)
         {
 
             timeIndex++;
-
-
+            //timeIndex =4;
 
             ArrayList<Time> timeLine = new ArrayList<Time>();
-            for (int i = 0; i < timeIndex; i++)
+            for (double i = 0; i <= timeIndex; i++)
                 timeLine.add(new Time());
 
-            for (int funcIndex = 0; funcIndex < Math.pow(funcCount, timeIndex); funcIndex++) {
+            //set function
+            double funcCount = 8;
 
-                float funcIndex2 = funcIndex;
-                for (int i = 0; i < timeLine.size(); i++) {
-                    Time time =  timeLine.get(i);
-                    int razm = (int)Math.pow(funcCount, i + 1);
-                    time.func = (int) ((funcIndex2 % razm) / Math.pow(funcCount, i));
-                    funcIndex2 = funcIndex2 - funcIndex2 % razm;
+            for (double funcIndex = 0; funcIndex < Math.pow(funcCount, timeIndex); funcIndex++) {
+
+                double funcIndex2 = funcIndex;
+                       /*0 * Math.pow(funcCount, 0) + //add
+                       1 * Math.pow(funcCount, 1) + //sub
+                       4 * Math.pow(funcCount, 2) + //==
+                       5 * Math.pow(funcCount, 3) + //!=
+                       2 * Math.pow(funcCount, 4); //mul */
+
+                for (double i = 0; i < timeLine.size(); i++) {
+                    Time time =  timeLine.get((int)i);
+                    double razm = Math.pow(funcCount, i + 1);
+                    time.func = (funcIndex2 % razm) / Math.pow(funcCount, i);
+                    funcIndex2 -= funcIndex2 % razm;
                 }
+
+
+                //prepare to params generate
+
 
                 ArrayList<Double> maxIndex = new ArrayList<Double>();
-                ArrayList<Double> values = new ArrayList<Double>();
-                for (int i = 0; i < timeLine.size(); i++){
+                for (double i = 0; i < timeLine.size(); i++)
                     maxIndex.add(Math.pow(inputVars.length + i, 2));
-                    values.add(0.0);
-                }
+                Double maxIndexSum = 0.0;
+                for (double i = 0; i < maxIndex.size(); i++)
+                    maxIndexSum +=  maxIndex.get((int)i);
+                ArrayList<Double> valIndex = new ArrayList<Double>();
+                for (double i = 0; i < maxIndex.size(); i++)
+                    valIndex.add(0.0);
 
 
-                Double sum = 0.0;
-                for (int i = 0; i < maxIndex.size(); i++)
-                    sum +=  maxIndex.get(i);
+                //set params
+                for (double parIndex = 0; parIndex < maxIndexSum; parIndex++) {
 
-
-                for (int linkIndex = 0; linkIndex < sum; linkIndex++) {
-
-                    float linkIndex2 = linkIndex;
-
-                    for (int i = 0; i < values.size(); i++)
+                    double parIndex2 = parIndex;
+                      /*(0 + 2 * Math.sqrt(maxIndex.get(0))) * 1 +
+                      (3 + 2 * Math.sqrt(maxIndex.get(1))) * 1 * maxIndex.get(1) +
+                      (0 + 0 * Math.sqrt(maxIndex.get(2))) * 1 * maxIndex.get(1) * maxIndex.get(2) +
+                      (5 + 5 * Math.sqrt(maxIndex.get(3))) * 1 * maxIndex.get(1) * maxIndex.get(2) * maxIndex.get(3) +
+                      (6 + 1 * Math.sqrt(maxIndex.get(4))) * 1 * maxIndex.get(1) * maxIndex.get(2) * maxIndex.get(3) * maxIndex.get(4);
+                       */
+                    for (double i = 0; i < valIndex.size(); i++)
                     {
-                        Double val = values.get(i);
+                        double razm = 1;
+                        for (double j = 1; j < maxIndex.size() - i; j++)
+                            razm *= maxIndex.get((int)j);
+                        double val = (double)(int)(parIndex2 / razm);
+                        valIndex.set((int)(maxIndex.size() - i - 1), val);
+                        parIndex2 -= val * razm;
 
-                        int razm = 1;
-                        for (int j = i + 1; j < maxIndex.size(); j++) {
-                            int maxIndex1 = maxIndex.get(j).intValue();
-                            razm *= maxIndex1;
+                        if (val == 15)
+                        {
+                            double x = 1;
                         }
-                        values.set(i, (double) (int) (linkIndex2 / razm));
-                        int val2 = val.intValue();
-                        linkIndex2 -= val * razm;
-
+                        /*double razm = Math.pow(funcCount, i + 1);
+                        time.func = (funcIndex2 % razm) / Math.pow(funcCount, i);
+                        funcIndex2 -= funcIndex2 % razm;
+                        */
                     }
 
-                    for (int i = 0; i < values.size(); i++) {
-                        float val =  values.get(i).floatValue();
-                        Time time = timeLine.get(i);
-                        time.param1 = (float)(val % Math.sqrt(maxIndex.get(i)));
-                        time.param2 = (float)(int)(val / Math.sqrt(maxIndex.get(i)));
-                    }
-
-                    ArrayList<Double> equals = new ArrayList<Double>();
-                    for (int i = 0; i < timeLine.size(); i++)
-                        if (timeLine.get(i).func > 3)
-                            equals.add((double)i);
-
-                    for (int trueIndex = 0; trueIndex < Math.pow(timeLine.size() - 1, equals.size()); trueIndex++)
+                    for (double i = 0; i < valIndex.size(); i++)
                     {
-                        float trueIndex2 = trueIndex;
+                        double val =  valIndex.get((int)i);
+                        Time time = timeLine.get((int)i);
+                        double razm = Math.pow(funcCount, i + 1);
+                        time.par1 = (int)(val % Math.sqrt(maxIndex.get((int)i)));
+                        time.par2 = (int)(val / Math.sqrt(maxIndex.get((int)i)));
+                    }
 
-                        for (int i = 0; i < equals.size(); i++) {
-                            Time time = timeLine.get(equals.get(i).intValue());
-                            int razm = (int)Math.pow(timeLine.size() - 1, i + 1);
-                            time.trueto = (float) (int) (trueIndex2 / razm);
-                            trueIndex2 -= time.trueto * razm;
-                            if (time.trueto >= equals.get(i))
+
+                    //set trueto
+                    ArrayList<Double> equalsFuncIndexes = new ArrayList<Double>();
+                    for (double i = 0; i < timeLine.size(); i++)
+                        if (timeLine.get((int)i).func > 3)
+                            equalsFuncIndexes.add((double)i);
+
+                    for (double trueIndex = 0; trueIndex < Math.pow(timeLine.size() - 1, equalsFuncIndexes.size()); trueIndex++)
+                    {
+                        double trueIndex2 = trueIndex;
+                           // 1 + 3 * Math.pow(timeLine.size() - 1, 1);
+
+                        for (double i = 0; i < equalsFuncIndexes.size(); i++) {
+                            Time time = timeLine.get((int)equalsFuncIndexes.get((int)i).doubleValue());
+                            double razm = Math.pow(timeLine.size() - 1, i + 1);
+                            time.trueto = (trueIndex2 % razm) / Math.pow(timeLine.size() - 1, i);
+                            trueIndex2 -= trueIndex2 % razm;
+                            if (time.trueto >= equalsFuncIndexes.get((int)i))
                                 time.trueto++;
                         }
 
 
+
+
                         //run
 
-                        long maxRunTime = 200;
-                        long runTime = 0;
 
-
-                        int i=0;
-                        while (i != timeLine.size())
+                        double maxRunTime = 200;
+                        double runTime = 0;
+                        double i = 0;
+                        while ((i < timeLine.size()) & (runTime < maxRunTime))
                         {
                             runTime++;
-                            if (runTime > maxRunTime)
-                                break;
-                            Time time = timeLine.get(i);
+                            Time time = timeLine.get((int)i);
+
+                            double par1 = 0;
+                            if (time.par1 < inputVars.length)
+                                par1 = inputVars[(int)time.par1];
+                            else
+                                par1 = timeLine.get((int)time.par1- inputVars.length).result;
+
+                            double par2 = 0;
+                            try
+                            {
+                            if (time.par2 < inputVars.length)
+                                par2 = inputVars[(int)time.par2];
+                            else
+                                par2 = timeLine.get((int)time.par2- inputVars.length).result;
+                            }
+                            catch (IndexOutOfBoundsException e)
+                            {
+                                e.printStackTrace();
+                            }
 
                             switch ((int)time.func){
-                                case 0: time.result = time.param1 + time.param2; break;
-                                case 1: time.result = time.param1 - time.param2; break;
-                                case 2: time.result = time.param1 * time.param2; break;
-                                case 3: time.result = time.param1 / time.param2; break;
-                                case 4: time.result = (time.param1 == time.param2) ? 1 : 0; break;
-                                case 5: time.result = (time.param1 != time.param2) ? 1 : 0; break;
-                                case 6: time.result = (time.param1 > time.param2) ? 1 : 0; break;
-                                case 7: time.result = (time.param1 < time.param2) ? 1 : 0; break;
+                                case 0: time.result = par1 + par2; break;
+                                case 1: time.result = par1 - par2; break;
+                                case 2: time.result = par1 * par2; break;
+                                case 3: time.result = par1 / par2; break;
+                                case 4: time.result = (par1 == par2) ? 1 : 0; break;
+                                case 5: time.result = (par1 != par2) ? 1 : 0; break;
+                                case 6: time.result = (par1 > par2) ? 1 : 0; break;
+                                case 7: time.result = (par1 < par2) ? 1 : 0; break;
                             }
                             if (time.func > 3)
                                 if (time.result == 1)
                                 {
-                                    i = (int)time.trueto;
+                                    i = (double)time.trueto;
                                     continue;
                                 }
 
@@ -151,17 +197,17 @@ public class GG {
 
                         double rightResult = 3.14;
 
-                        if (runTime <= maxRunTime)
+                        if (runTime < maxRunTime)
                         {
-                            for (int resultIndex = 0; resultIndex < timeLine.size(); resultIndex++) {
-                                Time time = timeLine.get(resultIndex);
+                            for (double resultIndex = 0; resultIndex < timeLine.size(); resultIndex++) {
+                                Time time = timeLine.get((int)resultIndex);
                                 double roundResult = Math.round(time.result * 100.0) / 100.0;
                                 if (roundResult == rightResult)
                                 {
                                     TimeID timeID = new TimeID();
                                     timeID.timeIndex = timeIndex;
                                     timeID.funcIndex = funcIndex;
-                                    timeID.linkIndex = linkIndex;
+                                    timeID.linkIndex = parIndex;
                                     timeID.trueIndex = trueIndex;
                                     timeID.resultIndex = resultIndex;
                                     rightFuncs.add(timeID);
