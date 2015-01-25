@@ -1,4 +1,8 @@
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.ComplexTypeModel;
+
+import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Author: x29a100
@@ -31,17 +35,16 @@ public class GG {
 
 
     public static void main(String[] args) {
-
+        double funcRun = 0;
         double[] inputVars = {1, 6, 3};
         ArrayList<TimeID> rightFuncs = new ArrayList<TimeID>();
 
         //set time
         double timeIndex = 3;
 
-
+        long beginTime = System.currentTimeMillis();
         while (true)
         {
-
             timeIndex++;
             //timeIndex =4;
 
@@ -148,7 +151,7 @@ public class GG {
                         //run
 
 
-                        double maxRunTime = 200;
+                        double maxRunTime = 100000;
                         double runTime = 0;
                         double i = 0;
                         while ((i < timeLine.size()) & (runTime < maxRunTime))
@@ -195,8 +198,15 @@ public class GG {
                             i++;
                         }
 
-                        double rightResult = 3.14;
+                        funcRun++;
 
+                        if (funcRun % 50000 == 0) {
+                            System.out.println(timeIndex + " line " + funcRun + " count " + (System.currentTimeMillis() - beginTime) + " ms");
+                            beginTime = System.currentTimeMillis();
+                        }
+
+
+                        double rightResult = 3.14;
                         if (runTime < maxRunTime)
                         {
                             for (double resultIndex = 0; resultIndex < timeLine.size(); resultIndex++) {
