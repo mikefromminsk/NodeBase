@@ -1,23 +1,21 @@
-import javax.xml.transform.OutputKeys;
+import javax.xml.transform.*;
+import java.awt.event.FocusEvent;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import com.sun.javafx.collections.MappingChange;
 import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -26,24 +24,35 @@ import org.xml.sax.SAXException;
  */
 public class HttpServer
 {
-
-
+	static class FuncID
+	{
+		double timeIndex;
+		double funcIndex;
+		double linkIndex;
+		double trueIndex;
+		double resultIndex;
+	}
 
 	static class Block
 	{
 		int blockID;
 		String mac;
-		int status;
-		long outTime;
-		FuncID result;
+		ArrayList<FuncID> result = new ArrayList<FuncID>();
 	}
 
 	static class HostData
 	{
 		String mac;
-		String ip;
+		String url;
 		int lastBlock;
-		ArrayList<Block> blockList = new ArrayList<Block>();
+	}
+
+	static class GenerateBlock
+	{
+		int blockID;
+		String mac;
+		long endTime;
+		ArrayList<FuncID> result = new ArrayList<FuncID>();
 	}
 
 	static class ThreadID
@@ -58,8 +67,17 @@ public class HttpServer
 		}
 	}
 
+	static String outFile = "Blocks.xml";
 
 	static ArrayList<HostData> hostList = new ArrayList<HostData>();
+
+	static ArrayList<Block> blockList = new ArrayList<Block>();
+
+	static ArrayList<Block> waitList = new ArrayList<Block>();
+
+	static ArrayList<GenerateBlock> generateList = new ArrayList<GenerateBlock>();
+
+	static ArrayList<ThreadID> threadList = new ArrayList<ThreadID>();
 
 	static HostData data = new HostData();
 
@@ -71,35 +89,102 @@ public class HttpServer
 			NetworkInterface network = NetworkInterface.getByInetAddress(ip);
 			localMac = network.getHardwareAddress().toString();*/
 			data.mac = "localhost";
+			data.url = "http://192.168.1.30:8080";
+
 
 			new Thread(new SocketListener()).start();
 
-
 			int processorCount = Runtime.getRuntime().availableProcessors();
-			ArrayList<ThreadID> threadList = new ArrayList<ThreadID>();
 			for (int i = 0; i < processorCount - 1; i++)
-			{
-				Thread thread = new Thread(new Generator(i));
-				thread.start();
-				threadList.add(new ThreadID(i, thread));
-			}
+				threadList.add(new ThreadID(i, new Thread()));
 
-
-//			for (int i = 0; i < 256; i++)
+			while (true)
 			{
-				String request = createRequest(-1);
-				String toIP = "localhost";
-				HostData response = sendRequest("http://" + toIP + ":8080", request);
-				if (response != null)
+				for (int i = 0; i < processorCount; i++)
 				{
-					for (int j = 0; j < hostList.size(); j++)
+					ThreadID threadID = threadList.get(i);
+					if (!threadID.thread.isAlive())
 					{
-						HostID hostID = hostList.get(j);
-						hostID.mac
-					}
-					hostList.add()
-				}
 
+						int lastID = data.lastBlock;
+
+
+						for (int j = 0; j < generateList.size(); j++)
+						{
+							GenerateBlock generateBlock = generateList.get(j);
+							if (generateBlock.blockID == threadID.blockID)
+							{
+
+								Block block = new Block();
+								block.blockID = generateBlock.blockID;
+								block.mac = generateBlock.mac;
+								block.result = generateBlock.result;
+
+								if (data.lastBlock + 1 == block.blockID)
+								{
+									blockList.add(block);
+									data.lastBlock++;
+									for (int k = 0; k < waitList.size(); k++)
+									{
+										Block block1 = waitList.get(k);
+										if (data.lastBlock + 1 == block1.blockID)
+										{
+											blockList.add(block1);
+											waitList.remove(block1);
+										}
+									}
+								} else
+									waitList.add(block);
+								generateList.remove(generateBlock);
+								break;
+							}
+						}
+
+						for (int j = 0; j < generateList.size(); j++)
+						{
+							GenerateBlock generateBlock = generateList.get(j);
+							if (generateBlock.endTime < System.currentTimeMillis())
+								generateList.remove(generateBlock);
+						}
+
+						int prevBlockID = data.lastBlock;
+						int nextBlockID = data.lastBlock + 1;
+						while (nextBlockID != prevBlockID)
+						{
+							prevBlockID = nextBlockID;
+							for (int j = 0; j < generateList.size(); j++)
+							{
+								GenerateBlock generateBlock = generateList.get(j);
+								if (generateBlock.blockID == nextBlockID)
+									nextBlockID++;
+							}
+						}
+						GenerateBlock generateBlock = new GenerateBlock();
+						generateBlock.mac = data.mac;
+						generateBlock.blockID = nextBlockID;
+						generateBlock.endTime = System.currentTimeMillis() + 120000;
+
+						generateList.add(generateBlock);
+
+						threadID.thread = new Thread(new Generator(nextBlockID));
+						threadID.thread.start();
+
+
+						String xmlData = getXmlData();
+						FileWriter fw = new FileWriter(outFile);
+						fw.write(xmlData);
+						fw.close();
+
+						for (int j = 0; j < hostList.size(); j++)
+						{
+							HostData hostData = hostList.get(j);
+							sendRequest(hostData.url);
+						}
+
+
+					}
+				}
+				Thread.sleep(1000);
 			}
 
 
@@ -110,35 +195,74 @@ public class HttpServer
 		}
 	}
 
-
-	static String createRequest(int lastBlock)
+	public static String getXmlData()
 	{
 		try
 		{
-
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
-
 			Document doc = docBuilder.newDocument();
-			Element host = doc.createElement("host");
-			doc.appendChild(host);
 
-			host.setAttribute("mac", localMac);
+			Element localhost = doc.createElement("localhost");
+			localhost.setAttribute("mac", data.mac);
+			localhost.setAttribute("lastBlock", "" + data.lastBlock);
+			doc.appendChild(localhost);
 
+			Element hosts = doc.createElement("hosts");
+			localhost.appendChild(hosts);
+			for (int i = 0; i < hostList.size(); i++)
+			{
+				HostData hostData = hostList.get(i);
+				Element host = doc.createElement("host");
+				host.setAttribute("mac", hostData.mac);
+				host.setAttribute("url", hostData.url);
+				host.setAttribute("lastBlock", "" + hostData.lastBlock);
+				hosts.appendChild(host);
+			}
 
-			/*Element firstname = doc.createElement("firstname");
-						firstname.appendChild(doc.createTextNode("yong"));
-						staff.appendChild(firstname);
-						*/
+			Element blocks = doc.createElement("blocks");
+			localhost.appendChild(blocks);
 
-			TransformerFactory tf = TransformerFactory.newInstance();
-			Transformer transformer = tf.newTransformer();
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			for (int i = 0; i < blockList.size(); i++)
+			{
+				if (blockList.get(i).result.size() == 0) continue;
+				Element block = doc.createElement("block");
+				block.setAttribute("blockID", "" + blockList.get(i).blockID);
+				blocks.appendChild(block);
+				                                                          +waitList
+				Block newBlock = blockList.get(i);
+				for (int j = 0; j < newBlock.result.size(); j++)
+				{
+					FuncID funcID = newBlock.result.get(j);
+					Element func = doc.createElement("func");
+					func.setAttribute("timeIndex", "" + funcID.timeIndex);
+					func.setAttribute("funcIndex", "" + funcID.funcIndex);
+					func.setAttribute("linkIndex", "" + funcID.linkIndex);
+					func.setAttribute("trueIndex", "" + funcID.trueIndex);
+					func.setAttribute("resultIndex", "" + funcID.resultIndex);
+					block.appendChild(func);
+				}
+			}
+
+			Element generateBlocks = doc.createElement("generateBlocks");
+			localhost.appendChild(blocks);
+
+			for (int i = 0; i < generateList.size(); i++)
+			{
+				Element generateBlock = doc.createElement("generateBlock");
+				generateBlock.setAttribute("blockID", "" + generateList.get(i).blockID);
+				generateBlock.setAttribute("mac", "" + generateList.get(i).mac);
+				generateBlock.setAttribute("endTime", "" + generateList.get(i).endTime);
+				blocks.appendChild(generateBlock);
+			}
+
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource source = new DOMSource(doc);
 			StringWriter writer = new StringWriter();
-			transformer.transform(new DOMSource(doc), new StreamResult(writer));
+			StreamResult result = new StreamResult(writer);
+			transformer.transform(source, result);
 			return writer.getBuffer().toString();
-
 		}
 		catch (ParserConfigurationException pce)
 		{
@@ -148,11 +272,14 @@ public class HttpServer
 		{
 			tfe.printStackTrace();
 		}
-		return "";
+		return null;
 	}
 
-	public static HostData sendRequest(String targetURL, String request)
+	public static HostData sendRequest(String targetURL)
 	{
+		String request = getXmlData();
+
+		StringBuffer response = null;
 		URL url;
 		HttpURLConnection conn = null;
 		try
@@ -183,52 +310,167 @@ public class HttpServer
 			InputStream is = conn.getInputStream();
 			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 			String line;
-			StringBuffer response = new StringBuffer();
+			response = new StringBuffer();
 			while ((line = rd.readLine()) != null)
 			{
 				response.append(line);
 				response.append('\r');
 			}
-
-			HostData res = new HostData();
-			res.ip =  url.getHost();
 			rd.close();
-
-			DOMParser parser = new DOMParser();
-			try
-			{
-
-				parser.parse(new InputSource(new StringReader(response.toString())));
-				Document doc = parser.getDocument();
-				Element host = doc.getDocumentElement();
-				res.mac = host.getAttribute("mac");
-
-				return res;
-			}
-			catch (SAXException e)
-			{
-				e.printStackTrace();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-			return null;
 		}
 		catch (Exception e)
 		{
-			System.out.println(e.getMessage());
 			e.printStackTrace();
 			return null;
-
 		}
 		finally
 		{
 			if (conn != null)
-			{
 				conn.disconnect();
-			}
 		}
+
+		try
+		{
+			DOMParser parser = new DOMParser();
+			parser.parse(new InputSource(new StringReader(response.toString())));
+			Document doc = parser.getDocument();
+			Element host = doc.getDocumentElement();
+
+			HostData res = new HostData();
+			res.mac = host.getAttribute("mac");
+			res.url = targetURL;
+			res.lastBlock = Integer.parseInt(host.getAttribute("lastBlock"));
+
+			int pos = -1;
+			for (int i = 0; i < hostList.size(); i++)
+				if (hostList.get(i).mac == res.mac)
+				{
+					hostList.set(i, res);
+					pos = i;
+				}
+			if (pos == -1)
+				hostList.add(res);
+
+
+			Element block = (Element) doc.getElementsByTagName("blocks").item(0);
+			int pos2 = -1;
+			for (int i = 0; i < blockList.size(); i++)
+				if (blockList.get(i).blockID == Double.parseDouble(block.getAttribute("blockID")))
+				{
+					pos2 = i;
+					break;
+				}
+			if (pos2 == -1)
+			{
+				Block block2 = new Block();
+				block2.blockID = Integer.parseInt(block.getAttribute("blockID"));
+				NodeList funcs = block.getElementsByTagName("func");
+				for (int i = 0; i < funcs.getLength(); i++)
+				{
+					Node funcNode = funcs.item(i);
+					if (funcNode.getNodeType() == Node.ELEMENT_NODE)
+					{
+						Element funcElement = (Element) funcNode;
+						FuncID funcID = new FuncID();
+						funcID.timeIndex = Double.parseDouble(funcElement.getAttribute("timeIndex"));
+						funcID.funcIndex = Double.parseDouble(funcElement.getAttribute("funcIndex"));
+						funcID.linkIndex = Double.parseDouble(funcElement.getAttribute("linkIndex"));
+						funcID.trueIndex = Double.parseDouble(funcElement.getAttribute("trueIndex"));
+						funcID.resultIndex = Double.parseDouble(funcElement.getAttribute("resultIndex"));
+						block2.result.add(funcID);
+					}
+				}
+				if (data.lastBlock + 1 == block2.blockID)
+				{
+					blockList.add(block2);
+					data.lastBlock++;
+					for (int k = 0; k < waitList.size(); k++)
+					{
+						Block block1 = waitList.get(k);
+						if (data.lastBlock + 1 == block1.blockID)
+						{
+							blockList.add(block1);
+							waitList.remove(block1);
+						}
+					}
+				} else
+					waitList.add(block2);
+			}
+
+			NodeList generateBlocksList = doc.getElementsByTagName("genereteBlock");
+			for (int i = 0; i < generateBlocksList.getLength(); i++)
+			{
+				Node gNode = generateBlocksList.item(i);
+				if (gNode.getNodeType() == Node.ELEMENT_NODE)
+				{
+					Element generate = (Element) gNode;
+					GenerateBlock newBlock = new GenerateBlock();
+					newBlock.mac = generate.getAttribute("mac");
+					newBlock.endTime = Integer.parseInt(generate.getAttribute("endTime"));
+					newBlock.blockID = Integer.parseInt(generate.getAttribute("blockID"));
+
+					int pos3 = -1;
+					for (int j = 0; j < generateList.size(); j++)
+					{
+						GenerateBlock block2 = generateList.get(j);
+						if (block2.blockID == newBlock.blockID)
+						{
+							if (block2.mac == data.mac)
+							{
+								generateList.set(j, newBlock);
+								for (int k = 0; k < threadList.size(); k++)
+								{
+									ThreadID threadID = threadList.get(k);
+									if (threadID.blockID == newBlock.blockID)
+										threadID.thread.stop();
+								}
+							}
+							break;
+						}
+					}
+					if (pos3 == -1)
+						generateList.add(newBlock);
+				}
+			}
+
+
+			NodeList hosts = doc.getElementsByTagName("host");
+			for (int i = 0; i < hosts.getLength(); i++)
+			{
+				Node gNode = hosts.item(i);
+				if (gNode.getNodeType() == Node.ELEMENT_NODE)
+				{
+					Element hostElement = (Element) gNode;
+					HostData newHost = new HostData();
+					newHost.mac = hostElement.getAttribute("mac");
+					newHost.url = hostElement.getAttribute("url");
+					newHost.lastBlock = Integer.parseInt(hostElement.getAttribute("lastBlock"));
+
+					int pos3 = -1;
+					for (int j = 0; j < hostList.size(); j++)
+					{
+						HostData hostData = hostList.get(j);
+						if (hostData.mac == newHost.mac)
+						{
+							hostList.set(i, newHost);
+							break;
+						}
+					}
+					if (pos3 == -1)
+						hostList.add(newHost);
+				}
+			}
+
+
+			return res;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
+
+
 	}
 
 	static class SocketListener implements Runnable
@@ -243,7 +485,7 @@ public class HttpServer
 				{
 					Socket s = ss.accept();
 					System.err.println("Client accepted");
-					new Thread(new SocketAnswer(s)).start();
+					new Thread(new SocketSendResponse(s)).start();
 				}
 			}
 			catch (Throwable e)
@@ -253,14 +495,51 @@ public class HttpServer
 		}
 	}
 
-	static class SocketAnswer implements Runnable
+	static class SocketScanner implements Runnable
+	{
+
+		public void run()
+		{
+			while (hostList.size() == 0)
+			{
+				for (int i = 0; i < 256; i++)
+				{
+					String toIP = "localhost";
+					HostData response = sendRequest("http://" + toIP + ":8080", -1);
+					if (response != null)
+					{
+
+						boolean find = false;
+						for (int j = 0; j < hostList.size(); j++)
+							if (hostList.get(j).mac == response.mac)
+							{
+								find = true;
+								break;
+							}
+
+					}
+
+				}
+				try
+				{
+					Thread.sleep(60000);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	static class SocketSendResponse implements Runnable
 	{
 
 		private Socket s;
 		private InputStream is;
 		private OutputStream os;
 
-		private SocketAnswer(Socket s) throws Throwable
+		private SocketSendResponse(Socket s) throws Throwable
 		{
 			this.s = s;
 			this.is = s.getInputStream();
@@ -318,16 +597,6 @@ public class HttpServer
 		}
 	}
 
-
-	static class FuncID
-	{
-		double timeIndex;
-		double funcIndex;
-		double linkIndex;
-		double trueIndex;
-		double resultIndex;
-	}
-
 	static class Generator implements Runnable
 	{
 		static class Time
@@ -352,7 +621,7 @@ public class HttpServer
 
 			double funcRun = 0;
 			double[] inputVars = {1, 6, 3};
-			ArrayList<FuncID> rightFuncs = new ArrayList<FuncID>();
+
 
 			//set time
 			double timeIndex = 3;
@@ -362,6 +631,9 @@ public class HttpServer
 			{
 				timeIndex++;
 				//timeIndex =4;
+
+				+funcINdexBegin
+				+funcindexend
 
 				ArrayList<Time> timeLine = new ArrayList<Time>();
 				for (double i = 0; i <= timeIndex; i++)
@@ -557,8 +829,11 @@ public class HttpServer
 										funcID.linkIndex = parIndex;
 										funcID.trueIndex = trueIndex;
 										funcID.resultIndex = resultIndex;
-										rightFuncs.add(funcID);
-										System.out.println(rightFuncs.size());
+
+										for (int j = 0; j < generateList.size(); j++)
+											if (generateList.get(j).blockID == blockID)
+												generateList.get(j).result.add(funcID);
+
 									}
 
 								}
