@@ -35,8 +35,14 @@ public class Generator implements Runnable {
         } catch (InterruptedException e) {
         }
         Synchronizer.Block generateBlock = Synchronizer.data.getBlock(blockID);
+        if (generateBlock.ID == 100)
+        {
+            FuncID funcID  = new FuncID();
+            funcID.funcIndex = (double )generateBlock.ID;
+            result.add(funcID);
+        }
         generateBlock.result = result;
-        generateBlock.threadID = 0L;
+        generateBlock.threadEnd = true;
 
 
         if (true)
