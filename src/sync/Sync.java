@@ -100,7 +100,8 @@ public class Sync {
 
     private static Logger log = Logger.getLogger(Sync.class.getName());
 
-    public static void main() throws InterruptedException {
+
+    public static void main(String[] args) throws InterruptedException {
 
         log.info("get started");
         new Thread(new HttpServer()).start();
