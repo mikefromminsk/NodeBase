@@ -110,6 +110,7 @@ public class Sync {
     }
     public static Logger log = Logger.getLogger(Sync.class.getName());
 
+<<<<<<< HEAD
     public static InetAddress getCurrentIp() {
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface
@@ -134,6 +135,10 @@ public class Sync {
     }
 
     public static void main(String[] args) {
+=======
+
+    public static void main(String[] args) throws InterruptedException {
+>>>>>>> c4098796dd0be84ca733658c490b05a1008d1a2d
 
         InetAddress localIP = null;
         try {

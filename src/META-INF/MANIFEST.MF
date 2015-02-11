@@ -1,5 +1,9 @@
 Manifest-Version: 1.0
+<<<<<<< HEAD
 Class-Path: support-annotations-21.0.3.jar classes.jar internal_impl-2
  1.0.3.jar classes.jar
 Main-Class: 
+=======
+Main-Class: sync.Sync
+>>>>>>> c4098796dd0be84ca733658c490b05a1008d1a2d
 
