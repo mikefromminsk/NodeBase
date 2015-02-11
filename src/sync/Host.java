@@ -3,9 +3,7 @@ package sync;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 class Host implements Serializable {
 
@@ -48,7 +46,7 @@ class Host implements Serializable {
     }
 
 
-    public Map<String, String> hosts = new HashMap<String, String>();
+    public ArrayList<String> hosts = new ArrayList<String>();
 
 
 

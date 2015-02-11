@@ -2,12 +2,8 @@ package sync;
 
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -63,12 +59,15 @@ public class Sync {
             url = new URL(urlToRead);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
+            conn.setConnectTimeout(2000);
             rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             while ((line = rd.readLine()) != null) {
                 result += line;
             }
             rd.close();
         } catch (java.net.ConnectException e) {
+            //e.printStackTrace();
+        }catch (java.net.SocketTimeoutException e) {
             //e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,28 +100,35 @@ public class Sync {
         return null;
     }
 
+    public static String getMac(InetAddress localIP) throws SocketException {
+        byte[] mac = NetworkInterface.getByInetAddress(localIP).getHardwareAddress();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++)
+            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+        return sb.toString();
+    }
     private static Logger log = Logger.getLogger(Sync.class.getName());
 
-    public static void main(String[] args) throws InterruptedException, UnknownHostException {
+    public static void main(String[] args) throws InterruptedException, UnknownHostException, SocketException {
 
 
-
+        InetAddress localIP = InetAddress.getLocalHost();
         data.ip = InetAddress.getLocalHost().getHostAddress();
         new Thread(new HttpServer()).start();
         Thread.sleep(10);
 
+        //testing in real
+        //data.mac = getMac(localIP);
 
-        data.hosts.put("8080", "localhost:8080");
-        data.hosts.put("8081", "localhost:8081");
-        data.hosts.put("8082", "localhost:8082");
+        data.hosts.add("192.168.1.10:8080");
+        data.hosts.add("192.168.1.10:8081");
+        data.hosts.add("192.168.1.8:8080");
 
 
         while (true) {
             try {
-
-                for (Map.Entry entry : data.hosts.entrySet()) {
-                    String mac = (String) entry.getKey();
-                    String ip = (String) entry.getValue();
+                for (int j = 0; j < data.hosts.size(); j++) {
+                    String ip = data.hosts.get(j);
 
                     //get remote host data
                     String s = getHTML("http://" + ip);
