@@ -4,6 +4,7 @@ package sync;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.logging.Logger;
 
 /**
@@ -107,18 +108,49 @@ public class Sync {
             sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
         return sb.toString();
     }
-    private static Logger log = Logger.getLogger(Sync.class.getName());
+    public static Logger log = Logger.getLogger(Sync.class.getName());
 
-    public static void main(String[] args) throws InterruptedException, UnknownHostException, SocketException {
+    public static InetAddress getCurrentIp() {
+        try {
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface
+                    .getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface ni = (NetworkInterface) networkInterfaces
+                        .nextElement();
+                Enumeration<InetAddress> nias = ni.getInetAddresses();
+                while(nias.hasMoreElements()) {
+                    InetAddress ia= (InetAddress) nias.nextElement();
+                    if (!ia.isLinkLocalAddress()
+                            && !ia.isLoopbackAddress()
+                            && ia instanceof Inet4Address) {
+                        return ia;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            //LOG.error("unable to get current IP " + e.getMessage(), e);
+        }
+        return null;
+    }
 
+    public static void main(String[] args) {
 
-        InetAddress localIP = InetAddress.getLocalHost();
-        data.ip = InetAddress.getLocalHost().getHostAddress();
-        new Thread(new HttpServer()).start();
-        Thread.sleep(10);
+        InetAddress localIP = null;
+        try {
 
+            new Thread(new HttpServer()).start();
+            Thread.sleep(10);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         //testing in real
-        //data.mac = getMac(localIP);
+        try {
+            localIP = getCurrentIp();
+            data.ip = localIP.getHostAddress();
+            data.mac = getMac(localIP);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         data.hosts.add("192.168.1.10:8080");
         data.hosts.add("192.168.1.10:8081");
@@ -129,7 +161,8 @@ public class Sync {
             try {
                 for (int j = 0; j < data.hosts.size(); j++) {
                     String ip = data.hosts.get(j);
-
+                    if (ip.equals(data.ip + ":" + data.port))
+                        continue;
                     //get remote host data
                     String s = getHTML("http://" + ip);
                     if ("".equals(s))
@@ -227,11 +260,12 @@ public class Sync {
                     //start generate thread
                     newThread.start();
                 }
+
+                Thread.sleep(2000);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            Thread.sleep(2000);
         }
     }
 }
