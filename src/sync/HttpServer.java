@@ -13,6 +13,7 @@ public class HttpServer implements Runnable {
             try {
                 ServerSocket ss = new ServerSocket(port);
                 System.out.println("open " + port + " port");
+                Sync.data.port = "" + port;
                 Sync.data.mac = "" + port;
                 while (true) {
                     Socket s = ss.accept();

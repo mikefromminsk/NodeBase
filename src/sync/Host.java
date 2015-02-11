@@ -6,15 +6,25 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 class Host implements Serializable {
-    String outFile = "c:\\HostData.class";
-    Integer blockSize = 200;
-    Integer processorCount = Runtime.getRuntime().availableProcessors();
-    String mac = "";
-    String url = "localhost";
-    Integer lastID = 0;
-    Long mergeTime;
 
+    String ip = "localhost";
+    String port = "8080";
+    String mac = "";
+
+    Integer lastID = 0;
     public ArrayList<Block> blocks = new ArrayList<Block>();
+    Integer processorCount = Runtime.getRuntime().availableProcessors();
+    Long mergeTime = 0L;
+
+
+
+    public Host(String ip, String port) {
+        this.ip = ip;
+        this.port = port;
+    }
+
+    public Host() {
+    }
 
     synchronized Block getBlock(int ID) {
         for (int i = 0; i < blocks.size(); i++) {
@@ -42,7 +52,7 @@ class Host implements Serializable {
     synchronized public void putHostList(Host newData) {
         for (int i = 0; i < hosts.size(); i++) {
             Host hostData = hosts.get(i);
-            if (hostData.mac.equals(newData.mac)) {
+            if (!"".equals(newData.mac) && hostData.mac.equals(newData.mac)) {
                 if (newData.mergeTime > hostData.mergeTime)
                     hosts.set(i, hostData);
                 return;

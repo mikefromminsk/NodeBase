@@ -3,7 +3,9 @@ package sync;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -100,26 +102,44 @@ public class Sync {
 
     private static Logger log = Logger.getLogger(Sync.class.getName());
 
-    public static void main() throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, UnknownHostException {
 
         log.info("get started");
+
+        data.ip = InetAddress.getLocalHost().getHostAddress();
         new Thread(new HttpServer()).start();
         Thread.sleep(10);
+
+
+
+
+        data.putHostList(new Host("localhost", "8080"));
+        data.putHostList(new Host("localhost", "8081"));
 
 
 
         while (true) {
             try {
 
-                String s = getHTML("http://localhost:8080");
-                Host host = (Host) hostDataFromString(s);
-                if (host == null || host.mac.equals(data.mac)) {
-                    s = getHTML("http://localhost:8081");
-                    if (!"".equals(s))
-                        host = (Host) hostDataFromString(s);
-                }
+                for (int j = 0; j < data.hosts.size(); j++) {
+                    Host host = data.hosts.get(j);
 
-                if (!host.mac.equals(data.mac)) {
+                    //get remote host data
+                    String s = getHTML("http://" + host.ip + ":" + data.port);
+                    if ("".equals(s))
+                        continue;
+                    host = (Host) hostDataFromString(s);
+                    if (host == null || host.mac.equals(data.mac))
+                        continue;
+
+                    //merge hosts
+                    host.mergeTime = System.currentTimeMillis();
+                    data.putHostList(host);
+                    for (int i = 0; i < data.hosts.size(); i++) {
+                        Host hostData = data.hosts.get(i);
+                        if (!hostData.mac.equals(data.mac))
+                            data.putHostList(hostData);
+                    }
 
                     //delete from exists blocks
                     for (int i = 0; i < data.blocks.size(); i++) {
