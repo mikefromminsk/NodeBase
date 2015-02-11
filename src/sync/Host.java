@@ -3,7 +3,9 @@ package sync;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 class Host implements Serializable {
 
@@ -15,7 +17,6 @@ class Host implements Serializable {
     public ArrayList<Block> blocks = new ArrayList<Block>();
     Integer processorCount = Runtime.getRuntime().availableProcessors();
     Long mergeTime = 0L;
-
 
 
     public Host(String ip, String port) {
@@ -47,19 +48,9 @@ class Host implements Serializable {
     }
 
 
-    public ArrayList<Host> hosts = new ArrayList<Host>();
+    public Map<String, String> hosts = new HashMap<String, String>();
 
-    synchronized public void putHostList(Host newData) {
-        for (int i = 0; i < hosts.size(); i++) {
-            Host hostData = hosts.get(i);
-            if (!"".equals(newData.mac) && hostData.mac.equals(newData.mac)) {
-                if (newData.mergeTime > hostData.mergeTime)
-                    hosts.set(i, hostData);
-                return;
-            }
-        }
-        hosts.add(newData);
-    }
+
 
     synchronized public void removeBlock(Block remove) {
         for (Iterator<Block> it = blocks.iterator(); it.hasNext(); ) {

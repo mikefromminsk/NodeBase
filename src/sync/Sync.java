@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -104,42 +105,32 @@ public class Sync {
 
     public static void main(String[] args) throws InterruptedException, UnknownHostException {
 
-        log.info("get started");
+
 
         data.ip = InetAddress.getLocalHost().getHostAddress();
         new Thread(new HttpServer()).start();
         Thread.sleep(10);
 
 
-
-
-        data.putHostList(new Host("localhost", "8080"));
-        data.putHostList(new Host("localhost", "8081"));
-
+        data.hosts.put("8080", "localhost:8080");
+        data.hosts.put("8081", "localhost:8081");
+        data.hosts.put("8082", "localhost:8082");
 
 
         while (true) {
             try {
 
-                for (int j = 0; j < data.hosts.size(); j++) {
-                    Host host = data.hosts.get(j);
+                for (Map.Entry entry : data.hosts.entrySet()) {
+                    String mac = (String) entry.getKey();
+                    String ip = (String) entry.getValue();
 
                     //get remote host data
-                    String s = getHTML("http://" + host.ip + ":" + data.port);
+                    String s = getHTML("http://" + ip);
                     if ("".equals(s))
                         continue;
-                    host = (Host) hostDataFromString(s);
+                    Host host = (Host) hostDataFromString(s);
                     if (host == null || host.mac.equals(data.mac))
                         continue;
-
-                    //merge hosts
-                    host.mergeTime = System.currentTimeMillis();
-                    data.putHostList(host);
-                    for (int i = 0; i < data.hosts.size(); i++) {
-                        Host hostData = data.hosts.get(i);
-                        if (!hostData.mac.equals(data.mac))
-                            data.putHostList(hostData);
-                    }
 
                     //delete from exists blocks
                     for (int i = 0; i < data.blocks.size(); i++) {
@@ -179,14 +170,7 @@ public class Sync {
                     if (data.lastID < host.lastID)
                         data.lastID = host.lastID;
 
-                    //merge hosts
-                    host.mergeTime = System.currentTimeMillis();
-                    data.putHostList(host);
-                    for (int i = 0; i < data.hosts.size(); i++) {
-                        Host hostData = data.hosts.get(i);
-                        if (!hostData.mac.equals(data.mac))
-                            data.putHostList(hostData);
-                    }
+                    log.info("merge host " + ip + " id " + host.lastID);
                 }
 
 
