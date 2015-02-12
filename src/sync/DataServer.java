@@ -12,7 +12,7 @@ public class DataServer implements Runnable {
         while (true) {
             try {
                 ServerSocket ss = new ServerSocket(port);
-                Sync.log.info("ssds open " + port + " port");
+                Sync.log("DataServer open " + port + " port");
                 Sync.data.port = "" + port;
                 Sync.data.mac = "" + port;
                 while (true) {

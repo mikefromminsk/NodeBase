@@ -33,7 +33,7 @@ public class Generator implements Runnable {
 
         double funcRun = 0;
         double[] inputVars = {1, 6, 3};
-        
+
         //set time and func index of generate block
         double funcCount = 8;
         double blockSize = 200;

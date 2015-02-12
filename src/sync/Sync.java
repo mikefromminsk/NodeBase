@@ -164,7 +164,9 @@ public class Sync {
 
 
         try {
+
             new Thread(new DataServer()).start();
+            new Thread(new LogServer()).start();
             Thread.sleep(10);
             InetAddress localIP = getCurrentIp();
             data.ip = localIP.getHostAddress();
