@@ -33,10 +33,7 @@ public class Generator implements Runnable {
 
         double funcRun = 0;
         double[] inputVars = {1, 6, 3};
-
-        //set function
-
-
+        
         //set time and func index of generate block
         double funcCount = 8;
         double blockSize = 200;
@@ -75,6 +72,7 @@ public class Generator implements Runnable {
 
                 //exit if generate last func
                 if (timeIndex >= maxTimeIndex && funcIndex >= maxFuncIndex) {
+                    Sync.log(timeIndex + " line " + funcRun + " count " + (System.currentTimeMillis() - beginTime) + " ms");
                     sendResult();
                     return;
                 }
@@ -84,7 +82,7 @@ public class Generator implements Runnable {
                     return;
 
                 /*if (funcRun % 200 == 0) {
-                    System.out.println(timeIndex + " line " + funcRun + " count " + (System.currentTimeMillis() - beginTime) + " ms");
+                    log(timeIndex + " line " + funcRun + " count " + (System.currentTimeMillis() - beginTime) + " ms");
                     beginTime = System.currentTimeMillis();
                 }*/
 

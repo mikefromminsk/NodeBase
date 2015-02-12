@@ -5,7 +5,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class HttpServer implements Runnable {
+public class DataServer implements Runnable {
 
     public void run() {
         int port = 8080;
