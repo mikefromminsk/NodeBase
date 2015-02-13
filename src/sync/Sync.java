@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  * Time: 4:46
  * To change this template use File | Settings | File Templates.
  */
-public class Sync {
+public class Sync implements Runnable{
 
 
     static Host data = new Host();
@@ -113,12 +113,15 @@ public class Sync {
     static ArrayList<String> logList = new ArrayList<String>();
     public static Logger logger = Logger.getLogger(Sync.class.getName());
 
-    static synchronized void log(String str){
-        logger.info(str);
-        logList.add(str);
+    static synchronized void log(String str) {
+        //logger.info(str);
+        System.out.println(str);
+        logList.add(str + "<br/>");
         if (logList.size() > 50)
             logList.remove(0);
-    };
+    }
+
+    ;
 
     public static String getLog() {
         String result = "";
@@ -152,36 +155,60 @@ public class Sync {
         return null;
     }
 
-    public static void main(String[] args) {
+    @Override
+    public void run() {
 
         try {
             String strHostData = new Scanner(new File(data.getClass().getName())).useDelimiter("\\Z").next();
             if (!strHostData.equals(""))
                 data = (Host) hostDataFromString(strHostData);
         } catch (FileNotFoundException e) {
-            data.lastID = 4;
+            data.lastID = 5;
+            data.hosts.add("192.168.1.10:8080");
+            data.hosts.add("192.168.1.10:8081");
         }
-
+        Integer processorCount = Runtime.getRuntime().availableProcessors() - 1;
 
         try {
 
             new Thread(new DataServer()).start();
+            Thread.sleep(10);
             new Thread(new LogServer()).start();
             Thread.sleep(10);
             InetAddress localIP = getCurrentIp();
             data.ip = localIP.getHostAddress();
             //testing in real
             //data.mac = getMac(localIP);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        data.hosts.add("192.168.1.10:8080");
-        data.hosts.add("192.168.1.10:8081");
 
+        log("begin generate lastID " + data.lastID);
 
         while (true) {
             try {
+                //delete dead block
+                for (int i = 0; i < data.blocks.size(); i++) {
+                    Block localBlock = data.blocks.get(i);
+                    Thread thread = getThread(localBlock.threadID);
+                    if ((localBlock.ID > data.lastID &&
+                            (localBlock.endTime <= System.currentTimeMillis() && localBlock.threadEnd == false &&
+                                    !localBlock.mac.equals(data.mac)))
+                            ||
+                            (localBlock.threadID > data.lastID &&
+                                    localBlock.mac.equals(data.mac) && localBlock.threadEnd == false &&
+                                    thread == null)) {
+                        if (localBlock.mac.equals(data.mac))
+                            if (thread != null && thread.isAlive())
+                                thread.interrupt();
+                        data.removeBlock(localBlock);
+                        i--;
+                    }
+                }
+
+                //send requests
                 for (int j = 0; j < data.hosts.size(); j++) {
                     String ip = data.hosts.get(j);
                     if (ip.equals(data.ip + ":" + data.port))
@@ -198,14 +225,10 @@ public class Sync {
                     for (int i = 0; i < data.blocks.size(); i++) {
                         Block localBlock = data.blocks.get(i);
                         Block remoteBlock = host.getBlock(localBlock.ID);
-
-                        if ((localBlock.ID > data.lastID &&
-                                (localBlock.endTime <= System.currentTimeMillis() && localBlock.threadEnd == false &&
-                                        !localBlock.mac.equals(data.mac)))
-                                ||
-                                (localBlock.ID > data.lastID && localBlock.ID <= host.lastID &&
-                                        (remoteBlock == null) ||
-                                        (remoteBlock != null && !remoteBlock.mac.equals(data.mac)))
+                        Thread thread = getThread(localBlock.threadID);
+                        if ((localBlock.ID > data.lastID && localBlock.ID <= host.lastID &&
+                                (remoteBlock == null) ||
+                                (remoteBlock != null && !remoteBlock.mac.equals(data.mac)))
                                 ||
                                 (localBlock.ID > data.lastID && localBlock.ID > host.lastID &&
                                         (remoteBlock != null &&
@@ -213,10 +236,10 @@ public class Sync {
                                                         (remoteBlock.threadEnd == false && !remoteBlock.mac.equals(data.mac))))
                                 )) {
                             if (localBlock.mac.equals(data.mac)) {
-                                Thread thread = getThread(localBlock.threadID);
                                 if (thread != null && thread.isAlive())
                                     thread.interrupt();
                             }
+
                             data.removeBlock(localBlock);
                             i--;
                         }
@@ -252,12 +275,15 @@ public class Sync {
                         if (block.result.size() == 0)
                             data.removeBlock(block);
                         data.lastID++;
+                        if (data.lastID % 10 == 0)
+                            log("lastID " + data.lastID);
                     } else
                         break;
                 }
 
+
                 //start new thread
-                for (int j = threads.size() - 1; j < data.processorCount - 1; j++) {
+                for (int j = threads.size() - 1; j < processorCount - 1; j++) {
 
                     //new generate id
                     int newGenerationID = data.lastID + 1;
@@ -270,6 +296,7 @@ public class Sync {
 
                     //create thread id
                     Thread newThread = new Thread(new Generator(newGenerationID));
+                    newThread.setPriority(Thread.MIN_PRIORITY);
                     threads.add(newThread);
 
                     //add new block
@@ -293,6 +320,4 @@ public class Sync {
             }
         }
     }
-
-
 }

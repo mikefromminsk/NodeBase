@@ -13,9 +13,6 @@ class Host implements Serializable {
 
     Integer lastID = 0;
     public ArrayList<Block> blocks = new ArrayList<Block>();
-    Integer processorCount = Runtime.getRuntime().availableProcessors();
-    Long mergeTime = 0L;
-
 
     public Host(String ip, String port) {
         this.ip = ip;

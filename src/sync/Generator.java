@@ -22,7 +22,7 @@ public class Generator implements Runnable {
         this.blockID = blockID;
     }
 
-    void sendResult(){
+    void sendResult() {
         Block block = Sync.data.getBlock(blockID);
         block.result = result;
         block.threadEnd = true;
@@ -38,19 +38,19 @@ public class Generator implements Runnable {
         double funcCount = 8;
         double blockSize = 200;
 
-        double id = 5;
+
         double timeIndex = 0;
-        double funcIndex = blockSize * id;
-        while (funcIndex > Math.pow(funcCount, timeIndex)){
+        double funcIndex = blockSize * blockID;;
+        while (funcIndex > Math.pow(funcCount, timeIndex)) {
             funcIndex -= Math.pow(funcCount, timeIndex);
             timeIndex++;
         }
         //set next time and func index of block
-        double nextId = id + 1;
+        double nextId = blockID + 1;
         double maxTimeIndex = 0;
         double maxFuncIndex = blockSize * nextId;
-        while (maxTimeIndex > Math.pow(maxFuncIndex, maxTimeIndex)){
-            maxFuncIndex -= Math.pow(maxFuncIndex, maxTimeIndex);
+        while (maxFuncIndex > Math.pow(funcCount, maxTimeIndex)) {
+            maxFuncIndex -= Math.pow(funcCount, maxTimeIndex);
             maxTimeIndex++;
         }
         boolean firstFuncGenerate = true;
@@ -72,7 +72,7 @@ public class Generator implements Runnable {
 
                 //exit if generate last func
                 if (timeIndex >= maxTimeIndex && funcIndex >= maxFuncIndex) {
-                    Sync.log(timeIndex + " line " + funcRun + " count " + (System.currentTimeMillis() - beginTime) + " ms");
+                    Sync.log("block " +(int)blockID + " time " + (int)timeIndex + " func " + (int)maxFuncIndex  + " size " + (int)funcRun + " runtime " + (int)((System.currentTimeMillis() - beginTime) / 1000) + " s");
                     sendResult();
                     return;
                 }
