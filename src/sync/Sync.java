@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  * Time: 4:46
  * To change this template use File | Settings | File Templates.
  */
-public class Sync implements Runnable{
+public class Sync implements Runnable {
 
 
     static Host data = new Host();
@@ -160,14 +160,22 @@ public class Sync implements Runnable{
 
         try {
             String strHostData = new Scanner(new File(data.getClass().getName())).useDelimiter("\\Z").next();
-            if (!strHostData.equals(""))
+            if (!strHostData.equals("")) {
                 data = (Host) hostDataFromString(strHostData);
+                for (int i = 0; i < data.blocks.size(); i++)
+                    if (data.blocks.get(i).threadEnd == false) {
+                        data.blocks.remove(i);
+                        i--;
+                    }
+            }
         } catch (FileNotFoundException e) {
             data.lastID = 5;
             data.hosts.add("192.168.1.10:8080");
             data.hosts.add("192.168.1.10:8081");
+            data.hosts.add("192.168.1.8:8080");
+
         }
-        Integer processorCount = Runtime.getRuntime().availableProcessors() - 1;
+        Integer processorCount = 4;
 
         try {
 
@@ -178,7 +186,7 @@ public class Sync implements Runnable{
             InetAddress localIP = getCurrentIp();
             data.ip = localIP.getHostAddress();
             //testing in real
-            //data.mac = getMac(localIP);
+            data.mac = getMac(localIP);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -252,10 +260,12 @@ public class Sync implements Runnable{
                             data.putBlock(remoteBlock);
                     }
 
-                    if (data.lastID < host.lastID)
+                    if (data.lastID < host.lastID) {
+                        log("merge host " + ip + " id " + data.lastID + "->" + host.lastID);
                         data.lastID = host.lastID;
+                    }
 
-                    log("merge host " + ip + " id " + host.lastID);
+
                 }
 
 
