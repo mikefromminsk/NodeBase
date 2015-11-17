@@ -1,7 +1,8 @@
-import sync.Sync;
+package net.metabrain;
 
 public class Main {
+
     public static void main(String[] args) {
-        new Thread(new Sync()).start();
+	// write your code here
     }
 }
