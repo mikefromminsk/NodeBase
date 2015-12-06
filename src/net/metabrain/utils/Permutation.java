@@ -90,8 +90,8 @@ public class Permutation {
         if (newGroupName.equals(group))
             groupId++;
         ArrayList<ArrayList<String>> list = like(input);
-        for (int i = 0; i < list.size(); i++)
-            allTemplates.put(list.get(i));
+        /*for (int i = 0; i < list.size(); i++)
+            allTemplates.put(list.get(i));*/
         return group;
     }
 

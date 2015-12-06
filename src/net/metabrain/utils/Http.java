@@ -4,9 +4,19 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.Socket;
 import java.net.URL;
+import java.util.List;
 
 public class Http {
+
+    List<Socket> SocketList;
+    public Socket Open(int port){
+        return null;
+    }
+    public Socket Close(int port){
+        return null;
+    }
 
 
     public static InputStream GetStream(String url) {
