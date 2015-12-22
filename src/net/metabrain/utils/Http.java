@@ -1,19 +1,47 @@
 package net.metabrain.utils;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Http {
 
-    List<Socket> SocketList;
-    public Socket Open(int port){
-        return null;
+
+    public static Map<String, HttpHandler> serverContent = new HashMap<>();
+
+
+    public static Map<String, String> getQueryMap(String query)
+    {
+        String[] params = query.split("&");
+        Map<String, String> map = new HashMap<String, String>();
+        for (String param : params)
+        {
+            String name = param.split("=")[0];
+            String value = param.split("=")[1];
+            map.put(name, value);
+        }
+        return map;
     }
+
+    static HttpServer server;
+    public static void open(int port) throws IOException {
+        server = HttpServer.create(new InetSocketAddress(port), 0);
+        for (String key: serverContent.keySet())
+            server.createContext(key, serverContent.get(key));
+        server.setExecutor(null);
+        server.start();
+    }
+
+    List<Socket> SocketList;
+
     public Socket Close(int port){
         return null;
     }

@@ -1,48 +1,40 @@
 package net.metabrain;
 
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import net.metabrain.utils.Http;
-import org.w3c.dom.*;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Map;
 
-public class Main {
-
-    public static void main(String[] args) throws Exception {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(Http.GetStream("http://localhost:8080"));
-
-        doc.getDocumentElement();
-        NodeList processList = doc.getElementById("list").getChildNodes();
-        for (int i = 0; i < processList.getLength(); i++) {
-            NodeList processParams = processList.item(i).getChildNodes();
-            for (int j = 0; j < processParams.getLength(); j++) {
-                Node param = processParams.item(j);
-                String id = param.getAttributes().getNamedItem("id").getNodeValue();
-                if (id.equals("pid")) {
-
-                } else if (id.equals("using")) {
-
-                } else if (id.equals("cmd")){
-
-                }
+public class Main implements HttpHandler {
 
 
-            }
-
-        }
-
-        visit(doc, 0);
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+        Map<String, String> map = Http.getQueryMap(httpExchange.getRequestURI().getQuery());
+        String response = map.get("ss");
+        httpExchange.sendResponseHeaders(200, response.length());
+        OutputStream os = httpExchange.getResponseBody();
+        os.write(response.getBytes());
+        os.close();
     }
 
-    public static void visit(Node node, int level) {
-        NodeList list = node.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
-            Node childNode = list.item(i);
-            if (childNode.getNodeType() == Node.TEXT_NODE)
-                System.out.println(childNode.getAttributes().getLength());
-            visit(childNode, level + 1);
+
+    static Main main;
+    static Main getInstance(){
+        if (main == null)
+            main = new Main();
+        return main;
+    }
+
+    public static void main(String[] args) {
+        try {
+            Http.serverContent.put("/hello", getInstance());
+            Http.open(8082);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
