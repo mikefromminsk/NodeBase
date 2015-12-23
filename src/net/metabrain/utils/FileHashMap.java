@@ -1,6 +1,6 @@
 package net.metabrain.utils;
 
-import com.google.gson.Gson;
+import net.metabrain.Model.Root;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -11,20 +11,26 @@ import java.util.Map;
 
 public class FileHashMap {
 
-    static FileStorage fs;
-    static int storageID;
+    public FileStorage fs = FileStorage.getInstance();
+    public int storageID;
 
-    public FileHashMap(FileStorage fileStorage) {
-        this.fs = fileStorage;
+    public FileHashMap() {
         this.storageID = 0;
     }
 
-    public FileHashMap(FileStorage fileStorage, int storageID) {
-        this.fs = fileStorage;
-        this.storageID = storageID;
+    public FileHashMap(String path) {
+        String RootID = Root.getInstance().get(path);
+        if (RootID == null){
+            storageID = fs.allocate(Integer.BYTES * blockSize);
+            Root.getInstance().put(path, String.valueOf(storageID));
+            RootID = Root.getInstance().get(path);
+            System.out.println(RootID);
+        }
+        else
+            storageID = Integer.valueOf(RootID);
     }
 
-    static int hash(String str) {
+    int hash(String str) {
         //LY hash
         int hash = 1;
         for (int i = 0; i < str.length(); i++)
@@ -32,16 +38,16 @@ public class FileHashMap {
         return hash;
     }
 
-    static final int linksCount = 16;
-    static final int blockSize = 19;
-    static final int keyIndex = 16;
-    static final int valueIndex = 17;
-    static final int nextIndex = 18;
-    static final int entryKeyIndex = 0;
-    static final int entryValueIndex = 1;
-    static final int entryNextIndex = 2;
+    final int linksCount = 16;
+    public final int blockSize = 19;
+    final int keyIndex = 16;
+    final int valueIndex = 17;
+    final int nextIndex = 18;
+    final int entryKeyIndex = 0;
+    final int entryValueIndex = 1;
+    final int entryNextIndex = 2;
 
-    String get(String key) {
+    public String get(String key) {
         return get(hash(key), key);
     }
 
@@ -94,7 +100,7 @@ public class FileHashMap {
         return null;
     }
 
-    static Map<String, String> get(int hash) {
+    public Map<String, String> get(int hash) {
         if (storageID == 0)
             return null;
         Map<String, String> result = new HashMap<>();
@@ -141,11 +147,11 @@ public class FileHashMap {
         return result;
     }
 
-    public static void put(String key, String value) {
+    public void put(String key, String value) {
         put(hash(key), key, value);
     }
 
-    public static void put(int hash, String key, String value) {
+    public void put(int hash, String key, String value) {
         String hashstr = String.format("%08X", hash);
         if (storageID == 0)
             storageID = fs.allocate(Integer.BYTES * blockSize);
@@ -204,7 +210,7 @@ public class FileHashMap {
     }
 
 
-    static int next(int hash) {
+    int next(int hash) {
         if (storageID == 0)
             return 0;
         String hashstr = String.format("%08X", hash);
@@ -286,7 +292,7 @@ public class FileHashMap {
         return 0;
     }
 
-    static List<Integer> interval(int begin, int end) {
+    public List<Integer> interval(int begin, int end) {
         List<Integer> result = new ArrayList<>();
         int min = Math.min(begin, end);
         int max = Math.max(begin, end);
@@ -299,13 +305,4 @@ public class FileHashMap {
         return result;
     }
 
-
-    public static void main(String[] args) {
-        FileHashMap map = new FileHashMap(FileStorage.getInstance());
-
-        map.put(0x123, "1", "2");
-        map.put(0x132, "2", "3");
-        map.put(0x500, "3", "4");
-        System.out.println(new Gson().toJson(interval(0x124, 0x500)));
-    }
 }

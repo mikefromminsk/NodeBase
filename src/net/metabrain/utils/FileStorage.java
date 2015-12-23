@@ -2,23 +2,20 @@ package net.metabrain.utils;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.Properties;
 
 public class FileStorage {
 
     static FileStorage instance;
 
-    static FileStorage getInstance(){
+    public static FileStorage getInstance(){
         if (instance == null)
             instance = new FileStorage();
         return instance;
     }
 
-    Properties settings = new Properties();
+    public Properties settings = new Properties();
     static int lastID;
     File metafile;
     File datafile;
@@ -30,22 +27,40 @@ public class FileStorage {
         this(null);
     }
 
+    File settingsFile;
+    String getSetting(String key){
+        return settings.getProperty(key);
+    }
+
+    String getSetting(String key, String defaultValue){
+        return settings.getProperty(key, defaultValue);
+    }
+
+    public void setSetting(String key, String value){
+        settings.setProperty(key, value);
+        try {
+            settings.store(new FileOutputStream(settingsFile), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public FileStorage(String settingsPath) {
         try {
             if (settingsPath == null || settingsPath.equals(""))
                 settingsPath = "storage.prop";
-            File settingsFile = new File(settingsPath);
+            settingsFile = new File(settingsPath);
             if (!settingsFile.exists())
                 settingsFile.createNewFile();
             System.out.println(settingsFile.getAbsolutePath());
             settings.load(new FileInputStream(settingsFile));
-            metafile = new File(settings.getProperty("metafile", "storage.meta"));
-            datafile = new File(settings.getProperty("datafile", "storage.data"));
+            metafile = new File(getSetting("metafile", "storage.meta"));
+            datafile = new File(getSetting("datafile", "storage.data"));
             System.out.println(metafile.getAbsolutePath());
             System.out.println(datafile.getAbsolutePath());
-            settings.setProperty("metafile", metafile.getAbsolutePath());
-            settings.setProperty("datafile", datafile.getAbsolutePath());
-            settings.store(new FileOutputStream(settingsFile), null);
+            setSetting("metafile", metafile.getAbsolutePath());
+            setSetting("datafile", datafile.getAbsolutePath());
+
             if (!metafile.exists())
                 metafile.createNewFile();
             if (!datafile.exists())
@@ -159,7 +174,7 @@ public class FileStorage {
         setMeta(metaData, id);
     }
 
-    int allocate(int size){
+    public int allocate(int size){
         StringBuffer sb = new StringBuffer();
         sb.setLength(size);
         return put(sb.toString());
