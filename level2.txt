@@ -1,0 +1,41 @@
+hand @1?1	@1?1		@4?up	@4?up30
+foot 	@2?1	@2?2	@5?[1,4]	@5[2,3]
+head 	@3?3
+
+hand +10	+10			+10		+30
+foot 	+1=+20	+2=+40	+40			+30
+head 	p1*5
+
+hand 10		20			30		60
+foot 	20		60		100			130
+head 	15
+
+hand
+foot 	+10		+20		+20			+15
+head 			
+
+hand
+foot 	10<		30<		50=			65>
+head 	
+
+hand
+foot 	-50		-20		0			+15
+head 
+
+hand
+foot 	1c		1c		1c			2c
+head 			
+
+rand @n ?par* +n +str +arr
+
+priznaki size=2 chislo=+ znak=+ chetnoe=2 slowo=+ coding=utf8 array=+
+repeating=супер postrepitingposled=[0..2]+1 notpostrepitingposled=[2] userfunction@12=3 value=up
+
+crosspriznaki 1c +16 hand+12 hand@1?1
+
+summators sizeposled=2*+1 chislo=3*+
+
+pravila sizenext=60%+1 chislo=90%+
+
+
+
