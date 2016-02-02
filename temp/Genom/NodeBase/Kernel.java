@@ -227,8 +227,8 @@ public class Kernel
 
 			method = c.getMethod("run", paramTypes);
 
-			Object[] params = new Object[] { new Integer(10) };
-			Object ret = method.invoke(obj, params);
+			Object[] consolidator = new Object[] { new Integer(10) };
+			Object ret = method.invoke(obj, consolidator);
 			return ret;
 
 				System.out.print(((Integer)ret).toString());

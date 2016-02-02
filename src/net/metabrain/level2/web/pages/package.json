@@ -1,0 +1,17 @@
+{
+  "name": "application-name",
+  "version": "0.0.1",
+
+  "address": "192.168.0.1",
+  "groupID":"123",
+  "api":{
+        "func1":{
+          "par1":"number",
+          "par2": "string"
+        },
+        "func2":{
+          "par1":"object",
+          "par2": "array"
+        }
+  }
+}
