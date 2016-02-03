@@ -1,6 +1,6 @@
 package net.metabrain.level2.controllers;
 
-import net.metabrain.level2.storage.FileStorage;
+import net.metabrain.level2.utils.storage.FileStorage;
 
 import java.io.*;
 import java.util.Date;

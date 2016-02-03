@@ -1,4 +1,4 @@
-package net.metabrain.level2.storage;
+package net.metabrain.level2.utils.storage;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
