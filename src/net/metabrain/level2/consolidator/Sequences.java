@@ -1,4 +1,4 @@
-package net.metabrain.level2.utils;
+package net.metabrain.level2.consolidator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,6 +86,12 @@ public class Sequences {
     }
 
 
+    public ArrayList<ArrayList<String>> like(String input) {
+        ArrayList<String> list = new ArrayList<>();
+        list.add(input);
+        return like(list);
+    }
+
     public ArrayList<ArrayList<String>> like(ArrayList<String> input){
         ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
         Map<String, Double> sequences = sequences(input);
@@ -100,6 +106,10 @@ public class Sequences {
             }
         }
         return list;
+    }
+
+    public String last() {
+        return null;
     }
 
     /*

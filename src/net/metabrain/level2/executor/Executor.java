@@ -1,12 +1,12 @@
 package net.metabrain.level2.executor;
 
 import com.google.gson.JsonObject;
+import net.metabrain.level2.Main;
 import net.metabrain.level2.consolidator.Consolidator;
 import net.metabrain.level2.utils.Http;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Executor {
 
@@ -32,6 +32,32 @@ public class Executor {
         }
     }
 
+
+    static Consolidator execConsolidator;
+    static long beginStart;
+    public static void addExecConsolidator(Consolidator consolidator){
+        execConsolidator = consolidator;
+        beginStart = new Date().getTime();
+    }
+
+
+    Timer execTimer;
+    class execTimerTask extends TimerTask {
+
+        @Override
+        public void run() {
+            Consolidator lastConsolidator = (Consolidator) Main.consolidatorTimeLine.lastObject();
+            execConsolidator.getTimeLineLocalTime(100);
+            //Провести сравнение консолидаторов по времени и по последовательсноти и по пермутейшенам
+            //equals time block
+            //оценка выполненыз работ и награда за соответсвие предыдущему разу
+            //эту оценку нужно учитывать в планировании
+        }
+    }
+
+    public Executor() {
+        execTimer.schedule(new execTimerTask(), 100);
+    }
 
 
 }
