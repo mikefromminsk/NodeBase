@@ -38,15 +38,9 @@ public class Consolidator {
     }
 
     public static void event(JsonObject eventObject){
-        String type = "get";
         String group = eventObject.get("group").getAsString();
-        recursivePermutationPut(eventObject, type + "/" + group);
-
-        Indexator.index(eventObject, type + "/" + group);
+        recursivePermutationPut(eventObject, group);
+        Indexator.index(group, eventObject);
     }
 
-    void selectPlans(){
-
-
-    }
 }

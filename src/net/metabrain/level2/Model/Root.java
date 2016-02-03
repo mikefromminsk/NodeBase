@@ -1,6 +1,7 @@
 package net.metabrain.level2.Model;
 
-import net.metabrain.level2.utils.FileHashMap;
+
+import net.metabrain.level2.storage.FileHashMap;
 
 public class Root{
 

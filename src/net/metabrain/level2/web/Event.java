@@ -9,10 +9,6 @@ import java.io.IOException;
 
 public class Event implements HttpHandler {
 
-    String getBody(HttpExchange httpExchange){
-        return "";
-    }
-
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         //json

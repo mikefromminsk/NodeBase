@@ -18,7 +18,7 @@ public class Properties {
             result.put("type", "number");
             result.put("int", ((int) value) - value == 0.0 ? "true" : "false");
             result.put("div2", value % 2 == 0.0 ? "true" : "false");
-
+            //Разница с предыдущим 4 -> 1 = -3
         } catch (NumberFormatException e) {
 
         }

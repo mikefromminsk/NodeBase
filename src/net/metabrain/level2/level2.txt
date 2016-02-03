@@ -62,3 +62,35 @@ emotion
 
 
 корректировка плана,  выбор плана, поиск планов, консолидация, обработка, получение событий, генерация событий
+
+
+
+
+
+
+
+
+
+
+{
+groupID: "processList",
+address: "localhost:8080",
+processList: {
+        "paint":{
+            pid: "123",
+            usage: "10",
+            memory: "150"
+            params:{
+                file:"c:\file.bmp"
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
