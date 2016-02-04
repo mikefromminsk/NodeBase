@@ -1,4 +1,4 @@
-package net.metabrain.level2.consolidator;
+package net.metabrain.level2.planing;
 
 import com.google.gson.JsonObject;
 
@@ -75,7 +75,7 @@ public class Properties {
         return result;
     }*/
 
-    // analysis PropertiesValue like type=number -> type=string or length=3 -> length=4
+    // analysis PropertiesValue likePermutation type=number -> type=string or length=3 -> length=4
    void update(String value){
 
        Map<String, String> nextProp = getProperties(value);

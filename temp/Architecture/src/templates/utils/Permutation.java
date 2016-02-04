@@ -104,8 +104,8 @@ public class Permutation {
         System.out.println(analysing.allGroups);
         data.add("4");
         System.out.println("new " + data);
-        System.out.println("per" + analysing.permutation(data) + "=" + analysing.allGroups.get(analysing.max(analysing.permutation(data))));
-        System.out.println("seq" + analysing.sequences(data) + "=" + analysing.allGroups.get(analysing.max(analysing.sequences(data))));
+        System.out.println("per" + analysing.likePermutations(data) + "=" + analysing.allGroups.get(analysing.max(analysing.likePermutations(data))));
+        System.out.println("seq" + analysing.likeSequences(data) + "=" + analysing.allGroups.get(analysing.max(analysing.likeSequences(data))));
 
         data.add(0, "5");
     }*/

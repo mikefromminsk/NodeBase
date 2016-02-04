@@ -16,7 +16,7 @@ public class Controller {
             Http.serverContent.put("/event", new Event());
             Http.serverContent.put("/hashmaptest", new HashMapTest());
             Http.serverContent.put("/", new Explorer());
-            //add "/" context like root tree
+            //add "/" context likePermutation root tree
             Http.open(8080);
         } catch (IOException e) {
             e.printStackTrace();

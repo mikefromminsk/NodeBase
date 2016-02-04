@@ -19,7 +19,6 @@ public class Controllers {
         indexators.put(UsageController.class.getName(), new UsageController());
         summators.put(UsageController.class.getName(), new Summator(100, 0, 0, 0, 50));
         updateTimer.schedule(new UpdateTimerTask(), 100);
-
     }
 
     public static void index(String path, JsonObject eventObject) {

@@ -7,11 +7,45 @@ import java.util.*;
 
 public class Consolidator {
 
-    public static Map<String, Permutation> permutations = new HashMap<>();
-    public static Map<String, Sequences> sequences = new HashMap<>();
-    public static Map<String, Properties> properties = new HashMap<>();
+    Map<String, Mining> groups = new HashMap<>();
+    Mining actions = new Mining();
 
-    public static Map<String, Group> groups = new HashMap<>();
+    void put(String groupName, JsonObject object){
+        Mining groupMining = groups.get(groupName);
+        //object
+        String objectID = groupMining.put();
+        actions.putToBuffer(objectID);
+    }
+
+    ArrayList<String> likeActions(String actionID){ //to planning
+
+    }
+
+    Timer consolidateTimer;
+    public Consolidator() {
+        consolidateTimer.schedule(new consolidateTimerTask(), 100);
+    }
+
+    class consolidateTimerTask extends TimerTask {
+
+        @Override
+        public void run() {
+            if ( new Date().getTime() - lastEventTime > 1000){
+                String consolidationID = actions.saveBuffer();
+            }
+        }
+    }
+
+
+
+
+
+
+
+    public static Map<String, Mining> permutations = new HashMap<>();
+    public static Map<String, Sequences> sequences = new HashMap<>();
+    public static Map<String, net.metabrain.level2.planing.Properties> properties = new HashMap<>();
+
 
 
     static ArrayList<String> JsonArrayToStringArray(JsonObject array){
@@ -23,7 +57,7 @@ public class Consolidator {
 
         //for  in (eventObject)
         //recursivePermutationPut(eventObject.get(key), path + "/" + key)
-        Permutation permutation = permutations.get(path);
+        Mining permutation = permutations.get(path);
         permutation.put(JsonArrayToStringArray(eventObject));
 
         Sequences sequence = sequences.get(path);
@@ -31,7 +65,7 @@ public class Consolidator {
 
         // for in eventObject inside params
         {
-            Properties properties = Consolidator.properties.get(path);
+            net.metabrain.level2.planing.Properties properties = Consolidator.properties.get(path);
             properties.update(eventObject.get("key").getAsString());
         }
     }
@@ -46,26 +80,6 @@ public class Consolidator {
         eventBlock.add(sequences.get(group).last());
         Controllers.index(group, eventObject);
         lastEventTime = new Date().getTime();
-    }
-
-    Timer consolidateTimer;
-    public Consolidator() {
-        consolidateTimer.schedule(new consolidateTimerTask(), 100);
-    }
-
-    public void getTimeLineLocalTime(int i) {
-
-    }
-
-    class consolidateTimerTask extends TimerTask {
-
-        @Override
-        public void run() {
-            if ( new Date().getTime() - lastEventTime > 1000){
-                eventConsolidator.put(eventBlock);
-                eventBlock.clear();
-            }
-        }
     }
 
 }

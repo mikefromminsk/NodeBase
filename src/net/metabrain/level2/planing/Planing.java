@@ -16,13 +16,13 @@ public class Planing {
         for (String controllerName: ord.keySet()){
             String controllerValue = ord.get(controllerName);
             //select permutations
-            //select sequences
+            //select likeSequences
 
         }
 
 
-        //choose sequences or pemutation
-        //get time seequences or permutation from timeline
+        //choose likeSequences or pemutation
+        //get time seequences or likePermutations from timeline
         long timeOfPermutationOrSequences = 1;
         //select from consolidator timeline consolidator
         Consolidator consolidator = (Consolidator) Main.consolidatorTimeLine.getBlockByTime(timeOfPermutationOrSequences);
