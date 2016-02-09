@@ -2,14 +2,20 @@ package net.metabrain.level2.consolidator;
 
 import java.util.*;
 
-public class Mining {
+public class Group {
     //groupName/groupID
-    public Integer groupId = 0;
-    public Map<String, ArrayList<String>> allGroups = new HashMap<String, ArrayList<String>>();
-    public Map<String, ArrayList<String>> allSortGroups = new HashMap<String, ArrayList<String>>();
+    public Integer arrayID = 0;
+    public Map<String, ArrayList<String>> allArrays = new HashMap<String, ArrayList<String>>();
+    public Map<String, ArrayList<String>> allSortArrays = new HashMap<String, ArrayList<String>>();
     public Map<String, ArrayList<String>> allObjects = new HashMap<String, ArrayList<String>>(); //link objectid to groupid
 
-    public ArrayList<String> groups(List<String> input) {
+    //нечеткий поиск по значениям
+
+    ArrayList<String> getArray(String groupID){
+        return allArrays.get(groupID);
+    }
+
+    public ArrayList<String> arrays(List<String> input) {
         ArrayList<String> result = new ArrayList<String>();
         for (int i = 0; i < input.size(); i++) {
             ArrayList<String> groups = allObjects.get(input.get(i));
@@ -21,13 +27,13 @@ public class Mining {
         return result;
     }
 
-    public Map<String, Double> likePermutations(ArrayList<String> input) {
+    public Map<String, Double> findPermutations(ArrayList<String> input) {
         ArrayList<String> sortInput = (ArrayList<String>) input.clone();
         java.util.Collections.sort(sortInput);
-        ArrayList<String> groups = groups(sortInput);
+        ArrayList<String> groups = arrays(sortInput);
         Map<String, Double> likes = new HashMap<String, Double>();
         for (int k = 0; k < groups.size(); k++) {
-            ArrayList<String> objects = allSortGroups.get(groups.get(k));
+            ArrayList<String> objects = allSortArrays.get(groups.get(k));
             double count = 0;
             for (int i = 0; i < objects.size(); i++) {
                 String object = objects.get(i);
@@ -41,11 +47,11 @@ public class Mining {
     }
 
 
-    public Map<String, Double> likeSequences(ArrayList<String> input) {
-        ArrayList<String> groups = groups(input);
+    public Map<String, Double> findSequences(ArrayList<String> input) {
+        ArrayList<String> groups = arrays(input);
         Map<String, Double> likes = new HashMap<String, Double>();
         for (int k = 0; k < groups.size(); k++) {
-            ArrayList<String> objects = allGroups.get(groups.get(k));
+            ArrayList<String> objects = allArrays.get(groups.get(k));
             double count = 0;
             for (int i = 0; i < objects.size(); i++)
                 if (objects.get(i) == null || objects.get(i).equals(input.get(i)))
@@ -55,7 +61,7 @@ public class Mining {
         return likes;
     }
 
-    public String max(Map<String, Double> likes) {
+    public static String max(Map<String, Double> likes) {
         double max = 0;
         String result = null;
         for (String groupId : likes.keySet()) {
@@ -68,15 +74,15 @@ public class Mining {
     }
 
     public String put(String newGroupName, ArrayList<String> input) {
-        Map<String, Double> permutation = likePermutations(input); //likePermutations включает в себя поиск по likeSequences
+        Map<String, Double> permutation = findPermutations(input); //findPermutations включает в себя поиск по findSequences
         String groupName = max(permutation);
         //update group
         if (groupName == null || permutation.get(groupName) != 1.0) {
             groupName = newGroupName;
-            allGroups.put(groupName, (ArrayList<String>) input.clone());
+            allArrays.put(groupName, (ArrayList<String>) input.clone());
             ArrayList<String> sortInput = (ArrayList<String>) input.clone();
             java.util.Collections.sort(sortInput);
-            allSortGroups.put(groupName, sortInput);
+            allSortArrays.put(groupName, sortInput);
         }
 
 
@@ -95,20 +101,42 @@ public class Mining {
     }
 
     public String put(ArrayList<String> input) {
-        String newGroupName = "" + (groupId + 1);
-        String group = put(newGroupName, input);
-        if (newGroupName.equals(group))
-            groupId++;
-        return group;
+        String newArrayID = "" + (arrayID + 1);
+        String arrayID = put(newArrayID, input);
+        if (newArrayID.equals(arrayID))
+            this.arrayID++;
+        return arrayID;
     }
+
+
+/*
+    static void recursivePermutationPut(JsonObject eventObject, String path) {
+
+        //for  in (eventObject)
+        //recursivePermutationPut(eventObject.get(key), path + "/" + key)
+        Group permutation = permutations.get(path);
+        permutation.put(JsonArrayToStringArray(eventObject));
+
+        Sequences sequence = sequences.get(path);
+        sequence.put(JsonArrayToStringArray(eventObject));
+
+        // for in eventObject inside params
+        {
+            net.metabrain.level2.consolidator.properties properties = Consolidator.properties.get(path);
+            properties.update(eventObject.get("key").getAsString());
+        }
+    }
+*/
+
 
 
     public ArrayList<ArrayList<String>> templatesOfPermutation(ArrayList<String> input) {
         ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
-        Map<String, Double> permutation = likePermutations(input);
+        Map<String, Double> permutation = findPermutations(input);
         for (String groupId : permutation.keySet()) {
             if (permutation.get(groupId) != 1.0) { //получаем список похожих кроме себя
-                ArrayList<String> perGroup = allSortGroups.get(groupId);
+                //походу придутся убрать
+                ArrayList<String> perGroup = allSortArrays.get(groupId);
                 ArrayList<String> temGroup = (ArrayList<String>) perGroup.clone();
                 for (int i = 0; i < perGroup.size(); i++)
                     if ((perGroup.size() < i + 1) || (input.size() < i + 1) || !perGroup.get(i).equals(input.get(i)))
@@ -121,10 +149,10 @@ public class Mining {
 
     public ArrayList<ArrayList<String>> templatesOfSequences(ArrayList<String> input) {
         ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
-        Map<String, Double> sequences = likeSequences(input);
+        Map<String, Double> sequences = findSequences(input);
         for (String groupId : sequences.keySet()) {
             if (sequences.get(groupId) != 1.0) {
-                ArrayList<String> seqGroup = allGroups.get(groupId);
+                ArrayList<String> seqGroup = allArrays.get(groupId);
                 ArrayList<String> temGroup = (ArrayList<String>) seqGroup.clone();
                 for (int i = 0; i < temGroup.size(); i++)
                     if (!temGroup.get(i).equals(input.get(i)))
@@ -144,16 +172,16 @@ public class Mining {
     }
 
     String saveBuffer(){
-        String id = put(objectBuffer, timeBuffer);
+        String arrayID = put(objectBuffer, timeBuffer);
         objectBuffer.clear();
-        return id;
+        return arrayID;
     }
 
 
     //end sequences and permutation code
 
     public String put(ArrayList<String> inputData, ArrayList<Long> dataTime) {
-        return null;
+        return put(inputData);
     }
 
     public String put(String groupName, ArrayList<String> inputData, ArrayList<Long> dataTime) {
@@ -161,12 +189,11 @@ public class Mining {
     }
 
 
-    Map<Integer, String> events = new HashMap<>();
-    Map<Integer, String> intervals = new HashMap<>();
+    Map<Integer, String> events = new HashMap<>(); //События
+    Map<Integer, String> intervals = new HashMap<>(); //Интервалы
+    Map<Integer, String> tacts = new HashMap<>(); //Такты
 
-    public Object get(long time){
-        return null;
-    }
+    //Поиск зависимостей в событиях
 
     public Object getInterval(long time){
         return null;
@@ -189,23 +216,27 @@ public class Mining {
     public String nextEvent(long time){
         return null;
     }
+    public String getEvent(long time){
+        return null;
+    }
+
 
     public static void main(String[] args) {
 
         //test of find likes
-        Mining mining = new Mining();
+        Group group = new Group();
         ArrayList<String> data = new ArrayList<String>();
         data.add("1");
         data.add("2");
         data.add("3");
-        mining.put(data);
+        group.put(data);
         data.set(2, "5");
-        mining.put(data);
-        System.out.println(mining.allGroups);
+        group.put(data);
+        System.out.println(group.allArrays);
         data.add("4");
         System.out.println("new " + data);
-        System.out.println("per" + mining.likePermutations(data) + "=" + mining.allGroups.get(mining.max(mining.likePermutations(data))));
-        System.out.println("seq" + mining.likeSequences(data) + "=" + mining.allGroups.get(mining.max(mining.likeSequences(data))));
+        System.out.println("per" + group.findPermutations(data) + "=" + group.allArrays.get(group.max(group.findPermutations(data))));
+        System.out.println("seq" + group.findSequences(data) + "=" + group.allArrays.get(group.max(group.findSequences(data))));
     }
 
 }

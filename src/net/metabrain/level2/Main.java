@@ -1,9 +1,9 @@
 package net.metabrain.level2;
 
-import net.metabrain.level2.consolidator.TimeLine;
+import net.metabrain.level2.consolidator.Group;
 
 public class Main {
-    public static TimeLine consolidatorTimeLine = new TimeLine();
+    Group consolidators = new Group();
 
 
     public static void main(String[] args) {

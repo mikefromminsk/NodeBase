@@ -101,11 +101,11 @@ public class Permutation {
         analysing.put(data);
         data.set(2, "5");
         analysing.put(data);
-        System.out.println(analysing.allGroups);
+        System.out.println(analysing.allArrays);
         data.add("4");
         System.out.println("new " + data);
-        System.out.println("per" + analysing.likePermutations(data) + "=" + analysing.allGroups.get(analysing.max(analysing.likePermutations(data))));
-        System.out.println("seq" + analysing.likeSequences(data) + "=" + analysing.allGroups.get(analysing.max(analysing.likeSequences(data))));
+        System.out.println("per" + analysing.findPermutations(data) + "=" + analysing.allArrays.get(analysing.max(analysing.findPermutations(data))));
+        System.out.println("seq" + analysing.findSequences(data) + "=" + analysing.allArrays.get(analysing.max(analysing.findSequences(data))));
 
         data.add(0, "5");
     }*/

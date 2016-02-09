@@ -20,7 +20,7 @@ public abstract class FunctionModule {
     public Object input(List<Object> inputs) {
         /*if (plan.isNotEnd or plan.isError) {
             inputMapping();
-            likePermutations / objs(); //
+            findPermutations / objs(); //
             sequence / objs(); //video fragment
             borders();
             objects();
@@ -35,7 +35,7 @@ public abstract class FunctionModule {
             choice / task();
             run();
         } else {
-            likePermutations / blocks();
+            findPermutations / blocks();
             sequence / blocks(); // video film
             template / tact();
             borders / pause();

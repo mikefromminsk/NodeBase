@@ -46,6 +46,6 @@ public class SequencesWithTemplates extends Sequences {
         templates.put(data);
         data.set(3, "6");
         templates.put(data);
-        System.out.println(templates.allTemplates.allGroups);
+        System.out.println(templates.allTemplates.allArrays);
     }*/
 }
