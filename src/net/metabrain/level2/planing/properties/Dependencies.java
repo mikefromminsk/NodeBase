@@ -1,5 +1,7 @@
 package net.metabrain.level2.planing.properties;
 
+import net.metabrain.level2.consolidator.GroupID;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -98,13 +100,14 @@ public class Dependencies {
                 counter = 0;
             dependenciesCounters.put(dependenciesID, counter + 1);
         }
-
-
     }
 
-    public void put(Map<String, String> groupsData) { // from groupNameArrayID -> arrayData
-        for (String dataID : groupsData.keySet()) {
-            findProperty(dataID, Double.valueOf(groupsData.get(dataID)));
+    public void put(Map<GroupID, ArrayList<String>> groupsData) { // from groupID -> arrayData
+        for (GroupID groupID : groupsData.keySet()) {
+            ArrayList<String> arrayData = groupsData.get(groupID);
+            for (int i = 0; i < arrayData.size(); i++) {
+                findProperty(groupID.toString(), Double.valueOf(arrayData.get(i)));
+            }
         }
         prevValueIds = valueIds;
         prevSubValues = subValues;

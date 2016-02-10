@@ -17,6 +17,7 @@ public class Consolidator {
     Map<String, Group> groups = new HashMap<>();
     Group unions = new Group();
 
+
     void putEvent(String groupName, JsonObject object) {
         Group groupGroup = groups.get(groupName);
         groupGroup.putToBuffer(object.getAsString());
@@ -26,8 +27,15 @@ public class Consolidator {
     Timer consolidateTimer;
     private long lastEventTime;
 
-    public Map<String, String> getUnionGroupsArrays(String unionID){
-        return null;
+    public Map<GroupID, ArrayList<String>> getUnionGroupsArrays(String unionID){
+        ArrayList<String> unionArray = unions.getArray(unionID);
+        Map<GroupID, ArrayList<String>> unionArrays = new HashMap<>();
+        for (int i = 0; i < unionArray.size(); i++) {
+            GroupID groupID = new GroupID(unionID);
+            Group group = groups.get(groupID.groupName);
+            unionArrays.put(groupID, group.getArray(groupID.arrayID));
+        }
+        return unionArrays;
     }
 
     class consolidateTimerTask extends TimerTask {
@@ -43,7 +51,7 @@ public class Consolidator {
                     }
                 }
                 String newUnion = unions.saveBuffer();
-                Map<String, String> newUnionGroups = getUnionGroupsArrays(newUnion);
+                Map<GroupID, ArrayList<String>> newUnionGroups = getUnionGroupsArrays(newUnion);
                 Dependencies.getInstance().put(newUnionGroups);
             }
         }
@@ -56,11 +64,9 @@ public class Consolidator {
 
         Map<String, ArrayList<String>> groupsDataArrays = new HashMap<>();
         for (int i = 0; i < groupsIDAndArrayIDInUnion.size(); i++) {
-            String[] groupIdAndArrayID = groupsIDAndArrayIDInUnion.get(i).split(",");
-            String groupName = groupIdAndArrayID[0];
-            String arrayID = groupIdAndArrayID[1];
-            Group group = groups.get(groupName);
-            groupsDataArrays.put(groupName, group.getArray(arrayID));
+            GroupID groupID = new GroupID(groupsIDAndArrayIDInUnion.get(i));
+            Group group = groups.get(groupID.groupName);
+            groupsDataArrays.put(groupID.groupName, group.getArray(groupID.arrayID));
         }
         return findUnions(groupsDataArrays);
     }
