@@ -8,11 +8,6 @@ public class Group {
     public Map<String, ArrayList<String>> allArrays = new HashMap<>();
     public Map<String, ArrayList<String>> allSortArrays = new HashMap<>();
     public Map<String, ArrayList<String>> allObjects = new HashMap<>(); //link objectid to groupid
-    public Map<Long, String> events = new HashMap<>(); // time -> ArrayID
-    public Map<Long, String> intervals = new HashMap<>(); //time -> intervalName
-
-
-
 
     public Map<String, Integer> allObjectsCounters = new HashMap<>();
     public Map<String, ArrayList<String>> allObjectsCash = new HashMap<>();
@@ -94,13 +89,11 @@ public class Group {
         return arrayID;
     }
 
-    long beginInterval = 0;
-    long lastEvent = 0;
+    String prevArrayID = null;
     ArrayList<String> lastTemplate = null;
 
-
     public String put(ArrayList<String> input) {
-        long eventTime = new Date().getTime();
+
 
         Map<String, Double> permutation = findPermutations(input); //findPermutations включает в себя поиск по findSequences
         String arrayID = max(permutation);
@@ -119,52 +112,25 @@ public class Group {
             String objName = input.get(i);
             ArrayList<String> object = allObjects.get(input.get(i));
             if (object == null) {
-                object = new ArrayList<String>();
+                object = new ArrayList<>();
                 allObjects.put(objName, object);
             }
             if (object.indexOf(arrayID) == -1)
                 object.add(arrayID);
         }
 
-        //save event time
-        if (beginInterval == 0)
-            beginInterval = eventTime;
-        events.put(eventTime, arrayID);
-
 
         //template
-        if (lastEvent != 0) {
-            ArrayList<String> lastArray;
-            if (lastTemplate == null) {
-                lastArray = getArray(getEvent(lastEvent));
-            } else {
-                lastArray = lastTemplate;
-            }
-            ArrayList<String> nowArray = getArray(arrayID);
-            lastTemplate = template(lastArray, nowArray);
+        //using last event from FileHashMap
+        if (prevArrayID != null){
+            ArrayList<String> prevArray = getArray(prevArrayID);
+            ArrayList<String> thisArray = getArray(arrayID);
+            lastTemplate = template(prevArray, thisArray);
         }
-        lastEvent = eventTime;
 
 
+        prevArrayID = arrayID;
         return arrayID;
-    }
-
-
-    void stopInterval(String intervalName) {
-        //interval
-        Long endInterval = new Date().getTime();
-        intervals.put(beginInterval, intervalName);
-        intervals.put(endInterval, intervalName);
-        beginInterval = 0;
-
-
-        //template
-        lastEvent = 0;
-        put(lastTemplate);
-        lastEvent = 0;
-
-
-        lastTemplate = null;
     }
 
 

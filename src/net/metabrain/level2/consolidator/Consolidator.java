@@ -1,6 +1,5 @@
 package net.metabrain.level2.consolidator;
 
-import com.google.gson.JsonObject;
 import net.metabrain.level2.planer.Dependencies;
 
 import java.util.*;
@@ -8,7 +7,9 @@ import java.util.*;
 public class Consolidator {
 
     public Map<String, Group> groups = new HashMap<>();
-    public Group unions = new Group();
+    public Map<String, Interval> intervals = new HashMap<>();
+    public Interval unions = new Interval();
+
 
     static Consolidator consolidator = new Consolidator();
     public static Consolidator getInstance() {
@@ -16,49 +17,44 @@ public class Consolidator {
     }
 
 
-    void putEvent(String groupName, JsonObject object) {
-        Group groupGroup = groups.get(groupName);
-        groupGroup.putToArrayBuffer(object.getAsString());
-        lastEventTime = new Date().getTime();
+    void put(String groupName, ArrayList<String> arrayData) {
+        Group group = groups.get(groupName);
+        group.put(arrayData);
     }
 
     Timer consolidateTimer;
-    private long lastEventTime;
 
     public Map<ArrayID, ArrayList<String>> getUnionGroupsArrays(String unionID){
-        ArrayList<String> unionArray = unions.getArray(unionID);
+        /*ArrayList<String> unionArray = unions.getArray(unionID);
         Map<ArrayID, ArrayList<String>> unionArrays = new HashMap<>();
         for (int i = 0; i < unionArray.size(); i++) {
             ArrayID arrayID = new ArrayID(unionID);
             Group group = groups.get(arrayID.groupName);
             unionArrays.put(arrayID, group.getArray(arrayID.arrayID));
         }
-        return unionArrays;
+        return unionArrays;*/
     }
 
     class consolidateTimerTask extends TimerTask {
 
         @Override
         public void run() {
-            if (new Date().getTime() - lastEventTime > 1000) {
-                for (String groupName : groups.keySet()) {
-                    Group group = groups.get(groupName);
-                    String arrayID = group.saveArrayBuffer();
-                    if (arrayID != null) {
-                        unions.putToArrayBuffer(groupName + "," + arrayID);
-                    }
+
+            for (String groupName : groups.keySet()) {
+                Interval interval = intervals.get(groupName);
+                String intervalID = interval.stopInterval(100);
+                if (intervalID != null){
+                    unions.put(intervalID);
                 }
-                String newUnionID = unions.saveArrayBuffer();
+            }
+
+            String unionIntervalID = unions.stopInterval(1000);
+            if (unionIntervalID != null) {
+
                 //Dependencies
                 Map<ArrayID, ArrayList<String>> newUnionGroups = getUnionGroupsArrays(newUnionID);
                 Dependencies.getInstance().put(newUnionGroups);
                 //templates create
-                unions.stopInterval(newUnionID);
-                for (String groupName : groups.keySet()) {
-                    Group group = groups.get(groupName);
-                    group.stopInterval(newUnionID);
-                    //перенести в group
-                }
             }
         }
     }
