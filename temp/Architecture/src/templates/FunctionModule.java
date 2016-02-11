@@ -31,7 +31,7 @@ public abstract class FunctionModule {
             speed();
             acceleration();
             traectory();
-            planing / tactic();
+            planer / tactic();
             choice / task();
             run();
         } else {
@@ -45,7 +45,7 @@ public abstract class FunctionModule {
             position / triangylation();
             speed();
             acceleration();
-            planing / strategy();
+            planer / strategy();
             choice / task / money();
             run();
         }*/

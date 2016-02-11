@@ -4,14 +4,23 @@ import java.util.*;
 
 public class Group {
     //groupName/groupID
-    public Integer arrayID = 0;
-    public Map<String, ArrayList<String>> allArrays = new HashMap<String, ArrayList<String>>();
-    public Map<String, ArrayList<String>> allSortArrays = new HashMap<String, ArrayList<String>>();
-    public Map<String, ArrayList<String>> allObjects = new HashMap<String, ArrayList<String>>(); //link objectid to groupid
+    public Integer arrayLastID = 0;
+    public Map<String, ArrayList<String>> allArrays = new HashMap<>();
+    public Map<String, ArrayList<String>> allSortArrays = new HashMap<>();
+    public Map<String, ArrayList<String>> allObjects = new HashMap<>(); //link objectid to groupid
+    public Map<Long, String> events = new HashMap<>(); // time -> ArrayID
+    public Map<Long, String> intervals = new HashMap<>(); //time -> intervalName
 
+
+
+
+    public Map<String, Integer> allObjectsCounters = new HashMap<>();
+    public Map<String, ArrayList<String>> allObjectsCash = new HashMap<>();
+    int objectCashSize = 20;
     //нечеткий поиск по значениям
 
-    ArrayList<String> getArray(String groupID){
+
+    public ArrayList<String> getArray(String groupID) {
         return allArrays.get(groupID);
     }
 
@@ -73,16 +82,35 @@ public class Group {
         return result;
     }
 
-    public String put(String newGroupName, ArrayList<String> input) {
+    ArrayList<String> objectBuffer = new ArrayList<>();
+
+    void putToArrayBuffer(String object) {
+        objectBuffer.add(object);
+    }
+
+    String saveArrayBuffer() {
+        String arrayID = put(objectBuffer);
+        objectBuffer.clear();
+        return arrayID;
+    }
+
+    long beginInterval = 0;
+    long lastEvent = 0;
+    ArrayList<String> lastTemplate = null;
+
+
+    public String put(ArrayList<String> input) {
+        long eventTime = new Date().getTime();
+
         Map<String, Double> permutation = findPermutations(input); //findPermutations включает в себя поиск по findSequences
-        String groupName = max(permutation);
+        String arrayID = max(permutation);
         //update group
-        if (groupName == null || permutation.get(groupName) != 1.0) {
-            groupName = newGroupName;
-            allArrays.put(groupName, (ArrayList<String>) input.clone());
+        if (arrayID == null || permutation.get(arrayID) != 1.0) {
+            arrayID = "" + arrayLastID++;
+            allArrays.put(arrayID, (ArrayList<String>) input.clone());
             ArrayList<String> sortInput = (ArrayList<String>) input.clone();
             java.util.Collections.sort(sortInput);
-            allSortArrays.put(groupName, sortInput);
+            allSortArrays.put(arrayID, sortInput);
         }
 
 
@@ -94,40 +122,71 @@ public class Group {
                 object = new ArrayList<String>();
                 allObjects.put(objName, object);
             }
-            if (object.indexOf(groupName) == -1)
-                object.add(groupName);
+            if (object.indexOf(arrayID) == -1)
+                object.add(arrayID);
         }
-        return groupName;
-    }
 
-    public String put(ArrayList<String> input) {
-        String newArrayID = "" + (arrayID + 1);
-        String arrayID = put(newArrayID, input);
-        if (newArrayID.equals(arrayID))
-            this.arrayID++;
+        //save event time
+        if (beginInterval == 0)
+            beginInterval = eventTime;
+        events.put(eventTime, arrayID);
+
+
+        //template
+        if (lastEvent != 0) {
+            ArrayList<String> lastArray;
+            if (lastTemplate == null) {
+                lastArray = getArray(getEvent(lastEvent));
+            } else {
+                lastArray = lastTemplate;
+            }
+            ArrayList<String> nowArray = getArray(arrayID);
+            lastTemplate = template(lastArray, nowArray);
+        }
+        lastEvent = eventTime;
+
+
         return arrayID;
     }
 
 
+    void stopInterval(String intervalName) {
+        //interval
+        Long endInterval = new Date().getTime();
+        intervals.put(beginInterval, intervalName);
+        intervals.put(endInterval, intervalName);
+        beginInterval = 0;
+
+
+        //template
+        lastEvent = 0;
+        put(lastTemplate);
+        lastEvent = 0;
+
+
+        lastTemplate = null;
+    }
+
+
+    ArrayList<String> template(ArrayList<String> from, ArrayList<String> to) {
+        ArrayList<String> result = (ArrayList<String>) to.clone();
+        for (int i = 0; i < from.size(); i++)
+            if (i >= to.size()) {
+                result.add(i, from.get(i));
+            } else {
+                if ((from.size() < i + 1) || (to.size() < i + 1) || !from.get(i).equals(to.get(i)))
+                    //изменение -1
+                    //добавление -2
+                    //удаление -3
+                    result.set(i, null);
+            }
+        return result;
+    }
+
 /*
     static void recursivePermutationPut(JsonObject eventObject, String path) {
-
-        //for  in (eventObject)
-        //recursivePermutationPut(eventObject.get(key), path + "/" + key)
-        Group permutation = permutations.get(path);
-        permutation.put(JsonArrayToStringArray(eventObject));
-
-        Sequences sequence = sequences.get(path);
-        sequence.put(JsonArrayToStringArray(eventObject));
-
-        // for in eventObject inside params
-        {
-            net.metabrain.level2.consolidator.properties properties = Consolidator.properties.get(path);
-            properties.update(eventObject.get("key").getAsString());
-        }
     }
 */
-
 
 
     public ArrayList<ArrayList<String>> templatesOfPermutation(ArrayList<String> input) {
@@ -164,59 +223,32 @@ public class Group {
     }
 
 
-    ArrayList<String> objectBuffer = new ArrayList<>();
-    ArrayList<Long> timeBuffer = new ArrayList<>();
-    void putToBuffer(String object){
-        objectBuffer.add(object);
-        timeBuffer.add(new Date().getTime());
-    }
-
-    String saveBuffer(){
-        String arrayID = put(objectBuffer, timeBuffer);
-        objectBuffer.clear();
-        return arrayID;
-    }
-
-
-    //end sequences and permutation code
-
-    public String put(ArrayList<String> inputData, ArrayList<Long> dataTime) {
-        return put(inputData);
-    }
-
-    public String put(String groupName, ArrayList<String> inputData, ArrayList<Long> dataTime) {
-        return null;
-    }
-
-
-    Map<Integer, String> events = new HashMap<>(); //События
-    Map<Integer, String> intervals = new HashMap<>(); //Интервалы
     Map<Integer, String> tacts = new HashMap<>(); //Такты
 
     //Поиск зависимостей в событиях
 
-    public Object getInterval(long time){
+    public Object getInterval(long time) {
         return null;
     }
+
     public Object putInterval(long begin, long end) {
         return null;
     }
+
     public Object selectEvents(long begin, long end) {
         return null;
     }
 
-    public String lastEvent(){
+    public String lastEvent() {
         return null;
     }
 
-    public String prevEvent(){
+
+    public String nextEvent(long time) {
         return null;
     }
 
-    public String nextEvent(long time){
-        return null;
-    }
-    public String getEvent(long time){
+    public String getEvent(long time) {
         return null;
     }
 

@@ -1,4 +1,4 @@
-package net.metabrain.level2.planing.properties;
+package net.metabrain.level2.planer;
 
 import com.google.gson.JsonObject;
 
@@ -7,7 +7,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Analyser {
+public class Types {
 
     Map<String, String> getProperties(String str) {
         Map<String, String> result = new HashMap<String, String>();

@@ -1,22 +1,36 @@
-package net.metabrain.level2.planing;
+package net.metabrain.level2.planer;
 
-import net.metabrain.level2.Main;
+import net.metabrain.level2.consolidator.ArrayID;
 import net.metabrain.level2.consolidator.Consolidator;
 import net.metabrain.level2.consolidator.Group;
 import net.metabrain.level2.executor.Executor;
-import net.metabrain.level2.planing.properties.Analyser;
-import net.metabrain.level2.planing.properties.Correction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Planing {
+public class Planer {
 
     Group plans = new Group();
-    Group templates = new Group();
-    Analyser properties = new Analyser();
+    //то чего не произошло
+    Map<String, Group> groups = new HashMap<>();
+    Group unions = new Group();
 
+
+
+    public static Map<ArrayID, ArrayList<String>> newUnion(String activeUnionID, String findUnionID) {
+
+        Map<ArrayID, ArrayList<String>> activeUnion = Consolidator.getInstance().getUnionGroupsArrays(activeUnionID);
+        Map<ArrayID, ArrayList<String>> findUnion = Consolidator.getInstance().getUnionGroupsArrays(findUnionID);
+        Map<String, ArrayList<String>> findTemplate;
+        Map<String, ArrayList<String>> newUnion;
+
+        //find to template
+        //equals unions
+        //replare ==
+        //depen correct in replace
+        return null;
+    }
 
     void correction(String activeUnion, String orderUnion){
 
@@ -31,12 +45,16 @@ public class Planing {
             convertOrderList.put(key, list);
         }
 
-        Map<String, Double> findUnions = Consolidator.getInstance().findUnions(convertOrderList);
+        Consolidator consolidator = Consolidator.getInstance();
+        Map<String, Double> findUnions = consolidator.findUnions(convertOrderList);
 
         //dependencies должен работать в консолидаторе
         String findUnion = Group.max(findUnions);
+        ArrayList<String> findGroups = consolidator.unions.getArray(findUnion);
         String activeUnion = "";//Consolidator.getInstance().getActiveUnion();
-        Correction.correction(activeUnion/*Что сейчас происходит*/, findUnion/*что хотим что бы произошло*/, orderList/*сила желания хотения*/);
+        /*newUnion(activeUnion*//*Что сейчас происходит*//*,
+                findUnion*//*что хотим что бы произошло*//*,
+                orderList*//*сила желания хотения*//*);*/
 
 
 
@@ -47,7 +65,6 @@ public class Planing {
         //get time seequences or findPermutations from timeline
         long timeOfPermutationOrSequences = 1;
         //select from consolidator timeline consolidator
-        Consolidator consolidator = (Consolidator) Main.consolidatorTimeLine.getBlockByTime(timeOfPermutationOrSequences);
 
         //Где то тут идёт анализ зависимостей данных и их корректировка
         //И создание новых консолидаторов потом они передаюся на выполнение

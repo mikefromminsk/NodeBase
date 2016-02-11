@@ -2,7 +2,7 @@ package net.metabrain.level2.controllers;
 
 import com.google.gson.JsonObject;
 import net.metabrain.level2.consolidator.Consolidator;
-import net.metabrain.level2.planing.Planing;
+import net.metabrain.level2.planer.Planer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +47,7 @@ public class Controllers {
                 }
 
             }
-            Planing.order(order);
+            Planer.order(order);
         }
     }
 }

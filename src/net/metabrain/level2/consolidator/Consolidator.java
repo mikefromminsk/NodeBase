@@ -1,39 +1,37 @@
 package net.metabrain.level2.consolidator;
 
 import com.google.gson.JsonObject;
-import net.metabrain.level2.planing.properties.Analyser;
-import net.metabrain.level2.planing.properties.Dependencies;
+import net.metabrain.level2.planer.Dependencies;
 
 import java.util.*;
 
 public class Consolidator {
 
+    public Map<String, Group> groups = new HashMap<>();
+    public Group unions = new Group();
 
     static Consolidator consolidator = new Consolidator();
     public static Consolidator getInstance() {
         return consolidator;
     }
 
-    Map<String, Group> groups = new HashMap<>();
-    Group unions = new Group();
-
 
     void putEvent(String groupName, JsonObject object) {
         Group groupGroup = groups.get(groupName);
-        groupGroup.putToBuffer(object.getAsString());
+        groupGroup.putToArrayBuffer(object.getAsString());
         lastEventTime = new Date().getTime();
     }
 
     Timer consolidateTimer;
     private long lastEventTime;
 
-    public Map<GroupID, ArrayList<String>> getUnionGroupsArrays(String unionID){
+    public Map<ArrayID, ArrayList<String>> getUnionGroupsArrays(String unionID){
         ArrayList<String> unionArray = unions.getArray(unionID);
-        Map<GroupID, ArrayList<String>> unionArrays = new HashMap<>();
+        Map<ArrayID, ArrayList<String>> unionArrays = new HashMap<>();
         for (int i = 0; i < unionArray.size(); i++) {
-            GroupID groupID = new GroupID(unionID);
-            Group group = groups.get(groupID.groupName);
-            unionArrays.put(groupID, group.getArray(groupID.arrayID));
+            ArrayID arrayID = new ArrayID(unionID);
+            Group group = groups.get(arrayID.groupName);
+            unionArrays.put(arrayID, group.getArray(arrayID.arrayID));
         }
         return unionArrays;
     }
@@ -45,14 +43,22 @@ public class Consolidator {
             if (new Date().getTime() - lastEventTime > 1000) {
                 for (String groupName : groups.keySet()) {
                     Group group = groups.get(groupName);
-                    String arrayID = group.saveBuffer();
+                    String arrayID = group.saveArrayBuffer();
                     if (arrayID != null) {
-                        unions.putToBuffer(groupName + "," + arrayID);
+                        unions.putToArrayBuffer(groupName + "," + arrayID);
                     }
                 }
-                String newUnion = unions.saveBuffer();
-                Map<GroupID, ArrayList<String>> newUnionGroups = getUnionGroupsArrays(newUnion);
+                String newUnionID = unions.saveArrayBuffer();
+                //Dependencies
+                Map<ArrayID, ArrayList<String>> newUnionGroups = getUnionGroupsArrays(newUnionID);
                 Dependencies.getInstance().put(newUnionGroups);
+                //templates create
+                unions.stopInterval(newUnionID);
+                for (String groupName : groups.keySet()) {
+                    Group group = groups.get(groupName);
+                    group.stopInterval(newUnionID);
+                    //перенести в group
+                }
             }
         }
     }
@@ -64,9 +70,9 @@ public class Consolidator {
 
         Map<String, ArrayList<String>> groupsDataArrays = new HashMap<>();
         for (int i = 0; i < groupsIDAndArrayIDInUnion.size(); i++) {
-            GroupID groupID = new GroupID(groupsIDAndArrayIDInUnion.get(i));
-            Group group = groups.get(groupID.groupName);
-            groupsDataArrays.put(groupID.groupName, group.getArray(groupID.arrayID));
+            ArrayID arrayID = new ArrayID(groupsIDAndArrayIDInUnion.get(i));
+            Group group = groups.get(arrayID.groupName);
+            groupsDataArrays.put(arrayID.groupName, group.getArray(arrayID.arrayID));
         }
         return findUnions(groupsDataArrays);
     }
@@ -106,16 +112,9 @@ public class Consolidator {
 
 
 
+    void template(String unionID){
 
-
-
-
-    Analyser analyser = new Analyser();
-
-    Map<String, Map<String, String>> prorerties = new HashMap<>();
-    //Map<group,array togroup,array>
-    //Map<from,to properties>
-    //Map<properties listProperties>
+    }
 
 
 
