@@ -3,3 +3,6 @@
 /.idea/
 /.settings/
 /.sync/
+/storage.data
+/storage.meta
+/storage.prop

@@ -31,6 +31,6 @@ public class Explorer implements HttpHandler {
             }
             Http.Response(httpExchange, response);
         } else
-            Http.Response(httpExchange, readFile(allpath, Charset.defaultCharset()));
+            Http.Response(httpExchange, readFile(allpath, Charset.forName("UTF8")));
     }
 }

@@ -86,7 +86,7 @@ public class Http {
 
     public static void Response(HttpExchange httpExchange, String response) throws IOException {
         OutputStream os = httpExchange.getResponseBody();
-        httpExchange.sendResponseHeaders(200, response.length());
+        httpExchange.sendResponseHeaders(200, response.getBytes().length);
         os.write(response.getBytes());
         os.close();
     }
