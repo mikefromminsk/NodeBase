@@ -11,6 +11,7 @@ import java.io.IOException;
 public class ClientActionList implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+
         Http.Response(httpExchange, new Gson().toJson(Consolidator.getInstance().actions.eventsGroup.arrayCountersCash));
     }
 }

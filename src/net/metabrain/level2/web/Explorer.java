@@ -6,20 +6,19 @@ import net.metabrain.level2.utils.Http;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class Explorer implements HttpHandler {
-    static String readFile(String path, Charset encoding)
+/*    static String readFile(String path)
             throws IOException {
-        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        byte[] encoded ;
         return new String(encoded, encoding);
-    }
+    }*/
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-        String root = "src/net/metabrain";
+        String root = "src/net/metabrain/level2";
         String path = httpExchange.getRequestURI().getPath();
         String allpath = root + path;
 
@@ -31,6 +30,6 @@ public class Explorer implements HttpHandler {
             }
             Http.Response(httpExchange, response);
         } else
-            Http.Response(httpExchange, readFile(allpath, Charset.forName("UTF8")));
+            Http.Response(httpExchange, Files.readAllBytes(Paths.get(allpath)));
     }
 }

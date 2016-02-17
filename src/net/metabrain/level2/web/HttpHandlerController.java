@@ -10,8 +10,7 @@ import java.io.IOException;
 
 public class HttpHandlerController {
 
-
-    public static void main(String[] args) {
+    public HttpHandlerController() {
         System.out.println(new File("").getAbsolutePath());
         try {
             Http.serverContent.put("/help", new RegistryApi());

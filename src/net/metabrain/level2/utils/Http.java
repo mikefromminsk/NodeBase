@@ -15,9 +15,7 @@ import java.util.Map;
 
 public class Http {
 
-
     public static Map<String, HttpHandler> serverContent = new HashMap<>();
-
 
     public static Map<String, String> getQueryMap(String query)
     {
@@ -85,9 +83,13 @@ public class Http {
     }
 
     public static void Response(HttpExchange httpExchange, String response) throws IOException {
+        Response(httpExchange, response.getBytes());
+    }
+
+    public static void Response(HttpExchange httpExchange, byte[] response) throws IOException {
         OutputStream os = httpExchange.getResponseBody();
-        httpExchange.sendResponseHeaders(200, response.getBytes().length);
-        os.write(response.getBytes());
+        httpExchange.sendResponseHeaders(200, response.length);
+        os.write(response);
         os.close();
     }
 }
