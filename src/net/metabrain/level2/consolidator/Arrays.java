@@ -2,16 +2,18 @@ package net.metabrain.level2.consolidator;
 
 import java.util.*;
 
-public class Group {
+public class Arrays {
     //groupName/groupID
     public Integer arrayLastID = 0;
     public Map<String, ArrayList<String>> allArrays = new HashMap<>();
     public Map<String, ArrayList<String>> allSortArrays = new HashMap<>();
     public Map<String, ArrayList<String>> allObjects = new HashMap<>(); //link objectid to groupid
 
-    public Map<String, Integer> allObjectsCounters = new HashMap<>();
-    public Map<String, ArrayList<String>> allObjectsCash = new HashMap<>();
-    int objectCashSize = 20;
+    public Map<String, Double> arrayCounters = new HashMap<>();
+    final int arrayCountersCashSize = 20;
+    public Map<String, Double> arrayCountersCash = new HashMap<>();
+
+
     //нечеткий поиск по значениям
 
 
@@ -77,6 +79,18 @@ public class Group {
         return result;
     }
 
+    public static String min(Map<String, Double> array) {
+        double min = Double.POSITIVE_INFINITY;
+        String result = null;
+        for (String groupId : array.keySet()) {
+            if (array.get(groupId) < min) {
+                result = groupId;
+                min = array.get(groupId);
+            }
+        }
+        return result;
+    }
+
     ArrayList<String> objectBuffer = new ArrayList<>();
 
     void putToArrayBuffer(String object) {
@@ -122,7 +136,7 @@ public class Group {
 
         //template
         //using last event from FileHashMap
-        if (prevArrayID != null){
+        if (prevArrayID != null) {
             ArrayList<String> prevArray = getArray(prevArrayID);
             ArrayList<String> thisArray = getArray(arrayID);
             lastTemplate = template(prevArray, thisArray);
@@ -130,6 +144,21 @@ public class Group {
 
 
         prevArrayID = arrayID;
+
+        //counters
+        Double arrayCounter = arrayCounters.get(arrayID);
+        if (arrayCounter == null)
+            arrayCounter = 0.0;
+        arrayCounters.put(arrayID, arrayCounter + 1);
+
+        //arrayCountersCash
+        arrayCountersCash.put(arrayID, arrayCounter);
+        if (arrayCountersCash.size() > arrayCountersCashSize)
+        {
+            String minCounter = min(arrayCountersCash);
+            arrayCountersCash.remove(minCounter);
+        }
+
         return arrayID;
     }
 
@@ -146,6 +175,37 @@ public class Group {
                     //удаление -3
                     result.set(i, null);
             }
+        return result;
+    }
+
+
+    public static ArrayList<Integer> fuzzyEqualsArray(ArrayList<String> from, ArrayList<String> to) {
+        //1 2 n 4 5
+        //1 2 3 4 5 6
+        //result
+        //0 1 2 3 4 5
+        return null;
+    }
+
+    static Double fuzzyEquals(ArrayList<String> from, ArrayList<String> to) {
+        ArrayList<Integer> fuzzy =  fuzzyEqualsArray(from, to);
+        double equalsCounter = 0;
+        for (int i = 0; i < fuzzy.size(); i++) {
+            // -1 -2 -3
+            if (fuzzy.get(i) == null){
+                equalsCounter++;
+            }
+        }
+        return equalsCounter / fuzzy.size();
+    }
+
+
+    public static Map<String, Double> equalsSequences(ArrayList<String> interval, Map<String, ArrayList<String>> arrays) {
+        Map<String, Double> result = new HashMap<>();
+        for (String arrayID: arrays.keySet()){
+            ArrayList<String> array = arrays.get(arrayID);
+            result.put(arrayID, fuzzyEquals(interval, array));
+        }
         return result;
     }
 
@@ -222,19 +282,19 @@ public class Group {
     public static void main(String[] args) {
 
         //test of find likes
-        Group group = new Group();
+        Arrays arrays = new Arrays();
         ArrayList<String> data = new ArrayList<String>();
         data.add("1");
         data.add("2");
         data.add("3");
-        group.put(data);
+        arrays.put(data);
         data.set(2, "5");
-        group.put(data);
-        System.out.println(group.allArrays);
+        arrays.put(data);
+        System.out.println(arrays.allArrays);
         data.add("4");
         System.out.println("new " + data);
-        System.out.println("per" + group.findPermutations(data) + "=" + group.allArrays.get(group.max(group.findPermutations(data))));
-        System.out.println("seq" + group.findSequences(data) + "=" + group.allArrays.get(group.max(group.findSequences(data))));
+        System.out.println("per" + arrays.findPermutations(data) + "=" + arrays.allArrays.get(arrays.max(arrays.findPermutations(data))));
+        System.out.println("seq" + arrays.findSequences(data) + "=" + arrays.allArrays.get(arrays.max(arrays.findSequences(data))));
     }
 
 }

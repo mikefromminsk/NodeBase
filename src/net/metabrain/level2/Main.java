@@ -1,9 +1,9 @@
 package net.metabrain.level2;
 
-import net.metabrain.level2.consolidator.Group;
+import net.metabrain.level2.consolidator.Arrays;
 
 public class Main {
-    Group consolidators = new Group();
+    Arrays consolidators = new Arrays();
 
 
     public static void main(String[] args) {

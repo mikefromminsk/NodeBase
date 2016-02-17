@@ -1,9 +1,9 @@
 package net.metabrain.level2.planer;
 
+import net.metabrain.level2.consolidator.Action;
 import net.metabrain.level2.consolidator.ArrayID;
+import net.metabrain.level2.consolidator.Arrays;
 import net.metabrain.level2.consolidator.Consolidator;
-import net.metabrain.level2.consolidator.Group;
-import net.metabrain.level2.executor.Executor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,63 +11,94 @@ import java.util.Map;
 
 public class Planer {
 
-    Group plans = new Group();
-    //то чего не произошло
-    Map<String, Group> groups = new HashMap<>();
-    Group unions = new Group();
+    Consolidator co = Consolidator.getInstance();
 
 
 
-    public static Map<ArrayID, ArrayList<String>> newUnion(String activeUnionID, String findUnionID) {
+    void createPlan(Map<String, ArrayList<String>> orderArrays){
 
-        Map<ArrayID, ArrayList<String>> activeUnion = Consolidator.getInstance().getUnionGroupsArrays(activeUnionID);
-        Map<ArrayID, ArrayList<String>> findUnion = Consolidator.getInstance().getUnionGroupsArrays(findUnionID);
-        Map<String, ArrayList<String>> findTemplate;
-        Map<String, ArrayList<String>> newUnion;
+        Map<String, Double> findActions = findActions(orderArrays);
+        String findActionID = Arrays.max(findActions);
 
-        //find to template
-        //equals unions
-        //replare ==
-        //depen correct in replace
+        Action findAction = new Action(findActionID);
+        Action lastAction = new Action(co.actions.getLastInterval());
+        Action execAction = new Action();
+
+
+        setVariables(findAction, lastAction, execAction);
+    }
+
+    Map<String, Double> findLikeActions(){
         return null;
     }
 
-    void correction(String activeUnion, String orderUnion){
-
+    void setVariables(Action findAction, Action lastAction, Action execAction){
+        for (String intervalStrID: findAction.intervalArrays.keySet()){
+            ArrayID intervalID = new ArrayID(intervalStrID);
+            ArrayList<String> intervalArray = findAction.intervalArrays.get(intervalStrID);
+            Map<String, Double> equalsSequences = Arrays.equalsSequences(intervalArray, lastAction.intervalArrays);
+            String maxEqualsInterval = Arrays.max(equalsSequences);
+            ArrayList<String> maxFindInterval = lastAction.intervalArrays.get(maxEqualsInterval);
+            ArrayList<Integer> fuzzyArray = Arrays.fuzzyEqualsArray(intervalArray, maxFindInterval);
+            ArrayList<String> execIntervalArray = new ArrayList<>();
+            for (int i = 0; i < intervalArray.size(); i++) {
+                if (intervalArray.get(i) == null) {
+                    int positionReplace = fuzzyArray.get(i);
+                    execIntervalArray.add(maxFindInterval.get(positionReplace));
+                }
+            }
+            execAction.intervalArrays.put(intervalID.groupName, execIntervalArray);
+        }
     }
 
-    void order(Map<String, String> orderList){
-        //convert Map<String, String> to Map<String, Array<String>> for Consolidator.findUnions
-        Map<String, ArrayList<String>> convertOrderList = new HashMap<>();
-        for (String key: orderList.keySet()){
-            ArrayList<String> list = new ArrayList();
-            list.add(orderList.get(key));
-            convertOrderList.put(key, list);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public Map<String, Double> findActions(Map<String, ArrayList<String>> groupsDataArrays) { //to planning
+
+        ArrayList<String> findMaxLikeGroups = new ArrayList<>();
+        for (String groupName: groupsDataArrays.keySet()){
+
+            Arrays arrays = co.arrays.get(groupName);
+            ArrayList<String> dataArray = groupsDataArrays.get(groupName);
+            //Ищем похожие данные в группах
+            Map<String, Double> findPermutation = arrays.findPermutations(dataArray);
+            Map<String, Double> findSequences = arrays.findSequences(dataArray);
+            //объединяем найденные данные по максимальной похожести
+            Map<String, Double> findsMerge = new HashMap<>();
+            for (String permutationArrayID : findPermutation.keySet()) {
+                Double permutationLike = findPermutation.get(permutationArrayID);
+                Double sequencesLike = findSequences.get(permutationArrayID);
+                findsMerge.put(permutationArrayID, permutationLike + sequencesLike);
+            }
+            //наверно это не нужно
+            for (String sequencesArrayID : findSequences.keySet()) {
+                if (findsMerge.get(sequencesArrayID) == null) {
+                    findsMerge.put(sequencesArrayID, findSequences.get(sequencesArrayID));
+                }
+            }
+            //ищем в объединенном массиве максимальный и добавляем найденную
+            String findArrayID = Arrays.max(findsMerge);
+            findMaxLikeGroups.add(groupName + "," + findArrayID);
         }
 
-        Consolidator consolidator = Consolidator.getInstance();
-        Map<String, Double> findUnions = consolidator.findUnions(convertOrderList);
-
-        //dependencies должен работать в консолидаторе
-        String findUnion = Group.max(findUnions);
-        ArrayList<String> findGroups = consolidator.unions.getArray(findUnion);
-        String activeUnion = "";//Consolidator.getInstance().getActiveUnion();
-        /*newUnion(activeUnion*//*Что сейчас происходит*//*,
-                findUnion*//*что хотим что бы произошло*//*,
-                orderList*//*сила желания хотения*//*);*/
-
-
-
-
-
-
-        //choose findSequences or pemutation
-        //get time seequences or findPermutations from timeline
-        long timeOfPermutationOrSequences = 1;
-        //select from consolidator timeline consolidator
-
-        //Где то тут идёт анализ зависимостей данных и их корректировка
-        //И создание новых консолидаторов потом они передаюся на выполнение
-        Executor.addExecConsolidator(consolidator);
+        Map<String, Double> findUnions = co.actions.eventsGroup.findPermutations(findMaxLikeGroups);
+        return findUnions;
     }
+
+
+
+
 }

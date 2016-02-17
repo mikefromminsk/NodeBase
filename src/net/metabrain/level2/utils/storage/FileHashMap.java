@@ -105,6 +105,7 @@ public class FileHashMap {
         String hashstr = String.format("%08X", hash);
         int thisBlock = storageID;
         for (int i = 0; i < hashstr.length(); i++) {
+            //первый раз читать сразу блок из 8 метаданных
             int index = Integer.parseInt("" + hashstr.charAt(i), 16);
             int nextBlock = fs.getInt(thisBlock, index);
             if (nextBlock == 0) {

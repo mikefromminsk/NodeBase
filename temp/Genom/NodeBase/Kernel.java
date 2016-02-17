@@ -87,7 +87,7 @@ public class Kernel
 
 		if (textNode.Comment != null)
 		{
-			//SetName(Result, Link.Name);
+			//SetName(Result, Link.groupName);
 
 			if (result.getNodeType() != Const.ntLoad)
 			{

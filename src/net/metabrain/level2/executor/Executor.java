@@ -1,14 +1,20 @@
 package net.metabrain.level2.executor;
 
 import com.google.gson.JsonObject;
-import net.metabrain.level2.Main;
+import net.metabrain.level2.consolidator.Action;
 import net.metabrain.level2.consolidator.Consolidator;
-import net.metabrain.level2.utils.Http;
 
 import java.io.InputStream;
 import java.util.*;
 
 public class Executor {
+
+    static Executor executor;
+    public static Executor getInstance(){
+        if (executor == null)
+            executor = new Executor();
+        return executor;
+    }
 
     static Map<String, String> groupAddress = new HashMap<>();
     static Map<String, JsonObject> groupApi = new HashMap<>();
@@ -20,16 +26,8 @@ public class Executor {
         groupApi.put(json.get("groupID").getAsString(), json.get("api").getAsJsonObject());
     }
 
-    boolean EqualsTypes(String groupID, JsonObject Params){
-        return true;
-    }
+    public void exec(Action action){
 
-    void exec(String groupID, JsonObject Params){
-        if (EqualsTypes(groupID, Params)){
-            JsonObject response = new JsonObject();
-            /*to response*/Http.Get(groupAddress.get(groupID));
-            Consolidator.event(response);
-        }
     }
 
 
@@ -46,8 +44,8 @@ public class Executor {
 
         @Override
         public void run() {
-            Consolidator lastConsolidator = (Consolidator) Main.consolidatorTimeLine.lastObject();
-            execConsolidator.getTimeLineLocalTime(100);
+//            Consolidator lastConsolidator = (Consolidator) Main.consolidatorTimeLine.lastObject();
+//            execConsolidator.getTimeLineLocalTime(100);
             //Провести сравнение консолидаторов по времени и по последовательсноти и по пермутейшенам
             //equals time block
             //оценка выполненыз работ и награда за соответсвие предыдущему разу

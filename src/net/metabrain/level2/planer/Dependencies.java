@@ -51,10 +51,10 @@ public class Dependencies {
 
     void findProperty(String id, Double value) {
 
-        //id -> value
+        //arrayID -> value
         valueIds.put(id, value);
 
-        //value -> array id
+        //value -> array arrayID
         ArrayList<String> valueArr = valueValues.get(value);
         if (valueArr == null)
             valueValues.put(value, valueArr = new ArrayList<String>());

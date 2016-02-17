@@ -10,7 +10,7 @@
                 var obj = JSON.parse(data);
                 for (var key in obj){
                     if (obj.hasOwnProperty(key))
-                    $( "#events" ).append("id: "+ key + " value: " + obj[key] + "<br>");
+                    $( "#events" ).append("arrayID: "+ key + " value: " + obj[key] + "<br>");
                 }
             });
         }
@@ -19,7 +19,7 @@
     </script>
 </head>
 <body>
-    <div id="events">
+    <div arrayID="events">
 
     </div>
 </body>

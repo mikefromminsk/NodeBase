@@ -184,12 +184,12 @@ public class Robot1/* extends RootModule*/ {
                                 }
                             }
 
-                            int id = 0;
+                            int arrayID = 0;
 
                             @Override
                             public void hash() {
                                 for (int i = 0; i < result.size(); i++) {
-                                    String key = String.valueOf(++id);
+                                    String key = String.valueOf(++arrayID);
                                     hash.add(key);
                                 }
                             }

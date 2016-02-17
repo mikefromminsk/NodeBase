@@ -261,7 +261,7 @@ public class Sync implements Runnable {
                     }
 
                     if (data.lastID < host.lastID) {
-                        log("merge host " + ip + " id " + data.lastID + "->" + host.lastID);
+                        log("merge host " + ip + " arrayID " + data.lastID + "->" + host.lastID);
                         data.lastID = host.lastID;
                     }
 
@@ -295,7 +295,7 @@ public class Sync implements Runnable {
                 //start new thread
                 for (int j = threads.size() - 1; j < processorCount - 1; j++) {
 
-                    //new generate id
+                    //new generate arrayID
                     int newGenerationID = data.lastID + 1;
                     while (true) {
                         Block block = data.getBlock(newGenerationID);
@@ -304,7 +304,7 @@ public class Sync implements Runnable {
                         newGenerationID++;
                     }
 
-                    //create thread id
+                    //create thread arrayID
                     Thread newThread = new Thread(new Generator(newGenerationID));
                     newThread.setPriority(Thread.MIN_PRIORITY);
                     threads.add(newThread);

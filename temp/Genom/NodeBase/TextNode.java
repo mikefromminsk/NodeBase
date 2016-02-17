@@ -51,7 +51,7 @@ public class TextNode
 	}
 	
 	
-	//Comment@ID^Source$Name=Val&Name=Val:Type?Name=Val&Name=Val#Value>True|Else\nNext\n\nLocal\n\nLocal2
+	//Comment@ID^Source$groupName=Val&groupName=Val:Type?groupName=Val&groupName=Val#Value>True|Else\nNext\n\nLocal\n\nLocal2
 	TextNode BaseParse()
 	{
 		Destroy();

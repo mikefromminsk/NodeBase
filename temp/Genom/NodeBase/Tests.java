@@ -60,10 +60,10 @@ public class Tests {
 		
 		{
 			beginTest("TextNode UserParse");
-			TextNode node = new TextNode("comment@id^source$attr1=val1&attr2=val2&attr3:type?par1:type1=val3&par2=val4&par3:type2&par4#value>true|else\nnext\n\nlocal1\n\nlocal2");
+			TextNode node = new TextNode("comment@arrayID^source$attr1=val1&attr2=val2&attr3:type?par1:type1=val3&par2=val4&par3:type2&par4#value>true|else\nnext\n\nlocal1\n\nlocal2");
 			node.UserParse();
 			testEqual(node.Comment, "comment");
-			testEqual(node.ID, "id");
+			testEqual(node.ID, "arrayID");
 			testEqual(node.Source.Comment, "source");
 			testEqual(node.Value.Comment, "value");
 			testEqual(node.True.Comment, "true");
@@ -89,10 +89,10 @@ public class Tests {
 		
 		{
 			beginTest("TextNode BaseParse");
-			TextNode node = new TextNode("comment@id^source$attr1=val1&attr2=val2&attr3:type?par1&par2#value>true|else\nnext\n\nlocal1\n\nlocal2");
+			TextNode node = new TextNode("comment@arrayID^source$attr1=val1&attr2=val2&attr3:type?par1&par2#value>true|else\nnext\n\nlocal1\n\nlocal2");
 			node.BaseParse();
 			testEqual(node.Comment, "comment");
-			testEqual(node.ID, "id");
+			testEqual(node.ID, "arrayID");
 			testEqual(node.Source.ID, "source");
 			testEqual(node.Value.ID, "value");
 			testEqual(node.True.ID, "true");

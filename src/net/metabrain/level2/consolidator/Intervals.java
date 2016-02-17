@@ -5,11 +5,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Interval {
+public class Intervals {
 
     public Map<Long, String> events = new HashMap<>(); // time -> ArrayID
     public Map<Long, ArrayList<Long>> intervals = new HashMap<>(); //time -> event arrray
-    public Group eventsGroup = new Group();
+    public Arrays eventsGroup = new Arrays();
 
     long beginInterval = 0;
     long lastInterval = 0;
@@ -51,4 +51,7 @@ public class Interval {
     }
 
 
+    public String getLastInterval() {
+        return null;
+    }
 }

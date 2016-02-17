@@ -17,8 +17,8 @@ abstract public class SystemModule {
         modules.put("audio", audio());
 
 /*
-        for (String name: modules.keySet()){
-            DataModule dataModule = modules.get(name);
+        for (String groupName: modules.keySet()){
+            DataModule dataModule = modules.get(groupName);
             dataModule.run();
         }
 */

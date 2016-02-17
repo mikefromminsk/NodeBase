@@ -1,8 +1,6 @@
 package net.metabrain.level2.controllers;
 
 import com.google.gson.JsonObject;
-import net.metabrain.level2.consolidator.Consolidator;
-import net.metabrain.level2.planer.Planer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +26,7 @@ public class Controllers {
         JsonObject json = new JsonObject();
         json.addProperty("groupID", controller.getClass().getName());
         json.addProperty("value", index);
-        Consolidator.event(json);
+        //Consolidator.event(json);
 
         Summator summator = summators.get(path);
         summator.add(index);
@@ -47,7 +45,7 @@ public class Controllers {
                 }
 
             }
-            Planer.order(order);
+            //Planer.order(order);
         }
     }
 }

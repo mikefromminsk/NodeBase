@@ -1,5 +1,6 @@
 package net.metabrain.level2.utils;
 
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
@@ -32,6 +33,11 @@ public class Http {
         return map;
     }
 
+    public static Map<String, String> Params(HttpExchange httpExchange)
+    {
+        return getQueryMap(httpExchange.getRequestURI().getQuery());
+    }
+
     static HttpServer server;
     public static void open(int port) throws IOException {
         server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -39,6 +45,7 @@ public class Http {
             server.createContext(key, serverContent.get(key));
         server.setExecutor(null);
         server.start();
+        System.out.println("Open HTTP port " + port);
     }
 
     List<Socket> SocketList;
@@ -75,5 +82,12 @@ public class Http {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static void Response(HttpExchange httpExchange, String response) throws IOException {
+        OutputStream os = httpExchange.getResponseBody();
+        httpExchange.sendResponseHeaders(200, response.length());
+        os.write(response.getBytes());
+        os.close();
     }
 }
