@@ -5,6 +5,7 @@ import java.util.*;
 public class Consolidator {
 
     public Map<String, Arrays> arrays = new HashMap<>();//group ->  arrays
+    //arrays group как многоканальный звук
     public Map<String, Intervals> intervals = new HashMap<>(); //group ->  intervals
     public Intervals actions = new Intervals(); //arrayID -> ArrayList<groupID:IntervalID>
 

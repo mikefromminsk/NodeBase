@@ -10,6 +10,5 @@ public class StartClass {
             Consolidator.getInstance().actions.eventsGroup.arrayCountersCash.put("actionID" + i, Double.valueOf(i));
         }
         HttpHandlerController httpHandlerController = new HttpHandlerController();
-
     }
 }
