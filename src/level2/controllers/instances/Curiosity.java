@@ -1,6 +1,6 @@
-package net.metabrain.level2.controllers.instances;
+package level2.controllers.instances;
 
-import net.metabrain.utils.storage.FileStorage;
+import utils.storage.FileStorage;
 
 import java.io.*;
 import java.util.Date;

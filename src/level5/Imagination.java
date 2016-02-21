@@ -1,4 +1,4 @@
-package net.metabrain.level5;
+package level5;
 
 public class Imagination {
 }

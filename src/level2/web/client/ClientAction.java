@@ -1,10 +1,10 @@
-package net.metabrain.level2.web.client;
+package level2.web.client;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.metabrain.level2.consolidator.Action;
-import net.metabrain.utils.Http;
+import level2.consolidator.Action;
+import utils.Http;
 
 import java.io.IOException;
 

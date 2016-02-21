@@ -1,8 +1,8 @@
-package net.metabrain.level1;
+package level1;
 
 import com.google.gson.JsonObject;
-import net.metabrain.level2.consolidator.Consolidator;
-import net.metabrain.level2.web.HttpHandlerController;
+import level2.consolidator.Consolidator;
+import level2.web.HttpHandlerController;
 
 public class StartClass {
 

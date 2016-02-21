@@ -1,6 +1,6 @@
-package net.metabrain.level2.planer;
+package level2.planer;
 
-import net.metabrain.level2.consolidator.ArrayID;
+import level2.consolidator.ArrayID;
 
 import java.util.ArrayList;
 import java.util.HashMap;

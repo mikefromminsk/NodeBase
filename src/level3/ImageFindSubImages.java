@@ -1,4 +1,4 @@
-package net.metabrain.level3;
+package level3;
 
 import java.util.ArrayList;
 import java.util.HashMap;

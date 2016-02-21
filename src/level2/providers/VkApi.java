@@ -1,4 +1,4 @@
-package net.metabrain.level2.providers;
+package level2.providers;
 
 import java.awt.Desktop;
 import java.io.BufferedReader;

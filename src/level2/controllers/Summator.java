@@ -1,4 +1,4 @@
-package net.metabrain.level2.controllers;
+package level2.controllers;
 
 public class Summator {
 

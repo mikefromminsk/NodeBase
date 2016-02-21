@@ -1,4 +1,4 @@
-package net.metabrain.level2.web;
+package level2.web;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;

@@ -1,9 +1,9 @@
-package net.metabrain.level2.planer;
+package level2.planer;
 
-import net.metabrain.level2.consolidator.Action;
-import net.metabrain.level2.consolidator.ArrayID;
-import net.metabrain.level2.consolidator.Arrays;
-import net.metabrain.level2.consolidator.Consolidator;
+import level2.consolidator.Action;
+import level2.consolidator.ArrayID;
+import level2.consolidator.Arrays;
+import level2.consolidator.Consolidator;
 
 import java.util.ArrayList;
 import java.util.HashMap;

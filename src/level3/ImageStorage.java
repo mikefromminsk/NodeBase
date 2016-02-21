@@ -1,6 +1,6 @@
-package net.metabrain.level3;
+package level3;
 
-import net.metabrain.level2.consolidator.Arrays;
+import level2.consolidator.Arrays;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

@@ -1,4 +1,4 @@
-package net.metabrain.level1.codegenerator;
+package level1.codegenerator;
 
 
 import java.util.ArrayList;

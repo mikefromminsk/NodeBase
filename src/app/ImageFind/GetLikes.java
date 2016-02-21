@@ -1,4 +1,4 @@
-package net.metabrain.app.ImageFind;
+package app.ImageFind;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;

@@ -1,4 +1,4 @@
-package net.metabrain.level4;
+package level4;
 
 public class SocialMap {
 }

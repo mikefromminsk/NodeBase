@@ -1,4 +1,4 @@
-package net.metabrain.level2.planer;
+package level2.planer;
 
 import com.google.gson.JsonObject;
 

@@ -1,8 +1,8 @@
-package net.metabrain.level2.executor;
+package level2.executor;
 
 import com.google.gson.JsonObject;
-import net.metabrain.level2.consolidator.Action;
-import net.metabrain.level2.consolidator.Consolidator;
+import level2.consolidator.Action;
+import level2.consolidator.Consolidator;
 
 import java.io.InputStream;
 import java.util.*;

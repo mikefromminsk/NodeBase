@@ -1,4 +1,4 @@
-package net.metabrain.utils;
+package utils;
 
 
 import java.io.IOException;

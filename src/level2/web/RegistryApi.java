@@ -1,8 +1,8 @@
-package net.metabrain.level2.web;
+package level2.web;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.metabrain.level2.executor.Executor;
+import level2.executor.Executor;
 
 import java.io.IOException;
 

@@ -1,6 +1,6 @@
-package net.metabrain.level2.web;
+package level2.web;
 
-import net.metabrain.utils.Http;
+import utils.Http;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,8 +1,8 @@
-package net.metabrain.level2.web;
+package level2.web;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.metabrain.utils.Http;
+import utils.Http;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,7 @@ public class Explorer implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-        String root = "src/net/metabrain/level2";
+        String root = "src";
         String path = httpExchange.getRequestURI().getPath();
         String allpath = root + path;
 

@@ -1,4 +1,4 @@
-package net.metabrain.level2.consolidator;
+package level2.consolidator;
 
 public class ArrayID {
     public String groupName;
