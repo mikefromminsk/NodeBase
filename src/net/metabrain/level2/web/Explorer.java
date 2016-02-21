@@ -2,7 +2,7 @@ package net.metabrain.level2.web;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.metabrain.level2.utils.Http;
+import net.metabrain.utils.Http;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,11 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class Explorer implements HttpHandler {
-/*    static String readFile(String path)
-            throws IOException {
-        byte[] encoded ;
-        return new String(encoded, encoding);
-    }*/
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {

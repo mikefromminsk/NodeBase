@@ -1,6 +1,7 @@
 package net.metabrain.level2.web;
 
-import net.metabrain.level2.utils.Http;
+import net.metabrain.builds.HashMapTest.HashMapTest;
+import net.metabrain.utils.Http;
 import net.metabrain.level2.web.client.ClientAction;
 import net.metabrain.level2.web.client.ClientActionExecute;
 import net.metabrain.level2.web.client.ClientActionList;
@@ -9,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class HttpHandlerController {
+
+    // поиск файлов со строкой implements HttpHandle и добавление в контент
 
     public HttpHandlerController() {
         System.out.println(new File("").getAbsolutePath());

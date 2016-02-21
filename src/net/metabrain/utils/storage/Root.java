@@ -1,4 +1,4 @@
-package net.metabrain.level2.utils.storage;
+package net.metabrain.utils.storage;
 
 public class Root{
 

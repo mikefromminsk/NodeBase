@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Image {
+public class ImageFindSubImages {
 
     public static Double borderValue = 5.0;
     public static Double borderLength = 1.0;

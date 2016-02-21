@@ -1,0 +1,12 @@
+{
+  "name": "application-name",
+  "version": "0.0.1",
+  "storageData": {
+    "controllers": {
+      "curiosity": {
+        "chracter": "5",
+        "factor": "00.1"
+      }
+    }
+  }
+}

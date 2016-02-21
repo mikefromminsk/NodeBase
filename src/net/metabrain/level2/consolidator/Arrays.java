@@ -14,7 +14,17 @@ public class Arrays {
     public Map<String, Double> arrayCountersCash = new HashMap<>();
 
 
+
     //нечеткий поиск по значениям
+
+
+    public Arrays() {
+
+    }
+
+    public Arrays(String storagePath) {
+
+    }
 
 
     public ArrayList<String> getArray(String groupID) {
@@ -44,8 +54,10 @@ public class Arrays {
             for (int i = 0; i < objects.size(); i++) {
                 String object = objects.get(i);
                 for (int j = 0; j < sortInput.size(); j++)
-                    if (object.equals(sortInput.get(j)))
+                    if (object.equals(sortInput.get(j))) {
                         count++;
+                        break;
+                    }
             }
             likes.put(groups.get(k), count / sortInput.size());
         }
@@ -55,12 +67,12 @@ public class Arrays {
 
     public Map<String, Double> findSequences(ArrayList<String> input) {
         ArrayList<String> groups = arrays(input);
-        Map<String, Double> likes = new HashMap<String, Double>();
+        Map<String, Double> likes = new HashMap<>();
         for (int k = 0; k < groups.size(); k++) {
             ArrayList<String> objects = allArrays.get(groups.get(k));
             double count = 0;
             for (int i = 0; i < objects.size(); i++)
-                if (objects.get(i) == null || objects.get(i).equals(input.get(i)))
+                if (objects.get(i).equals(input.get(i)))
                     count++;
             likes.put(groups.get(k), count / input.size());
         }
@@ -109,7 +121,7 @@ public class Arrays {
     public String put(ArrayList<String> input) {
 
 
-        Map<String, Double> permutation = findPermutations(input); //findPermutations включает в себя поиск по findSequences
+        Map<String, Double> permutation = findSequences(input); //findPermutations включает в себя поиск по findSequences
         String arrayID = max(permutation);
         //update group
         if (arrayID == null || permutation.get(arrayID) != 1.0) {

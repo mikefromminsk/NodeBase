@@ -1,4 +1,4 @@
-package net.metabrain.level1;
+package net.metabrain.level1.codegenerator;
 
 
 public class Base64

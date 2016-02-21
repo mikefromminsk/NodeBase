@@ -1,10 +1,10 @@
-package net.metabrain.level2.web;
+package net.metabrain.builds.HashMapTest;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.metabrain.level2.utils.storage.FileHashMap;
-import net.metabrain.level2.utils.Http;
+import net.metabrain.utils.storage.FileHashMap;
+import net.metabrain.utils.Http;
 
 import java.io.IOException;
 import java.io.OutputStream;

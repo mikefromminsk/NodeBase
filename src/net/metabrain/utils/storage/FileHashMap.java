@@ -1,4 +1,4 @@
-package net.metabrain.level2.utils.storage;
+package net.metabrain.utils.storage;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -149,7 +149,10 @@ public class FileHashMap {
     public void put(String key, String value) {
         put(hash(key), key, value);
     }
+    //put first 8byte is type of var
+    //array string int
 
+    //save the history
     public void put(int hash, String key, String value) {
         String hashstr = String.format("%08X", hash);
         if (storageID == 0)
