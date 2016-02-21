@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,66 @@ public class Http {
 
     public static Map<String, HttpHandler> serverContent = new HashMap<>();
 
-    public static Map<String, String> getQueryMap(String query)
-    {
-        Map<String, String> map = new HashMap<String, String>();
+    static ArrayList<File> searchFiles(File topDirectory) {
+        ArrayList<File> result = new ArrayList<>();
+        search(topDirectory, result);
+        return result;
+    }
+
+    private static void search(File topDirectory, ArrayList<File> res) {
+        File[] list = topDirectory.listFiles();
+        for (int i = 0; i < list.length; i++) {
+            if (list[i].isDirectory())
+                search(list[i], res);
+            else if (list[i].getName().indexOf(".java") != -1)
+                res.add(list[i]);
+        }
+    }
+
+    static String packageName(File file) {
+        File srcRoot = new File("src");
+        String packageName = file.getName().substring(0, file.getName().indexOf('.'));
+        File dir = file.getParentFile();
+        while (true) {
+            packageName = dir.getName() + "." + packageName;
+            if (dir.getParentFile().getAbsolutePath().equals(srcRoot.getAbsolutePath()))
+                break;
+            dir = dir.getParentFile();
+        }
+        return packageName;
+    }
+
+    public static void findHttpHandlers() {
+        ArrayList<File> searchFiles = searchFiles(new File("src"));
+        for (int i = 0; i < searchFiles.size(); i++) {
+            File file = searchFiles.get(i);
+            String packageName = packageName(file);
+            try {
+                Class c = Class.forName(packageName);
+                Class[] interfaces = c.getInterfaces();
+                for(Class cInterface : interfaces) {
+                    if (cInterface.getName().equals("com.sun.net.httpserver.HttpHandler")){
+
+                        try {
+                            Object obj = c.newInstance();
+                            HttpHandler handler = (HttpHandler) obj;
+                            String path = "/" + c.getName().replace('.', '/');
+                            serverContent.put(path, handler);
+                        } catch (InstantiationException e) {
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static Map<String, String> getQueryMap(String query) {
+        Map<String, String> map = new HashMap<>();
         if (query != null) {
             String[] params = query.split("&");
             for (String param : params) {
@@ -31,15 +89,15 @@ public class Http {
         return map;
     }
 
-    public static Map<String, String> Params(HttpExchange httpExchange)
-    {
+    public static Map<String, String> Params(HttpExchange httpExchange) {
         return getQueryMap(httpExchange.getRequestURI().getQuery());
     }
 
     static HttpServer server;
+
     public static void open(int port) throws IOException {
         server = HttpServer.create(new InetSocketAddress(port), 0);
-        for (String key: serverContent.keySet())
+        for (String key : serverContent.keySet())
             server.createContext(key, serverContent.get(key));
         server.setExecutor(null);
         server.start();
@@ -48,7 +106,7 @@ public class Http {
 
     List<Socket> SocketList;
 
-    public Socket Close(int port){
+    public Socket Close(int port) {
         return null;
     }
 
