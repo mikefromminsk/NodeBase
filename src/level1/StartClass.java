@@ -13,7 +13,7 @@ public class StartClass {
     void build(JsonObject buildData){
         //delete old storage
         //put new storage data
-        // from builds/package.json
+        // from app/package.json
         //run build
     }
 

@@ -1,4 +1,4 @@
-package net.metabrain.builds.HashMapTest;
+package net.metabrain.app.HashMapTest;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
