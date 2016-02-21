@@ -1,4 +1,4 @@
-package level2.providers;
+package app.VK;
 
 import java.awt.Desktop;
 import java.io.BufferedReader;
