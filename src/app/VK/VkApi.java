@@ -1,10 +1,13 @@
 package app.VK;
 
-import java.awt.Desktop;
+import com.google.gson.Gson;
+
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
@@ -83,6 +86,12 @@ public final class VkApi {
         return invokeApi(reqUrl);
     }
 
+    public Object invoke(String method, Params params, Type typeOfT) throws IOException {
+        String response =  invokeApi(method, params);
+        return new Gson().fromJson(response, typeOfT);
+    }
+
+
     private static String invokeApi(String requestUrl) throws IOException {
         final StringBuilder result = new StringBuilder();
         final URL url = new URL(requestUrl);
@@ -93,7 +102,7 @@ public final class VkApi {
         return result.toString();
     }
     
-    private static class Params {
+    public static class Params {
         
         public static Params create() {
             return new Params();

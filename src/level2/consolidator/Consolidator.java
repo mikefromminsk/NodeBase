@@ -1,8 +1,15 @@
 package level2.consolidator;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import utils.Http;
+
+import java.io.IOException;
 import java.util.*;
 
-public class Consolidator {
+public class Consolidator implements HttpHandler{
 
     public Map<String, Arrays> arrays = new HashMap<>();//group ->  arrays
     //arrays group как многоканальный звук
@@ -22,8 +29,23 @@ public class Consolidator {
         actions.put(new ArrayID(groupName, arrayID).toString());
     }
 
+    void put(JsonObject query) {
+        String groupName= query.get("groupName").getAsString();
+        Arrays arrays = this.arrays.get(groupName);
+        String arrayID = arrays.put(query);
+        actions.put(new ArrayID(groupName, arrayID).toString());
+    }
+
 
     Timer consolidateTimer;
+
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
+        InputConsolidator inputConsolidator = new Gson().fromJson(Http.Body(httpExchange), InputConsolidator.class);
+        inputConsolidator
+
+    }
+
     class consolidateTimerTask extends TimerTask {
 
         @Override

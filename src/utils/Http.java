@@ -110,6 +110,29 @@ public class Http {
         return null;
     }
 
+    public static void Post(String url, String body) {
+        try {
+            URL obj = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(15000);
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+            writer.write(body);
+            writer.flush();
+            writer.close();
+            os.close();
+
+            conn.connect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static InputStream GetStream(String url) {
         try {
@@ -127,7 +150,8 @@ public class Http {
 
     public static String Get(String url) {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(GetStream(url)));
+            InputStream inputStream = GetStream(url);
+            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
             String inputLine;
             StringBuffer response = new StringBuffer();
             while ((inputLine = in.readLine()) != null)
@@ -140,6 +164,7 @@ public class Http {
         return null;
     }
 
+
     public static void Response(HttpExchange httpExchange, String response) throws IOException {
         Response(httpExchange, response.getBytes());
     }
@@ -149,5 +174,10 @@ public class Http {
         httpExchange.sendResponseHeaders(200, response.length);
         os.write(response);
         os.close();
+    }
+
+    public static String Body(HttpExchange httpExchange) {
+        java.util.Scanner s = new java.util.Scanner(httpExchange.getRequestBody()).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 }

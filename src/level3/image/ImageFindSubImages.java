@@ -1,4 +1,4 @@
-package level3;
+package level3.image;
 
 import java.util.ArrayList;
 import java.util.HashMap;

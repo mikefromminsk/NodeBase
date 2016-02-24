@@ -9,6 +9,10 @@ import java.util.Map;
 
 public class FileHashMap {
 
+    void putTrigger(){
+
+    }
+
     public FileStorage fs = FileStorage.getInstance();
     public int storageID;
 

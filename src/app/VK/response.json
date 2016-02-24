@@ -1,0 +1,150 @@
+/*response :*/
+{
+  count: 25,
+  items: [
+    {
+      id: 1104,
+      from_id: 17210363,
+      owner_id: 17210363,
+      date: 1456012821,
+      post_type: 'post',
+      text: '',
+      copy_history: [
+        {
+          id: 90155,
+          owner_id: -31076033,
+          from_id: -31076033,
+          date: 1456007421,
+          post_type: 'post',
+          text: '',
+          attachments: [
+            {
+              type: 'photo',
+              photo: {
+                id: 403974360,
+                album_id: -7,
+                owner_id: -31076033,
+                user_id: 100,
+                photo_75: 'https://pp.vk.me/...bf1/P5Nq63rOpZY.jpg',
+                photo_130: 'https://pp.vk.me/...bf2/cpqwVy5wIQM.jpg',
+                photo_604: 'https://pp.vk.me/...bf3/yeuHsJcvwYQ.jpg',
+                width: 568,
+                height: 565,
+                text: 'Original: http://cs627617.vk.me/v627617322/50cc9/jLotkXP0PHM.jpg',
+                date: 1456007416,
+                post_id: 90155,
+                access_key: '55f2d66d8b32f688bb'
+              }
+            }
+          ],
+          post_source: {
+            type: 'vk'
+          }
+        }
+      ],
+      can_delete: 1,
+      can_pin: 1,
+      post_source: {
+        type: 'api',
+        platform: 'android'
+      },
+      comments: {
+        count: 0,
+        can_post: 1
+      },
+      likes: {
+        count: 0,
+        user_likes: 0,
+        can_like: 1,
+        can_publish: 0
+      },
+      reposts: {
+        count: 0,
+        user_reposted: 0
+      }
+    },
+    {
+      id: 1102,
+      from_id: 17210363,
+      owner_id: 17210363,
+      date: 1455870068,
+      post_type: 'post',
+      text: '',
+      copy_history: [
+        {
+          id: 899800,
+          owner_id: -20629724,
+          from_id: -20629724,
+          date: 1455856322,
+          post_type: 'post',
+          text: 'Apache Lucene.
+
+          Материал
+          по
+          работе
+          с
+          технологией
+          и
+          созданию
+          простейшего
+          нечёткого
+          поиска: habr
+          .
+          ru
+          /
+          p
+          /
+          277509
+          /
+          .
+          ',
+          attachments: [
+            {
+              type: 'photo',
+              photo: {
+                id: 401416924,
+                album_id: -7,
+                owner_id: -20629724,
+                user_id: 100,
+                photo_75: 'https://cs7062.vk...5a6/9XwYSI2fo2E.jpg',
+                photo_130: 'https://cs7062.vk...5a7/ifvzp-X6_OI.jpg',
+                photo_604: 'https://cs7062.vk...5a8/e25mqZbJ5rA.jpg',
+                photo_807: 'https://cs7062.vk...5a9/Y1YVJu-1rek.jpg',
+                photo_1280: 'https://cs7062.vk...5aa/bFlVJoK_gN0.jpg',
+                width: 1223,
+                height: 224,
+                text: '',
+                date: 1455856324,
+                post_id: 899800,
+                access_key: 'ad0ff3e8fc50ca469c'
+              }
+            }
+          ],
+          post_source: {
+            type: 'vk'
+          }
+        }
+      ],
+      can_delete: 1,
+      can_pin: 1,
+      post_source: {
+        type: 'api',
+        platform: 'android'
+      },
+      comments: {
+        count: 0,
+        can_post: 1
+      },
+      likes: {
+        count: 0,
+        user_likes: 0,
+        can_like: 1,
+        can_publish: 0
+      },
+      reposts: {
+        count: 0,
+        user_reposted: 0
+      }
+    }
+  ]
+}
